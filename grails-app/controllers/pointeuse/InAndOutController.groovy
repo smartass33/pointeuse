@@ -78,7 +78,7 @@ class InAndOutController {
 			return
 		}
 		EmployeeController employeeController = new EmployeeController()		
-		def inAndOutInstance = employeeController.initializeTotals(employee, calendar.time,type)
+		def inAndOutInstance = employeeController.initializeTotals(employee, calendar.time,type,null)
 		
 		
 		inAndOutInstance.regularization=true

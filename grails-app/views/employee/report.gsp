@@ -172,6 +172,8 @@
 										<g:hiddenField name="inOrOutId" value="${inOrOut.id}" />
 										<g:hiddenField name="time" value="${inOrOut.time.format('yyyy-M-d H:mm:ss')}" /> 
 										<g:hiddenField name="day" value="${inOrOut.day}" /> 
+										<g:hiddenField name="month" value="${inOrOut.month}" /> 
+										<g:hiddenField name="year" value="${inOrOut.year}" /> 
 										</td>
 									</g:each>
 								</tr>
@@ -209,8 +211,8 @@
 					</g:each>
 				</g:each>
 				<g:hiddenField name="employee.id" value="${employee.id}" />
-				<g:hiddenField name="month" value="${period.format('MM')}" />
-				<g:hiddenField name="year" value="${period.format('yyyy')}" />	
+				<!--g:hiddenField name="month" value="${period.format('MM')}" /-->
+				<!--g:hiddenField name="year" value="${period.format('yyyy')}" /-->	
 			</tbody>
 		</table>
 	</div>

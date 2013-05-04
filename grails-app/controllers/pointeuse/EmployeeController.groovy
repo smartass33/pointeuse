@@ -108,7 +108,15 @@ class EmployeeController {
 	}
 
 	
-	def initializeTotals(Employee employee, Date currentDate,String type){
+	def initializeMissingEvents(long eventId){
+		//def employee = Employee.get(employeeId)
+		def inOrOut = InAndOut.get(eventId)
+		initializeTotals(inOrOut.employee, inOrOut.time,"",inOrOut)
+		
+	}		
+	
+	
+	def initializeTotals(Employee employee, Date currentDate,String type,def event){
 		def criteria = MonthlyTotal.createCriteria()
 		def monthlyTotal = criteria.get {
 				and {
@@ -160,13 +168,18 @@ class EmployeeController {
 			
 		}
 		 
-		def inOrOut = new InAndOut(employee, currentDate,type)
-		inOrOut.dailyTotal=dailyTotal
-		dailyTotal.inAndOuts.add(inOrOut)
-		employee.inAndOuts.add(inOrOut)
-		dailyTotal.exitCount=dailyTotal.exitCount+1
-		
-		return inOrOut
+		if (event==null){
+			def inOrOut = new InAndOut(employee, currentDate,type)
+			inOrOut.dailyTotal=dailyTotal
+			dailyTotal.inAndOuts.add(inOrOut)
+			employee.inAndOuts.add(inOrOut)
+			dailyTotal.exitCount=dailyTotal.exitCount+1
+			return inOrOut
+			
+		}else{
+			event.dailyTotal=dailyTotal
+			return event
+		}
 	}
 	
     def show(Long id) {		
@@ -731,7 +744,7 @@ class EmployeeController {
 		}
 		
 		// initialisation
-		def inOrOut = initializeTotals(employeeInstance,currentDate,type)
+		def inOrOut = initializeTotals(employeeInstance,currentDate,type,null)
 		
 		// l'employee effectue une sortie: il faut calculer le temps passé depuis la derniere entrée
 		if (type.equals("S")){					
@@ -807,7 +820,7 @@ class EmployeeController {
 
 		// initialisation
 		if (dailyTotal == null) {
-			initializeTotals(employeeInstance , cal.time , type)
+			initializeTotals(employeeInstance , cal.time , type,null)
 		}else{
 			criteria = InAndOut.createCriteria()
 			lastElement = criteria.get {
@@ -1143,20 +1156,23 @@ class EmployeeController {
 	}
 	
 	def timeModification(){
-		def idList=params["inOrOutId"]
+		def idList=params["inOrOutId"] 
 		def timeList=params["time"]
-		def dayList=params["day"]
-		def month=params["month"]
-		def year=params["year"]
+		def dayList=params["day"] 
+		def monthList=params["month"] 
+		def yearList=params["year"] 
 		def employeeId=params["employee.id"]
 		def employee = Employee.get(employeeId)
 		def newTimeList=params["cell"]
+		def fromRegularize=params["fromRegularize"].equals("true") ? true : false
+		
 		def deltaUp
 		def deltaDown
 		def timeDiff
 		def oldDateSeconds
 		def criteria
 		def calendar = Calendar.instance
+
 		
 		def user = springSecurityService.currentUser
 
@@ -1167,20 +1183,45 @@ class EmployeeController {
 			
 		}
 		
+		if (idList instanceof String){
+			def tmpidList=idList
+			def tmpdayList=dayList
+			def tmpmonthList=monthList
+			def tmpyearList=yearList
+			def tmpnewTimeList=newTimeList
+			idList=[]
+			dayList=[]
+			monthList=[]
+			yearList=[]
+			newTimeList=[]
+			idList.add(tmpidList)
+			dayList.add(tmpdayList)
+			monthList.add(tmpmonthList)
+			yearList.add(tmpyearList)
+			newTimeList.add(tmpnewTimeList)
+		}
+		def month=monthList[0]
+		def year=yearList[0]
+		
+		
 		for( int p = 0 ; ( p < idList.size() ) ; p++ ) {		
 		// l'idée: comparer time et newTime
 			def inOrOut = InAndOut.get(idList[p])
 			if (inOrOut==null){
 				log.error("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification§")
-				def retour = report(employee.id as long,month as int,year as int)
+				def retour = report(employee.id as long,monthList[p] as int,yearList[p] as int)
 				render(view: "report", model: retour)
 				return
-			}		
+			}	
 			
-			def newDate = new Date().parse("d/M/yyyy H:m", dayList[p]+"/"+month+"/"+year+" "+newTimeList[p])
+			print dayList[p]+"/"+monthList[p]+"/"+yearList[p]+" "+newTimeList[p]	
+			
+			def newDate = new Date().parse("d/M/yyyy H:m", dayList[p]+"/"+monthList[p]+"/"+yearList[p]+" "+newTimeList[p])
 			def newCalendar = Calendar.instance
 			newCalendar.time=newDate
+			print newDate
 			def oldDate = inOrOut.time
+			print oldDate
 			def oldCalendar = Calendar.instance
 			oldCalendar.time=oldDate
 			newCalendar.set(Calendar.SECOND,oldCalendar.get(Calendar.SECOND))
@@ -1256,8 +1297,8 @@ class EmployeeController {
 				inOrOut.time=newCalendar.time
 				
 				// if the time difference
-				if (inOrOut.systemGenerated){
-					use (TimeCategory){timeDiff=newCalendar.time-previousInOrOut.time}			
+				if (inOrOut.systemGenerated && previousInOrOut!=null ){
+						use (TimeCategory){timeDiff=newCalendar.time-previousInOrOut.time}
 				}	
 				if (inOrOut.regularization && nextInOrOut !=null && nextInOrOut.systemGenerated){
 					use (TimeCategory){timeDiff=nextInOrOut.time - newCalendar.time}
@@ -1277,7 +1318,9 @@ class EmployeeController {
 				}else{
 					computeSupplementaryTime(inOrOut.dailyTotal)
 				}
-				inOrOut.regularizationType=InAndOut.MODIFIEE_ADMIN
+				
+				inOrOut.regularizationType=fromRegularize ? InAndOut.MODIFIEE_ADMIN : InAndOut.MODIFIEE_SALARIE
+				
 				inOrOut.systemGenerated=false			
 				
 				if (user!=null){
@@ -1287,8 +1330,15 @@ class EmployeeController {
 				}
 			}
 		}
+		if (fromRegularize){
+			
+			//render(view: "pointage")
+			redirect(action: "pointage", id: employee.id)
+			
+		}else{
 		def retour = report(employee.id as long,month as int,year as int)
 		render(view: "report", model: retour)
+		}
 	}
 	
 	
@@ -1815,7 +1865,10 @@ class EmployeeController {
 		return openedDays
 	}
 	
-	
+	def regularize(){
+		
+	}
+		
 	def pointage(Long id){		
 		try {	
 			def username = params["username"]
@@ -1839,6 +1892,23 @@ class EmployeeController {
 			
 			def calendar = Calendar.instance	
 			def inAndOutsCriteria = InAndOut.createCriteria()
+			def systemGeneratedEvents = inAndOutsCriteria.list {
+				and {
+					eq('employee',employee)
+					lt('time',calendar.time)
+					eq('systemGenerated',true)
+					order('time','asc')
+				}
+			}
+			
+			
+			if (systemGeneratedEvents!=null && systemGeneratedEvents.size()>0){
+				log.error('redirecting user to regularization page')
+				render(view: "regularize", model: [systemGeneratedEvents: systemGeneratedEvents,employee:employee])
+				return
+			}
+			
+			inAndOutsCriteria = InAndOut.createCriteria()
 			def inAndOuts = inAndOutsCriteria.list {
 				and {
 					eq('employee',employee)
@@ -1848,6 +1918,8 @@ class EmployeeController {
 					order('time','asc')
 				}
 			}
+			
+			 
 			
 			//inAndOutsCriteria = InAndOut.createCriteria()
 			def tmpCalendar = Calendar.instance

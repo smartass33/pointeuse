@@ -21,6 +21,7 @@ class InAndOut {
 	static final int INITIALE_SALARIE=1
 	static final int INITIALE_ADMIN=2
 	static final int MODIFIEE_ADMIN=3
+	static final int MODIFIEE_SALARIE=4
 	static belongsTo = [dailyTotal:DailyTotal,employee:Employee]
 		
 	
