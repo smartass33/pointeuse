@@ -1146,13 +1146,10 @@ class EmployeeController {
 		def idList=params["inOrOutId"]
 		def timeList=params["time"]
 		def dayList=params["day"]
-		def monthList=params["month"]
-		def yearList=params["year"]
-		def regularizationList=params["regul"]
-		def systemGeneratedList=params["systemGenerated"]
-		def employeeIdList=params["employee"]
-		def idEmployee = employeeIdList[0]
-		def employee = Employee.get(idEmployee)
+		def month=params["month"]
+		def year=params["year"]
+		def employeeId=params["employee.id"]
+		def employee = Employee.get(employeeId)
 		def newTimeList=params["cell"]
 		def deltaUp
 		def deltaDown
@@ -1162,44 +1159,43 @@ class EmployeeController {
 		def calendar = Calendar.instance
 		
 		def user = springSecurityService.currentUser
-		//def username = user?.getUsername()
-		
-		if (timeList==null){
-			def month = params["month"]
-			def year = params["year"]
-			def retour = report(params["employee.id"] as long,params["month"] as int,params["year"] as int)
+
+		if (idList==null){
+			log.error("list is null")
+			def retour = report(employee.id as long,month as int,year as int)
 			render(view: "report", model: retour)
-			return
+			
 		}
 		
-		for( int p = 0 ; ( p < timeList.size() ) ; p++ ) {		
+		for( int p = 0 ; ( p < idList.size() ) ; p++ ) {		
 		// l'idŽe: comparer time et newTime
-			String theDate = dayList[p]+"/"+monthList[p]+"/"+yearList[p]+" "+newTimeList[p]
-			def tmpDate = timeList[p]
-			def newDate = new Date().parse("d/M/yyyy H:m", theDate)
-			def oldDate = new Date().parse("yyyy-M-d H:mm:ss", timeList[p])
-			oldDateSeconds=oldDate.getAt(Calendar.SECOND)
-			oldDate.set(second:0)
+			def inOrOut = InAndOut.get(idList[p])
+			if (inOrOut==null){
+				log.error("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification¤")
+				def retour = report(employee.id as long,month as int,year as int)
+				render(view: "report", model: retour)
+				return
+			}		
 			
-			if (newDate!=oldDate){
+			def newDate = new Date().parse("d/M/yyyy H:m", dayList[p]+"/"+month+"/"+year+" "+newTimeList[p])
+			def newCalendar = Calendar.instance
+			newCalendar.time=newDate
+			def oldDate = inOrOut.time
+			def oldCalendar = Calendar.instance
+			oldCalendar.time=oldDate
+			newCalendar.set(Calendar.SECOND,oldCalendar.get(Calendar.SECOND))
+			
+			if (newCalendar.time!=oldCalendar.time){
 				def toCompare
-				if (newDate>oldDate){
-					toCompare=newDate
+				if (newCalendar.time>oldCalendar.time){
+					toCompare=newCalendar.time
 				}else{
-					toCompare=oldDate
+					toCompare=oldCalendar.time
 				}
 				toCompare.set(minutes:toCompare.minutes+1)
-				
-				def inOrOut = InAndOut.get(idList[p])
-				if (inOrOut==null){
-					log.error("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification¤")
-					def retour = report(employee.id as long,monthList[0] as int,yearList[0] as int)
-					render(view: "report", model: retour)
-					return
-				}
-				
+					
 				// get next inOrOut for this user
-				calendar.time=oldDate
+				calendar.time=oldCalendar.time
 				criteria = InAndOut.createCriteria()
 				def nextInOrOut = criteria.get {
 					and {
@@ -1214,10 +1210,10 @@ class EmployeeController {
 					maxResults(1)	
 				}
 				
-				if (newDate>oldDate){
-					toCompare=oldDate
+				if (newCalendar.time>oldCalendar.time){
+					toCompare=oldCalendar.time
 				}else{
-					toCompare=newDate
+					toCompare=newCalendar.time
 				}
 				toCompare.set(minutes:toCompare.minutes+1)
 				
@@ -1236,7 +1232,7 @@ class EmployeeController {
 				}
 			
 				if (previousInOrOut != null){
-					use (TimeCategory){deltaDown=newDate-previousInOrOut.time}
+					use (TimeCategory){deltaDown=newCalendar.time-previousInOrOut.time}
 				}
 				else {
 					deltaDown=new Date()
@@ -1244,7 +1240,7 @@ class EmployeeController {
 				}
 				
 				if (nextInOrOut != null){
-					use (TimeCategory){deltaUp=nextInOrOut.time-newDate}
+					use (TimeCategory){deltaUp=nextInOrOut.time-newCalendar.time}
 				}
 				else {
 					deltaUp=new Date()
@@ -1257,15 +1253,14 @@ class EmployeeController {
 					render(view: "report", model: back)
 					return
 				}
-				inOrOut.time=newDate
-				oldDate.set(second:oldDateSeconds)
+				inOrOut.time=newCalendar.time
 				
 				// if the time difference
 				if (inOrOut.systemGenerated){
-					use (TimeCategory){timeDiff=newDate-previousInOrOut.time}			
+					use (TimeCategory){timeDiff=newCalendar.time-previousInOrOut.time}			
 				}	
 				if (inOrOut.regularization && nextInOrOut !=null && nextInOrOut.systemGenerated){
-					use (TimeCategory){timeDiff=nextInOrOut.time - newDate}
+					use (TimeCategory){timeDiff=nextInOrOut.time - newCalendar.time}
 				}		
 				def doNothing=false	
 				if (inOrOut.type.equals('E') && nextInOrOut !=null && nextInOrOut.type.equals('E')){
@@ -1275,14 +1270,13 @@ class EmployeeController {
 					doNothing=true
 				}
 				if(!doNothing){
-					dailyTotalUpdate(timeDiff,newDate,oldDate,inOrOut,employee,dayList[p] as int,monthList[p] as int)
+					dailyTotalUpdate(timeDiff,newDate,oldDate,inOrOut,employee,dayList[p] as int,month as int)
 				}
 				if (employee.weeklyContractTime != 35){
 					computeComplementaryTime(inOrOut.dailyTotal)
 				}else{
 					computeSupplementaryTime(inOrOut.dailyTotal)
 				}
-			//	inOrOut.regularization=false
 				inOrOut.regularizationType=InAndOut.MODIFIEE_ADMIN
 				inOrOut.systemGenerated=false			
 				
@@ -1293,7 +1287,7 @@ class EmployeeController {
 				}
 			}
 		}
-		def retour = report(employee.id as long,monthList[0] as int,yearList[0] as int)
+		def retour = report(employee.id as long,month as int,year as int)
 		render(view: "report", model: retour)
 	}
 	
