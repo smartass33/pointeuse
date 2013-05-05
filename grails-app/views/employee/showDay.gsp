@@ -54,9 +54,10 @@ $('.deleteThisRow').live('click',function(){
 				  			${inOrOut.time.format('HH:mm')}
 				  			</td>
 					  		<td> 
+					  		
 					  			<g:submitToRemote 
 					  				update="inAndOutListDiv"
-					  				before="return confirm('${message(code: 'inAndOut.delete.confirmation', default: 'Create')}')"
+					  				before="if(!confirm('${message(code: 'inAndOut.delete.confirmation', default: 'Create')}')) return false"
 					  				after="var elem = document.getElementById('elemTable');elem.parentNode.removeChild(elem);"
 					                url="[action:'trash',id:inOrOut.id]"
 					                value="${message(code: 'inAndOut.delete.element', default: 'Sortie')}" /> 

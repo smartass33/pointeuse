@@ -43,6 +43,8 @@ grails.project.dependency.resolution = {
         runtime ":jquery:1.8.0"
         runtime ":resources:1.0"
 
+		//compile  ":rendering:0.4.4"
+		//compile ":cache:1.0.1"		
 		//compile ":jquery-ui:1.8.24"
 		compile ":spring-security-core:1.2.7.3"
 		compile ":joda-time:1.4"

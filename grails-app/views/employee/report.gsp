@@ -22,7 +22,9 @@
 <link href="main.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-	<g:form method="post" action="timeModification"  >
+
+<g:form method="post" >
+	
 	<a href="#list-employee" class="skip" tabindex="-1"><g:message
 			code="default.link.skip.label" default="Skip to content&hellip;" /></a>
 	<div id="list-employee" class="content scaffold-list">
@@ -44,6 +46,28 @@
 							name="myDate" value="${period ? period : new Date()}" onChange="alert('KKKK');"
 							precision="month" noSelection="['':'-Choose-']" />
 					</li>
+					<!--li>
+						<g:select
+							onchange="${remoteFunction(action:'report',params:[monthPeriod:period.getAt(Calendar.MONTH),yearPeriod:period.getAt(Calendar.YEAR),userId:employee.id])}"
+							name="monthSelect" from="${['Janvier','Février','Mars','Avril','Mai']}"
+							noSelection="${['-':period.format('MMM')]}" />
+					</li>
+					<li>
+						<g:select
+							onchange="${remoteFunction(action:'report',params:[monthPeriod:period.getAt(Calendar.MONTH),yearPeriod:period.getAt(Calendar.YEAR),userId:employee.id])}"
+							name="yearSelect" from="${['2012','2013','2014','2015']}"
+							noSelection="${['-':period.format('yyyy')]}" />
+					</li>
+
+				<li>
+					<g:pdfForm controller="employee" action="pdfForm" method="post" >
+						<g:hiddenField name="userId" value="${userId}" />
+						<g:hiddenField name="month" value="${month}" />
+						<g:hiddenField name="year" value="${year}" />
+						
+            			<g:submitButton name="printPdf" value="pdf" />
+            		</g:pdfForm>
+				</li-->
 					<li>
 						<g:actionSubmit value="afficher" action="report" />						
 					</li>
@@ -162,6 +186,11 @@
 														<g:textField id="myinput" name="cell"
 															value="${inOrOut.time.format('H:mm')}" align="center"
 															style="color : green;font-weight: bold;" />
+													</g:if>
+													<g:if test="${inOrOut.regularizationType==4}">
+														<g:textField id="myinput" name="cell"
+															value="${inOrOut.time.format('H:mm')}" align="center"
+															style="color : orange;font-weight: bold;" />
 													</g:if>
 												</g:if> <g:else>
 													<g:textField id="myinput" name="cell"

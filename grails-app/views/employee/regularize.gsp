@@ -21,10 +21,10 @@
 	  			<g:form method="post" action="timeModification"  >
 	  			
 	  			<div id="last5days">
-	  				<h1>Evènements oubliés</h1>
+	  				<h1><g:message code="event.regularization.label" default="Last Name" /></h1>
 		  			<table border="1">
 		  				<thead>
-		  				<th>Evenements</th>
+		  				<th><g:message code="events.label" default="Last Name" /></th>
 		  				<th>
 		  					<g:actionSubmit value="appliquer"  action="timeModification"/>
 		  				</th>

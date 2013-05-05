@@ -1169,7 +1169,6 @@ class EmployeeController {
 		def deltaUp
 		def deltaDown
 		def timeDiff
-		def oldDateSeconds
 		def criteria
 		def calendar = Calendar.instance
 
@@ -1213,17 +1212,12 @@ class EmployeeController {
 				render(view: "report", model: retour)
 				return
 			}	
-			
-			print dayList[p]+"/"+monthList[p]+"/"+yearList[p]+" "+newTimeList[p]	
-			
+						
 			def newDate = new Date().parse("d/M/yyyy H:m", dayList[p]+"/"+monthList[p]+"/"+yearList[p]+" "+newTimeList[p])
 			def newCalendar = Calendar.instance
 			newCalendar.time=newDate
-			print newDate
-			def oldDate = inOrOut.time
-			print oldDate
 			def oldCalendar = Calendar.instance
-			oldCalendar.time=oldDate
+			oldCalendar.time=inOrOut.time
 			newCalendar.set(Calendar.SECOND,oldCalendar.get(Calendar.SECOND))
 			
 			if (newCalendar.time!=oldCalendar.time){
@@ -1311,7 +1305,7 @@ class EmployeeController {
 					doNothing=true
 				}
 				if(!doNothing){
-					dailyTotalUpdate(timeDiff,newDate,oldDate,inOrOut,employee,dayList[p] as int,month as int)
+					dailyTotalUpdate(timeDiff,newCalendar.time,oldCalendar.time,inOrOut,employee,dayList[p] as int,month as int)
 				}
 				if (employee.weeklyContractTime != 35){
 					computeComplementaryTime(inOrOut.dailyTotal)
@@ -1319,7 +1313,7 @@ class EmployeeController {
 					computeSupplementaryTime(inOrOut.dailyTotal)
 				}
 				
-				inOrOut.regularizationType=fromRegularize ? InAndOut.MODIFIEE_ADMIN : InAndOut.MODIFIEE_SALARIE
+				inOrOut.regularizationType=fromRegularize ? InAndOut.MODIFIEE_SALARIE : InAndOut.MODIFIEE_ADMIN
 				
 				inOrOut.systemGenerated=false			
 				
@@ -1331,10 +1325,7 @@ class EmployeeController {
 			}
 		}
 		if (fromRegularize){
-			
-			//render(view: "pointage")
 			redirect(action: "pointage", id: employee.id)
-			
 		}else{
 		def retour = report(employee.id as long,month as int,year as int)
 		render(view: "report", model: retour)
@@ -1649,7 +1640,7 @@ class EmployeeController {
 		def dailyTotalId=0
 		def myDate = params["myDate"]
 		def monthlySupTime = 0
-		def monthlyCompTime = 0
+		def monthlyCompTime = 0		
 		
 		
 		if (myDate != null && myDate instanceof String){
@@ -1818,9 +1809,9 @@ class EmployeeController {
 			def payableSupTime = computeHumanTime(monthlySupTime)
 			def payableCompTime = computeHumanTime(monthlyCompTime)
 			
-			
 			[siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:cartoucheTable.get(3),holiday:cartoucheTable.get(4),rtt:cartoucheTable.get(5),sickness:cartoucheTable.get(6),sansSolde:cartoucheTable.get(7),yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:cartoucheTable.get(11),yearlyRtt:cartoucheTable.get(12),yearlySickness:cartoucheTable.get(13),yearlySansSolde:cartoucheTable.get(17),yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,weeklyCompTotal:weeklyCompTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
-					}
+			
+			}
 		}catch (NullPointerException e){
 			log.error('error with application: '+e.toString())		
 		}
@@ -1989,82 +1980,7 @@ class EmployeeController {
 		}
 	}
 	
-	def pdfForm = {
-		try{
-			def cartoucheTable
-		  def userId = params["userId"]
-		  if (userId !=null){
-			  cartoucheTable = cartouche(userId as long)
-		  }
-		  //return [params.userId,employeeInstance,calendar,counter ,holidays.size(),rtt.size(),sickness.size()]
-		  
-		  
-		  byte[] b
-		  def baseUri = request.scheme + "://" + request.serverName + ":" + request.serverPort + grailsAttributes.getApplicationUri(request)
-		  // def baseUri = g.createLink(uri:"/", absolute:"true").toString()
-		  if(request.method == "GET") {
-			def url = baseUri + params.url + '?' + request.getQueryString()
-			//println "BaseUri is $baseUri"
-			//println "Fetching url $url"
-			b = pdfService.buildPdf(url)
-		  }
-		  if(request.method == "POST"){
-			def content
-			if(params.template){
-			  //println "Template: $params.template"
-			  content = g.render(template:params.template, model:[pdf:params])
-			}
-			else{
-			  content = g.include(controller:params.pdfController, action:params.pdfAction, id:params.id, pdf:params)
-			}
-			b = pdfService.buildPdfFromString(content.readAsString(), baseUri)
-		  }
-		  response.setContentType("application/pdf")
-		  response.setHeader("Content-disposition", "attachment; filename=" + (params.filename ?: "document.pdf"))
-		  response.setContentLength(b.length)
-		  response.getOutputStream().write(b)
-		}
-		catch (Throwable e) {
-		  println "there was a problem with PDF generation ${e}"
-		  if(params.template) render(template:params.template)
-		  if(params.url) redirect(uri:params.url + '?' + request.getQueryString())
-		  else redirect(controller:params.pdfController, action:params.pdfAction, params:params)
-		}
-	  }
-	
-	def pdfLink = {
-		try{
-		  byte[] b
-		  def baseUri = request.scheme + "://" + request.serverName + ":" + request.serverPort + grailsAttributes.getApplicationUri(request)
-		  // def baseUri = g.createLink(uri:"/", absolute:"true").toString()
-		  // TODO: get this working...
-		  //if(params.template){
-			//println "Template: $params.template"
-			//def content = g.render(template:params.template, model:[pdf:params])
-			//b = pdfService.buildPdfFromString(content.readAsString(), baseUri)
-		  //}
-		  if(params.pdfController){
-			//println "GSP - Controller: $params.pdfController , Action: $params.pdfAction, Id: $params.pdfId"
-			def content = g.include(controller:params.pdfController, action:params.pdfAction, id:params.pdfId)
-			b = pdfService.buildPdfFromString(content.readAsString(), baseUri)
-		  }
-		  else{
-			def url = baseUri + params.url
-			b = pdfService.buildPdf(url)
-		  }
-		  response.setContentType("application/pdf")
-		  response.setHeader("Content-disposition", "attachment; filename=" + (params.filename ?: "document.pdf"))
-		  response.setContentLength(b.length)
-		  response.getOutputStream().write(b)
-		}
-		catch (Throwable e) {
-		  println "there was a problem with PDF generation ${e}"
-		  //if(params.template) render(template:params.template)
-		  if(params.pdfController) redirect(controller:params.pdfController, action:params.pdfAction, params:params)
-		  else redirect(uri:params.url + '?' + request.getQueryString())
-		}
-	  }
-	
+
 	def computeHumanTime(long inputSeconds){
 		def diff=inputSeconds
 		long hours=TimeUnit.SECONDS.toHours(diff);

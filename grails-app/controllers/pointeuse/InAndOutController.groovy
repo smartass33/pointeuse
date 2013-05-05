@@ -154,13 +154,7 @@ class InAndOutController {
             redirect(action: "list")
             return
         }
-		/*else{
-			def userId=inAndOutInstance.employee.id
-			redirect(action: "show",controller:"employee",id:userId)
-			return
-        }*/
 		[inAndOutInstance: inAndOutInstance]
-		
     }
 
     def update(Long id, Long version) {
@@ -215,6 +209,31 @@ class InAndOutController {
 		def inAndOutInstance = InAndOut.get(id)
 		inAndOutInstance.systemGenerated=false
 		render(view: "edit",model: [inAndOutInstance:inAndOutInstance])		
+	}
+	
+	def getOddInAndOuts(){
+		def criteria = InAndOut.createCriteria()
+		def inAndOuts = criteria.list {
+			and {
+				eq('systemGenerated',true)
+			}
+		}
+		
+		for (InAndOut inAndOut:inAndOuts){
+			criteria = InAndOut.createCriteria()
+			def previousInAndOuts = criteria.list{
+				and{
+					eq('employee',inAndOut.employee)
+					eq('day',inAndOut.day)
+					eq('month',inAndOut.month)
+					eq('year',inAndOut.year)
+					lt('time',inAndOut.time)
+				}
+			}
+			if (previousInAndOuts!=null && previousInAndOuts.size()==0){
+				log.error('orphan inAnOut: '+inAndOut)
+			}
+		}
 	}
 	
 }
