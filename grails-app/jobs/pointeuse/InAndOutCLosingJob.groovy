@@ -37,25 +37,12 @@ class InAndOutCLosingJob {
 
 		def employeeList = Employee.findAll()
 		def calendar = Calendar.instance
-		def dailyTotal
-		def criteria
 		for (employee in employeeList){
 			def lastIn = InAndOut.findByEmployee(employee,[max:1,sort:"time",order:"desc"])
 			if (lastIn != null && lastIn.type == "E"){
 				log.error "we have a problem: user "+employee.lastName +" did not log out"
-				
-				criteria = DailyTotal.createCriteria()
-				dailyTotal = criteria.get {
-					and {
-						eq('employee',employee)
-						eq('year',calendar.getAt(Calendar.YEAR))
-						eq('month',calendar.getAt(Calendar.MONTH)+1)
-						eq('day',calendar.getAt(Calendar.DAY_OF_MONTH))
-					}
-				}
-				
 				inOrOut = new InAndOut(employee, calendar.time,"S")
-				inOrOut.dailyTotal=dailyTotal
+				inOrOut.dailyTotal=lastIn.dailyTotal
 				inOrOut.systemGenerated=true
 				employee.inAndOuts.add(inOrOut)
 				employee.status=false

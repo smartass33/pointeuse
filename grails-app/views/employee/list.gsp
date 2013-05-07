@@ -34,6 +34,12 @@ function removeElements()
 	elem.parentNode.removeChild(elem);
 }
 
+
+function calling()
+{
+	alert('toto');
+}
+
 </script>
 </head>
 <body>
@@ -43,26 +49,26 @@ function removeElements()
 	<div id="list-employee" class="content scaffold-list">
 		<h1>
 			<g:message code="default.list.label" args="[entityName]" />
-			<g:form action="search" controller="employee">
-       			   Chercher un salarié
-        			<input type="text" name="q" value="${params.q}" />
-				<input type="submit"
-					style="background-image: url('../images/skin/search.png')"
-					value="Recherche" />
-				<g:hiddenField name="isAdmin" value="${isAdmin}" />   	      			
-					<g:hiddenField name="siteId" value="${siteId}" />   	      			
-
-			Laboratoire:
-			<g:if test="${siteId != null && !siteId.equals('')}">
-			        <g:select name="site.id" from="${Site.list([sort:'name'])}"
-					noSelection="${['':site.name]}" optionKey="id" optionValue="name"
-					onChange="${remoteFunction(action:'list', params:'\'site=\' + this.value',update:'divId',after:'removeElements()')}" />
-			</g:if>
-			<g:else>
-			        <g:select name="site.id" from="${Site.list([sort:'name'])}"
-					noSelection="${['':'-']}" optionKey="id" optionValue="name"
-					onChange="${remoteFunction(action:'list', params:'\'site=\' + this.value',update:'divId',after:'removeElements()')}" />
-			</g:else>
+				<g:form action="search" controller="employee">
+	       			   Chercher un salarié
+	        			<input type="text" name="q" value="${params.q}" />
+					<input type="submit"
+						style="background-image: url('../images/skin/search.png')"
+						value="Recherche" />
+					<g:hiddenField name="isAdmin" value="${isAdmin}" />   	      			
+						<g:hiddenField name="siteId" value="${siteId}" />   	      			
+	
+				Laboratoire:
+				<g:if test="${siteId != null && !siteId.equals('')}">
+				        <g:select name="site.id" from="${Site.list([sort:'name'])}"
+						noSelection="${['':site.name]}" optionKey="id" optionValue="name"
+						onChange="${remoteFunction(controller:'employee',action:'list',params:'\'category=\'+this.value')}" />
+				</g:if>
+				<g:else>
+				        <g:select name="site.id" from="${Site.list([sort:'name'])}"
+						noSelection="${['':'-']}" optionKey="id" optionValue="name"
+						onChange="${remoteFunction(action:'list', params:'\'site=\' + this.value',update:'divId',after:'removeElements()')}" />
+				</g:else>
 			</g:form>
 			
 		</h1>

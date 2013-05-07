@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	<g:javascript library="jquery" plugin="jquery"/>
+	<g:javascript library="prototype" plugin="prototype"/>
 		<meta name="layout" content="main" />
 		<title>Pointeuse BIOLAB33</title>
 		<style type="text/css" media="screen">
@@ -215,7 +215,7 @@
 	</script>
 	
 	</head>
-	<body>
+	<body>	
 	    <g:javascript>window.onload = updateClock();document.getElementById('mytextfield').focus();</g:javascript>
 		<a href="#page-body" class="skip"><g:message code="default.link.skip.label" default="Skip to content&hellip;" /></a>
 		<div id="status" role="complementary">
