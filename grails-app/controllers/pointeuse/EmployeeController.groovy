@@ -48,6 +48,8 @@ class EmployeeController {
 		def employeeInstanceTotal
 		def site
 		def siteId=params["siteId"]
+		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
+		
 
 		if (params["site"]!=null && !params["site"].equals('')){
 			site = Site.get(params["site"] as int)
@@ -63,12 +65,13 @@ class EmployeeController {
 		if (site!=null){
 			employeeInstanceList = Employee.findAllBySite(site)		
 			employeeInstanceTotal = employeeInstanceList.size()
+			render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+			return
 		}else{
 			employeeInstanceList=Employee.list(params)
 			employeeInstanceTotal = employeeInstanceList.totalCount		
 		}
 		
-		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
         [employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
     }
 	
@@ -824,15 +827,6 @@ class EmployeeController {
 				order('time','asc')
 			}
 		}
-		
-		def model=[]
-		def day=calendar.getAt(Calendar.DAY_OF_MONTH)
-		def month=calendar.getAt(Calendar.MONTH)+1
-		def year=calendar.getAt(Calendar.YEAR)
-		model.add(inAndOutList)
-		model.add(day)
-		model.add(month)
-		model.add(year)
 	//	String content = g.render(template:'/common/listInAndOutsTemplate',model:[inAndOutList:inAndOutList,day:calendar.getAt(Calendar.DAY_OF_MONTH),month:calendar.getAt(Calendar.MONTH)+1,year:calendar.getAt(Calendar.YEAR)])
 	//	render content
 		render template: "/common/listInAndOutsTemplate", model: [inAndOutList:inAndOutList,day:calendar.getAt(Calendar.DAY_OF_MONTH),month:calendar.getAt(Calendar.MONTH)+1,year:calendar.getAt(Calendar.YEAR)]

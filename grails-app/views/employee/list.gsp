@@ -24,14 +24,14 @@ function removeElements()
 	elem.parentNode.removeChild(elem);
 	elem = document.getElementById('mainLayout');
 	elem.parentNode.removeChild(elem);
-	elem = document.getElementById('list-employee');
-	elem.parentNode.removeChild(elem);
+//	elem = document.getElementById('list-employee');
+//	elem.parentNode.removeChild(elem);
 	elem = document.getElementById('grailsLogo');
 	elem.parentNode.removeChild(elem);
 	elem = document.getElementById('footer');
 	elem.parentNode.removeChild(elem);
-	elem = document.getElementById('pagination');
-	elem.parentNode.removeChild(elem);
+//	elem = document.getElementById('pagination');
+//	elem.parentNode.removeChild(elem);
 }
 
 
@@ -55,7 +55,7 @@ function calling()
 					<input type="submit"
 						style="background-image: url('../images/skin/search.png')"
 						value="Recherche" />
-					<g:hiddenField name="isAdmin" value="${isAdmin}" />   	      			
+						<g:hiddenField name="isAdmin" value="${isAdmin}" />   	      			
 						<g:hiddenField name="siteId" value="${siteId}" />   	      			
 	
 				Laboratoire:
@@ -67,7 +67,7 @@ function calling()
 				<g:else>
 				        <g:select name="site.id" from="${Site.list([sort:'name'])}"
 						noSelection="${['':'-']}" optionKey="id" optionValue="name"
-						onChange="${remoteFunction(action:'list', params:'\'site=\' + this.value',update:'divId',after:'removeElements()')}" />
+						onChange="${remoteFunction(action:'list', params:'\'site=\' + this.value',update:'divId')}" />
 				</g:else>
 			</g:form>
 			
