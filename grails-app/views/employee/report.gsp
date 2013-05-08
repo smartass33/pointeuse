@@ -53,7 +53,7 @@
 						<g:actionSubmit value="afficher" action="report" />						
 					</li>
 					<li>
-						<g:actionSubmit value="appliquer"  action="timeModification"/>		
+						<g:actionSubmit value="appliquer"  action="modifyTime"/>		
 						</li>
 					<li><modalbox:createLink controller="inAndOut" action="create"
 							css="loginbutton" id="${userId}"
@@ -124,14 +124,14 @@
 									</font></td>
 									<td><g:if test="${holidayMap.get(entries.key) != null}">
 											<font size="2"> <g:select
-													onchange="${remoteFunction(action:'modifyAbsence', update:'myUpdate', params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy')])}"
+													onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:payableSupTime,payableCompTime:payableCompTime])}"
 													name="absenceType" from="${AbsenceType.values()}"
 													value="${AbsenceType}" optionKey="key"
 													noSelection="${['-':holidayMap.get(entries.key).type]}" />
 											</font>
 										</g:if> <g:else>
 											<font size="2"> <g:select
-													onchange="${remoteFunction(action:'modifyAbsence', update:'myUpdate',params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy')] )}"
+													onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2',params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:payableSupTime,payableCompTime:payableCompTime] )}"
 													name="absenceType" from="${AbsenceType.values()}"
 													value="${AbsenceType}" optionKey="key"
 													noSelection="${['':'-']}" />
@@ -218,8 +218,6 @@
 					</g:each>
 				</g:each>
 				<g:hiddenField name="employee.id" value="${employee.id}" />
-				<!--g:hiddenField name="month" value="${period.format('MM')}" /-->
-				<!--g:hiddenField name="year" value="${period.format('yyyy')}" /-->	
 			</tbody>
 		</table>
 	</div>

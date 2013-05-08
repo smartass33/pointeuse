@@ -1,11 +1,30 @@
 package pointeuse
 
-import groovy.time.TimeDuration
+import groovy.time.TimeDuration;
+import groovy.time.TimeCategory
+
+
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 class TimeManagerService {
 
+	def springSecurityService
+	
+	def addExtraTime(InAndOut inOrOut,TimeDuration extraTime){
+		if (inOrOut.dailyTotal==null){
+			def totals=initializeTotals(inOrOut.employee,inOrOut.time)
+			def dailyTotal=totals.getAt(0)
+			inOrOut.dailyTotal=dailyTotal
+		}
+		inOrOut.dailyTotal.elapsedSeconds+=extraTime.hours*3600+extraTime.minutes*60+extraTime.seconds
+		inOrOut.dailyTotal.weeklyTotal.elapsedSeconds+=extraTime.hours*3600+extraTime.minutes*60+extraTime.seconds
+		inOrOut.dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds+=extraTime.hours*3600+extraTime.minutes*60+extraTime.seconds
+		return inOrOut
+	}
+	
 	def computeSupplementaryTime(DailyTotal dailyTotal){
 		def weeklyTotal = dailyTotal.weeklyTotal
 		if (weeklyTotal.elapsedSeconds > WeeklyTotal.maxWorkingTime){
@@ -116,6 +135,61 @@ class TimeManagerService {
 			event.dailyTotal=dailyTotal
 			return event
 		}
+	}
+	
+	
+	def initializeTotals(Employee employee, Date currentDate){
+		def criteria = MonthlyTotal.createCriteria()
+		def monthlyTotal = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',currentDate.getAt(Calendar.YEAR))
+					eq('month',currentDate.getAt(Calendar.MONTH)+1)
+				}
+			}
+		
+		if (monthlyTotal==null){
+			monthlyTotal = new MonthlyTotal(employee,currentDate)
+			employee.monthlyTotals.add(monthlyTotal)
+			monthlyTotal.save(flush:true)
+			
+		}
+		
+		criteria = WeeklyTotal.createCriteria()
+		def weeklyTotal = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('year',currentDate.getAt(Calendar.YEAR))
+				eq('month',currentDate.getAt(Calendar.MONTH)+1)
+				eq('week',currentDate.getAt(Calendar.WEEK_OF_YEAR))
+			}
+		}
+		
+		if (weeklyTotal == null){
+			weeklyTotal = new WeeklyTotal(employee,currentDate)
+			monthlyTotal.weeklyTotals.add(weeklyTotal)
+			weeklyTotal.monthlyTotal=monthlyTotal
+			weeklyTotal.save(flush:true)
+			
+		}
+
+		criteria = DailyTotal.createCriteria()
+		def dailyTotal = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('year',currentDate.getAt(Calendar.YEAR))
+				eq('month',currentDate.getAt(Calendar.MONTH)+1)
+				eq('day',currentDate.getAt(Calendar.DAY_OF_MONTH))
+			}
+		}
+		if (dailyTotal==null){
+			dailyTotal = new DailyTotal(employee,currentDate)
+			dailyTotal.weeklyTotal=weeklyTotal
+			weeklyTotal.dailyTotals.add(dailyTotal)
+			dailyTotal.save(flush:true)
+			
+		}
+		return [dailyTotal,weeklyTotal,monthlyTotal]
 	}
 	
 		def regularizeTime(String type,String userId,InAndOut inOrOut,Calendar calendar){
@@ -251,6 +325,218 @@ class TimeManagerService {
 		if (type.equals("S")){employeeInstance.status=false}
 		else {employeeInstance.status=true}
 		return deltaTime
+	}
+		
+		
+	def timeModification(def idList,def timeList,def dayList,def monthList, def yearList,Employee employee,def newTimeList,def fromRegularize){
+		def deltaUp
+		def deltaDown
+		def timeDiff
+		def criteria
+		def calendar = Calendar.instance
+		def user = springSecurityService.currentUser
+
+		if (idList instanceof String){
+			def tmpidList=idList
+			def tmpdayList=dayList
+			def tmpmonthList=monthList
+			def tmpyearList=yearList
+			def tmpnewTimeList=newTimeList
+			idList=[]
+			dayList=[]
+			monthList=[]
+			yearList=[]
+			newTimeList=[]
+			idList.add(tmpidList)
+			dayList.add(tmpdayList)
+			monthList.add(tmpmonthList)
+			yearList.add(tmpyearList)
+			newTimeList.add(tmpnewTimeList)
+		}
+		def month=monthList[0]
+		def year=yearList[0]
+		
+		
+		for( int p = 0 ; ( p < idList.size() ) ; p++ ) {
+		// l'idŽe: comparer time et newTime
+			def inOrOut = InAndOut.get(idList[p])
+			if (inOrOut==null){
+				log.error("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification¤")
+				def retour = report(employee.id as long,monthList[p] as int,yearList[p] as int)
+				render(view: "report", model: retour)
+				return
+			}
+			
+			SimpleDateFormat dateFormat = new SimpleDateFormat('d/M/yyyy H:m');
+			//Date newDate = dateFormat.parse(dayList[p]+"/"+monthList[p]+"/"+yearList[p]+" "+newTimeList[p])
+			def newCalendar = Calendar.instance
+			newCalendar.time=dateFormat.parse(dayList[p]+"/"+monthList[p]+"/"+yearList[p]+" "+newTimeList[p])
+			def oldCalendar = Calendar.instance
+			oldCalendar.time=inOrOut.time
+			newCalendar.set(Calendar.SECOND,oldCalendar.get(Calendar.SECOND))
+			
+			if (newCalendar.time!=oldCalendar.time){
+				def toCompare
+				if (newCalendar.time>oldCalendar.time){
+					toCompare=newCalendar.time
+				}else{
+					toCompare=oldCalendar.time
+				}
+				toCompare.set(minutes:toCompare.minutes+1)
+					
+				// get next inOrOut for this user
+				calendar.time=oldCalendar.time
+				criteria = InAndOut.createCriteria()
+				def nextInOrOut = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('day',calendar.getAt(Calendar.DAY_OF_MONTH))
+						eq('month',calendar.getAt(Calendar.MONTH)+1)
+						eq('year',calendar.getAt(Calendar.YEAR))
+						gt('id',inOrOut.id)
+						gt('time',toCompare)
+						order('time','asc')
+					}
+					maxResults(1)
+				}
+				
+				if (newCalendar.time>oldCalendar.time){
+					toCompare=oldCalendar.time
+				}else{
+					toCompare=newCalendar.time
+				}
+				toCompare.set(minutes:toCompare.minutes+1)
+				
+				criteria = InAndOut.createCriteria()
+				def previousInOrOut = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('day',calendar.getAt(Calendar.DAY_OF_MONTH))
+						eq('month',calendar.getAt(Calendar.MONTH)+1)
+						eq('year',calendar.getAt(Calendar.YEAR))
+						lt('time',toCompare)
+						lt('id',inOrOut.id)
+						order('time','desc')
+					}
+					maxResults(1)
+				}
+			
+				if (previousInOrOut != null){
+					use (TimeCategory){deltaDown=newCalendar.time-previousInOrOut.time}
+				}
+				else {
+					deltaDown=new Date()
+					deltaDown.minutes=0
+				}
+				
+				if (nextInOrOut != null){
+					use (TimeCategory){deltaUp=nextInOrOut.time-newCalendar.time}
+				}
+				else {
+					deltaUp=new Date()
+					deltaUp.minutes=0
+				}
+				
+				if (deltaUp.minutes < 0 || deltaDown.minutes < 0 || deltaDown.hours < 0 || deltaUp.hours < 0){
+					throw new PointeuseException("entry cannot be positionned after exit")
+
+				}
+				inOrOut.time=newCalendar.time
+				
+				// if the time difference
+				if (inOrOut.systemGenerated && previousInOrOut!=null ){
+						use (TimeCategory){timeDiff=newCalendar.time-previousInOrOut.time}
+				}
+				if (inOrOut.regularization && nextInOrOut !=null && nextInOrOut.systemGenerated){
+					use (TimeCategory){timeDiff=nextInOrOut.time - newCalendar.time}
+				}
+				def doNothing=false
+				if (inOrOut.type.equals('E') && nextInOrOut !=null && nextInOrOut.type.equals('E')){
+					doNothing=true
+				}
+				if (inOrOut.type.equals('S') && previousInOrOut !=null && previousInOrOut.type.equals('S')){
+					doNothing=true
+				}
+				if(!doNothing){
+					dailyTotalUpdate(timeDiff,newCalendar.time,oldCalendar.time,inOrOut,employee,dayList[p] as int,month as int)
+				}
+				if (employee.weeklyContractTime != 35){
+					computeComplementaryTime(inOrOut.dailyTotal)
+				}else{
+					computeSupplementaryTime(inOrOut.dailyTotal)
+				}
+				
+				inOrOut.regularizationType=fromRegularize ? InAndOut.MODIFIEE_SALARIE : InAndOut.MODIFIEE_ADMIN
+				
+				inOrOut.systemGenerated=false
+				
+				if (user!=null){
+					inOrOut.modifyingUser=user
+					inOrOut.modifyingTime=new Date()
+					log.error("user "+user?.username+" modified "+inOrOut)
+				}
+			}
+		}
+	}
+	
+	def dailyTotalUpdate(TimeDuration timeDiff,Date newDate ,Date oldDate,InAndOut inOrOut,Employee employee,int day, int month){
+		if (inOrOut.dailyTotal.elapsedSeconds<0){
+			log.error('the daily Total is negative ' + inOrOut.dailyTotal)
+			//dailyTotal.elapsedSeconds=0
+		}
+		if (timeDiff == null){
+			use (TimeCategory){timeDiff=newDate-oldDate}
+			if (inOrOut.type == "E"){
+				inOrOut.dailyTotal.elapsedSeconds-=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
+				inOrOut.dailyTotal.weeklyTotal.elapsedSeconds-=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
+				inOrOut.dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds-=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
+			} else {
+				inOrOut.dailyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
+				inOrOut.dailyTotal.weeklyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
+				inOrOut.dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
+			}
+		}else{
+			inOrOut.dailyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
+			inOrOut.dailyTotal.weeklyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
+			inOrOut.dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
+		}
+		return inOrOut.dailyTotal
+	}
+	
+	def computeMonthlyHours(int year,int month){
+		def openedDays = 0
+		def calendar = Calendar.instance
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.MONTH,month)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		
+		// discard sundays from opened days
+		while(calendar.getAt(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			if (calendar.getAt(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
+				openedDays += 1
+			}
+			
+			if (calendar.getAt(Calendar.DAY_OF_MONTH) == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				break
+			}
+			calendar.roll(Calendar.DAY_OF_MONTH, 1)
+		}
+		def bankHolidays = BankHoliday.findAllByYearAndMonth(year,month+1)
+		// discard bank holidays
+		if (bankHolidays!= null){
+			openedDays -= bankHolidays.size()
+		}
+		return openedDays
+	}
+	
+	def computeHumanTime(long inputSeconds){
+		def diff=inputSeconds
+		long hours=TimeUnit.SECONDS.toHours(diff);
+		diff=diff-(hours*3600);
+		long minutes=TimeUnit.SECONDS.toMinutes(diff);
+		diff=diff-(minutes*60);
+		long seconds=TimeUnit.SECONDS.toSeconds(diff);
+		return [hours,minutes,seconds]
 	}
 	
 }
