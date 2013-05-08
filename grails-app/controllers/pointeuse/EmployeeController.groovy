@@ -469,8 +469,8 @@ class EmployeeController {
 	
 	def modifyAbsence(){
 		def employeeId = params["employeeId"].getAt(0)
-		//def payableSupTime = params["payableSupTime"].getAt(0)
-		//def payableCompTime = params["payableCompTime"].getAt(0)
+		def payableSupTime = params["payableSupTime"].getAt(0)
+		def payableCompTime = params["payableCompTime"].getAt(0)
 		def employee = Employee.get(employeeId)
 		def day = params["day"].getAt(0)
 		def updatedSelection = params["updatedSelection"].toString()
@@ -554,12 +554,10 @@ class EmployeeController {
 			yearSup=cal.get(Calendar.YEAR)
 		}
 		
-		//payableSupTime:payableSupTime,payableCompTime:payableCompTime,
 		
-		def model=[monthlyTotal:timeManagerService.computeHumanTime(monthlyTotal.elapsedSeconds),yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde]
+		def model=[payableSupTime:payableSupTime,payableCompTime:payableCompTime,monthlyTotal:timeManagerService.computeHumanTime(monthlyTotal.elapsedSeconds),yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde]
 		render template: "/common/cartoucheTemplate", model:model
 		return
-		//return [workingDays:cartoucheTable.get(3),holiday:cartoucheTable.get(4),rtt:cartoucheTable.get(5),sickness:cartoucheTable.get(6)]
 	}
 	
 	
@@ -865,9 +863,9 @@ class EmployeeController {
 		}
 		try{
 			timeManagerService.timeModification( idList, timeList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
-		}catch(PointeuseException){
+		}catch(PointeuseException ex){
+			flash.message = message(code: ex.message)
 			def back = report(employee.id as int,month as int,year as int)
-			flash.message = message(code: 'inAndOut.updateTime.error')
 			render(view: "report", model: back)
 			return
 		}
@@ -1348,7 +1346,6 @@ class EmployeeController {
 				weeklySuppTotalTime.put(key,timeManagerService.computeHumanTime(value))
 			};
 			weeklyCompTotalTime.each() { key, value ->
-				//log.error(value)
 				monthlyCompTime += value
 				weeklyCompTotalTime.put(key,timeManagerService.computeHumanTime(value))
 			};
@@ -1356,7 +1353,7 @@ class EmployeeController {
 			def payableSupTime = timeManagerService.computeHumanTime(monthlySupTime)
 			def payableCompTime = timeManagerService.computeHumanTime(monthlyCompTime)
 			
-			[employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:cartoucheTable.get(3),holiday:cartoucheTable.get(4),rtt:cartoucheTable.get(5),sickness:cartoucheTable.get(6),sansSolde:cartoucheTable.get(7),yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:cartoucheTable.get(11),yearlyRtt:cartoucheTable.get(12),yearlySickness:cartoucheTable.get(13),yearlySansSolde:cartoucheTable.get(17),yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,weeklyCompTotal:weeklyCompTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+			[payableSupTime:payableSupTime,payableCompTime:payableCompTime,employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:cartoucheTable.get(3),holiday:cartoucheTable.get(4),rtt:cartoucheTable.get(5),sickness:cartoucheTable.get(6),sansSolde:cartoucheTable.get(7),yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:cartoucheTable.get(11),yearlyRtt:cartoucheTable.get(12),yearlySickness:cartoucheTable.get(13),yearlySansSolde:cartoucheTable.get(17),yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,weeklyCompTotal:weeklyCompTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 			
 			}
 		}catch (NullPointerException e){

@@ -328,7 +328,7 @@ class TimeManagerService {
 	}
 		
 		
-	def timeModification(def idList,def timeList,def dayList,def monthList, def yearList,Employee employee,def newTimeList,def fromRegularize){
+	def timeModification(def idList,def timeList,def dayList,def monthList, def yearList,Employee employee,def newTimeList,def fromRegularize) throws PointeuseException{
 		def deltaUp
 		def deltaDown
 		def timeDiff
@@ -361,14 +361,12 @@ class TimeManagerService {
 		// l'idŽe: comparer time et newTime
 			def inOrOut = InAndOut.get(idList[p])
 			if (inOrOut==null){
-				log.error("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification¤")
-				def retour = report(employee.id as long,monthList[p] as int,yearList[p] as int)
-				render(view: "report", model: retour)
+				log.error("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification")
+				throw new PointeuseException("inAndOut.not.found")
 				return
 			}
 			
 			SimpleDateFormat dateFormat = new SimpleDateFormat('d/M/yyyy H:m');
-			//Date newDate = dateFormat.parse(dayList[p]+"/"+monthList[p]+"/"+yearList[p]+" "+newTimeList[p])
 			def newCalendar = Calendar.instance
 			newCalendar.time=dateFormat.parse(dayList[p]+"/"+monthList[p]+"/"+yearList[p]+" "+newTimeList[p])
 			def oldCalendar = Calendar.instance
@@ -376,6 +374,37 @@ class TimeManagerService {
 			newCalendar.set(Calendar.SECOND,oldCalendar.get(Calendar.SECOND))
 			
 			if (newCalendar.time!=oldCalendar.time){
+				
+				// compare initial states:
+				criteria = InAndOut.createCriteria()
+				def inititalPrevious = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('day',inOrOut.day)
+						eq('month',inOrOut.month)
+						eq('year',inOrOut.year)
+						lt('time',inOrOut.time)
+						lt('id',inOrOut.id)
+						order('time','desc')
+					}
+					maxResults(1)
+				}
+				
+				criteria = InAndOut.createCriteria()
+				def initialNext = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('day',inOrOut.day)
+						eq('month',inOrOut.month)
+						eq('year',inOrOut.year)
+						gt('time',inOrOut.time)
+						gt('id',inOrOut.id)
+						order('time','asc')
+					}
+					maxResults(1)
+				}
+				
+				
 				def toCompare
 				if (newCalendar.time>oldCalendar.time){
 					toCompare=newCalendar.time
@@ -400,6 +429,12 @@ class TimeManagerService {
 					maxResults(1)
 				}
 				
+				if (nextInOrOut!=null && initialNext != null && nextInOrOut!=initialNext){
+					throw new PointeuseException('inAndOut.updateTime.error')
+					return
+				}
+				
+				
 				if (newCalendar.time>oldCalendar.time){
 					toCompare=oldCalendar.time
 				}else{
@@ -421,26 +456,21 @@ class TimeManagerService {
 					maxResults(1)
 				}
 			
+				if (previousInOrOut!=null && inititalPrevious != null && previousInOrOut!=inititalPrevious){
+					log.error('entry cannot be positionned after exit')
+					throw new PointeuseException('inAndOut.updateTime.error')
+					return
+				}
+				
 				if (previousInOrOut != null){
 					use (TimeCategory){deltaDown=newCalendar.time-previousInOrOut.time}
 				}
-				else {
-					deltaDown=new Date()
-					deltaDown.minutes=0
-				}
+
 				
 				if (nextInOrOut != null){
 					use (TimeCategory){deltaUp=nextInOrOut.time-newCalendar.time}
 				}
-				else {
-					deltaUp=new Date()
-					deltaUp.minutes=0
-				}
-				
-				if (deltaUp.minutes < 0 || deltaDown.minutes < 0 || deltaDown.hours < 0 || deltaUp.hours < 0){
-					throw new PointeuseException("entry cannot be positionned after exit")
 
-				}
 				inOrOut.time=newCalendar.time
 				
 				// if the time difference
