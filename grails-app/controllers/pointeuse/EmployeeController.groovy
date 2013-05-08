@@ -529,8 +529,48 @@ class EmployeeController {
 			}
 		}
 		 	
-		def cartoucheTable = cartouche(employee.id,absence.year,absence.month)		
-		return [workingDays:cartoucheTable.get(3),holiday:cartoucheTable.get(4),rtt:cartoucheTable.get(5),sickness:cartoucheTable.get(6)]
+		def cartoucheTable = cartouche(employee.id,absence.year,absence.month)	
+		def workingDays=cartoucheTable.get(3)
+		def holiday=cartoucheTable.get(4)
+		def rtt=cartoucheTable.get(5)
+		def sickness=cartoucheTable.get(6)
+		def sansSolde=cartoucheTable.get(7)
+		def monthTheoritical = computeHumanTime(cartoucheTable.get(8))
+		def pregnancyCredit = computeHumanTime(cartoucheTable.get(9))
+		def yearlyHoliday=cartoucheTable.get(11)
+		def yearlyRtt=cartoucheTable.get(12)
+		def yearlySickness=cartoucheTable.get(13)
+		def yearlyTheoritical = computeHumanTime(cartoucheTable.get(14))
+		def yearlyPregnancyCredit = computeHumanTime(cartoucheTable.get(15))
+		def yearlyActualTotal = computeHumanTime(cartoucheTable.get(16))
+		def yearlySansSolde=cartoucheTable.get(17)
+		def openedDays = computeMonthlyHours(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)
+		
+		def yyyy=cal.getAt(Calendar.YEAR)
+		def mmm=cal.getAt(Calendar.MONTH)+1
+		criteria = MonthlyTotal.createCriteria()
+		def monthlyTotal = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',cal.getAt(Calendar.YEAR))
+					eq('month',cal.getAt(Calendar.MONTH)+1)
+				}
+			}
+		
+		def yearInf
+		def yearSup
+		if ((cal.get(Calendar.MONTH)+1)>4){
+			yearInf=cal.get(Calendar.YEAR)
+			yearSup=cal.get(Calendar.YEAR)+1
+		}else{
+			yearInf=cal.get(Calendar.YEAR)-1
+			yearSup=cal.get(Calendar.YEAR)
+		}
+		
+		def model=[monthlyTotal:computeHumanTime(monthlyTotal.elapsedSeconds),yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde]
+		render template: "/common/cartoucheTemplate", model:model
+		return
+		//return [workingDays:cartoucheTable.get(3),holiday:cartoucheTable.get(4),rtt:cartoucheTable.get(5),sickness:cartoucheTable.get(6)]
 	}
 	
 	
@@ -1488,7 +1528,6 @@ class EmployeeController {
 			def yearlyTheoritical = computeHumanTime(cartoucheTable.get(14))
 			def yearlyPregnancyCredit = computeHumanTime(cartoucheTable.get(15))
 			def yearlyActualTotal = computeHumanTime(cartoucheTable.get(16))
-			
 			def pregnancyCredit = computeHumanTime(cartoucheTable.get(9))
 			def yearInf
 			def yearSup
