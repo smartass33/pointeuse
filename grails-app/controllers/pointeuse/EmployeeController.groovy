@@ -396,16 +396,6 @@ class EmployeeController {
 				eq('type',AbsenceType.CSS)
 			}
 		}
-		/*
-		criteria = MonthlyTotal.createCriteria()
-		def monthlyTotal = criteria.get{
-			and{
-				eq('employee',employeeInstance)
-				eq('year',year)
-				eq('month',month)
-			}
-		}
-		*/
 		calendar.set(Calendar.HOUR_OF_DAY,23)
 		calendar.set(Calendar.MINUTE,59)
 		calendar.set(Calendar.SECOND,59)
@@ -421,15 +411,11 @@ class EmployeeController {
 		def pregnancyCredit=30*60*pregnancy.size()
 		// determine monthly theoritical time:
 		def monthTheoritical=(3600*(counter*employeeInstance.weeklyContractTime/Employee.WeekOpenedDays+Employee.Pentecote-(WeeklyTotal.WeeklyLegalTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size())) - pregnancyCredit)as int
-		
-		//def monthTheoritical=(3600*(counter*employeeInstance.weeklyContractTime/6+7/12-sickness.size()*35/6-holidays.size()*35/6 -sansSolde.size()*35/6) - pregnancyCredit)as int	
 		return [params.userId,employeeInstance,calendar,counter ,holidays.size(),rtt.size(),sickness.size(),sansSolde.size(),monthTheoritical,pregnancyCredit,yearlyCartouche.get(0),yearlyCartouche.get(1),yearlyCartouche.get(2),yearlyCartouche.get(3),yearlyCartouche.get(4),yearlyCartouche.get(5),yearlyCartouche.get(6),yearlyCartouche.get(7),payableSupTime,payableCompTime]		
 	}
 	
 	def modifyAbsence(){
 		def employeeId = params["employeeId"].getAt(0)
-	//	def payableSupTime = params["payableSupTime"].getAt(0)
-	//	def payableCompTime = params["payableCompTime"].getAt(0)
 		def employee = Employee.get(employeeId)
 		def day = params["day"].getAt(0)
 		def criteria
@@ -438,10 +424,7 @@ class EmployeeController {
 		Date date = dateFormat.parse(day)
 		def cal= Calendar.instance
 		cal.time=date
-		// do nothing
 		if (!updatedSelection.equals('-') && !updatedSelection.equals('')){
-
-			
 			// check if an absence was already logged:
 			criteria = Absence.createCriteria()
 			
@@ -476,7 +459,7 @@ class EmployeeController {
 				}
 			}
 		}else{
-			flash.message(code:'absence.impossible.update')
+			flash.message=message(code: 'absence.impossible.update')
 		}
 		def cartoucheTable = cartouche(employee.id,cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)	
 		def workingDays=cartoucheTable.get(3)
@@ -525,7 +508,6 @@ class EmployeeController {
 		render template: "/common/cartoucheTemplate", model:model
 		return
 	}
-	
 	
 	def addingEventToEmployee(Long id){
 		def cal = Calendar.instance	
@@ -780,13 +762,17 @@ class EmployeeController {
 		def inAndOutList = criteria.list {
 			and {
 				eq('employee',employee)
-				eq('day',calendar.getAt(Calendar.DAY_OF_MONTH))
-				eq('month',calendar.getAt(Calendar.MONTH)+1)
-				eq('year',calendar.getAt(Calendar.YEAR))
+				eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+				eq('month',calendar.get(Calendar.MONTH)+1)
+				eq('year',calendar.get(Calendar.YEAR))
 				order('time','asc')
 			}
 		}
+		
+	//	def reportModel=report(inOrOut.employee.id, calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.YEAR))
 		render template: "/common/listInAndOutsTemplate", model: [inAndOutList:inAndOutList,day:calendar.getAt(Calendar.DAY_OF_MONTH),month:calendar.getAt(Calendar.MONTH)+1,year:calendar.getAt(Calendar.YEAR)]
+	//	render template: "/common/reportTableTemplate", model: reportModel
+		
 	}
 	
 	def showDay(){

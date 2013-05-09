@@ -34,8 +34,6 @@ class InAndOutController {
 		}
         [inAndOutInstance: inAndOutInstance,complete:complete,reportRedirect:reportRedirect]
     }
-
-
 	
     def save() {
 		def user = springSecurityService.currentUser
@@ -79,15 +77,12 @@ class InAndOutController {
 			return
 		}
 		def inAndOutInstance = timeManagerService.initializeTotals(employee, calendar.time,type,null)
-		
-		
 		inAndOutInstance.regularization=true
 		if (fromReport){
 			inAndOutInstance.regularizationType=InAndOut.INITIALE_ADMIN
 		}else{
 			inAndOutInstance.regularizationType=InAndOut.INITIALE_SALARIE
 		}
-		
 		if (reasonId != null && userId != ""){
 			def reason=Reason.get(reasonId)
 			if (reason!=null){
