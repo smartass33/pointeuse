@@ -569,4 +569,48 @@ class TimeManagerService {
 		return [hours,minutes,seconds]
 	}
 	
+	
+	def computeSupTime(Calendar calendar,Employee employee){
+		def dailyTotalId = 0
+		def calendarLoop = calendar
+		int month = calendar.getAt(Calendar.MONTH) // starts at 0
+		int year = calendar.getAt(Calendar.YEAR)
+		calendarLoop.getTime().clearTime()
+		def monthlyCompTime = 0
+		def monthlySupTime = 0
+
+		while(calendarLoop.getAt(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			// Žlimine les dimanches du rapport
+
+			//print calendarLoop.time
+			def criteria = DailyTotal.createCriteria()
+			def dailyTotal = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('day',calendarLoop.getAt(Calendar.DAY_OF_MONTH))
+					eq('month',month+1)
+					eq('year',year)
+				}
+			}
+			// permet de rŽcupŽrer le total hebdo
+			if (dailyTotal != null && dailyTotal != dailyTotalId && dailyTotal.weeklyTotal.elapsedSeconds > 0){
+				if (dailyTotal.weeklyTotal.elapsedSeconds > WeeklyTotal.maxWorkingTime){
+					monthlySupTime+=dailyTotal.weeklyTotal.supplementarySeconds
+				}else {
+					monthlySupTime+=dailyTotal.supplementarySeconds		
+				}
+				
+				if (dailyTotal.weeklyTotal.complementarySeconds > 0){
+					monthlyCompTime+=dailyTotal.weeklyTotal.complementarySeconds					
+				}
+				dailyTotalId=dailyTotal.id
+			}
+			if (calendarLoop.getAt(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				break
+			}
+			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
+		}
+		return [monthlySupTime,monthlyCompTime]
+	}
+	
 }

@@ -19,9 +19,9 @@ class UrlMappings {
 		}
 		
 		
-		"/inAndOut/timeModification" {
+		"/inAndOut/modifyTime" {
 			controller = "employee"
-			action = "timeModification"
+			action = "modifyTime"
 		}
 	}
 }

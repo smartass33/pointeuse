@@ -135,67 +135,6 @@ class EmployeeController {
         [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]	
     }
 
-
-	def cartoucheUpdate(){
-		def employeeId= params["employeeId"].getAt(0)
-		def employee = Employee.get(employeeId)
-		def calendar = Calendar.instance
-		calendar.set(Calendar.DAY_OF_MONTH,1)
-		def counter = 0
-		
-		
-		// count sundays within given month
-		while(calendar.getAt(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
-			if (calendar.getAt(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-				counter ++
-			}
-			if (calendar.getAt(Calendar.DAY_OF_MONTH) == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-				break
-			}
-			calendar.roll(Calendar.DAY_OF_MONTH, 1)
-		}
-		
-		// count bank holiday
-		def month = calendar.getAt(Calendar.MONTH)+1
-		def year = calendar.getAt(Calendar.YEAR)
-		def holiday = BankHoliday.findAllByMonthAndYear(calendar.getAt(Calendar.MONTH)+1,calendar.getAt(Calendar.YEAR))
-		
-		counter -= holiday.size()
-		
-		def criteria = Absence.createCriteria()
-		
-		// get cumul holidays
-		def holidays = criteria.list {
-			and {
-				eq('employee',employee)
-				eq('year',year)
-				eq('month',month)
-				eq('type',AbsenceType.VACANCE)
-			}
-		}
-		
-		// get cumul RTT
-		criteria = Absence.createCriteria()
-		def rtt = criteria.list {
-			and {
-				eq('employee',employee)
-				eq('year',year)
-				eq('month',month)
-				eq('type',AbsenceType.RTT)
-			}
-		}
-		// get cumul sickness
-		criteria = Absence.createCriteria()
-		def sickness = criteria.list {
-			and {
-				eq('employee',employee)
-				eq('year',year)
-				eq('month',month)
-				eq('type',AbsenceType.MALADIE)
-			}
-		}		
-		return [period:calendar,workingDays:counter as float,holiday:holidays.size(),rtt:rtt.size(),sickness:sickness.size()]		
-	}
 	
 	def yearlyCartouche(long userId,int year,int month){
 		if (userId == null){
@@ -457,64 +396,89 @@ class EmployeeController {
 				eq('type',AbsenceType.CSS)
 			}
 		}
+		/*
+		criteria = MonthlyTotal.createCriteria()
+		def monthlyTotal = criteria.get{
+			and{
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+			}
+		}
+		*/
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		calendar.set(Calendar.DATE,1)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.MONTH,month-1)
 		
+		def supTotals=timeManagerService.computeSupTime(calendar,employeeInstance)
+		def payableSupTime=timeManagerService.computeHumanTime(supTotals.get(0))
+		def payableCompTime=timeManagerService.computeHumanTime(supTotals.get(1))
 		def yearlyCartouche=yearlyCartouche(userId,year,month)		
 		def pregnancyCredit=30*60*pregnancy.size()
 		// determine monthly theoritical time:
 		def monthTheoritical=(3600*(counter*employeeInstance.weeklyContractTime/Employee.WeekOpenedDays+Employee.Pentecote-(WeeklyTotal.WeeklyLegalTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size())) - pregnancyCredit)as int
 		
 		//def monthTheoritical=(3600*(counter*employeeInstance.weeklyContractTime/6+7/12-sickness.size()*35/6-holidays.size()*35/6 -sansSolde.size()*35/6) - pregnancyCredit)as int	
-		return [params.userId,employeeInstance,calendar,counter ,holidays.size(),rtt.size(),sickness.size(),sansSolde.size(),monthTheoritical,pregnancyCredit,yearlyCartouche.get(0),yearlyCartouche.get(1),yearlyCartouche.get(2),yearlyCartouche.get(3),yearlyCartouche.get(4),yearlyCartouche.get(5),yearlyCartouche.get(6),yearlyCartouche.get(7)]		
+		return [params.userId,employeeInstance,calendar,counter ,holidays.size(),rtt.size(),sickness.size(),sansSolde.size(),monthTheoritical,pregnancyCredit,yearlyCartouche.get(0),yearlyCartouche.get(1),yearlyCartouche.get(2),yearlyCartouche.get(3),yearlyCartouche.get(4),yearlyCartouche.get(5),yearlyCartouche.get(6),yearlyCartouche.get(7),payableSupTime,payableCompTime]		
 	}
 	
 	def modifyAbsence(){
 		def employeeId = params["employeeId"].getAt(0)
-		def payableSupTime = params["payableSupTime"].getAt(0)
-		def payableCompTime = params["payableCompTime"].getAt(0)
+	//	def payableSupTime = params["payableSupTime"].getAt(0)
+	//	def payableCompTime = params["payableCompTime"].getAt(0)
 		def employee = Employee.get(employeeId)
 		def day = params["day"].getAt(0)
+		def criteria
 		def updatedSelection = params["updatedSelection"].toString()
-		
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 		Date date = dateFormat.parse(day)
 		def cal= Calendar.instance
 		cal.time=date
-		
-		// check if an absence was already logged:
-		def criteria = Absence.createCriteria()
-		
-		// get cumul holidays
-		def absence = criteria.get {
-			and {
-				eq('employee',employee)
-				eq('year',cal.get(Calendar.YEAR))
-				eq('month',cal.get(Calendar.MONTH)+1)
-				eq('day',cal.getAt(Calendar.DAY_OF_MONTH))
-			}
-		}
+		// do nothing
+		if (!updatedSelection.equals('-') && !updatedSelection.equals('')){
 
-		if (absence != null){
-			if (updatedSelection.equals(AbsenceType.ANNULATION.key)){
-				// annulation nŽcessaire: il faut effacer le tupple
-				absence.delete(flush: true)
-			}else{
-				absence.type=updatedSelection
-				absence.save(flush: true)
+			
+			// check if an absence was already logged:
+			criteria = Absence.createCriteria()
+			
+			// get cumul holidays
+			def absence = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',cal.get(Calendar.YEAR))
+					eq('month',cal.get(Calendar.MONTH)+1)
+					eq('day',cal.getAt(Calendar.DAY_OF_MONTH))
+				}
 			}
-		}else {
-			if (!updatedSelection.equals(AbsenceType.ANNULATION)){
-				absence = new Absence()
-				absence.date=date
-				absence.employee=employee
-				absence.day=cal.get(Calendar.DAY_OF_MONTH)
-				absence.month=cal.get(Calendar.MONTH)+1
-				absence.year=cal.get(Calendar.YEAR)
-				absence.type=updatedSelection
-				absence.save(flush: true)
+	
+			if (absence != null){
+				if (updatedSelection.equals(AbsenceType.ANNULATION.key)){
+					// annulation nŽcessaire: il faut effacer le tupple
+					absence.delete(flush: true)
+				}else{
+					absence.type=updatedSelection
+					absence.save(flush: true)
+				}
+			}else {
+				if (!updatedSelection.equals(AbsenceType.ANNULATION)){
+					absence = new Absence()
+					absence.date=date
+					absence.employee=employee
+					absence.day=cal.get(Calendar.DAY_OF_MONTH)
+					absence.month=cal.get(Calendar.MONTH)+1
+					absence.year=cal.get(Calendar.YEAR)
+					absence.type=updatedSelection
+					absence.save(flush: true)
+				}
 			}
+		}else{
+			flash.message(code:'absence.impossible.update')
 		}
-		 	
-		def cartoucheTable = cartouche(employee.id,absence.year,absence.month)	
+		def cartoucheTable = cartouche(employee.id,cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)	
 		def workingDays=cartoucheTable.get(3)
 		def holiday=cartoucheTable.get(4)
 		def rtt=cartoucheTable.get(5)
@@ -529,6 +493,8 @@ class EmployeeController {
 		def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(15))
 		def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get(16))
 		def yearlySansSolde=cartoucheTable.get(17)
+		def payableSupTime=cartoucheTable.get(18)
+		def payableCompTime=cartoucheTable.get(19)
 		def openedDays = timeManagerService.computeMonthlyHours(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)
 
 		criteria = MonthlyTotal.createCriteria()
@@ -553,9 +519,9 @@ class EmployeeController {
 			yearInf=cal.get(Calendar.YEAR)-1
 			yearSup=cal.get(Calendar.YEAR)
 		}
+		monthlyTotal=timeManagerService.computeHumanTime(monthlyTotal.elapsedSeconds)
 		
-		
-		def model=[payableSupTime:payableSupTime,payableCompTime:payableCompTime,monthlyTotal:timeManagerService.computeHumanTime(monthlyTotal.elapsedSeconds),yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde]
+		def model=[monthlyTotalRecap:monthlyTotal,yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 		render template: "/common/cartoucheTemplate", model:model
 		return
 	}
@@ -1322,6 +1288,7 @@ class EmployeeController {
 		
 		if (monthlyTotal!=null){
 			monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotal.elapsedSeconds))
+			monthlyTotal=timeManagerService.computeHumanTime(monthlyTotal.elapsedSeconds)
 		}	
 		try {
 			if (userId != null){
@@ -1353,7 +1320,7 @@ class EmployeeController {
 			def payableSupTime = timeManagerService.computeHumanTime(monthlySupTime)
 			def payableCompTime = timeManagerService.computeHumanTime(monthlyCompTime)
 			
-			[payableSupTime:payableSupTime,payableCompTime:payableCompTime,employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:cartoucheTable.get(3),holiday:cartoucheTable.get(4),rtt:cartoucheTable.get(5),sickness:cartoucheTable.get(6),sansSolde:cartoucheTable.get(7),yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:cartoucheTable.get(11),yearlyRtt:cartoucheTable.get(12),yearlySickness:cartoucheTable.get(13),yearlySansSolde:cartoucheTable.get(17),yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,weeklyCompTotal:weeklyCompTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+			[monthlyTotalRecap:monthlyTotal,payableSupTime:payableSupTime,payableCompTime:payableCompTime,employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:cartoucheTable.get(3),holiday:cartoucheTable.get(4),rtt:cartoucheTable.get(5),sickness:cartoucheTable.get(6),sansSolde:cartoucheTable.get(7),yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:cartoucheTable.get(11),yearlyRtt:cartoucheTable.get(12),yearlySickness:cartoucheTable.get(13),yearlySansSolde:cartoucheTable.get(17),yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,weeklyCompTotal:weeklyCompTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 			
 			}
 		}catch (NullPointerException e){

@@ -108,8 +108,8 @@
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
 	 									<tr>
-	 									<g:if test="${monthlyTotal!=null}">
-	 										<td>${monthlyTotal.get(0)}H${monthlyTotal.get(1)==0?'00':monthlyTotal.get(1)}</td>
+	 									<g:if test="${monthlyTotalRecap!=null}">
+	 										<td>${monthlyTotalRecap.get(0)}H${monthlyTotalRecap.get(1)==0?'00':monthlyTotalRecap.get(1)}</td>
 	 									</g:if>
 	 									<g:else>
 	 										<td>0 H 0 min</td>			
