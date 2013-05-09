@@ -34,7 +34,6 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 		compile 'log4j:apache-log4j-extras:1.0'
-			
         runtime 'mysql:mysql-connector-java:5.1.21'
     }
 
@@ -42,17 +41,11 @@ grails.project.dependency.resolution = {
         runtime ":hibernate:$grailsVersion"
         runtime ":jquery:1.8.0"
         runtime ":resources:1.0"
-
 		compile ":tooltip:0.7"
-		
-		//compile  ":rendering:0.4.4"
-		//compile ":cache:1.0.1"		
-		//compile ":jquery-ui:1.8.24"
+		runtime ":prototype:1.0"
 		compile ":spring-security-core:1.2.7.3"
 		compile ":joda-time:1.4"
-		compile ":prototype:1.0"
 		compile ":pdf:0.6"
-		//compile ":quartz:1.0-RC6"
 		compile ":quartz2:2.1.6.2"
 		compile ":modalbox:0.4"
 		compile ":richui:0.8"
