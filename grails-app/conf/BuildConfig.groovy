@@ -42,15 +42,18 @@ grails.project.dependency.resolution = {
         runtime ":hibernate:$grailsVersion"
         runtime ":jquery:1.8.0"
         runtime ":resources:1.0"
+<<<<<<< HEAD
 
 		compile ":tooltip:0.7"
 		
+=======
+		runtime ":prototype:1.0"
+>>>>>>> origin/delivery
 		//compile  ":rendering:0.4.4"
 		//compile ":cache:1.0.1"		
 		//compile ":jquery-ui:1.8.24"
 		compile ":spring-security-core:1.2.7.3"
 		compile ":joda-time:1.4"
-		compile ":prototype:1.0"
 		compile ":pdf:0.6"
 		//compile ":quartz:1.0-RC6"
 		compile ":quartz2:2.1.6.2"
