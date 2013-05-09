@@ -18,7 +18,7 @@
 	  			</h1>
 
 	  			</font>
-	  			<g:form method="post" action="timeModification"  >
+	  			<g:form method="post" action="modifyTime"  >
 	  			
 	  			<div id="last5days">
 	  				<h1><g:message code="event.regularization.label" default="Last Name" /></h1>
@@ -26,7 +26,7 @@
 		  				<thead>
 		  				<th><g:message code="events.label" default="Last Name" /></th>
 		  				<th>
-		  					<g:actionSubmit value="appliquer"  action="timeModification"/>
+		  					<g:actionSubmit value="appliquer"  action="modifyTime"/>
 		  				</th>
 		  				</thead>
 		  				<tbody>

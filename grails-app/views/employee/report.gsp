@@ -9,7 +9,7 @@
 <!doctype html>
 <html>
 <head>
-<g:javascript library="jquery" plugin="jquery" />
+<g:javascript library="prototype" />
 <resource:include components="autoComplete, dateChooser"
 	autoComplete="[skin: 'default']" />
 <resource:dateChooser />
@@ -43,39 +43,17 @@
 					</g:link></li>
 					<li>
 						${message(code: 'default.period.label', default: 'List')}: <g:datePicker
-							name="myDate" value="${period ? period : new Date()}" onChange="alert('KKKK');"
+							name="myDate" value="${period ? period : new Date()}" 
 							precision="month" noSelection="['':'-Choose-']" />
+							<g:hiddenField name="userId" value="${userId}" />
+							<g:hiddenField name="siteId" value="${siteId}" />
+							
 					</li>
-					<!--li>
-						<g:select
-							onchange="${remoteFunction(action:'report',params:[monthPeriod:period.getAt(Calendar.MONTH),yearPeriod:period.getAt(Calendar.YEAR),userId:employee.id])}"
-							name="monthSelect" from="${['Janvier','Février','Mars','Avril','Mai']}"
-							noSelection="${['-':period.format('MMM')]}" />
-					</li>
-					<li>
-						<g:select
-							onchange="${remoteFunction(action:'report',params:[monthPeriod:period.getAt(Calendar.MONTH),yearPeriod:period.getAt(Calendar.YEAR),userId:employee.id])}"
-							name="yearSelect" from="${['2012','2013','2014','2015']}"
-							noSelection="${['-':period.format('yyyy')]}" />
-					</li>
-
-				<li>
-					<g:pdfForm controller="employee" action="pdfForm" method="post" >
-						<g:hiddenField name="userId" value="${userId}" />
-						<g:hiddenField name="month" value="${month}" />
-						<g:hiddenField name="year" value="${year}" />
-						
-            			<g:submitButton name="printPdf" value="pdf" />
-            		</g:pdfForm>
-				</li-->
 					<li>
 						<g:actionSubmit value="afficher" action="report" />						
 					</li>
-					<g:hiddenField name="userId" value="${userId}" />
-					<g:hiddenField name="siteId" value="${siteId}" />
 					<li>
-						<g:actionSubmit value="appliquer"  action="timeModification"/>
-						
+						<g:actionSubmit value="appliquer"  action="modifyTime"/>		
 						</li>
 					<li><modalbox:createLink controller="inAndOut" action="create"
 							css="loginbutton" id="${userId}"
@@ -146,14 +124,14 @@
 									</font></td>
 									<td><g:if test="${holidayMap.get(entries.key) != null}">
 											<font size="2"> <g:select
-													onchange="${remoteFunction(action:'modifyAbsence', update:'myUpdate', params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd MM yyyy')])}"
+													onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:payableSupTime,payableCompTime:payableCompTime])}"
 													name="absenceType" from="${AbsenceType.values()}"
 													value="${AbsenceType}" optionKey="key"
 													noSelection="${['-':holidayMap.get(entries.key).type]}" />
 											</font>
 										</g:if> <g:else>
 											<font size="2"> <g:select
-													onchange="${remoteFunction(action:'modifyAbsence', update:'myUpdate',params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd MM yyyy')])}"
+													onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2',params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:payableSupTime,payableCompTime:payableCompTime] )}"
 													name="absenceType" from="${AbsenceType.values()}"
 													value="${AbsenceType}" optionKey="key"
 													noSelection="${['':'-']}" />
@@ -240,8 +218,6 @@
 					</g:each>
 				</g:each>
 				<g:hiddenField name="employee.id" value="${employee.id}" />
-				<!--g:hiddenField name="month" value="${period.format('MM')}" /-->
-				<!--g:hiddenField name="year" value="${period.format('yyyy')}" /-->	
 			</tbody>
 		</table>
 	</div>

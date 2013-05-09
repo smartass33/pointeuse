@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException
 class InAndOutController {
 
 	def springSecurityService
+	def timeManagerService
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
     def index() {
@@ -77,8 +78,7 @@ class InAndOutController {
 			redirect(action: "pointage", controller:"employee", id: employee.id)
 			return
 		}
-		EmployeeController employeeController = new EmployeeController()		
-		def inAndOutInstance = employeeController.initializeTotals(employee, calendar.time,type,null)
+		def inAndOutInstance = timeManagerService.initializeTotals(employee, calendar.time,type,null)
 		
 		
 		inAndOutInstance.regularization=true
@@ -112,7 +112,7 @@ class InAndOutController {
 			maxResults(1)
 		}
 			
-		def timeDiff = employeeController.regularizeTime(type,userId,inAndOutInstance,calendar)
+		def timeDiff = timeManagerService.regularizeTime(type,userId,inAndOutInstance,calendar)
 		if (timeDiff !=null && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600) < 60 && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)!=0){
 			flash.message = message(code: 'employee.overlogging.error')
 		}else{

@@ -109,8 +109,8 @@
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
 	 									<tr>
-	 									<g:if test="${monthlyTotal.get(employee)!=null}">
-	 										<td>${monthlyTotal.get(employee).get(0)}H${monthlyTotal.get(employee).get(1)==0?'00':monthlyTotal.get(employee).get(1)}</td>
+	 									<g:if test="${monthlyTotalRecap!=null}">
+	 										<td>${monthlyTotalRecap.get(0)}H${monthlyTotalRecap.get(1)==0?'00':monthlyTotalRecap.get(1)}</td>
 	 									</g:if>
 	 									<g:else>
 	 										<td>0 H 0 min</td>			
@@ -150,24 +150,28 @@
 	        						</table>
 	        					</td>
 							</tr>
-							<tr>
-								<td>${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
-								<td>
-	        						<table border="1" class="cartoucheValues" >
-	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${payableSupTime.get(0)}H${payableSupTime.get(1)==0?'00':payableSupTime.get(1)}</td><td style="font-weight:bold">${(payableSupTime.get(0)+payableSupTime.get(1)/60).setScale(2,2)}H</td></tr>
-	        						</table>
-	        					</td>
-							</tr>
-							<tr>
-								<td>${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
-								<td>
-	        						<table border="1" class="cartoucheValues" >
-	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${payableCompTime.get(0)}H${payableCompTime.get(1)==0?'00':payableCompTime.get(1)}</td><td style="font-weight:bold">${(payableCompTime.get(0)+payableCompTime.get(1)/60).setScale(2,2)}H</td></tr>
-	        						</table>
-	        					</td>
-							</tr>							
+							<g:if test="${payableSupTime!=null}">
+								<tr>
+									<td>${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
+									<td>
+		        						<table border="1" class="cartoucheValues" >
+		        							<thead></thead>
+		        							<tr><td style="font-weight:bold">${payableSupTime.get(0)}H${payableSupTime.get(1)==0?'00':payableSupTime.get(1)}</td><td style="font-weight:bold">${(payableSupTime.get(0)+payableSupTime.get(1)/60).setScale(2,2)}H</td></tr>
+		        						</table>
+		        					</td>
+								</tr>
+							</g:if>
+							<g:if test="${payableCompTime!=null}">						
+								<tr>
+									<td>${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
+									<td>
+		        						<table border="1" class="cartoucheValues" >
+		        							<thead></thead>
+		        							<tr><td style="font-weight:bold">${payableCompTime.get(0)}H${payableCompTime.get(1)==0?'00':payableCompTime.get(1)}</td><td style="font-weight:bold">${(payableCompTime.get(0)+payableCompTime.get(1)/60).setScale(2,2)}H</td></tr>
+		        						</table>
+		        					</td>
+								</tr>
+							</g:if>							
 						</tbody>
 					</table> 
 				</td>

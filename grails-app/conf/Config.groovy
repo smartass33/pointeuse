@@ -62,13 +62,7 @@ grails.exceptionresolver.params.exclude = ['password']
 
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
-/*
-grails.resources.modules = {
-	prototype{
-		resource url:'/js/prototype/prototype.js'
-	}
-}
-*/
+
 
 environments {
     development {
@@ -157,10 +151,6 @@ grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
 
 jquery {
 	sources = 'jquery'
-	version = '1.8.0'
+	version = '1.8.3'
 }
 
-prototype{
-	sources = 'prototype'
-	version = '1.0'
-}
