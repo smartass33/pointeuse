@@ -1,7 +1,4 @@
-<%@ page import="pointeuse.Employee"%>
-<%@ page import="pointeuse.InAndOut"%>
-<%@ page import="pointeuse.AbsenceType"%>
-<%@ page import="pointeuse.MonthlyTotal"%>
+
 
 <!doctype html>
 <html>
@@ -75,7 +72,7 @@
 
 	<BR />
 	<div id="updateDiv3">
-
+		<g:reportTable/>
 	</div>
 	</g:form>
 	</body>

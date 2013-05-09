@@ -1,5 +1,8 @@
 <%@ page import="org.codehaus.groovy.grails.plugins.web.taglib.JavascriptValue"%>
-
+<%@ page import="pointeuse.Employee"%>
+<%@ page import="pointeuse.InAndOut"%>
+<%@ page import="pointeuse.AbsenceType"%>
+<%@ page import="pointeuse.MonthlyTotal"%>
 
 <table border="1" style="table-layout: fixed;" id="reportTable">
     <thead>
