@@ -146,10 +146,10 @@
 						<tr>
 							<td>
 								<g:if test="${entryName.equals('Entrer')}">
-									<g:link class="entrybutton" action="updateTime" params="[userId:employee?.id,type:entryName]">${entryName}</g:link>
+									<g:link class="entrybutton" action="addingEventToEmployee" params="[userId:employee?.id,type:entryName]">${entryName}</g:link>
 								</g:if>
 								<g:else>
-									<g:link class="exitbutton" action="updateTime" params="[userId:employee?.id,type:entryName]">${entryName}</g:link>								
+									<g:link class="exitbutton" action="addingEventToEmployee" params="[userId:employee?.id,type:entryName]">${entryName}</g:link>								
 								</g:else>
 								</td>
 							<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>

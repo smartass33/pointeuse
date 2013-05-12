@@ -459,7 +459,7 @@ td, th {
 .cartouche td{
 	line-height: 0.7em;
 	text-align: left;
-	width: 130px;
+	width: 100px;
 }
 
 .cartoucheValues{	
@@ -469,10 +469,8 @@ td, th {
  	border-color:black;
 }
 .cartoucheValues td{
-		width: 130px;
-		text-align: center;
-		
-	
+		width: 100px;
+		text-align: center;	
 }
 
 .mytable.td{ width: 20px; } 

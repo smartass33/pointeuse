@@ -6,9 +6,7 @@
 <title>Récapitulatif annuel</title>
 </head>
 <body>
-	<!--div class="body" -->
 		<div>
-		<!-- Main Table(You can define padding accordingly) -->
 		<table width="100%" class="cartoucheTable" cellspacing="1" cellpadding="1" >
 		<thead></thead>
 		<tbody>

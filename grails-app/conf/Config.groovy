@@ -15,6 +15,7 @@
    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
  }
 
+grails.views.javascript.library = "prototype"
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
@@ -62,13 +63,7 @@ grails.exceptionresolver.params.exclude = ['password']
 
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
-/*
-grails.resources.modules = {
-	prototype{
-		resource url:'/js/prototype/prototype.js'
-	}
-}
-*/
+
 
 environments {
     development {
@@ -160,7 +155,8 @@ jquery {
 	version = '1.8.0'
 }
 
-prototype{
+prototype {
 	sources = 'prototype'
-	version = '1.0'
+	version = '1.0'	
 }
+

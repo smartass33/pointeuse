@@ -45,7 +45,9 @@ grails.project.dependency.resolution = {
 		runtime ":prototype:1.0"
 		compile ":spring-security-core:1.2.7.3"
 		compile ":joda-time:1.4"
-		compile ":pdf:0.6"
+		compile ":rendering:0.4.4"
+		
+		//compile ":pdf:0.6"
 		compile ":quartz2:2.1.6.2"
 		compile ":modalbox:0.4"
 		compile ":richui:0.8"

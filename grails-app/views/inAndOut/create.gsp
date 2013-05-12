@@ -37,5 +37,7 @@
 				</fieldset>
 			</g:form>
 		</div>
+					<a href="/employee/report/?userId=32" title="Close window" onclick="Modalbox.hide({afterHide: function() { alert('Modalbox is now hidden') } }); return false;">Close</a>
+		
 	</body>
 </html>
