@@ -2,3 +2,4 @@ target-eclipse
 target
 logs
 .DS_Store
+/.settings
