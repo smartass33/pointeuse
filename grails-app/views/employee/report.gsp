@@ -1,3 +1,4 @@
+<<<<<<< HEAD
  	<%@ page import="org.codehaus.groovy.grails.plugins.web.taglib.JavascriptValue"%>
 	<%@ page import="pointeuse.Employee"%>
 	<%@ page import="pointeuse.InAndOut"%>
@@ -6,6 +7,15 @@
 <head>
 	<g:javascript library="prototype" />
  	<resource:include components="autoComplete, dateChooser"
+=======
+
+
+<!doctype html>
+<html>
+<head>
+	<g:javascript library="prototype" />
+	<resource:include components="autoComplete, dateChooser"
+>>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
 		autoComplete="[skin: 'default']" />
 	<resource:dateChooser />
 	<modalbox:modalIncludes />	
@@ -16,6 +26,12 @@
 	</title>
 	<link href="main.css" rel="stylesheet" type="text/css">
 
+<<<<<<< HEAD
+=======
+	<script type="text/javascript">
+		function() { alert('Content loaded successfully') }
+	</script>
+>>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
 </head>
 <body>
 
@@ -75,7 +91,11 @@
 		<g:cartouche/>
 	</div>
 
+<<<<<<< HEAD
 	<BR/>
+=======
+	<BR />
+>>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
 	<div id="updateDiv3">
 		<g:reportTable/>
 	</div>

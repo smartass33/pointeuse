@@ -73,6 +73,7 @@ class EmployeeController {
 		employeeInstanceList=Employee.list(params)
 		employeeInstanceTotal = employeeInstanceList.totalCount
 		[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+
     }
 	
     def create() {
@@ -1450,8 +1451,7 @@ class EmployeeController {
 			redirect(uri:'/')
 
 		}
-	}
-	
+	}	
 	def pdf(){
 		log.error('method pdf called')
 		def myDate = "01/05/2013"//params["myDate"]
@@ -1535,6 +1535,5 @@ class EmployeeController {
 		
 
 	}
-
 
 }

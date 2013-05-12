@@ -1,15 +1,31 @@
+<<<<<<< HEAD
  	<%@ page import="org.codehaus.groovy.grails.plugins.web.taglib.JavascriptValue"%>
 	<%@ page import="pointeuse.Employee"%>
 	<%@ page import="pointeuse.InAndOut"%>
 	<%@ page import="pointeuse.AbsenceType"%>
 	<%@ page import="pointeuse.MonthlyTotal"%>
 <table border="1" id="reportTable">
+=======
+<%@ page import="org.codehaus.groovy.grails.plugins.web.taglib.JavascriptValue"%>
+<%@ page import="pointeuse.Employee"%>
+<%@ page import="pointeuse.InAndOut"%>
+<%@ page import="pointeuse.AbsenceType"%>
+<%@ page import="pointeuse.MonthlyTotal"%>
+
+<table border="1" style="table-layout: fixed;" id="reportTable">
+>>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
     <thead>
       <th width="60px" align="center">date</th>
       <th width="90px">total du jour</th>
       <th width="60px">HS</th>
       <th width="60px">absence</th>
+<<<<<<< HEAD
       <th align="center" colspan="80">${message(code: 'events.label', default: 'report')}</th>
+=======
+      <th align="center" colspan="40">
+        ${message(code: 'events.label', default: 'report')}
+      </th>
+>>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
     </thead>
     <tbody>
         <g:each in="${weeklyAggregate}" status="k" var="week">
@@ -146,5 +162,9 @@
         </g:each>
         <g:hiddenField name="employee.id" value="${employee.id}" />
       </tbody>
+<<<<<<< HEAD
     </table>
   
+=======
+    </table>
+>>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad

@@ -12,6 +12,38 @@
 <g:set var="entityName"
 	value="${message(code: 'employee.label', default: 'Employee')}" />
 <title><g:message code="default.list.label" args="[entityName]" /></title>
+<<<<<<< HEAD
+=======
+
+
+<script type="text/javascript">
+
+function removeElements()
+{
+	//alert('toto');
+	
+	var elem = document.getElementById('nav');
+	elem.parentNode.removeChild(elem);
+	elem = document.getElementById('mainLayout');
+	elem.parentNode.removeChild(elem);
+//	elem = document.getElementById('list-employee');
+//	elem.parentNode.removeChild(elem);
+	elem = document.getElementById('grailsLogo');
+	elem.parentNode.removeChild(elem);
+	elem = document.getElementById('footer');
+	elem.parentNode.removeChild(elem);
+//	elem = document.getElementById('pagination');
+//	elem.parentNode.removeChild(elem);
+}
+
+
+function calling()
+{
+	alert('toto');
+}
+
+</script>
+>>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
 </head>
 <body>
 	<div class="nav" id="nav">
@@ -30,10 +62,17 @@
 						<g:hiddenField name="siteId" value="${siteId}" />   	      			
 	
 				Laboratoire:
+<<<<<<< HEAD
 				<g:if test="${siteId != null && !siteId.equals('')}">          
 				        <g:select name="site.id" from="${Site.list([sort:'name'])}"
 						noSelection="${['':site.name]}" optionKey="id" optionValue="name"
 						onChange="${remoteFunction(controller:'employee',action:'list',update:'divId',params:'\'category=\'+this.value')}" />
+=======
+				<g:if test="${siteId != null && !siteId.equals('')}">
+				        <g:select name="site.id" from="${Site.list([sort:'name'])}"
+						noSelection="${['':site.name]}" optionKey="id" optionValue="name"
+						onChange="${remoteFunction(controller:'employee',action:'list',params:'\'category=\'+this.value')}" />
+>>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
 				</g:if>
 				<g:else>
 				        <g:select name="site.id" from="${Site.list([sort:'name'])}"
