@@ -44,6 +44,8 @@ class EmployeeController {
 		def employeeInstanceTotal
 		def site
 		def siteId=params["siteId"]
+		boolean back = (params["back"] != null && params["back"].equals("true")) ? true : false
+		
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
 		
 		if (params["site"]!=null && !params["site"].equals('')){
@@ -58,12 +60,17 @@ class EmployeeController {
 		def username = user?.getUsername()
         params.max = Math.min(max ?: 20, 100)
 		if (site!=null){
-			employeeInstanceList = Employee.findAllBySite(site)		
-			employeeInstanceTotal = employeeInstanceList.size()
-			render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
-			return
+			if (back){
+				redirect(action: "list")
+				return
+			}else{
+				employeeInstanceList = Employee.findAllBySite(site)
+				employeeInstanceTotal = employeeInstanceList.size()
+				render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+				return
+			}
 		}else{
-			if (params["site"]!=null && params["site"].equals('')){
+			if (params["site"].equals('')){
 				employeeInstanceList=Employee.list(params)
 				employeeInstanceTotal = employeeInstanceList.totalCount		
 				render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:null,site:null]
@@ -587,7 +594,7 @@ class EmployeeController {
 				if (employeeInstance.weeklyContractTime != 35){
 					timeManagerService.computeComplementaryTime(inOrOut.dailyTotal)
 				}else{
-					timeManagerService.computeSupplementaryTime(inOrOut.dailyTotal)
+					timeManagerService.computeSupplementaryTimeNew(inOrOut.dailyTotal)
 				}
 				lastIn.pointed=true
 			}
@@ -1194,7 +1201,9 @@ class EmployeeController {
 			}
 			// permet de rŽcupŽrer le total hebdo
 			if (dailyTotal != null && dailyTotal != dailyTotalId && dailyTotal.weeklyTotal.elapsedSeconds > 0){
-				weeklyTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailyTotal.weeklyTotal.elapsedSeconds))			
+				weeklyTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailyTotal.weeklyTotal.elapsedSeconds))		
+				timeManagerService.computeSupplementaryTimeNew(dailyTotal)
+				/*	
 				if (dailyTotal.weeklyTotal.elapsedSeconds > WeeklyTotal.maxWorkingTime){
 					weeklySuppTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR), dailyTotal.weeklyTotal.supplementarySeconds)
 				}else {					
@@ -1206,6 +1215,8 @@ class EmployeeController {
 									
 					weeklySuppTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR),supTime)					
 				}
+				*/
+				weeklySuppTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR),timeManagerService.computeSupplementaryTimeNew(dailyTotal))
 				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
 				
 				
@@ -1320,7 +1331,7 @@ class EmployeeController {
 			def payableSupTime = timeManagerService.computeHumanTime(monthlySupTime)
 			def payableCompTime = timeManagerService.computeHumanTime(monthlyCompTime)
 			
-			[monthlyTotalRecap:monthlyTotal,payableSupTime:payableSupTime,payableCompTime:payableCompTime,employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlySansSolde:yearlySansSolde,yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,weeklyCompTotal:weeklyCompTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+			[employeeId:employee.id,weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,firstName:employee.firstName,lastName:employee.lastName,monthlyTotalRecap:monthlyTotal,payableSupTime:payableSupTime,payableCompTime:payableCompTime,employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlySansSolde:yearlySansSolde,yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,weeklyCompTotal:weeklyCompTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 			
 			}
 		}catch (NullPointerException e){
@@ -1454,12 +1465,16 @@ class EmployeeController {
 	}	
 	def pdf(){
 		log.error('method pdf called')
-		def myDate = "01/05/2013"//params["myDate"]
+		def myDate = params["myDate"]
+		Calendar calendar = Calendar.instance
 		def userId= params["userId"] as int
 		def employee=Employee.get(userId)
-		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
-		myDate = dateFormat.parse(myDate)
-		def cartoucheTable = cartouche(userId,myDate.getAt(Calendar.YEAR),myDate.getAt(Calendar.MONTH)+1)
+				
+		if (myDate != null){
+			calendar.time=myDate
+		}
+
+		def cartoucheTable = cartouche(userId,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 		def workingDays=cartoucheTable.get(3)
 		def holiday=cartoucheTable.get(4)
 		def rtt=cartoucheTable.get(5)
@@ -1476,46 +1491,44 @@ class EmployeeController {
 		def yearlySansSolde=cartoucheTable.get(17)
 		def payableSupTime=cartoucheTable.get(18)
 		def payableCompTime=cartoucheTable.get(19)
-		def openedDays = timeManagerService.computeMonthlyHours(myDate.getAt(Calendar.YEAR),myDate.getAt(Calendar.MONTH)+1)
+		def openedDays = timeManagerService.computeMonthlyHours(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 
 		def criteria = MonthlyTotal.createCriteria()
 		def monthlyTotal = criteria.get {
 				and {
 					eq('employee',employee)
-					eq('year',myDate.getAt(Calendar.YEAR))
-					eq('month',myDate.getAt(Calendar.MONTH)+1)
+					eq('year',calendar.get(Calendar.YEAR))
+					eq('month',calendar.get(Calendar.MONTH)+1)
 				}
 			}
 		
 		if (monthlyTotal==null){
-			def totals=timeManagerService.initializeTotals(employee, myDate)
+			def totals=timeManagerService.initializeTotals(employee, calendar.time)
 			monthlyTotal=totals.get(2)
 		}
 		def yearInf
 		def yearSup
 		if ((myDate.getAt(Calendar.MONTH)+1)>4){
-			yearInf=myDate.getAt(Calendar.YEAR)
-			yearSup=myDate.getAt(Calendar.YEAR)+1
+			yearInf=calendar.get(Calendar.YEAR)
+			yearSup=calendar.get(Calendar.YEAR)+1
 		}else{
-			yearInf=myDate.getAt(Calendar.YEAR)-1
-			yearSup=myDate.getAt(Calendar.YEAR)
+			yearInf=calendar.get(Calendar.YEAR)-1
+			yearSup=calendar.get(Calendar.YEAR)
 		}
 		monthlyTotal=timeManagerService.computeHumanTime(monthlyTotal.elapsedSeconds)
 		
-		def modelCartouche=[firstName:employee.firstName,lastName:employee.lastName,monthlyTotalRecap:monthlyTotal,yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
-		def modelReport=report(userId,myDate.getAt(Calendar.YEAR),myDate.getAt(Calendar.MONTH)+1)
-		
-		//def model = (modelCartouche + modelReport).groupBy { it.key }.collect { it.value.collectEntries { it } }
+		def modelCartouche=[weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,firstName:employee.firstName,lastName:employee.lastName,monthlyTotalRecap:monthlyTotal,yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+		def modelReport=report(userId,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 		modelReport<<modelCartouche
 		// Get the bytes
-		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/completeReportTemplate', model: modelReport)
-		//ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/cartoucheTemplate', model: model)
-		
-
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/completeReportTemplate', model: modelReport)	
 		OutputStream outputStream;
 
+		def folder = grailsApplication.config.pdf.directory
+		def filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
+		
 		try {
-			outputStream = new FileOutputStream ("/Users/henri/file.pdf");
+			outputStream = new FileOutputStream (folder+'/'+filename);
 			bytes.writeTo(outputStream);
 			return
 
@@ -1525,7 +1538,7 @@ class EmployeeController {
 
 			if(outputStream)
 			outputStream.close();
-			File file = new File("/Users/henri/file.pdf")
+			File file = new File(folder+'/'+filename)
 			
 			response.setContentType("application/octet-stream")
 			response.setHeader("Content-disposition", "filename=${file.name}")

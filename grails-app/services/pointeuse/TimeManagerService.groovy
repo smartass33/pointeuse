@@ -40,6 +40,31 @@ class TimeManagerService {
 		}
 	}
 	
+	def computeSupplementaryTimeNew(DailyTotal dailyTotal){
+		// compute dailySupTime
+		if (dailyTotal.elapsedSeconds>DailyTotal.maxWorkingTime){
+			dailyTotal.supplementarySeconds=dailyTotal.elapsedSeconds-DailyTotal.maxWorkingTime
+		}else {
+			dailyTotal.supplementarySeconds=0
+		}
+		
+		// compute corresponding weeklySupTime
+		def weeklyTotal = dailyTotal.weeklyTotal
+		def dailyTotals=weeklyTotal.dailyTotals
+		def dailyTotalSum=0
+		for (DailyTotal tmpDaily:dailyTotals){
+			dailyTotalSum += tmpDaily.supplementarySeconds
+		}
+		if (weeklyTotal.elapsedSeconds <= WeeklyTotal.maxWorkingTime){
+			weeklyTotal.supplementarySeconds = dailyTotalSum
+	
+		}
+		else {
+			weeklyTotal.supplementarySeconds=Math.max(dailyTotalSum,(weeklyTotal.elapsedSeconds-WeeklyTotal.maxWorkingTime))
+		}
+	}
+	
+	
 	def computeComplementaryTime(DailyTotal dailyTotal){
 		def weeklyTotal = dailyTotal.weeklyTotal
 		def sup = 0
@@ -299,7 +324,7 @@ class TimeManagerService {
 				if (employeeInstance.weeklyContractTime != 35){
 					computeComplementaryTime(dailyTotal)
 				}else{
-					computeSupplementaryTime(dailyTotal)
+					computeSupplementaryTimeNew(dailyTotal)
 				}
 			}
 			if (dailyTotal.weeklyTotal.monthlyTotal != null){
@@ -493,7 +518,7 @@ class TimeManagerService {
 				if (employee.weeklyContractTime != 35){
 					computeComplementaryTime(inOrOut.dailyTotal)
 				}else{
-					computeSupplementaryTime(inOrOut.dailyTotal)
+					computeSupplementaryTimeNew	(inOrOut.dailyTotal)
 				}
 				
 				inOrOut.regularizationType=fromRegularize ? InAndOut.MODIFIEE_SALARIE : InAndOut.MODIFIEE_ADMIN

@@ -9,7 +9,7 @@
 	<style  type="text/css">
 				@page {
 				   size: 297mm 210mm;
-				   margin: 10px 5px 10px 5px;
+				   margin: 0px 0px 13px 0px;
 				 }
 				table {
 				  font: normal 11px verdana, arial, helvetica, sans-serif;
@@ -43,21 +43,26 @@
 				tr.odd {
 					background: #f1f1f1;
 				}
-				tbody th, tbody td {
+				tbody td {
 				 	text-align:center;
 				 	height:5px;
+				 	width:90px;
+				}
+				
+				tbody th{
+				 	text-align:center;
+				 	height:5px;
+				 	width:250px;
 				}
 			</style>
 	</head>
 	<body>
-	
-		<font size="2">
-		<table width="100%" class="cartoucheTable" cellspacing="1" cellpadding="1" >
+	<table>
 		<thead></thead>
 		<tbody>
 			<tr>
 				<td width="20%">
-					<table width="100%"  cellspacing="1" cellpadding="1">
+					<table width="100%" >
 						<tr>
 							<td style="font-weight: bold" >${firstName} ${lastName}</td>
 						</tr>
@@ -70,7 +75,7 @@
 					</table> 
 				</td>
 				<td width="80%">
-					<table width="100%" valign="center" class="cartouche">						
+					<table width="100%" >						
 						<tbody>		
 							<tr><td style="font-weight: bold" colspan="2" align="center"><g:formatDate format="MMMMM yyyy" date="${period}"/></td>
 							<td style="font-weight: bold">${message(code: 'employee.cumul', default: 'report')} ${yearInf}/${yearSup}</td>
@@ -228,16 +233,13 @@
 			</tr>
 			</tbody>
 		</table>
-	</font>
-	
-	
 		<table border="1" id="reportTable">
 		    <thead>
 		      <th>date</th>
 		      <th>total du jour</th>
 		      <th>HS</th>
 		      <th>absence</th>
-		      <th>${message(code: 'events.label', default: 'report')}</th>
+		      <th colspan="10">${message(code: 'events.label', default: 'report')}</th>
 		    </thead>	
 			<tbody>
 		        <g:each in="${weeklyAggregate}" status="k" var="week">
@@ -271,38 +273,43 @@
 		                    	<td>-</td>
 		                    </g:else> 
 		                  <g:each in="${entries.value}" var="inOrOut">
-		                  	<td>${inOrOut.time.format('H:mm')}</td>
+	                  		<g:if test="${inOrOut.type.equals('E')}">
+                       			<td bgcolor="98FB98" style="height: 1px;text-align:center;">${inOrOut.time.format('H:mm')}</td>
+                     			</g:if>
+                     			 <g:else>
+                       			<td bgcolor="#FFC0CB" style="height: 1px;text-align:center;">${inOrOut.time.format('H:mm')}</td>
+                    			 </g:else> 
 		                  </g:each>
 		                </tr>
 		              </g:if>
 		            </g:each>
 		           	<tr>
-		              <th>${day.key}</th>
+		        		<td style="width: 200px;overflow: hidden;text-overflow: ellipsis;">
+		              ${day.key}
 		              <g:if test="${weeklyTotal.get(employee) != null && weeklyTotal.get(employee).get(day.key) !=null && (weeklyTotal.get(employee).get(day.key).get(2)>0 || weeklyTotal.get(employee).get(day.key).get(1)>0 || weeklyTotal.get(employee).get(day.key).get(0)>0)}">
-		                <th colspan="10" scope="colgroup">
-		                  ${message(code: 'weekly.total.label', default: 'Report')} : ${(weeklyTotal.get(employee).get(day.key)).get(0)}H${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyTotal.get(employee).get(day.key)).get(1)}
-		                </th>                                                         
+		                  ${message(code: 'weekly.total.label', default: 'Report')}: ${(weeklyTotal.get(employee).get(day.key)).get(0)}H${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyTotal.get(employee).get(day.key)).get(1)}
 		                  <g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null}">
-		                  <th>${message(code: 'which.sup.time', default: 'Report')} : ${(weeklySupTotal.get(employee).get(day.key)).get(0)}H${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}</th>
+		                  ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)}H${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}
 		                  	<g:if test="${employee.weeklyContractTime!=35 && weeklyCompTotal != null && weeklyCompTotal.get(employee) != null && weeklyCompTotal.get(employee).get(week.key) != null}">
-		                       <th colspan="10">et ${message(code: 'which.comp.time', default: 'Report')} :  ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}</th>                                                                               
+		                       ${message(code: 'which.comp.time', default: 'Report')} ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}                                                                            
 		                    </g:if>
 		                    <g:else>
-		                      <th colspan="10">et ${message(code: 'which.comp.time', default: 'Report')} : 0H</th>
+		                      ${message(code: 'which.comp.time', default: 'Report')} 0H
 		                    </g:else>
 		                  </g:if>
 		                  <g:else>
 		                    <g:if test="${employee.weeklyContractTime!=35 && weeklyCompTotal != null && weeklyCompTotal.get(employee) != null && weeklyCompTotal.get(employee).get(week.key) != null}">
-		                       <th colspan="10">${message(code: 'which.comp.time', default: 'Report')} : ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}</th>                                                                                
+		                       ${message(code: 'which.comp.time', default: 'Report')} ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}                                                                        
 		                    </g:if>
 		                    <g:else>
-		                      <th colspan="10">${message(code: 'which.comp.time', default: 'Report')} : 0H</th>
+		                      ${message(code: 'which.comp.time', default: 'Report')} 0H
 		                    </g:else>  
 		                  </g:else>                            
 		              </g:if>
 		              <g:else>
-		                <th colspan="34" scope="colgroup">Total fin de semaine: 00H00</th>
+		                Total fin de semaine: 00H00
 		              </g:else>
+		              </td>
 		            </tr>  
 		          </g:each>
 		        </g:each>

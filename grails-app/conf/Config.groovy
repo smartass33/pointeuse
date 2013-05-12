@@ -67,6 +67,7 @@ grails.hibernate.cache.queries = false
 
 environments {
     development {
+		pdf.directory='/Users/henri'
 		grails.app.context=pointeuse
         grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
@@ -97,6 +98,7 @@ environments {
     }
 	
     production {
+		pdf.directory='/opt/tomcat/pdf'
 		grails.app.context=
         grails.logging.jul.usebridge = false
         serverURL = "http://pointeuse.biolab33"
@@ -127,8 +129,6 @@ environments {
 
 }
 
-
-
 grails {
 mail {
 	host = "smtp.gmail.com"
@@ -155,11 +155,8 @@ jquery {
 	version = '1.8.3'
 }
 
-<<<<<<< HEAD
 prototype {
 	sources = 'prototype'
 	version = '1.0'	
 }
 
-=======
->>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad

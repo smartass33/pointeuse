@@ -1,4 +1,3 @@
-<<<<<<< HEAD
  	<%@ page import="org.codehaus.groovy.grails.plugins.web.taglib.JavascriptValue"%>
 	<%@ page import="pointeuse.Employee"%>
 	<%@ page import="pointeuse.InAndOut"%>
@@ -6,17 +5,7 @@
 	<%@ page import="pointeuse.MonthlyTotal"%>
 <head>
 	<g:javascript library="prototype" />
- 	<resource:include components="autoComplete, dateChooser"
-=======
-
-
-<!doctype html>
-<html>
-<head>
-	<g:javascript library="prototype" />
-	<resource:include components="autoComplete, dateChooser"
->>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
-		autoComplete="[skin: 'default']" />
+ 	<resource:include components="autoComplete, dateChooser"/>
 	<resource:dateChooser />
 	<modalbox:modalIncludes />	
 	<meta name="layout" content="main">
@@ -25,13 +14,6 @@
 		${message(code: 'employee.report.label', default: 'Report')}
 	</title>
 	<link href="main.css" rel="stylesheet" type="text/css">
-
-<<<<<<< HEAD
-=======
-	<script type="text/javascript">
-		function() { alert('Content loaded successfully') }
-	</script>
->>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
 </head>
 <body>
 
@@ -50,7 +32,7 @@
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message
 							code="default.home.label" /></a></li>
 				<li><g:link class="list" action="list"
-						params="${[isAdmin:isAdmin,siteId:siteId]}">
+						params="${[isAdmin:isAdmin,siteId:siteId,back:true]}">
 						${message(code: 'employee.back.to.list.label', default: 'List')}
 					</g:link></li>
 					<li>
@@ -86,16 +68,10 @@
 			</div>
 		</g:if>
 	</div>
-
 	<div id="updateDiv2">
 		<g:cartouche/>
 	</div>
-
-<<<<<<< HEAD
-	<BR/>
-=======
 	<BR />
->>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
 	<div id="updateDiv3">
 		<g:reportTable/>
 	</div>

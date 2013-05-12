@@ -29,7 +29,7 @@
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
-	 									<tr><td>${holiday as float}</td></tr>
+	 									<tr><td>${holiday as java.lang.Float}</td></tr>
 	        						</table>
 	        					</td>
 	        					
@@ -37,7 +37,7 @@
 	        						<table border="1" class="cartoucheValues">
 	        							<thead></thead>
 	        							
-	        							<tr><td>${yearlyHoliday as float}</td></tr>
+	        							<tr><td>${yearlyHoliday as java.lang.Float}</td></tr>
 	        						</table>
 	        					</td>
 							</tr>
@@ -46,13 +46,13 @@
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
-	 									<tr><td>${rtt as float}</td></tr>
+	 									<tr><td>${rtt as java.lang.Float}</td></tr>
 	        						</table>
 	        					</td>
 	        					<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${yearlyRtt as float}</td></tr>
+	        							<tr><td>${yearlyRtt as java.lang.Float}</td></tr>
 	        						</table>
 	        					</td>
 							</tr>
@@ -61,13 +61,13 @@
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
-	 									<tr><td>${sickness as float}</td></tr>
+	 									<tr><td>${sickness as java.lang.Float}</td></tr>
 	        						</table>
 	        					</td>
 	        					<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${yearlySickness as float}</td></tr>
+	        							<tr><td>${yearlySickness as java.lang.Float}</td></tr>
 	        						</table>
 	        					</td>
 							</tr>
@@ -76,13 +76,13 @@
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
-	 									<tr><td>${sansSolde as float}</td></tr>
+	 									<tr><td>${sansSolde as java.lang.Float}</td></tr>
 	        						</table>
 	        					</td>
 	        					<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${yearlySansSolde as float}</td></tr>
+	        							<tr><td>${yearlySansSolde as java.lang.Float}</td></tr>
 	        						</table>
 	        					</td>
 							</tr>					
@@ -91,13 +91,27 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${monthTheoritical.get(0)}H${monthTheoritical.get(1)==0?'00':monthTheoritical.get(1)}</td></tr>
+	        							<tr>
+	        								<g:if test="${monthlyTheoritical!=null}">
+	        									<td>${monthTheoritical.get(0)}H${monthTheoritical.get(1)==0?'00':monthTheoritical.get(1)}</td>
+	        								</g:if>
+	        								<g:else>
+	        									<td>0H0</td>
+	        								</g:else>
+	        							</tr>
 	        						</table>
 	        					</td>	
 	        					<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${yearlyTheoritical.get(0)}H${yearlyTheoritical.get(1)==0?'00':yearlyTheoritical.get(1)}</td></tr>
+	        							<tr>
+	        								<g:if test="${yearlyTheoritical!=null}">
+	        									<td>${yearlyTheoritical.get(0)}H${yearlyTheoritical.get(1)==0?'00':yearlyTheoritical.get(1)}</td>
+	        								</g:if>
+	        								<g:else>
+	        									<td>0H0</td>
+	        								</g:else>
+	        							</tr>
 	        						</table>
 	        					</td>					
 							</tr>
@@ -120,7 +134,14 @@
 	        					<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${yearlyActualTotal.get(0)}H${yearlyActualTotal.get(1)==0?'00':yearlyActualTotal.get(1)}</td></tr>
+	        							<tr>
+	        								<g:if test="${yearlyActualTotal!=null}">
+	        									<td>${yearlyActualTotal.get(0)}H${yearlyActualTotal.get(1)==0?'00':yearlyActualTotal.get(1)}</td>
+	        								</g:if>
+		 									<g:else>
+		 										<td>00H00</td>			
+		 									</g:else>
+	        							</tr>
 	        						</table>
 	        					</td>					
 							</tr>
@@ -129,13 +150,27 @@
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
-	        							<tr><td>${pregnancyCredit.get(0)}H${pregnancyCredit.get(1)==0?'00':pregnancyCredit.get(1)}</td></tr>
+	        							<tr>
+	        								<g:if test="${pregnancyCredit!=null}">  						
+	        									<td>${pregnancyCredit.get(0)}H${pregnancyCredit.get(1)==0?'00':pregnancyCredit.get(1)}</td>
+	        								</g:if>
+		 									<g:else>
+		 										<td>00H00</td>			
+		 									</g:else>	        								
+	        							</tr>
 	        						</table>
 	        					</td>
 	        					<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${yearlyPregnancyCredit.get(0)}H${yearlyPregnancyCredit.get(1)==0?'00':yearlyPregnancyCredit.get(1)}</td></tr>
+	        							<tr>
+	        								<g:if test="${yearlyPregnancyCredit!=null}">  											
+	        									<td>${yearlyPregnancyCredit.get(0)}H${yearlyPregnancyCredit.get(1)==0?'00':yearlyPregnancyCredit.get(1)}</td>
+											</g:if>
+		 									<g:else>
+		 										<td>00H00</td>			
+		 									</g:else>											
+	        							</tr>
 	        						</table>
 	        					</td>					
 							</tr>
