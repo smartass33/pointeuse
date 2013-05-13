@@ -118,23 +118,23 @@
               <th>${day.key}</th>
               <g:if test="${weeklyTotal.get(employee) != null && weeklyTotal.get(employee).get(day.key) !=null && (weeklyTotal.get(employee).get(day.key).get(2)>0 || weeklyTotal.get(employee).get(day.key).get(1)>0 || weeklyTotal.get(employee).get(day.key).get(0)>0)}">
                 <th colspan="34" scope="colgroup">
-                  ${message(code: 'weekly.total.label', default: 'Report')} : ${(weeklyTotal.get(employee).get(day.key)).get(0)}H${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyTotal.get(employee).get(day.key)).get(1)}
+                  ${message(code: 'weekly.total.label', default: 'Report')} ${(weeklyTotal.get(employee).get(day.key)).get(0)}H${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyTotal.get(employee).get(day.key)).get(1)}
                   <g:if
                     test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null}">
                     ${message(code: 'which.sup.time', default: 'Report')} : ${(weeklySupTotal.get(employee).get(day.key)).get(0)}H${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}
                          <g:if test="${employee.weeklyContractTime!=35 && weeklyCompTotal != null && weeklyCompTotal.get(employee) != null && weeklyCompTotal.get(employee).get(week.key) != null}">
-                       et ${message(code: 'which.comp.time', default: 'Report')} :  ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}                                                                                
+                       et ${message(code: 'which.comp.time', default: 'Report')} ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}                                                                                
                     </g:if>
                     <g:else>
-                      et ${message(code: 'which.comp.time', default: 'Report')} : 00H00
+                      et ${message(code: 'which.comp.time', default: 'Report')} 00H00
                     </g:else>
                   </g:if>
                   <g:else>
                     <g:if test="${employee.weeklyContractTime!=35 && weeklyCompTotal != null && weeklyCompTotal.get(employee) != null && weeklyCompTotal.get(employee).get(week.key) != null}">
-                       ${message(code: 'which.comp.time', default: 'Report')} : ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}                                                                                
+                       ${message(code: 'which.comp.time', default: 'Report')} ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}                                                                                
                     </g:if>
                     <g:else>
-                      ${message(code: 'which.comp.time', default: 'Report')} : 00H00
+                      ${message(code: 'which.comp.time', default: 'Report')} 00H00
                     </g:else>  
                   </g:else>                            
                 </th>                                                        
