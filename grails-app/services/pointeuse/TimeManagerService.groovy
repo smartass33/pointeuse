@@ -25,22 +25,11 @@ class TimeManagerService {
 		return inOrOut
 	}
 	
-	def computeSupplementaryTime(DailyTotal dailyTotal){
-		def weeklyTotal = dailyTotal.weeklyTotal
-		if (weeklyTotal.elapsedSeconds > WeeklyTotal.maxWorkingTime){
-			weeklyTotal.supplementarySeconds = weeklyTotal.elapsedSeconds-WeeklyTotal.maxWorkingTime		
-		}else {
-			weeklyTotal.supplementarySeconds = 0
-		}
-		//else 
-		if (dailyTotal.elapsedSeconds > DailyTotal.maxWorkingTime){
-			dailyTotal.supplementarySeconds = dailyTotal.elapsedSeconds-DailyTotal.maxWorkingTime
-		}else {
-			dailyTotal.supplementarySeconds =0
-		}
-	}
+
 	
-	def computeSupplementaryTimeNew(DailyTotal dailyTotal){
+	def computeSupplementaryTime(DailyTotal dailyTotal){
+		def criteria
+		WeeklyTotal weeklyTotalSuppress
 		// compute dailySupTime
 		if (dailyTotal.elapsedSeconds>DailyTotal.maxWorkingTime){
 			dailyTotal.supplementarySeconds=dailyTotal.elapsedSeconds-DailyTotal.maxWorkingTime
@@ -50,20 +39,70 @@ class TimeManagerService {
 		
 		// compute corresponding weeklySupTime
 		def weeklyTotal = dailyTotal.weeklyTotal
-		def dailyTotals=weeklyTotal.dailyTotals
+		criteria = DailyTotal.createCriteria()
+		def dailyTotals 
+		
+		if (dailyTotal.week==1){
+			 dailyTotals = criteria.list {
+				or{
+					and {
+						eq('employee',dailyTotal.employee)
+						eq('year',dailyTotal.year)
+						eq('week',dailyTotal.week)
+					}
+					and{
+						eq('employee',dailyTotal.employee)
+						eq('year',dailyTotal.year-1)
+						eq('week',dailyTotal.week)
+					}
+				}
+			}
+		}else{
+			dailyTotals = criteria.list {
+				and {
+					eq('employee',dailyTotal.employee)
+					eq('year',dailyTotal.year)
+					eq('week',dailyTotal.week)
+				}
+			}
+		}
+			
+		
+		criteria = WeeklyTotal.createCriteria()
+		WeeklyTotal previousWeeklyTotal
+		// add special case for first week of year:
+
 		def dailyTotalSum=0
+		def weeklyTotalmonth=dailyTotal.weeklyTotal.month
 		for (DailyTotal tmpDaily:dailyTotals){
 			dailyTotalSum += tmpDaily.supplementarySeconds
+			if (dailyTotal.week==1){
+				if (tmpDaily.weeklyTotal.month>weeklyTotalmonth){
+					tmpDaily.weeklyTotal.supplementarySeconds=0
+					previousWeeklyTotal=tmpDaily.weeklyTotal
+				}
+				if (tmpDaily.weeklyTotal.month<weeklyTotalmonth){
+					weeklyTotal.supplementarySeconds=0
+				}
+			}else{
+				if (tmpDaily.weeklyTotal.month<weeklyTotalmonth){
+					tmpDaily.weeklyTotal.supplementarySeconds=0
+					previousWeeklyTotal=tmpDaily.weeklyTotal
+				}
+				if (tmpDaily.weeklyTotal.month>weeklyTotalmonth){
+					weeklyTotal.supplementarySeconds=0
+				}		
+			}		
 		}
-		if (weeklyTotal.elapsedSeconds <= WeeklyTotal.maxWorkingTime){
-			weeklyTotal.supplementarySeconds = dailyTotalSum
-	
+		if (previousWeeklyTotal!=null){
+			if ((weeklyTotal.elapsedSeconds+previousWeeklyTotal.elapsedSeconds) <= WeeklyTotal.maxWorkingTime){
+				weeklyTotal.supplementarySeconds = dailyTotalSum
+			}
+			else {
+				weeklyTotal.supplementarySeconds=Math.max(dailyTotalSum,((weeklyTotal.elapsedSeconds+previousWeeklyTotal.elapsedSeconds)-WeeklyTotal.maxWorkingTime))
+			}
 		}
-		else {
-			weeklyTotal.supplementarySeconds=Math.max(dailyTotalSum,(weeklyTotal.elapsedSeconds-WeeklyTotal.maxWorkingTime))
-		}
-	}
-	
+	}	
 	
 	def computeComplementaryTime(DailyTotal dailyTotal){
 		def weeklyTotal = dailyTotal.weeklyTotal
@@ -324,7 +363,7 @@ class TimeManagerService {
 				if (employeeInstance.weeklyContractTime != 35){
 					computeComplementaryTime(dailyTotal)
 				}else{
-					computeSupplementaryTimeNew(dailyTotal)
+					computeSupplementaryTime(dailyTotal)
 				}
 			}
 			if (dailyTotal.weeklyTotal.monthlyTotal != null){
@@ -518,7 +557,7 @@ class TimeManagerService {
 				if (employee.weeklyContractTime != 35){
 					computeComplementaryTime(inOrOut.dailyTotal)
 				}else{
-					computeSupplementaryTimeNew	(inOrOut.dailyTotal)
+					computeSupplementaryTime(inOrOut.dailyTotal)
 				}
 				
 				inOrOut.regularizationType=fromRegularize ? InAndOut.MODIFIEE_SALARIE : InAndOut.MODIFIEE_ADMIN

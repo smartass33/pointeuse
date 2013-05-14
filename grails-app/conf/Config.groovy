@@ -109,7 +109,7 @@ environments {
 					rollingFile name:'myAppender',file:"/var/log/tomcat6/pointeuse.log", layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
 			
-				debug  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
+				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
 				 
 				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
 					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping

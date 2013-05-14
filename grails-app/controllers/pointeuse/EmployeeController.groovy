@@ -592,7 +592,7 @@ class EmployeeController {
 				if (employeeInstance.weeklyContractTime != 35){
 					timeManagerService.computeComplementaryTime(inOrOut.dailyTotal)
 				}else{
-					timeManagerService.computeSupplementaryTimeNew(inOrOut.dailyTotal)
+					timeManagerService.computeSupplementaryTime(inOrOut.dailyTotal)
 				}
 				lastIn.pointed=true
 			}
@@ -755,7 +755,7 @@ class EmployeeController {
 		if (inOrOut.employee.weeklyContractTime != 35){
 			timeManagerService.computeComplementaryTime(inOrOut.dailyTotal)
 		}else{
-			timeManagerService.computeSupplementaryTimeNew(inOrOut.dailyTotal)
+			timeManagerService.computeSupplementaryTime(inOrOut.dailyTotal)
 		}
 		
 		log.error('removing entry '+inOrOut)
@@ -1155,6 +1155,7 @@ class EmployeeController {
 		calendarLoop.getTime().clearTime()
 		
 		while(calendarLoop.getAt(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			def currentDay=calendarLoop.time
 			// Žlimine les dimanches du rapport
 			if (calendarLoop.getAt(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
 				weeklyTotalMinutes = 0
@@ -1173,13 +1174,25 @@ class EmployeeController {
 			}
 			// permet de rŽcupŽrer le total hebdo
 			if (dailyTotal != null && dailyTotal != dailyTotalId && dailyTotal.weeklyTotal.elapsedSeconds > 0){
-				weeklyTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailyTotal.weeklyTotal.elapsedSeconds))		
-				timeManagerService.computeSupplementaryTimeNew(dailyTotal)
-				weeklySuppTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR),timeManagerService.computeSupplementaryTimeNew(dailyTotal))
+				
+				// recompute weekly as beginning of month of may was incorrect:
+				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR))
+				if (previousValue!=null){
+					def newValue=previousValue.get(0)*3600+previousValue.get(1)*60+previousValue.get(2)
+					weeklyTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailyTotal.elapsedSeconds+newValue))
+					
+				}else{
+					weeklyTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailyTotal.elapsedSeconds))
+				}
+				
+				def weekNumber=weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR)
+				timeManagerService.computeSupplementaryTime(dailyTotal)
+				weeklySuppTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR),dailyTotal.weeklyTotal.supplementarySeconds)
 				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
-				if (dailyTotal.weeklyTotal.complementarySeconds > 0){
+				if (employee.weeklyContractTime!=35){
+					timeManagerService.computeComplementaryTime(dailyTotal)
 					weeklyCompTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR), dailyTotal.weeklyTotal.complementarySeconds)
-					weeklyCompTotalTimeByEmployee.put(employee,weeklyCompTotalTime)	
+					weeklyCompTotalTimeByEmployee.put(employee,weeklyCompTotalTime)
 				}
 				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
 				dailyTotalId=dailyTotal.id
@@ -1187,13 +1200,13 @@ class EmployeeController {
 
 			criteria = InAndOut.createCriteria()
 			def entriesByDay = criteria{
-			and {
-				eq('employee',employee)
-				eq('day',calendarLoop.getAt(Calendar.DATE))
-				eq('month',month+1)
-				eq('year',year)
-				order('time')
-				}
+				and {
+					eq('employee',employee)
+					eq('day',calendarLoop.getAt(Calendar.DATE))
+					eq('month',month+1)
+					eq('year',year)
+					order('time')
+					}
 			}
 			// put in a map in and outs
 			def tmpDate = calendarLoop.getTime()
