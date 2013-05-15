@@ -12,15 +12,12 @@
 			<g:sortableColumn property="site"
 				title="${message(code: 'employee.site.label', default: 'Site')}" />
 			<g:if test="${!isAdmin}">
-				<g:sortableColumn property="annualReport"
-					title="${message(code: 'employee.annualReport.label', default: 'Report')}" />
-				<g:sortableColumn property="report"
-					title="${message(code: 'employee.monthly.report.label', default: 'Report')}" />
-				<g:sortableColumn property="entry"
+				<th>${message(code: 'employee.annualReport.label', default: 'Report')}</th>
+				<th>${message(code: 'employee.monthly.report.label', default: 'Report')}</th>
+				<g:sortableColumn property="status"
 					title="${message(code: 'employee.entry.status', default: 'Entry')}" />
-				<g:sortableColumn property="lastTime"
-					title="${message(code: 'employee.lastTime.label', default: 'Entry')}" />
-				<g:sortableColumn property="error"
+				<th>${message(code: 'employee.lastTime.label', default: 'Entry')}</th>
+				<g:sortableColumn property="hasError"
 					title="${message(code: 'employee.hasErrors', default: 'Errors')}" />
 			</g:if>
 			<g:else>
@@ -81,6 +78,11 @@
 								${InAndOut.findByEmployee(employeeInstance, [sort:'time',order:'desc']).time.format('H:mm d-M-yyyy')}
 							</td>
 						</g:if>
+						<g:else>
+							<td>
+								N/A
+							</td>						
+						</g:else>
 						<g:if test="${employeeInstance?.hasError}">
 							<td>
 								${message(code: 'default.yes.label', default: 'Yes')}

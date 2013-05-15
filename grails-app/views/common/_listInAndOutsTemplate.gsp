@@ -16,14 +16,15 @@
 					</g:else>
 			  			${inOrOut.time.format('HH:mm')}
 			  		<td> 		
-			  			<g:form>
-					  		<g:hiddenField name="inOrOutId" value="${inOrOut.id}"/>
-					  		<g:submitToRemote 
-									after="var elem = document.getElementById('${inOrOut.id}');elem.parentNode.removeChild(elem);"									                
-									url="[action:'trash']"
-					                before="if(!confirm('${message(code: 'inAndOut.delete.confirmation', default: 'Create')}')) return false"
-					                value="${message(code: 'inAndOut.delete.element', default: 'Sortie')}" /> 				
-				        </g:form>	  		
+			  			<g:formRemote 
+			  				name="trash" 
+			  				url="[action:'trash']"
+			  				after="var elem = document.getElementById('${inOrOut.id}');elem.parentNode.removeChild(elem);"	
+			  				before="if(!confirm('${message(code: 'inAndOut.delete.confirmation', default: 'Create')}')) return false"			  				>
+					  		<g:hiddenField name="inOrOutId" value="${inOrOut.id}"/>       
+							<input type="image"
+								src="../images/skin/trash.png" style="vertical-align: middle;">				       
+						 </g:formRemote>	  		
 			        </td> 
 			  	</tr>
 			 </g:each>

@@ -4,7 +4,7 @@
 	<%@ page import="pointeuse.AbsenceType"%>
 	<%@ page import="pointeuse.MonthlyTotal"%>
 <head>
-	<g:javascript library="prototype" />
+	<g:javascript library="prototype" />	
  	<resource:include components="autoComplete, dateChooser"/>
 	<resource:dateChooser />
 	<modalbox:modalIncludes />	
@@ -14,11 +14,11 @@
 		${message(code: 'employee.report.label', default: 'Report')}
 	</title>
 	<link href="main.css" rel="stylesheet" type="text/css">
+
 </head>
 <body>
 
 <g:form method="post" >
-	
 	<a href="#list-employee" class="skip" tabindex="-1"><g:message
 			code="default.link.skip.label" default="Skip to content&hellip;" /></a>
 	<div id="list-employee" class="content scaffold-list">
