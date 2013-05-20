@@ -55,6 +55,9 @@
 				 	height:5px;
 				 	width:250px;
 				}
+				
+
+				
 			</style>
 	</head>
 	<body>
@@ -93,8 +96,7 @@
 	        					
 	        					<td>
 	        						<table border="1" class="cartoucheValues">
-	        							<thead></thead>
-	        							
+	        							<thead></thead>	        							
 	        							<tr><td>${yearlyHoliday as float}</td></tr>
 	        						</table>
 	        					</td>
@@ -147,7 +149,7 @@
 							<tr>
 								<td>${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
 								<td>
-	        						<table border="1" class="cartoucheValues" >
+	        						<table border="1"  >
 	        							<thead></thead>
 	        							<tr><td>${monthTheoritical.get(0)}H${monthTheoritical.get(1)==0?'00':monthTheoritical.get(1)}</td></tr>
 	        						</table>
@@ -235,43 +237,47 @@
 			</tbody>
 		</table>
 		<table border="1" id="reportTable">
-		    <thead>
-		      <th>date</th>
-		      <th>total du jour</th>
-		      <th>HS</th>
-		      <th>absence</th>
-		      <th colspan="10">${message(code: 'events.label', default: 'report')}</th>
-		    </thead>	
-			<tbody>
+		    <thead style="border-top:5px solid red;">
+		      <th style="border:5px solid red; width:92px;text-align:center">date</th>
+		      <th style="border:5px solid red;width:62px;text-align:center">total jour</th>
+		      <th style="border:5px solid red;width:32px;text-align:center">HS</th>
+		      <th style="border:5px solid red;width:48px;text-align:center">absence</th>
+		      <th style="border:5px solid red;width:400px;text-align:center">${message(code: 'events.label', default: 'report')}</th>
+		    </thead>
+		    
+		</table>	
+		
 		        <g:each in="${weeklyAggregate}" status="k" var="week">
+		        <table border="1">
+		        	<tbody>
 		          <g:each in="${week}" status="l" var="day">
 		            <g:each in="${day.value}" status="m" var="entries">
 		              <g:if test="${entries!=null}">
 		                <tr>
-		                  <td><i>${entries.key.format('E dd MMM yyyy')}</i></td>
+		                  <td style="border:5px solid red;width:100px"><i>${entries.key.format('E dd MMM yyyy')}</i></td>
 		                  <g:if test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0 || dailyTotalMap.get(entries.key).get(2)>0)}">
-		                  	<td>${(dailyTotalMap.get(entries.key)).get(0)}:${(dailyTotalMap.get(entries.key)).get(1)}:${(dailyTotalMap.get(entries.key)).get(2)}</td>
+		                  	<td style="border:5px solid red;width:70px">${(dailyTotalMap.get(entries.key)).get(0)}:${(dailyTotalMap.get(entries.key)).get(1)}:${(dailyTotalMap.get(entries.key)).get(2)}</td>
 		                  </g:if>
 		                  <g:else>
-		                    <td>00:00:00</td>
+		                    <td style="border:5px solid red;width:70px">00:00:00</td>
 		                  </g:else>
-		                  <g:if test="${employee.weeklyContractTime==35}">
 		                  	<g:if test="${weeklySupTotal.get(employee) != null && weeklySupTotal.get(employee).get(day.key) !=null}">
 		                    	<g:if test="${dailySupTotalMap.get(entries.key) !=null && (dailySupTotalMap.get(entries.key).get(0)>0 ||dailySupTotalMap.get(entries.key).get(1)>0)}">
-		                            <td>${dailySupTotalMap.get(entries.key).get(0)}H${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}</td>
+		                            <td style="border:5px solid red;width:40px">${dailySupTotalMap.get(entries.key).get(0)}H${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}</td>
 		                         </g:if>
+			                    <g:else>
+		                    		<td style="border:5px solid red;width:40px">-</td>
+		                   		 </g:else>
 		                    </g:if>
-		                   </g:if> 
-		                   <g:else>
-		                   	<g:if test="${dailySupTotalMap.get(entries.key) !=null && (dailySupTotalMap.get(entries.key).get(0)>0 ||dailySupTotalMap.get(entries.key).get(1)>0)}">
-		                  	 <td>${dailySupTotalMap.get(entries.key).get(0)}H${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}</td>
-		                    </g:if>
-		                   </g:else>
+			                <g:else>
+		                    	<td style="border:5px solid red;width:40px">-</td>
+		                   	</g:else>
+
 		                  	<g:if test="${holidayMap.get(entries.key) != null}">
-		                   		<td>${holidayMap.get(entries.key).type}</td>
+		                   		<td style="border:5px solid red;width:55px">${holidayMap.get(entries.key).type}</td>
 		                    </g:if>
 		                    <g:else>
-		                    	<td>-</td>
+		                    	<td style="border:5px solid red;width:55px">-</td>
 		                    </g:else> 
 		                  <g:each in="${entries.value}" var="inOrOut">
 	                  		<g:if test="${inOrOut.type.equals('E')}">
@@ -284,6 +290,9 @@
 		                </tr>
 		              </g:if>
 		            </g:each>
+		            </tbody>
+		           	</table>
+		           	 <table border="1" >
 		           	<tr>
 		        		<td style="width: 200px;overflow: hidden;text-overflow: ellipsis;">
 		              ${day.key}
@@ -308,13 +317,13 @@
 		                  </g:else>                            
 		              </g:if>
 		              <g:else>
-		                Total fin de semaine: 00H00
+		                Total semaine: 00H00
 		              </g:else>
 		              </td>
 		            </tr>  
 		          </g:each>
+		          
+		          </table>
 		        </g:each>
-			</tbody>
-		</table>	
 	</body>
 </html>
