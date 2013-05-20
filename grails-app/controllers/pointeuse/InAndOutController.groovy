@@ -73,7 +73,11 @@ class InAndOutController {
 		def today = Calendar.instance
 		if(calendar.time>today.time){
 			flash.message = message(code: 'inAndOut.in.futur.error')
-			redirect(action: "pointage", controller:"employee", id: employee.id)
+			if (fromReport){
+				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])
+			}else{
+				redirect(action: "pointage", controller:"employee", id: employee.id)
+			}
 			return
 		}
 		def inAndOutInstance = timeManagerService.initializeTotals(employee, calendar.time,type,null)

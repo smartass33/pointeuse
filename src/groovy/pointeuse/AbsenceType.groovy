@@ -7,7 +7,7 @@ public enum AbsenceType {
 	MALADIE('M'),
 	GROSSESSE('G'),
 	RTT('RTT'),
-	AUTRE('A'),
+	AUTRE('R'),
 	ANNULATION('-'),
 	CSS('CSS')
 	

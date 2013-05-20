@@ -44,8 +44,9 @@ class BankHolidayController {
     def save() {
         def bankHolidayInstance = new BankHoliday(params)
 		if (bankHolidayInstance != null){
-			bankHolidayInstance.month=bankHolidayInstance.calendar.getAt(Calendar.MONTH)+1
-			bankHolidayInstance.year=bankHolidayInstance.calendar.getAt(Calendar.YEAR)
+			bankHolidayInstance.month=bankHolidayInstance.calendar.get(Calendar.MONTH)+1
+			bankHolidayInstance.year=bankHolidayInstance.calendar.get(Calendar.YEAR)
+			bankHolidayInstance.day=bankHolidayInstance.calendar.get(Calendar.DAY_OF_MONTH)
 		}
 		
         if (!bankHolidayInstance.save(flush: true)) {
@@ -100,6 +101,11 @@ class BankHolidayController {
         }
 
         bankHolidayInstance.properties = params
+		if (bankHolidayInstance != null){
+			bankHolidayInstance.month=bankHolidayInstance.calendar.get(Calendar.MONTH)+1
+			bankHolidayInstance.year=bankHolidayInstance.calendar.get(Calendar.YEAR)
+			bankHolidayInstance.day=bankHolidayInstance.calendar.get(Calendar.DAY_OF_MONTH)
+		}
 
         if (!bankHolidayInstance.save(flush: true)) {
             render(view: "edit", model: [bankHolidayInstance: bankHolidayInstance])
@@ -150,11 +156,10 @@ class BankHolidayController {
 		yearInstance.solidarityDays=1
 		
 		def openedDays = 0
-		while(calendar.getAt(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
-			if (calendar.getAt(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
+		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+			if (calendar.get(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
 				openedDays += 1
 			}
-			
 			if (calendar.getAt(Calendar.DAY_OF_YEAR) == calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 				break
 			}

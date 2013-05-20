@@ -7,6 +7,41 @@
 		<meta name="layout" content="main" />
 		<title>Pointeuse BIOLAB33</title>
 		<style type="text/css" media="screen">
+		
+		
+		input.loginbutton {
+   border-top: 1px solid #c7c7c7;
+   background: #e8edf0;
+   background: -webkit-gradient(linear, left top, left bottom, from(#6f706f), to(#e8edf0));
+   background: -webkit-linear-gradient(top, #6f706f, #e8edf0);
+   background: -moz-linear-gradient(top, #6f706f, #e8edf0);
+   background: -ms-linear-gradient(top, #6f706f, #e8edf0);
+   background: -o-linear-gradient(top, #6f706f, #e8edf0);
+   padding: 7px 14px;
+   -webkit-border-radius: 11px;
+   -moz-border-radius: 11px;
+   border-radius: 11px;
+   -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   box-shadow: rgba(0,0,0,1) 0 1px 0;
+   text-shadow: rgba(0,0,0,.4) 0 1px 0;
+   color: white;
+   font-size: 20px;
+   font-family: Helvetica, Arial, Sans-Serif;
+   text-decoration: none;
+   vertical-align: middle;
+   }
+input.loginbutton:hover {
+   border-top-color: #929ca3;
+   background: #929ca3;
+   color: #fffaff;
+   }
+input.loginbutton:active {
+   border-top-color: #1b435e;
+   background: #1b435e;
+   }
+		
+		
 	
 	#td {
 		vertical-alogn: center;
@@ -228,11 +263,9 @@
 				<li class="controller"><g:link controller="bankHoliday">Liste des jours fériés</g:link></li>	
 				<li class="controller"><g:link controller="site">Liste des sites</g:link></li>	
 				<li class="controller"><g:link controller="service">Liste des services</g:link></li>
-				<li class="controller"><g:link controller="reason">Raisons de régularisation</g:link></li>
-				
+				<li class="controller"><g:link controller="reason">Raisons de régularisation</g:link></li>		
 				<li><BR></li>
-				<li class="controller"><g:link controller="logout">Déconnectez vous</g:link></li>				
-						
+				<li class="controller"><g:link controller="logout">Déconnectez vous</g:link></li>							
 			</ul>
 			</sec:ifLoggedIn>
 			<sec:ifNotLoggedIn>
@@ -247,8 +280,8 @@
 	        	<div class="message">${flash.message}</div>
 	      	</g:if>
 	  		<form id="myform" method="POST" action="employee/pointage" controller="employee">
-	  			<font size="5">	Identifiant: <g:textField id="mytextfield" name="username" autofocus="true"/>  		  				  						
-	  			<g:link class="loginbutton" action="pointage" controller="employee" params="${[username:username]}">${message(code: 'default.button.login.label', default: 'Create')}</g:link>
+	  			<font size="5">	${message(code: 'employee.id', default: 'Create')}: <g:textField id="mytextfield" name="username" autofocus="true" style="vertical-align: middle;" />  	</font>	  				  						
+				<input type="submit" class="loginbutton" value="${message(code: 'default.button.login.label', default: 'Create')}" style="vertical-align: middle;">
 			</form>		
 		</div>
 	</body>

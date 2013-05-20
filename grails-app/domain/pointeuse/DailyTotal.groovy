@@ -7,6 +7,7 @@ class DailyTotal {
 	int day
 	int month
 	int year
+	int week
 	long elapsedSeconds
 	long supplementarySeconds
 	Employee employee
@@ -20,6 +21,7 @@ class DailyTotal {
 	
 	DailyTotal(Employee employee,Date currentDate){
 		this.employee=employee
+		this.week=currentDate.getAt(Calendar.WEEK_OF_YEAR)
 		this.year=currentDate.getAt(Calendar.YEAR)
 		this.month=currentDate.getAt(Calendar.MONTH)+1
 		this.day=currentDate.getAt(Calendar.DAY_OF_MONTH)

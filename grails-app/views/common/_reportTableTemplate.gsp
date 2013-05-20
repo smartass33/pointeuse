@@ -18,15 +18,29 @@
             <g:each in="${day.value}" status="m" var="entries">
               <g:if test="${entries!=null}">
                 <tr>
-                  <td width="140px"><font size="2"><i> <modalbox:createLink
-                          controller="employee" action="showDay" id="${employee.id}"
-                          title="modifier des évenements" width="500"
-                          params="[employeeId: employee.id, month: entries.key.format('MM'), year: entries.key.format('yyyy'), day: entries.key.format('dd')]">
-                          ${entries.key.format('E dd MMM yyyy')}
-                        </modalbox:createLink>
-                    </i></font></td>
+                  <g:if test="${dailyBankHolidayMap.get(entries.key) }">
+	                  <td style="width:140px; color:red;"><i> <modalbox:createLink
+	                          controller="employee" action="showDay" id="${employee.id}"
+	                          title="modifier des évenements" width="500"
+	                          params="[employeeId: employee.id, month: entries.key.format('MM'), year: entries.key.format('yyyy'), day: entries.key.format('dd')]">
+	                         <font size="2" style="color:red;"> ${entries.key.format('E dd MMM yyyy')}</font>
+	                        </modalbox:createLink>
+	                    </i>
+	                    </td>
+                  </g:if>
+                  <g:else>
+                  	 <td width="140px"><font size="2"><i> <modalbox:createLink
+	                          controller="employee" action="showDay" id="${employee.id}"
+	                          title="modifier des évenements" width="500"
+	                          params="[employeeId: employee.id, month: entries.key.format('MM'), year: entries.key.format('yyyy'), day: entries.key.format('dd')]">
+	                          ${entries.key.format('E dd MMM yyyy')}
+	                        </modalbox:createLink>
+	                    </i></font>
+	                    </td>
+                  </g:else>
                   <g:if
                     test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0 || dailyTotalMap.get(entries.key).get(2)>0)}">
+
                     <td><font size="2">
                         ${(dailyTotalMap.get(entries.key)).get(0)}:${(dailyTotalMap.get(entries.key)).get(1)}:${(dailyTotalMap.get(entries.key)).get(2)}
                     </font></td>
@@ -49,22 +63,36 @@
                           ${dailySupTotalMap.get(entries.key).get(0)}H${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}
                         </g:if>
                       </g:else>
-                  </font></td>
-                  <td><g:if test="${holidayMap.get(entries.key) != null}">
-                      <font size="2"> <g:select
-                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:payableSupTime,payableCompTime:payableCompTime])}"
-                          name="absenceType" from="${AbsenceType.values()}"
-                          value="${AbsenceType}" optionKey="key"
-                          noSelection="${['-':holidayMap.get(entries.key).type]}" />
-                      </font>
-                    </g:if> <g:else>
-                      <font size="2"> <g:select
-                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2',params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:payableSupTime,payableCompTime:payableCompTime] )}"
-                          name="absenceType" from="${AbsenceType.values()}"
-                          value="${AbsenceType}" optionKey="key"
-                          noSelection="${['':'-']}" />
-                      </font>
-                   </g:else></td>
+                  </font></td>             
+                  <td>
+                    <g:if test="${entries == null || entries.value ==null}">           
+	                  	<g:if test="${holidayMap.get(entries.key) != null}">
+	                      <font size="2"> 
+	                      <g:select
+	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:(payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2)),payableCompTime:(payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))])}"
+	                          name="absenceType" from="${AbsenceType.values()}"
+	                          value="${AbsenceType}" optionKey="key"
+	                          noSelection="${['-':holidayMap.get(entries.key).type]}" />
+	
+	                      </font>
+	                    </g:if> <g:else>
+	                      <font size="2"> <g:select
+	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2',params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:(payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2)),payableCompTime:(payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))] )}"
+	                          name="absenceType" from="${AbsenceType.values()}"
+	                          value="${AbsenceType}" optionKey="key"
+	                          noSelection="${['':'-']}" />
+	                      </font>
+	                   </g:else>
+                  </g:if>
+				<g:else>
+					<g:if test="${holidayMap.get(entries.key) != null}">
+                  	${holidayMap.get(entries.key).type}
+                  	</g:if>
+                  	<g:else>
+                  	-
+                  	</g:else>
+                  </g:else>
+                  </td>
                   <g:each in="${entries.value}" var="inOrOut">
                     <font size="2"> <g:if
                         test="${inOrOut.type.equals('E')}">
@@ -119,28 +147,13 @@
               <g:if test="${weeklyTotal.get(employee) != null && weeklyTotal.get(employee).get(day.key) !=null && (weeklyTotal.get(employee).get(day.key).get(2)>0 || weeklyTotal.get(employee).get(day.key).get(1)>0 || weeklyTotal.get(employee).get(day.key).get(0)>0)}">
                 <th colspan="34" scope="colgroup">
                   ${message(code: 'weekly.total.label', default: 'Report')} ${(weeklyTotal.get(employee).get(day.key)).get(0)}H${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyTotal.get(employee).get(day.key)).get(1)}
-                  <g:if
-                    test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null}">
-                    ${message(code: 'which.sup.time', default: 'Report')} : ${(weeklySupTotal.get(employee).get(day.key)).get(0)}H${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}
-                         <g:if test="${employee.weeklyContractTime!=35 && weeklyCompTotal != null && weeklyCompTotal.get(employee) != null && weeklyCompTotal.get(employee).get(week.key) != null}">
-                       et ${message(code: 'which.comp.time', default: 'Report')} ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}                                                                                
-                    </g:if>
-                    <g:else>
-                      et ${message(code: 'which.comp.time', default: 'Report')} 00H00
-                    </g:else>
+                  <g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null && ((weeklySupTotal.get(employee).get(day.key)).get(0) > 0 || (weeklySupTotal.get(employee).get(day.key)).get(1) >0)}">
+                   dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)}H${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}    
                   </g:if>
-                  <g:else>
-                    <g:if test="${employee.weeklyContractTime!=35 && weeklyCompTotal != null && weeklyCompTotal.get(employee) != null && weeklyCompTotal.get(employee).get(week.key) != null}">
-                       ${message(code: 'which.comp.time', default: 'Report')} ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}                                                                                
-                    </g:if>
-                    <g:else>
-                      ${message(code: 'which.comp.time', default: 'Report')} 00H00
-                    </g:else>  
-                  </g:else>                            
                 </th>                                                        
               </g:if>
               <g:else>
-                <th colspan="34" scope="colgroup">Total fin de semaine: 00H00</TH>
+                <th colspan="34" scope="colgroup">Total fin de semaine: 0H</TH>
               </g:else>
             </tr>  
           </g:each>

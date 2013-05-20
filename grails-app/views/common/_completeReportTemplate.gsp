@@ -8,7 +8,7 @@
 		<%@ page import="pointeuse.MonthlyTotal"%>
 	<style  type="text/css">
 				@page {
-				   size: 297mm 210mm;
+				   size: 210mm 297mm;
 				   margin: 0px 0px 13px 0px;
 				 }
 				table {
@@ -47,6 +47,7 @@
 				 	text-align:center;
 				 	height:5px;
 				 	width:90px;
+				 	font-size:95%;
 				}
 				
 				tbody th{

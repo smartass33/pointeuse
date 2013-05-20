@@ -92,7 +92,7 @@
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
 	        							<tr>
-	        								<g:if test="${monthlyTheoritical!=null}">
+	        								<g:if test="${monthTheoritical!=null}">
 	        									<td>${monthTheoritical.get(0)}H${monthTheoritical.get(1)==0?'00':monthTheoritical.get(1)}</td>
 	        								</g:if>
 	        								<g:else>
@@ -194,7 +194,7 @@
 		        					</td>
 								</tr>
 							</g:if>
-							<g:if test="${payableCompTime!=null}">						
+							<g:if test="${payableCompTime!=null && employee.weeklyContractTime != 35}">						
 								<tr>
 									<td>${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
 									<td>
