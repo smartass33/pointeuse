@@ -126,7 +126,7 @@
 				</table>
 				</g:if>
 				<g:else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pas d'évenement pour le jour en cours <BR><BR></g:else>			
-				<g:form>
+				<g:form method="POST">
 					<g:hiddenField name="userId" value="${employee?.id}" />
 					<g:if test="${employee?.status}">
 						<g:if test="${!entranceStatus}">
