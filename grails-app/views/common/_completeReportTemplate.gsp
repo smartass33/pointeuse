@@ -236,13 +236,14 @@
 			</tr>
 			</tbody>
 		</table>
+		<BR/><BR/>
 		<table border="1" id="reportTable">
 		    <thead style="border-top:5px solid red;">
-		      <th style="border:5px solid red; width:92px;text-align:center">date</th>
-		      <th style="border:5px solid red;width:62px;text-align:center">total jour</th>
-		      <th style="border:5px solid red;width:32px;text-align:center">HS</th>
-		      <th style="border:5px solid red;width:48px;text-align:center">absence</th>
-		      <th style="border:5px solid red;width:400px;text-align:center">${message(code: 'events.label', default: 'report')}</th>
+		      <th style="border:1px; width:92px;text-align:center">date</th>
+		      <th style="border:1px;width:62px;text-align:center">total jour</th>
+		      <th style="border:1px;width:32px;text-align:center">HS</th>
+		      <th style="border:1px;width:48px;text-align:center">absence</th>
+		      <th style="border:1px;width:400px;text-align:center">${message(code: 'events.label', default: 'report')}</th>
 		    </thead>
 		    
 		</table>	
@@ -254,37 +255,37 @@
 		            <g:each in="${day.value}" status="m" var="entries">
 		              <g:if test="${entries!=null}">
 		                <tr>
-		                  <td style="border:5px solid red;width:100px"><i>${entries.key.format('E dd MMM yyyy')}</i></td>
+		                  <td style="border:1px;width:100px"><i>${entries.key.format('E dd MMM yyyy')}</i></td>
 		                  <g:if test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0 || dailyTotalMap.get(entries.key).get(2)>0)}">
-		                  	<td style="border:5px solid red;width:70px">${(dailyTotalMap.get(entries.key)).get(0)}:${(dailyTotalMap.get(entries.key)).get(1)}:${(dailyTotalMap.get(entries.key)).get(2)}</td>
+		                  	<td style="border:1px;width:70px">${(dailyTotalMap.get(entries.key)).get(0)}:${(dailyTotalMap.get(entries.key)).get(1)}:${(dailyTotalMap.get(entries.key)).get(2)}</td>
 		                  </g:if>
 		                  <g:else>
-		                    <td style="border:5px solid red;width:70px">00:00:00</td>
+		                    <td style="border:1px;width:70px">00:00:00</td>
 		                  </g:else>
 		                  	<g:if test="${weeklySupTotal.get(employee) != null && weeklySupTotal.get(employee).get(day.key) !=null}">
 		                    	<g:if test="${dailySupTotalMap.get(entries.key) !=null && (dailySupTotalMap.get(entries.key).get(0)>0 ||dailySupTotalMap.get(entries.key).get(1)>0)}">
-		                            <td style="border:5px solid red;width:40px">${dailySupTotalMap.get(entries.key).get(0)}H${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}</td>
+		                            <td style="border:1px;width:40px">${dailySupTotalMap.get(entries.key).get(0)}H${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}</td>
 		                         </g:if>
 			                    <g:else>
-		                    		<td style="border:5px solid red;width:40px">-</td>
+		                    		<td style="border:1px;width:40px">-</td>
 		                   		 </g:else>
 		                    </g:if>
 			                <g:else>
-		                    	<td style="border:5px solid red;width:40px">-</td>
+		                    	<td style="border:1px;width:40px">-</td>
 		                   	</g:else>
 
 		                  	<g:if test="${holidayMap.get(entries.key) != null}">
-		                   		<td style="border:5px solid red;width:55px">${holidayMap.get(entries.key).type}</td>
+		                   		<td style="border:1px;width:55px">${holidayMap.get(entries.key).type}</td>
 		                    </g:if>
 		                    <g:else>
-		                    	<td style="border:5px solid red;width:55px">-</td>
+		                    	<td style="border:1px;width:55px">-</td>
 		                    </g:else> 
 		                  <g:each in="${entries.value}" var="inOrOut">
 	                  		<g:if test="${inOrOut.type.equals('E')}">
-                       			<td bgcolor="98FB98" style="height: 1px;text-align:center;">${inOrOut.time.format('H:mm')}</td>
+                       			<td bgcolor="98FB98" style="height: 1px;text-align:center; width:40px">${inOrOut.time.format('H:mm')}</td>
                      			</g:if>
                      			 <g:else>
-                       			<td bgcolor="#FFC0CB" style="height: 1px;text-align:center;">${inOrOut.time.format('H:mm')}</td>
+                       			<td bgcolor="#FFC0CB" style="height: 1px;text-align:center;width:40px">${inOrOut.time.format('H:mm')}</td>
                     			 </g:else> 
 		                  </g:each>
 		                </tr>
@@ -294,30 +295,16 @@
 		           	</table>
 		           	 <table border="1" >
 		           	<tr>
-		        		<td style="width: 200px;overflow: hidden;text-overflow: ellipsis;">
-		              ${day.key}
+		        		<td style="border:1px solid black;width:690px;text-align:left;font-weight:bold;">
+		              Total ${day.key}:
 		              <g:if test="${weeklyTotal.get(employee) != null && weeklyTotal.get(employee).get(day.key) !=null && (weeklyTotal.get(employee).get(day.key).get(2)>0 || weeklyTotal.get(employee).get(day.key).get(1)>0 || weeklyTotal.get(employee).get(day.key).get(0)>0)}">
-		                  ${message(code: 'weekly.total.label', default: 'Report')}: ${(weeklyTotal.get(employee).get(day.key)).get(0)}H${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyTotal.get(employee).get(day.key)).get(1)}
+		                  ${(weeklyTotal.get(employee).get(day.key)).get(0)}H${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyTotal.get(employee).get(day.key)).get(1)}
 		                  <g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null}">
-		                  ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)}H${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}
-		                  	<g:if test="${employee.weeklyContractTime!=35 && weeklyCompTotal != null && weeklyCompTotal.get(employee) != null && weeklyCompTotal.get(employee).get(week.key) != null}">
-		                       ${message(code: 'which.comp.time', default: 'Report')} ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}                                                                            
-		                    </g:if>
-		                    <g:else>
-		                      ${message(code: 'which.comp.time', default: 'Report')} 0H
-		                    </g:else>
-		                  </g:if>
-		                  <g:else>
-		                    <g:if test="${employee.weeklyContractTime!=35 && weeklyCompTotal != null && weeklyCompTotal.get(employee) != null && weeklyCompTotal.get(employee).get(week.key) != null}">
-		                       ${message(code: 'which.comp.time', default: 'Report')} ${(weeklyCompTotal.get(employee).get(day.key)).get(0)}H${(weeklyCompTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyCompTotal.get(employee).get(day.key)).get(1)}                                                                        
-		                    </g:if>
-		                    <g:else>
-		                      ${message(code: 'which.comp.time', default: 'Report')} 0H
-		                    </g:else>  
-		                  </g:else>                            
+		                  dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)}H${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}
+		                  </g:if>                           
 		              </g:if>
 		              <g:else>
-		                Total semaine: 00H00
+		                Total semaine: 0H
 		              </g:else>
 		              </td>
 		            </tr>  

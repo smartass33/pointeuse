@@ -21,7 +21,7 @@
 	font-family:arial;
 	font-size:15px;
 	font-weight:bold;
-	padding:6px 24px;
+	padding:2px 12px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #86ae47;
 }.listButton:hover {

@@ -1081,11 +1081,8 @@ class EmployeeController {
 				weeklySuppTotalTime.put(key,timeManagerService.computeHumanTime(value))
 			};
 
-			
-			def supTotals=timeManagerService.computeSupTimeNew(month,year,employee,cartoucheTable.get(8))
-			def payableCompTime=timeManagerService.computeHumanTime(supTotals.get(1))
-			def payableSupTime=timeManagerService.computeHumanTime(supTotals.get(0))
-				
+			def payableSupTime=cartoucheTable.get(18)
+			def payableCompTime=cartoucheTable.get(19)
 			
 			[isAdmin:false,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:cartoucheTable.get(3),holiday:cartoucheTable.get(4),rtt:cartoucheTable.get(5),sickness:cartoucheTable.get(6),sansSolde:cartoucheTable.get(7),yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:cartoucheTable.get(11),yearlyRtt:cartoucheTable.get(12),yearlySickness:cartoucheTable.get(13),yearlySansSolde:cartoucheTable.get(17),yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 					}
