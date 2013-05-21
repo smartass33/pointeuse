@@ -26,7 +26,13 @@ class SiteController {
     }
 
     def save() {
+		def user = springSecurityService.currentUser
+		
         def siteInstance = new Site(params)
+		siteInstance.loggingDate=new Date()
+		if (user != null){
+			siteInstance.user=user
+		}
         if (!siteInstance.save(flush: true)) {
             render(view: "create", model: [siteInstance: siteInstance])
             return

@@ -1,11 +1,10 @@
-
 <%@ page import="pointeuse.Site" %>
 <!DOCTYPE html>
 <html>
 	<head>
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'site.label', default: 'Site')}" />
-		<title><g:message code="default.list.label" args="[entityName]" /></title>
+		<title><g:message code="default.list.label" args="[entityName]" /></title>		
 	</head>
 	<body>
 		<a href="#list-site" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
@@ -23,19 +22,23 @@
 			<table>
 				<thead>
 					<tr>
-					
-						<g:sortableColumn property="name" title="${message(code: 'site.name.label', default: 'Name')}" />
-					
+						<g:sortableColumn property="name" title="${message(code: 'site.name.label', default: 'Name')}" />			
+						<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">
+							<th>Date de création</th>
+							<th>Administrateur</th>
+						</sec:ifAnyGranted>
 					</tr>
 				</thead>
 				<tbody>
-				<g:each in="${siteInstanceList}" status="i" var="siteInstance">
-					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-					
-						<td><g:link action="show" id="${siteInstance.id}">${fieldValue(bean: siteInstance, field: "name")}</g:link></td>
-					
-					</tr>
-				</g:each>
+					<g:each in="${siteInstanceList}" status="i" var="siteInstance">
+						<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">			
+							<td><g:link action="show" id="${siteInstance.id}">${fieldValue(bean: siteInstance, field: "name")}</g:link></td>				
+							<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">
+								<td>${siteInstance.loggingDate.format('dd/MM/yyyy')}</td>
+								<td>${siteInstance.user.firstName} ${siteInstance.user.firstName}</td>
+							</sec:ifAnyGranted>
+						</tr>
+					</g:each>
 				</tbody>
 			</table>
 			<div class="pagination">

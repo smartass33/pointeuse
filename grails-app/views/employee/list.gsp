@@ -4,16 +4,49 @@
 <!doctype html>
 <html>
 <head>
-<g:javascript library="prototype" plugin="prototype"/>
-<resource:autoComplete skin="default" />
+	<g:javascript library="prototype" plugin="prototype"/>
+	<resource:autoComplete skin="default" />
+	
+	<meta name="layout" content="main" id="mainLayout">
+	<g:set var="isNotSelected" value="true" />
+	
+	<g:set var="entityName"
+		value="${message(code: 'employee.label', default: 'Employee')}" />
+	<title><g:message code="default.list.label" args="[entityName]" /></title>
 
-<meta name="layout" content="main" id="mainLayout">
-<g:set var="isNotSelected" value="true" />
 
-<g:set var="entityName"
-	value="${message(code: 'employee.label', default: 'Employee')}" />
-<title><g:message code="default.list.label" args="[entityName]" /></title>
+<style>
+.listButton {
+	-moz-box-shadow:inset 0px 1px 0px 0px #d9fbbe;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #d9fbbe;
+	box-shadow:inset 0px 1px 0px 0px #d9fbbe;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #048802), color-stop(1, #a5cc52) );
+	background:-moz-linear-gradient( center top, #048802 5%, #a5cc52 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#048802', endColorstr='#a5cc52');
+	background-color:#048802;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #83c41a;
+	display:inline-block;
+	color:#ffffff;
+	font-family:arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:2px 12px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #86ae47;
+}.listButton:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #a5cc52), color-stop(1, #048802) );
+	background:-moz-linear-gradient( center top, #a5cc52 5%, #048802 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#a5cc52', endColorstr='#048802');
+	background-color:#a5cc52;
+}.listButton:active {
+	position:relative;
+	top:1px;
+}
 
+</style>
 
 </head>
 <body>

@@ -6,34 +6,26 @@ import grails.plugins.springsecurity.Secured
 class BankHolidayController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
-
+	def authenticateService
+	def springSecurityService
     def index() {
         redirect(action: "list", params: params)
     }
 
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
-     //   params.max = Math.min(max ?: 20, 100)
 		params.order = "desc"
 		params.sort = "calendar"
 		def yearlyCounts=[:]
 		def bankHolidayInstanceList = BankHoliday.list(params)
-		print "list size: "+bankHolidayInstanceList.size()
 		def bankHolidayInstanceTotal = BankHoliday.count()
-		def maxYear = 0
-		def yearlyCount=0
+
 		for (holidayInstance in bankHolidayInstanceList){
-			print "year: "+holidayInstance.year
 			if (yearlyCounts.get(holidayInstance.year)==null){
-				yearlyCounts.put(holidayInstance.year,BankHoliday.findAllByYear(holidayInstance.year).size())
-			}
-			
-			if (holidayInstance.year > maxYear){
-				maxYear=holidayInstance.year
-				//yearlyCounts.put(maxYear,1)
+				yearlyCounts.put(holidayInstance.year,BankHoliday.findAllByYear(holidayInstance.year))
 			}
 		}
-        [bankHolidayInstanceList:bankHolidayInstanceList, bankHolidayInstanceTotal:bankHolidayInstanceTotal,maxYear:maxYear,yearlyCounts:yearlyCounts]
+        [bankHolidayInstanceTotal:bankHolidayInstanceTotal,yearlyCounts:yearlyCounts]
     }
 
     def create() {
@@ -42,11 +34,17 @@ class BankHolidayController {
     }
 
     def save() {
+		def user = springSecurityService.currentUser
+		
         def bankHolidayInstance = new BankHoliday(params)
 		if (bankHolidayInstance != null){
 			bankHolidayInstance.month=bankHolidayInstance.calendar.get(Calendar.MONTH)+1
 			bankHolidayInstance.year=bankHolidayInstance.calendar.get(Calendar.YEAR)
 			bankHolidayInstance.day=bankHolidayInstance.calendar.get(Calendar.DAY_OF_MONTH)
+			bankHolidayInstance.loggingDate=new Date()
+			if (user!=null){
+				bankHolidayInstance.user=user
+			}
 		}
 		
         if (!bankHolidayInstance.save(flush: true)) {
@@ -56,7 +54,7 @@ class BankHolidayController {
 
 		setYearlyOpenDays(bankHolidayInstance.year)
 		
-        flash.message = message(code: 'default.created.message', args: [message(code: 'bankHoliday.label', default: 'BankHoliday'), bankHolidayInstance.id])
+        flash.message = message(code: 'default.created.message', args: [message(code: 'bankHoliday.label', default: 'BankHoliday'), bankHolidayInstance.calendar.time.format('EEEE MMM yyyy')])
         redirect(action: "show", id: bankHolidayInstance.id)
     }
 

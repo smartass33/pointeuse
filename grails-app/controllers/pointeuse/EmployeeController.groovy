@@ -19,6 +19,7 @@ import groovy.time.TimeDuration
 
 class EmployeeController {
 
+	def mailService
 	def pdfRenderingService
 	def searchableService
 	def authenticateService
@@ -1525,5 +1526,14 @@ class EmployeeController {
 		
 
 	}
+	
+	 def sendMail(){
+		 mailService.sendMail {
+			 to "henri.martin@gmail.com"
+			 from "pointeuse.biolab33@gmail.com"
+			 subject "Hello John"
+			 body 'this is some text'
+		  }
+	 }
 
 }
