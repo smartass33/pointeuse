@@ -19,6 +19,7 @@ import groovy.time.TimeDuration
 
 class EmployeeController {
 
+	def utilService
 	def mailService
 	def pdfRenderingService
 	def searchableService
@@ -113,9 +114,10 @@ class EmployeeController {
 		def query = "*"+params.q+"*"
 		if(query){
 			def srchResults = searchableService.search(query)
-			render(view: "list",
-				   model: [employeeInstanceList: srchResults.results,
-						 contactInstanceTotal:srchResults.total,employeeInstanceTotal:srchResults.results.size(),isAdmin:isAdmin])
+			//render(view: "list", model: [employeeInstanceList: srchResults.results,employeeInstanceTotal:srchResults.results.size(),isAdmin:isAdmin])
+			
+			render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: srchResults.results, employeeInstanceTotal: srchResults.results.size(),isAdmin:isAdmin]
+			return
 		}else{
 			redirect(action: "list")
 		}
@@ -325,7 +327,7 @@ class EmployeeController {
 		if (userId == null){
 			userId = params["employeeId"].getAt(0)
 		}
-		
+
 		def calendar = Calendar.instance
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		calendar.set(Calendar.YEAR,year)
@@ -417,11 +419,7 @@ class EmployeeController {
 		def pregnancyCredit=30*60*pregnancy.size()
 		// determine monthly theoritical time:
 		def monthTheoritical=(3600*(counter*employeeInstance.weeklyContractTime/Employee.WeekOpenedDays+Employee.Pentecote-(WeeklyTotal.WeeklyLegalTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size())) - pregnancyCredit)as int
-		def supTotals=timeManagerService.calculateSupAndComp(calendar, employeeInstance,  monthTheoritical)
-		def payableSupTime=timeManagerService.computeHumanTime(supTotals.get(0))
-		def payableCompTime=timeManagerService.computeHumanTime(supTotals.get(1))
-
-		return [params.userId,employeeInstance,calendar,counter ,holidays.size(),rtt.size(),sickness.size(),sansSolde.size(),monthTheoritical,pregnancyCredit,yearlyCartouche.get(0),yearlyCartouche.get(1),yearlyCartouche.get(2),yearlyCartouche.get(3),yearlyCartouche.get(4),yearlyCartouche.get(5),yearlyCartouche.get(6),yearlyCartouche.get(7),payableSupTime,payableCompTime]		
+		return [params.userId,employeeInstance,calendar,counter ,holidays.size(),rtt.size(),sickness.size(),sansSolde.size(),monthTheoritical,pregnancyCredit,yearlyCartouche.get(0),yearlyCartouche.get(1),yearlyCartouche.get(2),yearlyCartouche.get(3),yearlyCartouche.get(4),yearlyCartouche.get(5),yearlyCartouche.get(6),yearlyCartouche.get(7)]//,payableSupTime,payableCompTime]		
 	}
 	
 	def modifyAbsence(){
@@ -429,6 +427,8 @@ class EmployeeController {
 		def employee = Employee.get(employeeId)
 		def day = params["day"].getAt(0)
 		def supTime=params["payableSupTime"].getAt(0) as int
+		def compTime=params["payableCompTime"].getAt(0) as int
+		def monthlyTotal=params["monthlyTotalRecap"].getAt(0) as int
 		def criteria
 		def updatedSelection = params["updatedSelection"].toString()
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
@@ -487,34 +487,21 @@ class EmployeeController {
 		def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(15))
 		def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get(16))
 		def yearlySansSolde=cartoucheTable.get(17)
-		//def payableSupTime=cartoucheTable.get(18) 
 		def payableSupTime=timeManagerService.computeHumanTime(supTime)
-		def payableCompTime=cartoucheTable.get(19)
+		def payableCompTime=timeManagerService.computeHumanTime(compTime)
 		def openedDays = timeManagerService.computeMonthlyHours(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)
 
-		criteria = MonthlyTotal.createCriteria()
-		def monthlyTotal = criteria.get {
-				and {
-					eq('employee',employee)
-					eq('year',cal.getAt(Calendar.YEAR))
-					eq('month',cal.getAt(Calendar.MONTH)+1)
-				}
-			}
-		
-		if (monthlyTotal==null){
-			def totals=timeManagerService.initializeTotals(employee, cal.time)
-			monthlyTotal=totals.get(2)
-		}
+
 		def yearInf
 		def yearSup
-		if ((cal.get(Calendar.MONTH)+1)>4){
+		if ((cal.get(Calendar.MONTH)+1)>5){
 			yearInf=cal.get(Calendar.YEAR)
 			yearSup=cal.get(Calendar.YEAR)+1
 		}else{
 			yearInf=cal.get(Calendar.YEAR)-1
 			yearSup=cal.get(Calendar.YEAR)
 		}
-		monthlyTotal=timeManagerService.computeHumanTime(monthlyTotal.elapsedSeconds)
+		monthlyTotal=timeManagerService.computeHumanTime(monthlyTotal)
 		
 		def model=[period:cal.time,firstName:employee.firstName,lastName:employee.lastName,weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,monthlyTotalRecap:monthlyTotal,yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 		render template: "/common/cartoucheTemplate", model:model
@@ -523,28 +510,30 @@ class EmployeeController {
 	
 	def addingEventToEmployee(Long id){
 		def cal = Calendar.instance	
-		def type = params["type"]
+		def type = params["type"].getAt(0)
+		//def type = "E" ? params["type"].getAt(0).equals("Entrer") : "S"
 		if (type.equals("Entrer")){
 			type="E"
 		}
 		if (type.equals("Sortir")){
 			type="S"
 		}
-		def userId = params["userId"]
+		def userId = params["userId"].getAt(0) as int
+		Employee employeeInstance = Employee.get(userId)
+		
 		def dailyTotal
 		def currentDate = cal.time
-		def employeeInstance
 		def weeklyTotal
 		def monthlyTotal
 		def criteria
 		def timeDiff
 		
-		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).getTime()
-		if (id == null){
-			employeeInstance = Employee.get(userId)		
-		}else{
-			employeeInstance = Employee.get(id)
-		}
+		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).time
+//		if (id == null){
+//			employeeInstance = Employee.get(userId)		
+//		}else{
+//			employeeInstance = Employee.get(id)
+//		}
 			
 		// liste les entrees de la journée et vérifie que cette valeur n'est pas supérieure à une valeur statique
 		def inAndOutcriteria = InAndOut.createCriteria()
@@ -602,15 +591,42 @@ class EmployeeController {
 				lastIn.pointed=true
 			}
 		}
-		if (type.equals("S")){employeeInstance.status=false}
-		else {employeeInstance.status=true}
+		
+		criteria = InAndOut.createCriteria()
+		def inAndOuts = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('day',today.getAt(Calendar.DATE))
+				eq('month',today.getAt(Calendar.MONTH)+1)
+				eq('year',today.getAt(Calendar.YEAR))
+				order('time','asc')
+			}
+		}
+		
+		def humanTime = timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(inAndOuts))
+		def dailySupp = timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(inAndOuts)-DailyTotal.maxWorkingTime,0))
+		
+		def entranceStatus=true
+		if (inAndOuts==null || inAndOuts.size()==0){
+			entranceStatus=true
+		}
+		
+		
+		if (type.equals("S")){
+				employeeInstance.status=false
+		}
+		else {
+			employeeInstance.status=true
+		}
 		if (type.equals("E")){
 			flash.message = message(code: 'inAndOut.create.label', args: [message(code: 'inAndOut.entry.label', default: 'exit'), cal.time])
 		}else{
 			flash.message = message(code: 'inAndOut.create.label', args: [message(code: 'inAndOut.exit.label', default: 'exit'), cal.time])
 		}
-		redirect(action: "pointage", id: employeeInstance.id)
-		return
+		//redirect(action: "pointage", id: employeeInstance.id)
+		def model=[employee: employeeInstance,humanTime:humanTime, dailySupp:dailySupp,entranceStatus:entranceStatus,inAndOuts:inAndOuts]
+		render template: "/common/currentDayTemplate", model:model
+		//return
 	}
 	
 
@@ -930,8 +946,6 @@ class EmployeeController {
 		def previousDay
 		def employee
 		def mapByDay = [:]
-		def weeklyTotalMinutes = 0
-		def i=1
 		def dailyTotalId=0
 		def myDate = params["myDate"]
 		def monthlySupTime = 0
@@ -967,15 +981,14 @@ class EmployeeController {
 		int year = calendar.getAt(Calendar.YEAR)
 		calendarLoop.getTime().clearTime()
 		
+		timeManagerService.recomputeDailyTotals(employee.id as int,month,year)
+		
+		
 		while(calendarLoop.getAt(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 			// élimine les dimanches du rapport
 			if (calendarLoop.getAt(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
-				weeklyTotalMinutes = 0
 				mapByDay = [:]
-				i++
-			//	calendarLoop.roll(Calendar.DAY_OF_WEEK,1)
 			}
-			//print calendarLoop.time
 			def criteria = DailyTotal.createCriteria()
 			def dailyTotal = criteria.get {
 				and {
@@ -996,7 +1009,7 @@ class EmployeeController {
 					for (DailyTotal dailyTotalSup:dailyTotalsOfWeek){
 						supTime += dailyTotalSup.supplementarySeconds
 					}					
-					weeklySuppTotalTime.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR),supTime)
+					weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),supTime)
 				}
 				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
 				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
@@ -1112,13 +1125,15 @@ class EmployeeController {
 		def previousDay
 		def employee
 		def mapByDay = [:]
-		def weeklyTotalMinutes = 0
-		def i=1
 		def dailyTotalId=0
 		def myDate = params["myDate"]
 		def monthlySupTime = 0
+		def monthlyTotalTime = 0
 		def monthlyCompTime = 0				
 		def criteria
+		def dailySeconds = 0
+		def weeklySupTime
+		def currentWeek
 		
 		if (myDate != null && myDate instanceof String){
 			SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
@@ -1136,7 +1151,7 @@ class EmployeeController {
 				calendar.set(Calendar.MONTH,monthPeriod-1)
 				calendar.set(Calendar.YEAR,yearPeriod)			
 			}
-			calendar.set(Calendar.MONTH,calendar.getAt(Calendar.MONTH))
+			calendar.set(Calendar.MONTH,calendar.get(Calendar.MONTH))
 			calendar.set(Calendar.DATE,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
 		}else{
 			calendar.time=myDate
@@ -1151,14 +1166,16 @@ class EmployeeController {
 		int month = calendar.get(Calendar.MONTH)+1 // starts at 0
 		int year = calendar.get(Calendar.YEAR)
 		calendarLoop.getTime().clearTime()
+		def lastWeekParam = utilService.getLastWeekOfMonth(month, year)
+		def isSunday=lastWeekParam.get(1)
+		
+		currentWeek=0//calendar.get(Calendar.WEEK_OF_YEAR)
 		
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 			def currentDay=calendarLoop.time
 			// élimine les dimanches du rapport
-			if (calendarLoop.getAt(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
-				weeklyTotalMinutes = 0
+			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
 				mapByDay = [:]					
-				i++
 			}
 			//print calendarLoop.time
 			criteria = DailyTotal.createCriteria()
@@ -1171,23 +1188,33 @@ class EmployeeController {
 				}
 			}
 			// permet de récupérer le total hebdo
-			if (dailyTotal != null && dailyTotal != dailyTotalId && dailyTotal.weeklyTotal.elapsedSeconds > 0){
-				// recompute weekly as beginning of month of may was incorrect:
-				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR))
+			if (dailyTotal != null && dailyTotal != dailyTotalId){
+				dailySeconds = timeManagerService.getDailyTotal(dailyTotal)
+				monthlyTotalTime += dailySeconds
+				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
 				if (previousValue!=null){
 					def newValue=previousValue.get(0)*3600+previousValue.get(1)*60+previousValue.get(2)
-					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailyTotal.elapsedSeconds+newValue))	
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailySeconds+newValue))
 				}else{
-					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailyTotal.elapsedSeconds))
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailySeconds))
 				}
-				def weekNumber=weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR)
-				timeManagerService.computeSupplementaryTime(dailyTotal)
-				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),dailyTotal.weeklyTotal.supplementarySeconds)
+				
+				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
+					weeklySupTime = 0
+				}else{
+					weeklySupTime = timeManagerService.computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+				}
+				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),timeManagerService.computeHumanTime(weeklySupTime))
+				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
+					monthlySupTime += weeklySupTime
+					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
+				}
 				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
 				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
 				dailyTotalId=dailyTotal.id
 			} 
-
+			
+			
 			criteria = InAndOut.createCriteria()
 			def entriesByDay = criteria{
 				and {
@@ -1199,11 +1226,11 @@ class EmployeeController {
 					}
 			}
 			// put in a map in and outs
-			def tmpDate = calendarLoop.getTime()
+			def tmpDate = calendarLoop.time
 			if 	(entriesByDay.size()>0){
 				if (dailyTotal!=null){
-					dailyTotalMap.put(tmpDate, timeManagerService.computeHumanTime(dailyTotal.elapsedSeconds))
-					dailySupTotalMap.put(tmpDate, timeManagerService.computeHumanTime(dailyTotal.supplementarySeconds))
+					dailyTotalMap.put(tmpDate, timeManagerService.computeHumanTime(dailySeconds))
+					dailySupTotalMap.put(tmpDate, timeManagerService.computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)))
 				}else {
 					dailyTotalMap.put(tmpDate, timeManagerService.computeHumanTime(0))
 					dailySupTotalMap.put(tmpDate, timeManagerService.computeHumanTime(0))
@@ -1241,26 +1268,18 @@ class EmployeeController {
 				}
 			}
 			holidayMap.put(tmpDate, dailyAbsence)
-			weeklyAggregate.put(weekName+calendarLoop.getAt(Calendar.WEEK_OF_YEAR), mapByDay)	
-			if (calendarLoop.getAt(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			weeklyAggregate.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), mapByDay)	
+			if (calendarLoop.get(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 				break
 			}
 			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
 		}	
+
+	
 		
-		def monthlyTotalCriteria = MonthlyTotal.createCriteria()
-		def monthlyTotal = monthlyTotalCriteria.get{
-			and {
-				eq('employee',employee)
-				eq('year',calendarLoop.get(Calendar.YEAR))
-				eq('month',calendarLoop.get(Calendar.MONTH)+1)
-			}
-		}
 		
-		if (monthlyTotal!=null){
-			monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotal.elapsedSeconds))
-			monthlyTotal=timeManagerService.computeHumanTime(monthlyTotal.elapsedSeconds)
-		}	
+
+		
 		try {
 			if (userId != null){
 			def cartoucheTable = cartouche(userId,year,month)
@@ -1270,7 +1289,7 @@ class EmployeeController {
 			def rtt=cartoucheTable.get(5)
 			def sickness=cartoucheTable.get(6)
 			def sansSolde=cartoucheTable.get(7)
-			def monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get(8))
+			def monthTheoritical = cartoucheTable.get(8)
 			def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(9))
 			def yearlyHoliday=cartoucheTable.get(11)
 			def yearlyRtt=cartoucheTable.get(12)
@@ -1279,9 +1298,24 @@ class EmployeeController {
 			def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(15))
 			def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get(16))
 			def yearlySansSolde=cartoucheTable.get(17)
+			//def payableSupTime=cartoucheTable.get(18)
+			//def payableCompTime=cartoucheTable.get(19)
+			
+			def payableSupTime = timeManagerService.computeHumanTime(monthlySupTime)
+			def payableCompTime = timeManagerService.computeHumanTime(0)
+			if (employee.weeklyContractTime!=35){
+				if (monthlyTotalTime > monthTheoritical){
+					payableCompTime = timeManagerService.computeHumanTime(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0))
+				}
+			}
+			
+			monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotalTime))
+			def monthlyTotal=timeManagerService.computeHumanTime(monthlyTotalTime)
+			monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get(8))
+			
 			def yearInf
 			def yearSup
-			if (month>4){
+			if (month>5){
 				yearInf=year
 				yearSup=year+1
 			}else{
@@ -1289,25 +1323,9 @@ class EmployeeController {
 				yearSup=year
 			}
 
-		def payableSupTime=cartoucheTable.get(18)
-		def payableCompTime=cartoucheTable.get(19)
-		
-		weeklySuppTotalTime.each() { key, value ->
-			monthlySupTime += value
-			weeklySuppTotalTime.put(key,timeManagerService.computeHumanTime(value))
-		};
-		
-			calendar.set(Calendar.DATE,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-			def keepLastWeek = true
-			if (calendar.get(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
-				keepLastWeek = false
-				//print 'last day of month: '+calendar.time 
-			}
-			calendar.set(Calendar.DAY_OF_MONTH,8)
-			print calendar.time
 			def bankList = BankHoliday.findByCalendar(calendar);
 		
-			[dailyBankHolidayMap:dailyBankHolidayMap,keepLastWeek:keepLastWeek,employeeId:employee.id,weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,firstName:employee.firstName,lastName:employee.lastName,monthlyTotalRecap:monthlyTotal,payableSupTime:payableSupTime,payableCompTime:payableCompTime,employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlySansSolde:yearlySansSolde,yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+			[dailyBankHolidayMap:dailyBankHolidayMap,employeeId:employee.id,weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,firstName:employee.firstName,lastName:employee.lastName,monthlyTotalRecap:monthlyTotal,payableSupTime:payableSupTime,payableCompTime:payableCompTime,employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlySansSolde:yearlySansSolde,yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 			
 			}
 		}catch (NullPointerException e){
@@ -1334,6 +1352,7 @@ class EmployeeController {
 			def totalByDay=[:]
 			def dailyCriteria
 			def timeDiff
+			def elapsedSeconds=0
 			if (id!=null){
 				employee = Employee.get(id)		
 			}
@@ -1348,6 +1367,104 @@ class EmployeeController {
 			}
 			
 			def calendar = Calendar.instance	
+			def inAndOutsCriteria = InAndOut.createCriteria()
+			def systemGeneratedEvents = inAndOutsCriteria.list {
+				and {
+					eq('employee',employee)
+					lt('time',calendar.time)
+					eq('systemGenerated',true)
+					order('time','asc')
+				}
+			}
+			
+			if (systemGeneratedEvents!=null && systemGeneratedEvents.size()>0){
+				log.error('redirecting user to regularization page')
+				render(view: "regularize", model: [systemGeneratedEvents: systemGeneratedEvents,employee:employee])
+				return
+			}
+			
+			inAndOutsCriteria = InAndOut.createCriteria()
+			def inAndOuts = inAndOutsCriteria.list {
+				and {
+					eq('employee',employee)
+					eq('year',calendar.get(Calendar.YEAR))
+					eq('month',calendar.get(Calendar.MONTH)+1)
+					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+					order('time','asc')
+				}
+			}
+			 
+			def tmpCalendar = Calendar.instance
+			tmpCalendar.set(Calendar.DAY_OF_YEAR,tmpCalendar.get(Calendar.DAY_OF_YEAR)-4)
+			// iterate over tmpCalendar
+			while(tmpCalendar.get(Calendar.DAY_OF_YEAR) < (calendar.get(Calendar.DAY_OF_YEAR) -1)){
+				tmpCalendar.roll(Calendar.DAY_OF_YEAR, 1)
+				inAndOutsCriteria = InAndOut.createCriteria()
+				def lastInAndOuts = inAndOutsCriteria.list {
+					and {
+						eq('employee',employee)
+						eq('year',calendar.get(Calendar.YEAR))
+						eq('month',tmpCalendar.get(Calendar.MONTH)+1)
+						eq('day',tmpCalendar.get(Calendar.DAY_OF_MONTH))
+						order('time','asc')
+					}
+				}
+				mapByDay.put(tmpCalendar.time,lastInAndOuts)
+				elapsedSeconds = timeManagerService.getDailyTotal(lastInAndOuts)
+				totalByDay.put(tmpCalendar.time, timeManagerService.computeHumanTime(elapsedSeconds))
+			}				
+			
+			dailyCriteria = DailyTotal.createCriteria()
+			def dailyTotal = dailyCriteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',calendar.get(Calendar.YEAR))
+					eq('month',calendar.get(Calendar.MONTH)+1)
+					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+
+			
+			def humanTime = timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(dailyTotal))
+			def dailySupp = timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(dailyTotal)-DailyTotal.maxWorkingTime,0))
+			
+			def entranceStatus=true
+			if (inAndOuts==null || inAndOuts.size()==0){
+				entranceStatus=true
+			}			
+			
+			[employee: employee,inAndOuts:inAndOuts,dailyTotal:dailyTotal,humanTime:humanTime, dailySupp:dailySupp,mapByDay:mapByDay,entranceStatus:entranceStatus,totalByDay:totalByDay]
+		}
+		catch (Exception e){
+			log.error('error with application: '+e.toString())		
+			flash.message = message(code: 'employee.not.found.label',args:[params["username"]])
+			redirect(uri:'/')
+
+		}
+	}	
+	/*
+	def pointage(Long id){
+		try {
+			def username = params["username"]
+			def employee
+			def mapByDay=[:]
+			def totalByDay=[:]
+			def dailyCriteria
+			def timeDiff
+			if (id!=null){
+				employee = Employee.get(id)
+			}
+			if (username!=null && !username.equals("")){
+				employee = Employee.findByUserName(username)
+			}
+			
+			if (employee==null){
+				throw new NullPointerException("unknown employee("+username+")")
+			}else{
+				log.error('employee successfully authenticated='+username)
+			}
+			
+			def calendar = Calendar.instance
 			def inAndOutsCriteria = InAndOut.createCriteria()
 			def systemGeneratedEvents = inAndOutsCriteria.list {
 				and {
@@ -1407,7 +1524,7 @@ class EmployeeController {
 				}else{
 					totalByDay.put(tmpCalendar.time, timeManagerService.computeHumanTime(0))
 				}
-			}				
+			}
 			
 			dailyCriteria = DailyTotal.createCriteria()
 			def dailyTotal = dailyCriteria.get {
@@ -1428,17 +1545,18 @@ class EmployeeController {
 			def entranceStatus=true
 			if (inAndOuts==null || inAndOuts.size()==0){
 				entranceStatus=true
-			}			
+			}
 			
 			[employee: employee,inAndOuts:inAndOuts,dailyTotal:dailyTotal,humanTime:humanTime, dailySupp:dailySupp,mapByDay:mapByDay,entranceStatus:entranceStatus,totalByDay:totalByDay]
 		}
 		catch (Exception e){
-			log.error('error with application: '+e.toString())		
+			log.error('error with application: '+e.toString())
 			flash.message = message(code: 'employee.not.found.label',args:[params["username"]])
 			redirect(uri:'/')
 
 		}
-	}	
+	}*/
+	
 	def pdf(){
 		log.error('method pdf called with parameters:')
 		def myDate = params["myDate"]
@@ -1528,6 +1646,14 @@ class EmployeeController {
 	}
 	
 	 def sendMail(){
+		 def employeeList = Employee.list()
+		 Calendar calendar = Calendar.instance
+		 //find orphans
+		 
+		// for (Employee employee:employeeList){
+		//	 employee
+		 //}		 
+		 
 		 mailService.sendMail {
 			 to "henri.martin@gmail.com"
 			 from "pointeuse.biolab33@gmail.com"
@@ -1535,5 +1661,52 @@ class EmployeeController {
 			 body 'this is some text'
 		  }
 	 }
+	 
+	 
+	 
+ def recomputeAllDailyTotals(int userId,int month,int year){
+		 Employee employee = Employee.get(userId)
+		 
+		 def tmpInOrOut
+		 def dailyDelta=0
+		 def timeDiff
+		 def criteria = DailyTotal.createCriteria()
+		 def dailyTotalList = criteria.list {
+				 and {
+					 eq('employee',employee)
+					 eq('year',year)
+					 eq('month',month)
+				 }
+			 }
+		 
+		 for (DailyTotal dailyTotal: dailyTotalList){
+			 tmpInOrOut=null
+			 dailyDelta=0
+			 criteria=InAndOut.createCriteria()
+			 def inOrOutList = criteria.list {
+				 and {
+					 eq('employee',employee)
+					 eq('year',year)
+					 eq('month',month)
+					 eq('day',dailyTotal.day)
+				 }
+				 order('time','asc')
+			 }
+			 
+			 for (InAndOut inOrOut:inOrOutList){
+				 if (inOrOut.type.equals("E")){
+					 tmpInOrOut=inOrOut
+				 }else{
+					 if (tmpInOrOut!=null){
+					 	use (TimeCategory){timeDiff=inOrOut.time-tmpInOrOut.time}
+					 	dailyDelta+=timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600
+					 }
+				 }			 	
+			 }
+			 dailyTotal.elapsedSeconds=dailyDelta
+		 }
+		 
+	 }
+	 
 
 }

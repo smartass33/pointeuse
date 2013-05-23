@@ -25,6 +25,33 @@ class TimeManagerService {
 		return inOrOut
 	}
 	
+	def computeSupplementaryTime(Employee employee,int week, int year){
+		def dailySupplementarySeconds = 0
+		def weeklySupplementarySeconds = 0
+		def criteria = DailyTotal.createCriteria()
+		def dailyTotals = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('week',week)
+			}
+		}
+		criteria = WeeklyTotal.createCriteria()
+		WeeklyTotal previousWeeklyTotal
+		def dailyTotalSum=0
+		for (DailyTotal tmpDaily:dailyTotals){
+			def tmpElapsed = getDailyTotal(tmpDaily)
+			dailyTotalSum += tmpElapsed
+			dailySupplementarySeconds += Math.max(tmpElapsed-DailyTotal.maxWorkingTime, 0)
+		}
+		if (dailyTotalSum<=WeeklyTotal.maxWorkingTime){
+			weeklySupplementarySeconds = dailySupplementarySeconds
+		}else {
+			weeklySupplementarySeconds = Math.max(dailySupplementarySeconds,dailyTotalSum-WeeklyTotal.maxWorkingTime)
+		}
+		return weeklySupplementarySeconds
+	}
+
 
 	
 	def computeSupplementaryTime(DailyTotal dailyTotal){
@@ -383,7 +410,6 @@ class TimeManagerService {
 				dailyTotal.weeklyTotal.monthlyTotal.weeklyTotals.add(weeklyTotal)
 			}														
 			employeeInstance.inAndOuts.add(inOrOut)
-			//dailyTotal.inAndOuts.add(inOrOut)
 			dailyTotal.exitCount=dailyTotal.exitCount+1
 			// the new input is the last one. return the 
 			if (lastElement != null && nextElement != null){
@@ -398,7 +424,6 @@ class TimeManagerService {
 				}
 			}
 		}
-		//TODO: remove absence if exists
 		criteria = Absence.createCriteria()
 		def absence = criteria.get {
 			and {
@@ -416,6 +441,51 @@ class TimeManagerService {
 		return deltaTime
 	}
 		
+	
+	
+	def regularizeTimeNew(String type,String userId,InAndOut inOrOut,Calendar calendar){
+		if (calendar == null){
+			calendar = Calendar.instance
+		}
+		def dailyTotal
+		def currentDate = calendar.time
+		def employeeInstance = Employee.get(userId)
+		def criteria
+	
+		criteria = InAndOut.createCriteria()
+		def todayEmployeeEntries = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',calendar.get(Calendar.YEAR))
+				eq('month',calendar.get(Calendar.MONTH)+1)
+				eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+				eq('type','E')
+			}
+		}
+		
+		if (todayEmployeeEntries != null && todayEmployeeEntries.size() > Employee.entryPerDay){
+			flash.message = "TROP D'ENTREES DANS LA JOURNEE. POINTAGE NON PRIS EN COMPTE"
+			redirect(action: "show", id: employeeInstance.id)
+			return
+		}
+		//dailyTotal = recomputeDailyTotals(employeeInstance.id as int,calendar.get(Calendar.DAY_OF_MONTH),calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.YEAR))
+		employeeInstance.inAndOuts.add(inOrOut)
+		//dailyTotal.exitCount=dailyTotal.exitCount+1
+		
+		criteria = Absence.createCriteria()
+		def absence = criteria.get {
+			and {
+				eq('employee',employeeInstance)
+				eq('day',calendar.get(Calendar.DATE))
+				eq('month',calendar.get(Calendar.MONTH)+1)
+				eq('year',calendar.get(Calendar.YEAR))
+			}
+		}
+		if (absence!=null){
+			absence.delete()
+		}
+		employeeInstance.status=type.equals("S")?false:true
+	}
 		
 	def timeModification(def idList,def timeList,def dayList,def monthList, def yearList,Employee employee,def newTimeList,def fromRegularize) throws PointeuseException{
 		def deltaUp
@@ -883,6 +953,143 @@ class TimeManagerService {
 		
 	}
 	
+	
 
+	
+	
+	def recomputeDailyTotals(int userId,int month,int year){
+		Employee employee = Employee.get(userId)
+		
+		def tmpInOrOut
+		def dailyDelta=0
+		def timeDiff
+		def criteria = DailyTotal.createCriteria()
+		def dailyTotalList = criteria.list {
+				and {
+					eq('employee',employee)
+					eq('year',year)
+					eq('month',month)
+				}
+			}
+		
+		for (DailyTotal dailyTotal: dailyTotalList){
+			tmpInOrOut=null
+			dailyDelta=0
+			criteria=InAndOut.createCriteria()
+			def inOrOutList = criteria.list {
+				and {
+					eq('employee',employee)
+					eq('year',year)
+					eq('month',month)
+					eq('day',dailyTotal.day)
+				}
+				order('time','asc')
+			}
+			
+			for (InAndOut inOrOut:inOrOutList){
+				if (inOrOut.type.equals("E")){
+					tmpInOrOut=inOrOut
+				}else{
+					if (tmpInOrOut!=null){
+						use (TimeCategory){timeDiff=inOrOut.time-tmpInOrOut.time}
+						dailyDelta+=timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600
+					}
+				}
+			}
+			dailyTotal.elapsedSeconds=dailyDelta
+		}
+		
+	}
+	
+	def recomputeDailyTotals(int userId,int day,int month,int year){
+		Employee employee = Employee.get(userId)
+		
+		def tmpInOrOut
+		def dailyDelta=0
+		def timeDiff
+		def criteria = DailyTotal.createCriteria()
+		def dailyTotal = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',year)
+					eq('month',month)
+					eq('day',day)
+				}
+			}
+		
+	
+		criteria=InAndOut.createCriteria()
+		def inOrOutList = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('day',dailyTotal.day)
+			}
+			order('time','asc')
+		}
+		
+		for (InAndOut inOrOut:inOrOutList){
+			if (inOrOut.type.equals("E")){
+				tmpInOrOut=inOrOut
+			}else{
+				if (tmpInOrOut!=null){
+					use (TimeCategory){timeDiff=inOrOut.time-tmpInOrOut.time}
+					dailyDelta+=timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600
+				}
+			}
+		}
+		dailyTotal.elapsedSeconds=dailyDelta
+		return dailyTotal
+	}
+	def getDailyTotal(DailyTotal dailyTotal){
+		def criteria = InAndOut.createCriteria()
+		def elapsedSeconds = 0
+		def tmpInOrOut
+		def timeDifference
+		def inOrOutList = criteria.list {
+			and {
+				eq('employee',dailyTotal.employee)
+				eq('year',dailyTotal.year)
+				eq('month',dailyTotal.month)
+				eq('day',dailyTotal.day)
+			}
+			order('time','asc')
+		}
+		
+		for (InAndOut inOrOut:inOrOutList){
+			if (inOrOut.type.equals("E")){
+				tmpInOrOut=inOrOut
+			}else{
+				if (tmpInOrOut!=null){
+					use (TimeCategory){timeDifference=inOrOut.time-tmpInOrOut.time}
+					elapsedSeconds+=timeDifference.seconds + timeDifference.minutes*60+timeDifference.hours*3600
+				}
+			}
+		}
+		dailyTotal.elapsedSeconds=elapsedSeconds
+		return elapsedSeconds
+	}
+	
+	
+	def getDailyTotal(def inOrOutList){
+		def criteria = InAndOut.createCriteria()
+		def elapsedSeconds = 0
+		def tmpInOrOut
+		def timeDifference
+	
+		
+		for (InAndOut inOrOut:inOrOutList){
+			if (inOrOut.type.equals("E")){
+				tmpInOrOut=inOrOut
+			}else{
+				if (tmpInOrOut!=null){
+					use (TimeCategory){timeDifference=inOrOut.time-tmpInOrOut.time}
+					elapsedSeconds+=timeDifference.seconds + timeDifference.minutes*60+timeDifference.hours*3600
+				}
+			}
+		}
+		return elapsedSeconds
+	}
 	
 }

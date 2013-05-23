@@ -174,9 +174,9 @@ $(document).ready(function () {
 				<li style="vertical-align: middle;">
 					<g:actionSubmit value="pdf"  action="pdf" class="reportButton"/>		
 				</li>	
-								<li style="vertical-align: middle;">
+				<!--li style="vertical-align: middle;">
 					<g:actionSubmit value="sendMail"  action="sendMail" class="reportButton"/>		
-				</li>	
+				</li-->	
 				
 			
 				<li style="vertical-align: middle;"><modalbox:createLink controller="inAndOut" action="create"

@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="pointeuse.InAndOut" %>
+<%@ page import="pointeuse.Employee" %>
 <html>
 	<head>
 		<g:javascript library="prototype" />
@@ -63,7 +64,7 @@
 	  			</font>
 	  			<div id="last5days">
 	  				<h1>Evènements des 3 derniers jours</h1>
-		  			<table>
+		  			<table border="1">
 		  				<thead>
 		  				<th>Date</th>
 		  				<th>Total Journalier</th>
@@ -89,85 +90,70 @@
 		  				</tbody>
 		  			</table>
 	  			</div>
-	  			
-	  				<h1>
-	  					<g:formatDate format="E dd MMM yyyy'" date="${Calendar.instance.time}"/>
-	  					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	  					<span id="clock"><g:formatDate format="HH:mm:ss" date="${new Date()}"/></span>
-	  					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-	  					<g:message code="employee.daily.time" default="Last Name" />: ${humanTime.get(0)}H${humanTime.get(1)}
-	  					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-	  					<g:message code="employee.sup.time" default="Last Name" />: ${dailySupp.get(0)}H${dailySupp.get(1)}
-	  				</h1>
-	  			<g:if test="${flash.message}">
-	  			
-				<div class="message" role="status">${flash.message}</div>
-				</g:if>
-				
-				<g:if test="${inAndOuts==null || inAndOuts.size()}">
-				<table>
-					<thead>
-						<g:each in="${inAndOuts}" var="inAndOut">
-							<th>${inAndOut.type}</th>
-						</g:each>
-					</thead>
-					<tbody>
-						<tr>
-							<g:each in="${inAndOuts}" var="inAndOut">						
-								<g:if test="${inAndOut.regularization|| inAndOut.systemGenerated==true}">
-									<td bgcolor="#cccccc"><font color="red"><g:formatDate format="H:mm:s'" date="${inAndOut.time}"/></font></td>
-								</g:if>
-								<g:else>
-									<td><g:formatDate format="H:mm:s'" date="${inAndOut.time}"/></td>
-								</g:else>
-							</g:each>
-						</tr>
-					</tbody>	
-				</table>
-				</g:if>
-				<g:else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pas d'évenement pour le jour en cours <BR><BR></g:else>			
-				<g:form method="POST">
-					<g:hiddenField name="userId" value="${employee?.id}" />
-					<g:if test="${employee?.status}">
-						<g:if test="${!entranceStatus}">
-							<g:hiddenField name="type" value="E"/>
-							<%entryName='Entrer'%>
-						</g:if>
-						<g:else>
-							<g:hiddenField name="type" value="S"/> 
-							<%entryName='Sortir'%>
-						</g:else>	
-					</g:if>
-					<g:else>
-						<g:hiddenField name="type" value="E"/> <%entryName='Entrer'%>
-					</g:else>			
+	  			<div id='currentDay'>
+	  				<g:currentDay/>
+	  			</div>
+	  			<div id="form">
+	  			<g:form method="POST">
+	<g:hiddenField name="userId" value="${employee?.id}" />
+	<g:if test="${employee?.status}">
+		<g:if test="${!entranceStatus}">
+			<g:hiddenField name="type" value="E" />
+			<%entryName='Entrer'%>
+		</g:if>
+		<g:else>
+			<g:hiddenField name="type" value="S" />
+			<%entryName='Sortir'%>
+		</g:else>
+	</g:if>
+	<g:else>
+		<g:hiddenField name="type" value="E" />
+		<%entryName='Entrer'%>
+	</g:else>
 
-					<table border="0">
-						<tr>
-							<td>
-								<g:if test="${entryName.equals('Entrer')}">
-									<g:link class="entrybutton" action="addingEventToEmployee" params="[userId:employee?.id,type:entryName]">${entryName}</g:link>
-								</g:if>
-								<g:else>
-									<g:link class="exitbutton" action="addingEventToEmployee" params="[userId:employee?.id,type:entryName]">${entryName}</g:link>								
-								</g:else>
-								</td>
-							<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-							
-							<td>
-								<g:link class="loginbutton" controller="employee" action="reportLight" params="[userId:employee.id]">rapport</g:link>
-							</td>									
-							<td>					
-								<g:link class="loginbutton" url="/">${message(code: 'employee.disconnect.label', default: 'Sortie')}</g:link>
-							
-							</td>
-							<td></td>
-							<td><modalbox:createLink controller="inAndOut" action="create" id="${employee.id}" css="loginbutton" title="Ajouter un évenement oublié" width="500"><g:message code="inAndOut.regularization" default="Régul" /></modalbox:createLink></td>						
-						</tr>
-					</table>
-				</g:form>	
-				
-						
+	<table border="0">
+		<tr>
+			<td>
+				<g:if test="${entryName.equals('Entrer')}">
+					<g:remoteLink action="addingEventToEmployee" update="currentDay"
+					class="entrybutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
+				</g:if> 
+				<g:else>
+					<g:remoteLink action="addingEventToEmployee" update="currentDay"
+					class="exitbutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
+				</g:else>
+			</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+
+			<td><g:link class="loginbutton" controller="employee"
+					action="reportLight" params="[userId:employee.id]">rapport</g:link>
+			</td>
+			<td><g:link class="loginbutton" url="/">
+					${message(code: 'employee.disconnect.label', default: 'Sortie')}
+				</g:link></td>
+			<td></td>
+			<td><modalbox:createLink controller="inAndOut" action="create"
+					id="${employee.id}" css="loginbutton"
+					title="Ajouter un évenement oublié" width="500">
+					<g:message code="inAndOut.regularization" default="Régul" />
+				</modalbox:createLink></td>
+		</tr>
+	</table>
+</g:form>
+	  			
+	  			</div>
 			</div>
 	  </div>
 

@@ -72,10 +72,12 @@
 							noSelection="${['':'-']}" optionKey="id" optionValue="name"
 							onChange="${remoteFunction(action:'list', params:'\'site=\' + this.value',update:'divId')}" />
 					</g:else>
-					<g:textField id="q" name="q" onclick="if (this.value=='chercher un salarié') {this.value = '';}"
-                         value="${params.q ?: 'chercher un salarié'}" style="vertical-align: middle;"/>                              
-					<input type="image"
-						src="../images/skin/search.png" style="vertical-align: middle;">
+				
+
+		<g:remoteField id="q" action="search" update="divId" onclick="if (this.value=='chercher un salarié') {this.value = '';}"
+               name="q" value="${params.q ?: 'chercher un salarié'}" paramName="q" style="vertical-align: middle;"/>
+
+
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />   	      			
 					<g:hiddenField name="siteId" value="${siteId}" />   	
 										</g:form>	
