@@ -219,17 +219,19 @@
 		        					</td>
 								</tr>
 							</g:if>
-							<g:if test="${payableCompTime!=null}">						
-								<tr>
-									<td>${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
-									<td>
-		        						<table border="1" class="cartoucheValues" >
-		        							<thead></thead>
-		        							<tr><td style="font-weight:bold">${payableCompTime.get(0)}H${payableCompTime.get(1)==0?'00':payableCompTime.get(1)}</td><td style="font-weight:bold">${(payableCompTime.get(0)+payableCompTime.get(1)/60).setScale(2,2)}H</td></tr>
-		        						</table>
-		        					</td>
-								</tr>
-							</g:if>							
+							<g:if test="${employee.weeklyContractTime!=35}">
+								<g:if test="${payableCompTime!=null}">						
+									<tr>
+										<td>${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
+										<td>
+			        						<table border="1" class="cartoucheValues" >
+			        							<thead></thead>
+			        							<tr><td style="font-weight:bold">${payableCompTime.get(0)}H${payableCompTime.get(1)==0?'00':payableCompTime.get(1)}</td><td style="font-weight:bold">${(payableCompTime.get(0)+payableCompTime.get(1)/60).setScale(2,2)}H</td></tr>
+			        						</table>
+			        					</td>
+									</tr>
+								</g:if>		
+							</g:if>					
 						</tbody>
 					</table> 
 				</td>

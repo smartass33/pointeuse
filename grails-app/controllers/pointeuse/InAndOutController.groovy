@@ -111,8 +111,9 @@ class InAndOutController {
 			maxResults(1)
 		}
 			
-		
-		use (TimeCategory){timeDiff=calendar.time-lastIn.time}
+		if (lastIn != null){
+			use (TimeCategory){timeDiff=calendar.time-lastIn.time}
+		}
 		if (timeDiff !=null && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600) < 60 && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)!=0){
 			flash.message = message(code: 'employee.overlogging.error')
 			if (fromReport){
@@ -144,7 +145,7 @@ class InAndOutController {
 	
 
 		
-		timeManagerService.regularizeTimeNew(type,userId,inAndOutInstance,calendar)
+		timeManagerService.regularizeTime(type,userId,inAndOutInstance,calendar)
 		
 		if (inAndOutInstance.type.equals('E')){
 			flash.message = message(code: 'inAndOut.create.label', args: [message(code:'inAndOut.entry.label'), calendar.time])

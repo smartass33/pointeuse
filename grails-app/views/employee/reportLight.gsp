@@ -85,12 +85,10 @@
 			<table border="1" >
 				<thead>
 					<th width="150px" align="center">date</th>
-					<th width="50px">total<BR>du jour</th>
-					<th width="60px">absence</th>									
-					<g:each in="${(1..<7)}" var="val">
-						<th align="center" width="45px" >E ${val}</th>
-						<th align="center" width="45px" >S ${val}</th>
-					</g:each>
+					<th width="60px">total jour</th>
+					<th width="50px">absence</th>
+     				<th align="center" colspan="80">${message(code: 'events.label', default: 'report')}</th>
+
 				</thead>
 				<tbody >	
 					<g:each in="${weeklyAggregate}" status="k" var="week">
