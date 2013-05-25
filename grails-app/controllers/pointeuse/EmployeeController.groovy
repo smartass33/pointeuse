@@ -17,6 +17,9 @@ import groovy.time.TimeCategory
 import groovy.sql.Sql
 import groovy.time.TimeDuration
 
+import com.itextpdf.text.pdf.PdfReader
+import com.itextpdf.text.pdf.PdfCopyFields
+
 class EmployeeController {
 
 	def utilService
@@ -45,7 +48,7 @@ class EmployeeController {
 		def employeeInstanceList
 		def employeeInstanceTotal
 		def site
-		def siteId=params["siteId"]
+		def siteId=params["site"]
 		boolean back = (params["back"] != null && params["back"].equals("true")) ? true : false
 		
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
@@ -53,34 +56,41 @@ class EmployeeController {
 		if (params["site"]!=null && !params["site"].equals('')){
 			site = Site.get(params["site"] as int)
 			siteId=site.id
+			
 		}	
-		if (siteId!=null && !siteId.equals("")){
-			site = Site.get(siteId as int)
+		if (params["siteId"]!=null && !params["siteId"].equals("")){
+			site = Site.get(params["siteId"] as int)
+			siteId=site.id
+			
 		}		
 		
 		def user = springSecurityService.currentUser 
 		def username = user?.getUsername()
         params.max = Math.min(max ?: 20, 100)
-		if (site!=null){
-			if (back){
-				redirect(action: "list")
-				return
-			}else{
+		if (site!=null && !back){
 				employeeInstanceList = Employee.findAllBySite(site)
 				employeeInstanceTotal = employeeInstanceList.size()
-				render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+				render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]
 				return
-			}
-		}else{
-			if (params["site"].equals('')){
-				employeeInstanceList=Employee.list(params)
-				employeeInstanceTotal = employeeInstanceList.totalCount		
-				render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:null,site:null]
-				return
-			}
+			
 		}
-		employeeInstanceList=Employee.list(params)
-		employeeInstanceTotal = employeeInstanceList.totalCount
+		if (params["site"].equals('') && !back){
+			employeeInstanceList=Employee.list(params)
+			employeeInstanceTotal = employeeInstanceList.totalCount		
+			render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:null,site:null]
+			return
+		}
+		
+		
+		if (back){
+			employeeInstanceList=Employee.findAllBySite(site)
+			employeeInstanceTotal = employeeInstanceList.size()
+		}else{
+			employeeInstanceList=Employee.list(params)
+			employeeInstanceTotal = employeeInstanceList.totalCount
+		}
+		
+
 		[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
     }
 	
@@ -102,17 +112,25 @@ class EmployeeController {
             render(view: "create", model: [employeeInstance: employeeInstance])
             return
         }
-
+i
         flash.message = message(code: 'default.created.message', args: [message(code: 'employee.label', default: 'Employee'), employeeInstance.id])
         redirect(action: "show", id: employeeInstance.id,params: [isAdmin: isAdmin])
     }
 	
 	def search = {
-		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
+		params?.each{
+			print ("it: " + it)
+		}
+		def isAdmin = (params["isAdmin"].getAt(0) != null && params["isAdmin"].getAt(0).equals("true")) ? true : false
 		def query = "*"+params.q+"*"
 		if(query){
-			def srchResults = searchableService.search(query)		
-			render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: srchResults.results, employeeInstanceTotal: srchResults.results.size(),isAdmin:isAdmin]
+			def srchResults = searchableService.search(query)
+			def employeeList = []
+			for (Employee employee:srchResults.results){
+				def tmpEmployee = Employee.get(employee.id)
+				employeeList.add(tmpEmployee)
+			}
+			render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeList, employeeInstanceTotal: employeeList.size(),isAdmin:isAdmin]			
 			return
 		}else{
 			redirect(action: "list")
@@ -481,7 +499,9 @@ class EmployeeController {
 		Employee employeeInstance = Employee.get(userId)		
 		def currentDate = cal.time
 		def criteria
+		def entranceStatus=false
 		def timeDiff		
+		def flashMessage=true
 		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).time
 			
 		// liste les entrees de la journée et vérifie que cette valeur n'est pas supérieure à une valeur statique
@@ -519,14 +539,13 @@ class EmployeeController {
 			//empecher de represser le bouton pendant 5 min
 			if ((timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)<60){
 				flash.message = message(code: 'employee.overlogging.error')
-				redirect(action: "pointage", id: employeeInstance.id)
-				return
+				flashMessage=false
 			}
 		}
 		
 		// initialisation
-		def inOrOut = timeManagerService.initializeTotals(employeeInstance,currentDate,type,null)
-		
+		if (flashMessage)
+			def inOrOut = timeManagerService.initializeTotals(employeeInstance,currentDate,type,null)
 		
 		criteria = InAndOut.createCriteria()
 		def inAndOuts = criteria.list {
@@ -539,20 +558,30 @@ class EmployeeController {
 			}
 		}
 		
+		if (lastIn!=null){
+			entranceStatus = lastIn.type.equals("S") ? true : false
+		}else{
+			entranceStatus=true
+		}
+		
 		def humanTime = timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(inAndOuts))
 		def dailySupp = timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(inAndOuts)-DailyTotal.maxWorkingTime,0))
-		
+		/*
 		def entranceStatus=true
 		if (inAndOuts==null || inAndOuts.size()==0){
 			entranceStatus=true
 		}
+		*/
 		employeeInstance.status = type.equals("S") ? false : true
 		
 		if (type.equals("E")){
+			if (flashMessage)
 			flash.message = message(code: 'inAndOut.create.label', args: [message(code: 'inAndOut.entry.label', default: 'exit'), cal.time])
 		}else{
+			if (flashMessage)		
 			flash.message = message(code: 'inAndOut.create.label', args: [message(code: 'inAndOut.exit.label', default: 'exit'), cal.time])
 		}
+
 		def model=[employee: employeeInstance,humanTime:humanTime, dailySupp:dailySupp,entranceStatus:entranceStatus,inAndOuts:inAndOuts]
 		render template: "/common/currentDayTemplate", model:model
 	}
@@ -687,9 +716,13 @@ class EmployeeController {
 			timeManagerService.timeModification( idList, timeList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
 		}catch(PointeuseException ex){
 			flash.message = message(code: ex.message)
-			def back = report(employee.id as int,month as int,year as int)
-			render(view: "report", model: back)
-			return
+			if (fromRegularize){
+			render(view: "index")
+			}else{
+			def retour = report(employee.id as long,month as int,year as int)
+			render(view: "report", model: retour)
+			}
+			
 		}
 	
 		if (fromRegularize){
@@ -714,20 +747,24 @@ class EmployeeController {
 		calendar.set(Calendar.WEEK_OF_YEAR,1)	
 		
 		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
-			criteria = WeeklyTotal.createCriteria()
-			weeklyTotal = criteria.get {
+
+			
+			criteria = DailyTotal.createCriteria()
+			def dailyTotalList= criteria.list{
 				and {
 					eq('employee',employee)
-					eq('week',calendar.getAt(Calendar.WEEK_OF_YEAR))
-					eq('year',calendar.getAt(Calendar.YEAR))
+					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
+					eq('year',calendar.get(Calendar.YEAR))
 				}
+				
 			}
-			if (weeklyTotal !=null){
-				def elapsedTime = timeManagerService.computeHumanTime(weeklyTotal.elapsedSeconds)
-				mapByWeek.put(calendar.get(Calendar.WEEK_OF_YEAR), elapsedTime)		
-			}else{
-				mapByWeek.put(calendar.get(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(0))
+			def totalTime
+			for (DailyTotal dailyTotal:dailyTotalList){
+				totalTime = timeManagerService.getDailyTotal(dailyTotal)
+				mapByWeek.put(calendar.get(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(totalTime))
+				
 			}
+
 			
 			if (calendar.get(Calendar.WEEK_OF_YEAR) == calendar.getActualMaximum(Calendar.WEEK_OF_YEAR)){
 				break
@@ -1175,6 +1212,7 @@ class EmployeeController {
 		try {	
 			def username = params["username"]
 			def employee
+			def entranceStatus
 			def mapByDay=[:]
 			def totalByDay=[:]
 			def dailyCriteria
@@ -1253,10 +1291,25 @@ class EmployeeController {
 			def humanTime = timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(dailyTotal))
 			def dailySupp = timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(dailyTotal)-DailyTotal.maxWorkingTime,0))
 			
+			
+			if (inAndOuts!=null){
+				def max = inAndOuts.size()
+				if (max>0){
+				def  lastEvent = inAndOuts.get(max-1)
+				entranceStatus = lastEvent.type.equals("S") ? false : true
+				}else{
+				entranceStatus=false
+				
+				}
+			}else{
+				entranceStatus=false
+			}
+			/*
 			def entranceStatus=true
 			if (inAndOuts==null || inAndOuts.size()==0){
 				entranceStatus=true
-			}			
+			}	
+			*/		
 			
 			[employee: employee,inAndOuts:inAndOuts,dailyTotal:dailyTotal,humanTime:humanTime, dailySupp:dailySupp,mapByDay:mapByDay,entranceStatus:entranceStatus,totalByDay:totalByDay]
 		}
@@ -1269,6 +1322,122 @@ class EmployeeController {
 	}	
 
 	def pdf(){
+		params?.each{
+			print ("it: " + it)
+		}
+		def bytesMap=[:]
+		def fileNameList=[]
+		def userId
+		def site
+		def siteId
+		Calendar calendar = Calendar.instance
+		OutputStream outputStream;
+		log.error('method pdf called with parameters:')
+		def myDate = params["myDate"]
+		if (myDate==null || myDate.equals("")){
+			myDate=calendar.time
+		}
+	
+		if (params["userId"]!=null && !params["userId"].equals("")){
+			userId= params["userId"] as int
+		}
+
+		if (params["site.id"]!=null && !params["site.id"].equals('')){
+			siteId = params["site.id"].toInteger()
+			site = Site.get(siteId)
+			siteId=site.id
+		}else{
+			flash.message = message(code: 'pdf.site.selection.error')
+		
+        	redirect(action: "list")
+			return
+		}
+		
+		
+		
+		def folder = grailsApplication.config.pdf.directory
+
+		
+		def employeeList = Employee.findAllBySite(site)
+		for (Employee employee:employeeList){			
+			log.error('method pdf called with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
+			
+			def cartoucheTable = cartouche(employee.id as int,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+			def workingDays=cartoucheTable.get(3)
+			def holiday=cartoucheTable.get(4)
+			def rtt=cartoucheTable.get(5)
+			def sickness=cartoucheTable.get(6)
+			def sansSolde=cartoucheTable.get(7)
+			def monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get(8))
+			def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(9))
+			def yearlyHoliday=cartoucheTable.get(11)
+			def yearlyRtt=cartoucheTable.get(12)
+			def yearlySickness=cartoucheTable.get(13)
+			def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get(14))
+			def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(15))
+			def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get(16))
+			def yearlySansSolde=cartoucheTable.get(17)
+			def openedDays = timeManagerService.computeMonthlyHours(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+	
+			def yearInf
+			def yearSup
+			if ((calendar.get(Calendar.MONTH)+1)>5){
+				yearInf=calendar.get(Calendar.YEAR)
+				yearSup=calendar.get(Calendar.YEAR)+1
+			}else{
+				yearInf=calendar.get(Calendar.YEAR)-1
+				yearSup=calendar.get(Calendar.YEAR)
+			}		
+			def modelCartouche=[weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,firstName:employee.firstName,lastName:employee.lastName,yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde]
+			def modelReport=report(employee.id as int,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+			modelReport<<modelCartouche
+			// Get the bytes
+			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/completeReportTemplate', model: modelReport)	
+			//outputStream = new FileOutputStream (folder+'/'+filename);
+			
+
+			def filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
+			fileNameList.add(filename)
+			
+			
+			//try {
+				outputStream = new FileOutputStream (folder+'/'+filename);
+				bytes.writeTo(outputStream);
+		//		return
+		//	}finally {
+				if(bytes)
+				   bytes.close();
+	
+				if(outputStream)
+					outputStream.close();
+				
+		//	}
+		}
+			PdfCopyFields finalCopy = new PdfCopyFields(new FileOutputStream(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'));
+			finalCopy.open();
+				for (String tmpFile:fileNameList){
+					PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
+					finalCopy.addDocument(pdfReader);
+					
+				}
+				finalCopy.close();
+				
+			
+			
+			File file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+			
+			response.setContentType("application/octet-stream")
+			response.setHeader("Content-disposition", "filename=${file.name}")
+			response.outputStream << file.bytes
+			return
+			
+
+	
+		
+	}
+	
+	
+	def userPDF(){
 		log.error('method pdf called with parameters:')
 		def myDate = params["myDate"]
 		Calendar calendar = Calendar.instance
@@ -1306,12 +1475,12 @@ class EmployeeController {
 		}else{
 			yearInf=calendar.get(Calendar.YEAR)-1
 			yearSup=calendar.get(Calendar.YEAR)
-		}		
+		}
 		def modelCartouche=[weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,firstName:employee.firstName,lastName:employee.lastName,yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde]
 		def modelReport=report(userId,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 		modelReport<<modelCartouche
 		// Get the bytes
-		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/completeReportTemplate', model: modelReport)	
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/completeReportTemplate', model: modelReport)
 		OutputStream outputStream;
 
 		def folder = grailsApplication.config.pdf.directory
@@ -1335,6 +1504,7 @@ class EmployeeController {
 			return
 		}
 	}
+	
 	
 	def sendEmail(){
 		sendMail{

@@ -6,9 +6,9 @@
 <table id="employee-table">
 	<thead>
 		<tr>
-			<g:sortableColumn property="lastName"
+			<g:sortableColumn property="lastName" style="width:150px;"
 				title="${message(code: 'employee.lastName.label', default: 'Last Name')}" />
-			<g:sortableColumn property="firstName"
+			<g:sortableColumn property="firstName" style="width:100px;"
 				title="${message(code: 'employee.firstName.label', default: 'First Name')}" />	
 			<g:sortableColumn property="site"
 				title="${message(code: 'employee.site.label', default: 'Site')}" />

@@ -90,73 +90,13 @@
 		  				</tbody>
 		  			</table>
 	  			</div>
+	  			<g:form method="POST">
+	  			
 	  			<div id='currentDay'>
 	  				<g:currentDay/>
 	  			</div>
-	  			<div id="form">
-	  			<g:form method="POST">
-	<g:hiddenField name="userId" value="${employee?.id}" />
-	<g:if test="${employee?.status}">
-		<g:if test="${!entranceStatus}">
-			<g:hiddenField name="type" value="E" />
-			<%entryName='Entrer'%>
-		</g:if>
-		<g:else>
-			<g:hiddenField name="type" value="S" />
-			<%entryName='Sortir'%>
-		</g:else>
-	</g:if>
-	<g:else>
-		<g:hiddenField name="type" value="E" />
-		<%entryName='Entrer'%>
-	</g:else>
-
-	<table border="0">
-		<tr>
-			<td>
-				<g:if test="${entryName.equals('Entrer')}">
-					<g:remoteLink action="addingEventToEmployee" update="currentDay"
-					class="entrybutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
-				</g:if> 
-				<g:else>
-					<g:remoteLink action="addingEventToEmployee" update="currentDay"
-					class="exitbutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
-				</g:else>
-			</td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-
-			<td><g:link class="loginbutton" controller="employee"
-					action="reportLight" params="[userId:employee.id]">rapport</g:link>
-			</td>
-			<td><g:link class="loginbutton" url="/">
-					${message(code: 'employee.disconnect.label', default: 'Sortie')}
-				</g:link></td>
-			<td></td>
-			<td><modalbox:createLink controller="inAndOut" action="create"
-					id="${employee.id}" css="loginbutton"
-					title="Ajouter un évenement oublié" width="500">
-					<g:message code="inAndOut.regularization" default="Régul" />
-				</modalbox:createLink></td>
-		</tr>
-	</table>
-</g:form>
-	  			
-	  			</div>
+	  			</g:form>
 			</div>
-	  </div>
-
-				
+	  </div>			
 	</body>
 </html>

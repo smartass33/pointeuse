@@ -16,61 +16,7 @@
 	</title>
 	<link href="main.css" rel="stylesheet" type="text/css">
 
-	<!--style type="text/css" media="screen">
-	input.reportButton {
-   	-webkit-box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
-	-moz-box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
-	box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
-	border-bottom-color:#333;
-	border:1px solid #61c4ea;
-	background-color:#7cceee;
-	border-radius:5px;
-	-moz-border-radius:5px;
-	-webkit-border-radius:5px;
-	color:#333;
-	font-family:'Verdana',Arial,sans-serif;
-	font-size:14px;
-	text-shadow:#b2e2f5 0 1px 0;
-	padding:5px
-   }
-input.reportButton:hover {
-   border-top-color: #929ca3;
-   background: #929ca3;
-   color: #fffaff;
-   }
-input.reportButton:active {
-   border-top-color: #1b435e;
-   background: #1b435e;
-   }
-		
-			a.reportButton {
-   	-webkit-box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
-	-moz-box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
-	box-shadow:rgba(0,0,0,0.2) 0 1px 0 0;
-	border-bottom-color:#333;
-	border:1px solid #61c4ea;
-	background-color:#7cceee;
-	border-radius:5px;
-	-moz-border-radius:5px;
-	-webkit-border-radius:5px;
-	color:#333;
-	font-family:'Verdana',Arial,sans-serif;
-	font-size:14px;
-	text-shadow:#b2e2f5 0 1px 0;
-	padding:5px
-   }
-a.reportButton:hover {
-   border-top-color: #929ca3;
-   background: #929ca3;
-   color: #fffaff;
-   }
-a.reportButton:active {
-   border-top-color: #1b435e;
-   background: #1b435e;
-   }
-		
-	
-	</style-->
+
 <style type="text/css">
 .reportButton {
 	-moz-box-shadow:inset 0px 1px 0px 0px #d9fbbe;
@@ -102,45 +48,11 @@ a.reportButton:active {
 	top:1px;
 }
 
-/*
-#nav {
-  position: absolute;
-  top: 0;
-  margin-top: 60px;
-  margin-bottom: 300px;
-  
-  border-top: 1px solid purple;
-  padding-top: 0px;
-  padding-bottom: 0px;
-}
 
-#nav.fixed {
-  position: fixed;
-  top: 0;
-}
-
-*/
 </style>
 </head>
 <body>
-<!--script type="text/javascript">
-$(document).ready(function () {  
-  var top = $('#nav').offset().top - parseFloat($('#nav').css('marginTop').replace(/auto/, 0));
-  $(window).scroll(function (event) {
-    // what the y position of the scroll is
-    var y = $(this).scrollTop();
-  
-    // whether that's below the form
-    if (y >= top) {
-      // if so, ad the fixed class
-      $('#nav').addClass('fixed');
-    } else {
-      // otherwise remove it
-      $('#nav').removeClass('fixed');
-    }
-  });
-});
-</script-->
+
 <g:form method="post" >
 	<a href="#list-employee" class="skip" tabindex="-1"><g:message
 			code="default.link.skip.label" default="Skip to content&hellip;" /></a>
@@ -172,7 +84,7 @@ $(document).ready(function () {
 					<g:actionSubmit value="appliquer"  action="modifyTime" class="reportButton"/>		
 				</li>
 				<li style="vertical-align: middle;">
-					<g:actionSubmit value="pdf"  action="pdf" class="reportButton"/>		
+					<g:actionSubmit value="pdf"  action="userPDF" class="reportButton"/>		
 				</li>	
 				<!--li style="vertical-align: middle;">
 					<g:actionSubmit value="sendMail"  action="sendMail" class="reportButton"/>		

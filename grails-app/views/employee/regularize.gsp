@@ -22,6 +22,13 @@
 	  			
 	  			<div id="last5days">
 	  				<h1><g:message code="event.regularization.label" default="Last Name" /></h1>
+	  						<g:if test="${flash.message}">
+			<div class="message">
+				${flash.message}
+			</div>
+			
+
+		</g:if>
 		  			<table border="1">
 		  				<thead>
 		  				<th><g:message code="events.label" default="Last Name" /></th>
