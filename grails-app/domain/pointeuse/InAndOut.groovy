@@ -38,7 +38,7 @@ class InAndOut {
 	}
 	
 	String toString(){
-		return 'inAndOut: '+ this.employee.lastName+' '+this.year+'-'+this.month+'-'+this.day+' '+this.time
+		return 'inAndOut: '+ this.employee.lastName+' '+this.year+'-'+this.month+'-'+this.day+' '+this.time + ' '+this.type
 	}
 	
     static constraints = {
