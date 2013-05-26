@@ -83,8 +83,12 @@ class EmployeeController {
 		
 		
 		if (back){
-			employeeInstanceList=Employee.findAllBySite(site)
-			employeeInstanceTotal = employeeInstanceList.size()
+			if (site!=null){
+				employeeInstanceList=Employee.findAllBySite(site)
+			}else {
+				employeeInstanceList=Employee.findAll()	
+				employeeInstanceTotal = employeeInstanceList.size()
+			}
 		}else{
 			employeeInstanceList=Employee.list(params)
 			employeeInstanceTotal = employeeInstanceList.totalCount
@@ -112,7 +116,7 @@ class EmployeeController {
             render(view: "create", model: [employeeInstance: employeeInstance])
             return
         }
-i
+
         flash.message = message(code: 'default.created.message', args: [message(code: 'employee.label', default: 'Employee'), employeeInstance.id])
         redirect(action: "show", id: employeeInstance.id,params: [isAdmin: isAdmin])
     }
@@ -537,7 +541,7 @@ i
 			def LIT = lastIn.time
 			use (TimeCategory){timeDiff=currentDate-LIT}
 			//empecher de represser le bouton pendant 5 min
-			if ((timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)<60){
+			if ((timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)<30){
 				flash.message = message(code: 'employee.overlogging.error')
 				flashMessage=false
 			}
@@ -1322,9 +1326,6 @@ i
 	}	
 
 	def pdf(){
-		params?.each{
-			print ("it: " + it)
-		}
 		def bytesMap=[:]
 		def fileNameList=[]
 		def userId

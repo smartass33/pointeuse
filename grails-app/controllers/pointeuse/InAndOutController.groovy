@@ -114,7 +114,7 @@ class InAndOutController {
 		if (lastIn != null){
 			use (TimeCategory){timeDiff=calendar.time-lastIn.time}
 		}
-		if (timeDiff !=null && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600) < 60 && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)!=0){
+		if (timeDiff !=null && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600) < 30 && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)!=0){
 			flash.message = message(code: 'employee.overlogging.error')
 			if (fromReport){
 				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])

@@ -6,31 +6,31 @@
 <table id="employee-table">
 	<thead>
 		<tr>
-			<g:sortableColumn property="lastName" style="width:150px;"
+			<g:sortableColumn property="lastName" style="width:150px;text-align:center"
 				title="${message(code: 'employee.lastName.label', default: 'Last Name')}" />
-			<g:sortableColumn property="firstName" style="width:100px;"
+			<g:sortableColumn property="firstName" style="width:100px;text-align:center"
 				title="${message(code: 'employee.firstName.label', default: 'First Name')}" />	
 			<g:sortableColumn property="site"
 				title="${message(code: 'employee.site.label', default: 'Site')}" />
 			<g:if test="${!isAdmin}">
-				<th>${message(code: 'employee.annualReport.label', default: 'Report')}</th>
-				<th>${message(code: 'employee.monthly.report.label', default: 'Report')}</th>
-				<g:sortableColumn property="status"
+				<th style="width:70px;text-align:center">${message(code: 'employee.annualReport.label', default: 'Report')}</th>
+				<th style="width:70px;text-align:center">${message(code: 'employee.monthly.report.label', default: 'Report')}</th>
+				<g:sortableColumn property="status" style="text-align:center"
 					title="${message(code: 'employee.entry.status', default: 'Entry')}" />
-				<th>${message(code: 'employee.lastTime.label', default: 'Entry')}</th>
-				<g:sortableColumn property="hasError"
+				<th style="text-align:center">${message(code: 'employee.lastTime.label', default: 'Entry')}</th>
+				<g:sortableColumn property="hasError" style="width:60px;text-align:center"
 					title="${message(code: 'employee.hasErrors', default: 'Errors')}" />
 			</g:if>
 			<g:else>
-				<g:sortableColumn property="lastName"
+				<g:sortableColumn property="lastName" style="width:150px;text-align:center"
 					title="${message(code: 'employee.username.label', default: 'User Name')}" />
-				<g:sortableColumn property="weeklyContractTime"
+				<g:sortableColumn property="weeklyContractTime" style="width:90px;text-align:center"
 					title="${message(code: 'employee.weeklyContractTime.short.label', default: 'weeklyContractTime')}" />
-				<g:sortableColumn property="arrivalDate"
+				<g:sortableColumn property="arrivalDate" style="text-align:center"
 					title="${message(code: 'employee.arrivalDate.short.label', default: 'arrivalDate')}" />
-				<g:sortableColumn property="service"
+				<g:sortableColumn property="service" style="text-align:center"
 					title="${message(code: 'employee.service.label', default: 'service')}" />
-				<g:sortableColumn property="matricule"
+				<g:sortableColumn property="matricule" style="text-align:center"
 					title="${message(code: 'employee.matricule.label', default: 'matricule')}" />
 			</g:else>
 		</tr>
