@@ -67,7 +67,10 @@
 						onChange="${remoteFunction(action:'list', params:'\'site=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'divId')}" />
 				</g:else>		
 				
-				
+				<g:remoteField id="q" action="search" update="divId"
+					onclick="if (this.value=='chercher un salarié') {this.value = '';}"
+					name="q" value="${params.q ?: 'chercher un salarié'}" paramName="q"
+					params="[isAdmin:isAdmin]" style="vertical-align: middle;" />
 						${message(code: 'default.period.label', default: 'List')}: <g:datePicker
 							name="myDate" value="${period ? period : new Date()}" 
 							precision="month" noSelection="['':'-Choose-']" style="vertical-align: middle;"/>

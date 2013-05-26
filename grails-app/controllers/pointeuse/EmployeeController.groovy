@@ -122,9 +122,6 @@ class EmployeeController {
     }
 	
 	def search = {
-		params?.each{
-			print ("it: " + it)
-		}
 		def isAdmin = (params["isAdmin"].getAt(0) != null && params["isAdmin"].getAt(0).equals("true")) ? true : false
 		def query = "*"+params.q+"*"
 		if(query){
@@ -181,7 +178,7 @@ class EmployeeController {
 		def yearlyCounter = 0
 		
 		// set the date end of may
-		calendar.set(Calendar.MONTH,4)
+		calendar.set(Calendar.MONTH,month-1)
 		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))  
 		calendar.set(Calendar.HOUR_OF_DAY,23)
 		calendar.set(Calendar.MINUTE,59)
@@ -265,7 +262,7 @@ class EmployeeController {
 		monthsAggregate = criteria.list{
 			and {
 				eq('employee',employee)
-				le('month',5)
+				le('month',month)
 				eq('year',year)
 			}
 		}
@@ -296,7 +293,7 @@ class EmployeeController {
 		
 		bankHolidayList = criteria.list{
 			and {
-				lt('month',6)
+				le('month',month)
 				eq('year',year)
 			}
 		}
@@ -421,11 +418,15 @@ class EmployeeController {
 		def monthlyTotal=params["monthlyTotalRecap"].getAt(0) as int
 		def criteria
 		def updatedSelection = params["updatedSelection"].toString()
+		if (updatedSelection.equals('G'))
+			updatedSelection = AbsenceType.GROSSESSE
+		if (updatedSelection.equals('-'))
+			updatedSelection = AbsenceType.ANNULATION
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 		Date date = dateFormat.parse(day)
 		def cal= Calendar.instance
 		cal.time=date
-		if (!updatedSelection.equals('-') && !updatedSelection.equals('')){
+		if (!updatedSelection.equals('')){
 			// check if an absence was already logged:
 			criteria = Absence.createCriteria()
 			
@@ -563,19 +564,18 @@ class EmployeeController {
 		}
 		
 		if (lastIn!=null){
-			entranceStatus = lastIn.type.equals("S") ? true : false
+			if (flashMessage){
+				entranceStatus = lastIn.type.equals("S") ? true : false
+			}else{
+				entranceStatus = lastIn.type.equals("S") ? false : true
+			}
 		}else{
 			entranceStatus=true
 		}
 		
 		def humanTime = timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(inAndOuts))
 		def dailySupp = timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(inAndOuts)-DailyTotal.maxWorkingTime,0))
-		/*
-		def entranceStatus=true
-		if (inAndOuts==null || inAndOuts.size()==0){
-			entranceStatus=true
-		}
-		*/
+
 		employeeInstance.status = type.equals("S") ? false : true
 		
 		if (type.equals("E")){

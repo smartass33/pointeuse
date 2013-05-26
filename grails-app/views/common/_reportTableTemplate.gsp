@@ -88,11 +88,23 @@
                   </g:if>
 				<g:else>
 					<g:if test="${holidayMap.get(entries.key) != null}">
-                  	${holidayMap.get(entries.key).type}
-                  	</g:if>
-                  	<g:else>
-                  	-
-                  	</g:else>
+	                      <font size="2"> 
+	                      <g:select
+	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', 
+								  params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),monthlyTotalRecap:(monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2)),payableSupTime:(payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2)),payableCompTime:(payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))])}"
+	                          name="absenceType" from="${AbsenceType.values()}"
+	                          value="${AbsenceType}" optionKey="key"
+	                          noSelection="${['-':holidayMap.get(entries.key).type]}" />
+	
+	                      </font>
+	                </g:if> 
+	                <g:else>
+	                      <g:select
+	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', 
+								  params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),monthlyTotalRecap:(monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2)),payableSupTime:(payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2)),payableCompTime:(payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))])}"
+	                          name="absenceType" from="${['-',AbsenceType.GROSSESSE]}"
+	                          noSelection="${['':'-']}" />
+	                 </g:else>
                   </g:else>
                   </td>
                   <g:each in="${entries.value}" var="inOrOut">
