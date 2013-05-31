@@ -33,7 +33,7 @@
 		  				<thead>
 		  				<th><g:message code="events.label" default="Last Name" /></th>
 		  				<th>
-		  					<g:actionSubmit value="appliquer"  action="modifyTime"/>
+		  					<g:actionSubmit value="appliquer" class="listButton"  action="modifyTime"/>
 		  				</th>
 		  				</thead>
 		  				<tbody>
@@ -53,7 +53,7 @@
 				  			</g:each>
 		  				</tbody>
 		  			</table>
-	  			</div
+	  			</div>
 	  				<g:hiddenField name="userId" value="${employee.id}" />
 	  				<g:hiddenField name="employee.id" value="${employee.id}" />
 			  		<g:hiddenField name="fromRegularize" value="${true}" />
