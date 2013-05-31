@@ -284,6 +284,9 @@ input, select, textarea {
 	border: 1px solid #cccccc;
 	font-size: 1em;
 	padding: 0.2em 0.4em;
+	-moz-border-radius:5px; /* Firefox */
+-webkit-border-radius: 5px; /* Safari, Chrome */
+-khtml-border-radius: 5px; /* KHTML */
 }
 
 searchInput {
@@ -677,14 +680,12 @@ a.exitbutton {
 	padding:6px 12px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #b23e35;
-}
-a.exitbutton :hover {
+}a.exitbutton :hover {
 	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ce0100), color-stop(1, #fe1a00) );
 	background:-moz-linear-gradient( center top, #ce0100 5%, #fe1a00 100% );
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ce0100', endColorstr='#fe1a00');
 	background-color:#ce0100;
-}
-a.exitbutton :active {
+}a.exitbutton :active {
 	position:relative;
 	top:1px;
 }
@@ -949,7 +950,7 @@ a.skip {
 	font-family:arial;
 	font-size:15px;
 	font-weight:bold;
-	padding:6px 12px;
+	padding:6px 20px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #ffffff;
 }.listButton:hover {
@@ -977,9 +978,9 @@ a.listButton {
 	display:inline-block;
 	color:#333233;
 	font-family:arial;
-	font-size:15px;
+	font-size:14px;
 	font-weight:bold;
-	padding:6px 12px;
+	padding:1px 10px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #ffffff;
 }a.listButton:hover {
@@ -991,3 +992,35 @@ a.listButton {
 	position:relative;
 	top:1px;
 }
+
+a.modalbox {
+	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #bdbdbd) );
+	background:-moz-linear-gradient( center top, #ededed 5%, #bdbdbd 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#bdbdbd');
+	background-color:#ededed;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	color:#333233;
+	font-family:arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:7px 20px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #ffffff;
+}a.modalbox:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #bdbdbd), color-stop(1, #ededed) );
+	background:-moz-linear-gradient( center top, #bdbdbd 5%, #ededed 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#bdbdbd', endColorstr='#ededed');
+	background-color:#bdbdbd;
+}a.modalbox:active {
+	position:relative;
+	top:1px;
+}
+
+
