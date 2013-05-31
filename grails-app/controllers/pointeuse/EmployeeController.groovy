@@ -45,6 +45,7 @@ class EmployeeController {
 
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
+		log.error('browser version: '+request.getHeader('User-Agent') )
 		def employeeInstanceList
 		def employeeInstanceTotal
 		def site
@@ -52,6 +53,7 @@ class EmployeeController {
 		boolean back = (params["back"] != null && params["back"].equals("true")) ? true : false
 		
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
+		
 		
 		if (params["site"]!=null && !params["site"].equals('')){
 			site = Site.get(params["site"] as int)
@@ -94,7 +96,8 @@ class EmployeeController {
 			employeeInstanceTotal = employeeInstanceList.totalCount
 		}
 		
-
+		//response.setHeader "Cache-Control", "max-age=0,no-cache,no-store,must-revalidate,post-check=0,pre-check=0"
+		//response.addHear "Expires", "Mon, 26 Jul 1997 05:00:00 GMT"
 		[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
     }
 	
@@ -1025,16 +1028,20 @@ class EmployeeController {
 		def weeklySupTime
 		def currentWeek
 		
+
 		if (myDate != null && myDate instanceof String){
 			SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 			myDate = dateFormat.parse(myDate)			
 		}
-			
-		if (userId==null){
-			userId = params["userId"]
+			/*
+		if (userId==null && params["userId"] != null && !params["userId"].equals("")){
+			userId = params["userId"] as long
+		}*/
+		if (userId==null && params["userId"] != null ){
+			employee = Employee.get(params["userId"])
+		}else{
+			employee = Employee.get(userId)
 		}
-		employee = Employee.get(userId)
-	
 		//get last day of the month
 		if (myDate==null){
 			if (yearPeriod!=0){

@@ -2,6 +2,20 @@
 <%@ page import="pointeuse.Employee"%>
 <%@ page import="pointeuse.InAndOut"%>
 
+<div class="toggle">
+    <label><input type="radio" name="toggle"><span>On</span></label>    
+</div>
+<div class="toggle">
+    <label><input type="radio" name="toggle"><span>Off</span></label>
+</div>
+
+<div id="donate">
+    <label class="blue"><input type="radio" name="toggle" onclick="document.getElementById('employee-table').className='showDetail';if(document.all){document.getElementById('table').getElementsByTagName('th')[0].style.display='block';}" ><span>SHOW</span></label>
+    <label class="green"><input type="radio" name="toggle" onclick="document.getElementById('employee-table').className='';"><span>HIDE</span></label>
+</div>
+
+			<input type="button" value="Show" onclick="document.getElementById('employee-table').className='showDetail';if(document.all){document.getElementById('table').getElementsByTagName('th')[0].style.display='block';}" />
+			<input type="button" value="Hide" onclick="document.getElementById('employee-table').className='';" />
 
 <table id="employee-table">
 	<thead>
@@ -18,7 +32,7 @@
 				<g:sortableColumn property="status" style="text-align:center"
 					title="${message(code: 'employee.entry.status', default: 'Entry')}" />
 				<th style="text-align:center">${message(code: 'employee.lastTime.label', default: 'Entry')}</th>
-				<g:sortableColumn property="hasError" style="width:60px;text-align:center"
+				<g:sortableColumn class="moreDetail"  property="hasError" style="width:60px;text-align:center"
 					title="${message(code: 'employee.hasErrors', default: 'Errors')}" />
 			</g:if>
 			<g:else>
@@ -36,14 +50,14 @@
 		</tr>
 	</thead>
 
-	<tbody id='body_update'>
+	<tbody id='body_update' style="border:1px;">
 		<g:each in="${employeeInstanceList}" status="i" var="employeeInstance">
 			<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-				<td style="width:80px"><g:link action="edit" id="${employeeInstance.id}"
+				<td style="width:120px"><g:link action="edit" id="${employeeInstance.id}"
 						params="${[isAdmin:isAdmin,siteId:siteId]}">
 						${fieldValue(bean: employeeInstance, field: "lastName")}
 					</g:link></td>
-				<td style="width:80px"><g:link action="edit" id="${employeeInstance.id}"
+				<td style="width:120px"><g:link action="edit" id="${employeeInstance.id}"
 						params="${[isAdmin:isAdmin,siteId:siteId]}">
 						${fieldValue(bean: employeeInstance, field: "firstName")}
 					</g:link></td>
@@ -51,17 +65,9 @@
 						${employeeInstance?.site.name}
 					</g:if></td>
 				<g:if test="${!isAdmin}">
-					<g:form>
-						<g:hiddenField name="userId" value="${employeeInstance?.id}" />
-						<g:hiddenField name="siteId" value="${siteId}" />
-						<td><g:actionSubmit class="listButton"
-								value="${message(code: 'employee.annualReport.label', default: 'Report')}"
-								action="annualReport" /></td>
-						<td><g:actionSubmit class="listButton"
-								value="${message(code: 'employee.monthly.report.label', default: 'Report')}"
-								action="report" /></td>
-					</g:form>
-					<g:form controller="employee">
+					<td style="border:1px;width:200px"><g:link controller="employee" action='annualReport' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
+					<td style="border:1px;width:200px"><g:link controller="employee" action='report' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link></td>
+				<g:form controller="employee">
 						<g:hiddenField name="userId" value="${employeeInstance?.id}" />
 						<td><g:if test="${employeeInstance?.status}">
 								<g:if
@@ -85,13 +91,13 @@
 							</td>						
 						</g:else>
 						<g:if test="${employeeInstance?.hasError}">
-							<td>
-								${message(code: 'default.yes.label', default: 'Yes')}
+							<td class="moreDetail" style="text-align:middle;" ondblclick="this.style.display = 'none';">
+								<img alt="tick" src="../images/skin/tick.png" style="vertical-align: middle;horizontal-align:middle;">
 							</td>
 						</g:if>
 						<g:else>
-							<td>
-								${message(code: 'default.no.label', default: 'No')}
+							<td class="moreDetail" style="text-align:middle;" ondblclick="this.style.display = 'none';">
+								<img alt="cross" src="../images/skin/cross.png" style="vertical-align: middle;horizontal-align:middle;">
 							</td>
 						</g:else>
 					</g:form>

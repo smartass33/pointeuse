@@ -86,15 +86,15 @@
 				</g:else>
 			</td>
 			<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-			<td><g:link class="listButton" controller="employee"
+			<td><g:link class="modalbox" controller="employee"
 					action="reportLight" params="[userId:employee.id]">rapport</g:link>
 			</td>
-			<td><g:link class="listButton" url="/">
+			<td><g:link class="modalbox" url="/">
 					${message(code: 'employee.disconnect.label', default: 'Sortie')}
 				</g:link></td>
 			<td></td>
 			<td><modalbox:createLink controller="inAndOut" action="create"
-					id="${employee.id}" css="listButton"
+					id="${employee.id}" css="modalbox"
 					title="Ajouter un évenement oublié" width="500">
 					<g:message code="inAndOut.regularization" default="Régul" />
 				</modalbox:createLink></td>

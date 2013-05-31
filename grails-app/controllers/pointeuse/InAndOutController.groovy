@@ -57,7 +57,7 @@ class InAndOutController {
 		}else{
 			flash.message = message(code: 'employee.not.null')
 			if (fromReport){
-				redirect(action: "list")
+				redirect(action: "list",controller:"employee")
 			}else{
 				redirect(action: "pointage", controller:"employee")
 			}

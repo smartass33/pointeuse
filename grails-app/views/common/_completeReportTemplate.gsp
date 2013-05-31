@@ -68,25 +68,39 @@
 				<td width="20%">
 					<table width="100%" >
 						<tr>
-							<td style="font-weight: bold" >${firstName} ${lastName}</td>
+							<td style="font-weight: bold;text-align:left;" >${firstName} ${lastName}</td>
+						</tr>
+						<tr/><tr/><tr/><tr/><tr/><tr/><tr/><tr/>
+						
+						<tr>
+							<td style="text-align:left;">${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${weeklyContractTime}</td>
 						</tr>
 						<tr>
-							<td>Horaire Hebdomadaire: ${weeklyContractTime}</td>
-						</tr>
-						<tr>
-							<td>matricule: ${matricule}</td>
+							<td style="text-align:left;">${message(code: 'employee.matricule.label', default: 'report')}: ${matricule}</td>
 						</tr>
 					</table> 
 				</td>
 				<td width="80%">
 					<table width="100%" >						
 						<tbody>		
-							<tr><td style="font-weight: bold" colspan="2" align="center"><g:formatDate format="MMMMM yyyy" date="${period}"/></td>
-							<td style="font-weight: bold">${message(code: 'employee.cumul', default: 'report')} ${yearInf}/${yearSup}</td>
-							</tr>			
 							<tr>
 							
-								<td width="35%" >${message(code: 'employee.vacances.count', default: 'report')} :</td>	
+								<td width="35%" style="text-align:left;" ></td>	
+	 							<td>
+	 								<table>
+	 									<thead></thead>
+	 									<tr><td style="font-weight: bold" align="center"><g:formatDate format="MMMM yyyy" date="${period}"/></td></tr>
+	        						</table>
+	        					</td>
+	        					<td>
+	 								<table>
+	 									<thead></thead>
+	 									<tr><td style="font-weight: bold">${message(code: 'employee.cumul', default: 'report')} ${yearInf}/${yearSup}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>			
+							<tr>
+								<td width="35%" style="text-align:left;" >${message(code: 'employee.vacances.count', default: 'report')} :</td>	
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
@@ -102,7 +116,7 @@
 	        					</td>
 							</tr>
 							<tr>
-								<td>${message(code: 'employee.rtt.count', default: 'report')} :</td>
+								<td style="text-align:left;">${message(code: 'employee.rtt.count', default: 'report')} :</td>
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
@@ -117,7 +131,7 @@
 	        					</td>
 							</tr>
 							<tr>
-								<td>${message(code: 'employee.sickness.count', default: 'report')} :</td>
+								<td style="text-align:left;">${message(code: 'employee.sickness.count', default: 'report')} :</td>
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
@@ -132,7 +146,7 @@
 	        					</td>
 							</tr>
 							<tr>
-								<td>${message(code: 'employee.sanssolde.count', default: 'report')} :</td>
+								<td style="text-align:left;">${message(code: 'employee.sanssolde.count', default: 'report')} :</td>
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
@@ -147,7 +161,7 @@
 	        					</td>
 							</tr>					
 							<tr>
-								<td>${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
+								<td style="text-align:left;">${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
 								<td>
 	        						<table border="1"  >
 	        							<thead></thead>
@@ -162,7 +176,7 @@
 	        					</td>					
 							</tr>
 							<tr>
-								<td>${message(code: 'employee.yearly.actual.time', default: 'report')} :</td>							
+								<td style="text-align:left;">${message(code: 'employee.yearly.actual.time', default: 'report')} :</td>							
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
@@ -185,7 +199,7 @@
 	        					</td>					
 							</tr>
 							<tr>
-								<td>${message(code: 'employee.peculiar.time', default: 'report')} :</td>							
+								<td style="text-align:left;">${message(code: 'employee.peculiar.time', default: 'report')} :</td>							
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
@@ -200,7 +214,7 @@
 	        					</td>					
 							</tr>
 							<tr>
-								<td>${message(code: 'default.monthly.open.day', default: 'report')} :</td>				
+								<td style="text-align:left;">${message(code: 'default.monthly.open.day', default: 'report')} :</td>				
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
@@ -210,7 +224,7 @@
 							</tr>
 							<g:if test="${payableSupTime!=null}">
 								<tr>
-									<td>${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
+									<td style="text-align:left;">${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
 									<td>
 		        						<table border="1" class="cartoucheValues" >
 		        							<thead></thead>
@@ -222,7 +236,7 @@
 							<g:if test="${employee.weeklyContractTime!=35}">
 								<g:if test="${payableCompTime!=null}">						
 									<tr>
-										<td>${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
+										<td style="text-align:left;">${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
 										<td>
 			        						<table border="1" class="cartoucheValues" >
 			        							<thead></thead>
@@ -241,10 +255,10 @@
 		<BR/><BR/>
 		<table border="1" id="reportTable">
 		    <thead style="border-top:5px solid red;">
-		      <th style="border:1px; width:92px;text-align:center">date</th>
-		      <th style="border:1px;width:62px;text-align:center">total jour</th>
-		      <th style="border:1px;width:32px;text-align:center">HS</th>
-		      <th style="border:1px;width:48px;text-align:center">absence</th>
+		      <th style="border:1px; width:92px;text-align:center">${message(code: 'report.table.date.label', default: 'report')}</th>
+		      <th style="border:1px;width:62px;text-align:center">${message(code: 'report.table.daily.total.label', default: 'report')}</th>
+		      <th style="border:1px;width:32px;text-align:center">${message(code: 'report.table.HS.label', default: 'report')}</th>
+		      <th style="border:1px;width:48px;text-align:center">${message(code: 'report.table.absence.label', default: 'report')}</th>
 		      <th style="border:1px;width:400px;text-align:center">${message(code: 'events.label', default: 'report')}</th>
 		    </thead>
 		    
@@ -257,13 +271,20 @@
 		            <g:each in="${day.value}" status="m" var="entries">
 		              <g:if test="${entries!=null}">
 		                <tr>
-		                  <td style="border:1px;width:100px"><i>${entries.key.format('E dd MMM yyyy')}</i></td>
-		                  <g:if test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0 || dailyTotalMap.get(entries.key).get(2)>0)}">
-		                  	<td style="border:1px;width:70px">${(dailyTotalMap.get(entries.key)).get(0)}:${(dailyTotalMap.get(entries.key)).get(1)}:${(dailyTotalMap.get(entries.key)).get(2)}</td>
-		                  </g:if>
-		                  <g:else>
-		                    <td style="border:1px;width:70px">00:00:00</td>
-		                  </g:else>
+		                  	<g:if test="${dailyBankHolidayMap.get(entries.key) }"><td style="border:1px; width:100px; color:red; text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td></g:if>
+							<g:else>
+				                <g:if test="${entries.key.getAt(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY}"><td style="border:1px;width:100px;font-weight:bold;text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td></g:if>
+				                <g:else><td style="border:1px;width:100px;text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td></g:else>		                
+				          	</g:else>          		
+			                <g:if test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0)}">		
+				                <td style="border:1px;width:70px">          
+				                    	<g:if test='${(dailyTotalMap.get(entries.key)).get(0)<10}'>0${(dailyTotalMap.get(entries.key)).get(0)}</g:if>
+						                <g:else>${(dailyTotalMap.get(entries.key)).get(0)}</g:else>
+						                <g:if test='${(dailyTotalMap.get(entries.key)).get(1)<10}'> : 0${(dailyTotalMap.get(entries.key)).get(1)}</g:if>
+						                <g:else>: ${(dailyTotalMap.get(entries.key)).get(1)}</g:else>	                  	
+						         </td>
+			                </g:if>
+		                	<g:else><td style="border:1px;width:70px">00 : 00</td></g:else>
 		                  	<g:if test="${weeklySupTotal.get(employee) != null && weeklySupTotal.get(employee).get(day.key) !=null}">
 		                    	<g:if test="${dailySupTotalMap.get(entries.key) !=null && (dailySupTotalMap.get(entries.key).get(0)>0 ||dailySupTotalMap.get(entries.key).get(1)>0)}">
 		                            <td style="border:1px;width:40px">${dailySupTotalMap.get(entries.key).get(0)}H${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}</td>
@@ -272,41 +293,34 @@
 		                    		<td style="border:1px;width:40px">-</td>
 		                   		 </g:else>
 		                    </g:if>
-			                <g:else>
-		                    	<td style="border:1px;width:40px">-</td>
-		                   	</g:else>
-
-		                  	<g:if test="${holidayMap.get(entries.key) != null}">
-		                   		<td style="border:1px;width:55px">${holidayMap.get(entries.key).type}</td>
-		                    </g:if>
-		                    <g:else>
-		                    	<td style="border:1px;width:55px">-</td>
-		                    </g:else> 
-		                  <g:each in="${entries.value}" var="inOrOut">
-	                  		<g:if test="${inOrOut.type.equals('E')}">
-                       			<td bgcolor="98FB98" style="height: 1px;text-align:center; width:40px">${inOrOut.time.format('H:mm')}</td>
-                     			</g:if>
-                     			 <g:else>
-                       			<td bgcolor="#FFC0CB" style="height: 1px;text-align:center;width:40px">${inOrOut.time.format('H:mm')}</td>
-                    			 </g:else> 
-		                  </g:each>
-		                </tr>
-		              </g:if>
+			            	<g:else><td style="border:1px;width:40px">-</td></g:else>
+		                  	<g:if test="${holidayMap.get(entries.key) != null}"><td style="border:1px;width:55px">${holidayMap.get(entries.key).type}</td></g:if>
+		                    <g:else><td style="border:1px;width:55px">-</td></g:else> 
+			                  <g:each in="${entries.value}" var="inOrOut">
+		                  		<g:if test="${inOrOut.type.equals('E')}">
+	                       			<td bgcolor="98FB98" style="height: 1px;text-align:center; width:40px">${inOrOut.time.format('HH:mm')}</td>
+	                     			</g:if>
+	                     			 <g:else>
+	                       			<td bgcolor="#FFC0CB" style="height: 1px;text-align:center;width:40px">${inOrOut.time.format('HH:mm')}</td>
+	                    			 </g:else> 
+			                  </g:each>
+			                </tr>
+			              </g:if>
 		            </g:each>
 		            </tbody>
 		           	</table>
 		           	 <table border="1" >
 		           	<tr>
 		        		<td style="border:1px solid black;width:690px;text-align:left;font-weight:bold;">
-		              Total ${day.key}:
+		              Total ${day.key}:&nbsp;&nbsp;
 		              <g:if test="${weeklyTotal.get(employee) != null && weeklyTotal.get(employee).get(day.key) !=null && (weeklyTotal.get(employee).get(day.key).get(2)>0 || weeklyTotal.get(employee).get(day.key).get(1)>0 || weeklyTotal.get(employee).get(day.key).get(0)>0)}">
 		                  ${(weeklyTotal.get(employee).get(day.key)).get(0)}H${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyTotal.get(employee).get(day.key)).get(1)}
 		                  <g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null}">
-		                  dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)}H${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}
+		                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)}H${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}
 		                  </g:if>                           
 		              </g:if>
 		              <g:else>
-		                Total semaine: 0H
+		                00H00
 		              </g:else>
 		              </td>
 		            </tr>  
@@ -314,5 +328,20 @@
 		          
 		          </table>
 		        </g:each>
+		         <br/><br/>
+		         
+  				<table  >
+					<thead></thead>
+					<tr>
+						<td>${message(code: 'report.verification.date.label', default: 'Report')}: ${new Date().format('EEE dd MMM yyyy')}</td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<td>${message(code: 'report.signature.label', default: 'Report')}:</td></tr>
+				</table>
+		        
+
 	</body>
 </html>

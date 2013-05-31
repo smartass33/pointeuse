@@ -59,8 +59,6 @@
 	</g:else>
 </div>
 
-
-
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'service', 'error')} ">
 	<label for="service">
 		<g:message code="employee.service.label" default="Service" />

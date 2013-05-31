@@ -3,13 +3,14 @@
 <%@ page import="pointeuse.InAndOut"%>
 <%@ page import="pointeuse.AbsenceType"%>
 <%@ page import="pointeuse.MonthlyTotal"%>
+<%@ page import="java.util.Calendar"%>
 
 <table border="1" style="table-layout: fixed;" id="reportTable">
     <thead>
-      <th width="60px" align="center">date</th>
-      <th width="90px">total du jour</th>
-      <th width="60px">HS</th>
-      <th width="60px">absence</th>
+      <th width="60px" align="center">${message(code: 'report.table.date.label', default: 'report')}</th>
+      <th width="90px">${message(code: 'report.table.daily.total.label', default: 'report')}</th>
+      <th width="60px">${message(code: 'report.table.HS.label', default: 'report')}</th>
+      <th width="60px">${message(code: 'report.table.absence.label', default: 'report')}</th>
       <th align="center" colspan="80">${message(code: 'events.label', default: 'report')}</th>
     </thead>
     <tbody>
@@ -29,24 +30,38 @@
 	                    </td>
                   </g:if>
                   <g:else>
-                  	 <td width="140px"><font size="2"><i> <modalbox:createLink
+						<g:if test="${entries.key.getAt(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY}">
+						<td style="width:140px;">
+							<i> <modalbox:createLink
+	                          controller="employee" action="showDay" id="${employee.id}"
+	                          title="modifier des évenements" width="500"
+	                          params="[employeeId: employee.id, month: entries.key.format('MM'), year: entries.key.format('yyyy'), day: entries.key.format('dd')]">
+	                         <font size="2" style="width:140px; font-weight:bold;"> ${entries.key.format('E dd MMM yyyy')}</font>
+	                        </modalbox:createLink>
+	                        </i></td>
+						</g:if>
+						<g:else>
+						<td style="width:140px;">
+							<font size="2"><i> <modalbox:createLink
 	                          controller="employee" action="showDay" id="${employee.id}"
 	                          title="modifier des évenements" width="500"
 	                          params="[employeeId: employee.id, month: entries.key.format('MM'), year: entries.key.format('yyyy'), day: entries.key.format('dd')]">
 	                          ${entries.key.format('E dd MMM yyyy')}
 	                        </modalbox:createLink>
-	                    </i></font>
-	                    </td>
+	                        </i></font></td>						
+	                   </g:else>
                   </g:else>
                   <g:if
-                    test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0 || dailyTotalMap.get(entries.key).get(2)>0)}">
-
+                    test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0)}">
                     <td><font size="2">
-                        ${(dailyTotalMap.get(entries.key)).get(0)}:${(dailyTotalMap.get(entries.key)).get(1)}:${(dailyTotalMap.get(entries.key)).get(2)}
+                       	<g:if test='${(dailyTotalMap.get(entries.key)).get(0)<10}'>0${(dailyTotalMap.get(entries.key)).get(0)}</g:if>
+		                <g:else> ${(dailyTotalMap.get(entries.key)).get(0)}</g:else>
+		                <g:if test='${(dailyTotalMap.get(entries.key)).get(1)<10}'> : 0${(dailyTotalMap.get(entries.key)).get(1)}</g:if>
+		                <g:else>: ${(dailyTotalMap.get(entries.key)).get(1)}</g:else>
                     </font></td>
                   </g:if>
                   <g:else>
-                    <td><font size="2">00:00:00</font></td>
+                    <td><font size="2">00 : 00</font></td>
                   </g:else>
                   <td><font size="2"> <g:if
                         test="${employee.weeklyContractTime==35}">
@@ -117,32 +132,32 @@
                           test="${inOrOut.regularizationType!=0 || inOrOut.systemGenerated}">
                           <g:if test="${inOrOut.systemGenerated}">
                             <g:textField id="myinput" name="cell"
-                              value="${inOrOut.time.format('H:mm')}" align="center"
+                              value="${inOrOut.time.format('HH:mm')}" align="center"
                              style="font-weight: bold" />
                           </g:if>
                           <g:if test="${inOrOut.regularizationType==1}">
                             <g:textField id="myinput" name="cell"
-                             value="${inOrOut.time.format('H:mm')}" align="center"
+                             value="${inOrOut.time.format('HH:mm')}" align="center"
                               style="color : red;font-weight: bold;" />
                           </g:if>
                           <g:if test="${inOrOut.regularizationType==2}">
                             <g:textField id="myinput" name="cell"
-                              value="${inOrOut.time.format('H:mm')}" align="center"
+                              value="${inOrOut.time.format('HH:mm')}" align="center"
                               style="color : blue;font-weight: bold;" />
                           </g:if>
                           <g:if test="${inOrOut.regularizationType==3}">
                             <g:textField id="myinput" name="cell"
-                              value="${inOrOut.time.format('H:mm')}" align="center"
+                              value="${inOrOut.time.format('HH:mm')}" align="center"
                               style="color : green;font-weight: bold;" />
                           </g:if>
                           <g:if test="${inOrOut.regularizationType==4}">
                             <g:textField id="myinput" name="cell"
-                              value="${inOrOut.time.format('H:mm')}" align="center"
+                              value="${inOrOut.time.format('HH:mm')}" align="center"
                               style="color : orange;font-weight: bold;" />
                           </g:if>
                         </g:if> <g:else>
                           <g:textField id="myinput" name="cell"
-                            value="${inOrOut.time.format('H:mm')}" align="center" />
+                            value="${inOrOut.time.format('HH:mm')}" align="center" />
                         </g:else>
                     </font>
                     </font>

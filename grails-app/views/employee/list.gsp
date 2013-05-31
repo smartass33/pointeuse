@@ -6,6 +6,10 @@
 <head>
 <g:javascript library="prototype" plugin="prototype" />
 <resource:autoComplete skin="default" />
+	<meta http-equiv="X-UA-Compatible" content="ie=9"/>
+	<meta http-equiv='cache-control' content='no-cache'>
+	<meta http-equiv='expires' content='0'>
+	<meta http-equiv='pragma' content='no-cache'>
 
 <meta name="layout" content="main" id="mainLayout">
 <g:set var="isNotSelected" value="true" />
@@ -15,8 +19,142 @@
 <title><g:message code="default.list.label" args="[entityName]" /></title>
 
 
+		<style type="text/css">
+			body {
+				font-family: Verdana, Arial, sans-serif;
+				font-size: 0.9em;
+			}
+			table {
+				border-collapse: collapse;
+			}
+			thead {
+				background-color: #DDD;
+			}
+			td {
+				padding: 2px 4px 2px 4px;
+			}
+			th {
+				padding: 2px 4px 2px 4px;
+			}
 
+			/* Classes used for hiding more detail, by default */
+			th.moreDetail {
+				display: none;
+			}			
+			td.moreDetail {
+				display: none;
+			}
+			
+			/* Classes used for showing more detail */
+			table.showDetail th.moreDetail {
+				display: table-cell;
+				background-color: #E4E4A2;
+			}
+			table.showDetail td.moreDetail {
+				display: table-cell;
+				background-color: #E4E4A2;
+			}
+			/* Style rule for IE 6 */
+			* html table.showDetail .moreDetail {
+				display: block;
+			}
+#donate {
+    margin:4px;
+
+    float:left;
+}
+
+#donate label {
+    float:left;
+    width:170px;
+    margin:4px;
+    background-color:#EFEFEF;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+
+}
+
+#donate label span {
+    text-align:center;
+    font-size: 32px;
+    padding:13px 0px;
+    display:block;
+}
+
+#donate label input {
+    position:absolute;
+    top:-20px;
+}
+
+#donate input:checked + span {
+    background-color:#404040;
+    color:#F7F7F7;
+}
+
+#donate .yellow {
+    background-color:#FFCC00;
+    color:#333;
+}
+
+#donate .blue {
+    background-color:#00BFFF;
+    color:#333;
+}
+
+#donate .pink {
+    background-color:#FF99FF;
+    color:#333;
+}
+
+#donate .green {
+    background-color:#A3D900;
+    color:#333;
+}
+#donate .purple {
+    background-color:#B399FF;
+    color:#333;
+}
+
+
+.toggle {
+    margin:4px;
+    background-color:#EFEFEF;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    float:left;
+}
+
+.toggle label {
+    float:left;
+    width:2.0em;
+}
+
+.toggle label span {
+    text-align:center;
+    padding:3px 0px;
+    display:block;
+    cursor: pointer;
+}
+
+.toggle label input {
+    position:absolute;
+    top:-20px;
+}
+
+.toggle .input-checked /*, .bounds input:checked + span works for firefox and ie9 but breaks js for ie8(ONLY) */ {
+    background-color:#404040;
+    color:#F7F7F7;
+}
+		</style>
 <script type="text/javascript">
+
+$('label').click(function(){
+    $(this).children('span').addClass('input-checked');
+    $(this).parent('.toggle').siblings('.toggle').children('label').children('span').removeClass('input-checked');
+});
+
    function showSpinner() {
       $('spinner').show();
    }
@@ -35,6 +173,7 @@
 
 </head>
 <body>
+
 <div id="spinner" class="spinner" style="display:none;">
 <img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Spinner" />
 </div>
