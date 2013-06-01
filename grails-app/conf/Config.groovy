@@ -152,7 +152,7 @@ grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
 
 jquery {
 	sources = 'jquery'
-	version = '1.8.3'
+	version = '1.10.0'
 }
 
 prototype {

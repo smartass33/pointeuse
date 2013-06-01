@@ -253,6 +253,7 @@
 			<ul>
 				<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:false,max:20]">Liste des employés</g:link></li>
 				<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:true,max:20]">Liste administrative</g:link></li>
+				<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20]">Rapport quotidien</g:link></li>	
 				<li class="controller"><g:link controller="user">Liste des administrateurs</g:link></li>
 				<li class="controller"><g:link controller="bankHoliday">Liste des jours fériés</g:link></li>	
 				<li class="controller"><g:link controller="site">Liste des sites</g:link></li>	
