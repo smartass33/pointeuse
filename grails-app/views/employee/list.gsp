@@ -4,19 +4,14 @@
 <!doctype html>
 <html>
 <head>
-<g:javascript library="prototype" plugin="prototype" />
-<resource:autoComplete skin="default" />
-	<meta http-equiv="X-UA-Compatible" content="ie=9"/>
-	<meta http-equiv='cache-control' content='no-cache'>
-	<meta http-equiv='expires' content='0'>
-	<meta http-equiv='pragma' content='no-cache'>
-
-<meta name="layout" content="main" id="mainLayout">
-<g:set var="isNotSelected" value="true" />
-
-<g:set var="entityName"
-	value="${message(code: 'employee.label', default: 'Employee')}" />
-<title><g:message code="default.list.label" args="[entityName]" /></title>
+	<g:javascript library="jquery" plugin="jquery" />
+	<resource:autoComplete skin="default" />
+	<meta name="layout" content="main" id="mainLayout">
+	<g:set var="isNotSelected" value="true" />
+	
+	<g:set var="entityName"
+		value="${message(code: 'employee.label', default: 'Employee')}" />
+	<title><g:message code="default.list.label" args="[entityName]" /></title>
 
 
 		<style type="text/css">
@@ -37,116 +32,7 @@
 				padding: 2px 4px 2px 4px;
 			}
 
-			/* Classes used for hiding more detail, by default */
-			th.moreDetail {
-				display: none;
-			}			
-			td.moreDetail {
-				display: none;
-			}
-			
-			/* Classes used for showing more detail */
-			table.showDetail th.moreDetail {
-				display: table-cell;
-				background-color: #E4E4A2;
-			}
-			table.showDetail td.moreDetail {
-				display: table-cell;
-				background-color: #E4E4A2;
-			}
-			/* Style rule for IE 6 */
-			* html table.showDetail .moreDetail {
-				display: block;
-			}
-#donate {
-    margin:4px;
-
-    float:left;
-}
-
-#donate label {
-    float:left;
-    width:170px;
-    margin:4px;
-    background-color:#EFEFEF;
-    border-radius:4px;
-    border:1px solid #D0D0D0;
-    overflow:auto;
-
-}
-
-#donate label span {
-    text-align:center;
-    font-size: 32px;
-    padding:13px 0px;
-    display:block;
-}
-
-#donate label input {
-    position:absolute;
-    top:-20px;
-}
-
-#donate input:checked + span {
-    background-color:#404040;
-    color:#F7F7F7;
-}
-
-#donate .yellow {
-    background-color:#FFCC00;
-    color:#333;
-}
-
-#donate .blue {
-    background-color:#00BFFF;
-    color:#333;
-}
-
-#donate .pink {
-    background-color:#FF99FF;
-    color:#333;
-}
-
-#donate .green {
-    background-color:#A3D900;
-    color:#333;
-}
-#donate .purple {
-    background-color:#B399FF;
-    color:#333;
-}
-
-
-.toggle {
-    margin:4px;
-    background-color:#EFEFEF;
-    border-radius:4px;
-    border:1px solid #D0D0D0;
-    overflow:auto;
-    float:left;
-}
-
-.toggle label {
-    float:left;
-    width:2.0em;
-}
-
-.toggle label span {
-    text-align:center;
-    padding:3px 0px;
-    display:block;
-    cursor: pointer;
-}
-
-.toggle label input {
-    position:absolute;
-    top:-20px;
-}
-
-.toggle .input-checked /*, .bounds input:checked + span works for firefox and ie9 but breaks js for ie8(ONLY) */ {
-    background-color:#404040;
-    color:#F7F7F7;
-}
+		
 		</style>
 <script type="text/javascript">
 
@@ -169,6 +55,9 @@ $('label').click(function(){
          if(!Ajax.activeRequestCount) hideSpinner();
       }
    });
+   
+   
+
 </script>
 
 </head>
@@ -209,12 +98,14 @@ $('label').click(function(){
 				<g:remoteField id="q" action="search" update="divId"
 					onclick="if (this.value=='chercher un salarié') {this.value = '';}"
 					name="q" value="${params.q ?: 'chercher un salarié'}" paramName="q"
-					params="[isAdmin:isAdmin]" style="vertical-align: middle;" />
+					style="vertical-align: middle;"
+					params="\'q=\'+this.value+\'&isAdmin=\'+\'${isAdmin}+\'"/>
+
 						${message(code: 'default.period.label', default: 'List')}: <g:datePicker
 							name="myDate" value="${period ? period : new Date()}" 
 							precision="month" noSelection="['':'-Choose-']" style="vertical-align: middle;"/>
-							
-		
+		 
+
 						<g:actionSubmit class='listButton' value="pdf"  action="pdf"/>		
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:hiddenField name="siteId" value="${siteId}" />
@@ -231,7 +122,8 @@ $('label').click(function(){
 	
 
 	<br>
-	<div id="divId"><g:listEmployee /></div>
+		<div id="divId"><g:listEmployee /></div>
+	
 	<g:if test="${employeeInstanceTotal!=null}">
 	<div class="pagination" id="pagination">
 		<g:hiddenField name="isAdmin" value="${isAdmin}" />

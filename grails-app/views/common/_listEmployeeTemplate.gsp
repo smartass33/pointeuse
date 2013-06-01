@@ -91,12 +91,12 @@
 							</td>						
 						</g:else>
 						<g:if test="${employeeInstance?.hasError}">
-							<td class="moreDetail" style="text-align:middle;" ondblclick="this.style.display = 'none';">
+							<td class="moreDetail" align="center" style="text-align:middle;" ondblclick="this.style.display = 'none';">
 								<img alt="tick" src="../images/skin/tick.png" style="vertical-align: middle;horizontal-align:middle;">
 							</td>
 						</g:if>
 						<g:else>
-							<td class="moreDetail" style="text-align:middle;" ondblclick="this.style.display = 'none';">
+							<td class="moreDetail" align="center" style="text-align:middle;" ondblclick="this.style.display = 'none';">
 								<img alt="cross" src="../images/skin/cross.png" style="vertical-align: middle;horizontal-align:middle;">
 							</td>
 						</g:else>

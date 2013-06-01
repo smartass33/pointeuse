@@ -44,6 +44,12 @@ class EmployeeController {
     }
 
 	@Secured(['ROLE_ADMIN'])
+	def dailyReport(){
+		
+	}
+	
+	
+	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
 		log.error('browser version: '+request.getHeader('User-Agent') )
 		def employeeInstanceList
@@ -95,9 +101,6 @@ class EmployeeController {
 			employeeInstanceList=Employee.list(params)
 			employeeInstanceTotal = employeeInstanceList.totalCount
 		}
-		
-		//response.setHeader "Cache-Control", "max-age=0,no-cache,no-store,must-revalidate,post-check=0,pre-check=0"
-		//response.addHear "Expires", "Mon, 26 Jul 1997 05:00:00 GMT"
 		[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
     }
 	
@@ -141,6 +144,8 @@ class EmployeeController {
 		}
 	}
 
+	
+	
 	
     def show(Long id) {		
 		def siteId=params["siteId"]
