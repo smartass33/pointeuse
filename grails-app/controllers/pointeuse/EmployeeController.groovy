@@ -123,9 +123,9 @@ class EmployeeController {
         flash.message = message(code: 'default.created.message', args: [message(code: 'employee.label', default: 'Employee'), employeeInstance.id])
         redirect(action: "show", id: employeeInstance.id,params: [isAdmin: isAdmin])
     }
-	
+
 	def search = {
-		def isAdmin = (params["isAdmin"].getAt(0) != null && params["isAdmin"].getAt(0).equals("true")) ? true : false
+		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].split(" ").getAt(0).equals("true")) ? true : false
 		def query = "*"+params.q+"*"
 		if(query){
 			def srchResults = searchableService.search(query)
@@ -134,13 +134,14 @@ class EmployeeController {
 				def tmpEmployee = Employee.get(employee.id)
 				employeeList.add(tmpEmployee)
 			}
-			render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeList, employeeInstanceTotal: employeeList.size(),isAdmin:isAdmin]			
+			render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeList, employeeInstanceTotal: employeeList.size(),isAdmin:isAdmin]
 			return
 		}else{
 			redirect(action: "list")
 		}
 	}
 
+	
     def show(Long id) {		
 		def siteId=params["siteId"]
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
