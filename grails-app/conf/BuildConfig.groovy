@@ -4,8 +4,6 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.target.level = 1.6
 grails.project.source.level = 1.6
-//grails.project.war.file = "target/${appName}-${appVersion}.war"
-
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -24,12 +22,6 @@ grails.project.dependency.resolution = {
 
         mavenLocal()
         mavenCentral()
-
-        // uncomment these (or add new ones) to enable remote dependency resolution from public Maven repositories
-        //mavenRepo "http://snapshots.repository.codehaus.org"
-        //mavenRepo "http://repository.codehaus.org"
-        //mavenRepo "http://download.java.net/maven/2/"
-        //mavenRepo "http://repository.jboss.com/maven2/"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -44,10 +36,7 @@ grails.project.dependency.resolution = {
         runtime ":resources:1.0"
 		compile ":tooltip:0.7"
 		compile ":mail:1.0.1"
-		//compile ":dojo:1.7.2.0"
-		compile ":prototype:1.0"
-	//compile ":jquery-ui:1.8.24"
-		//compile ":google-visualization:0.6.2"
+		runtime ":prototype:1.0"
 		compile ":spring-security-core:1.2.7.3"
 		compile ":joda-time:1.4"
 		compile ":rendering:0.4.4"

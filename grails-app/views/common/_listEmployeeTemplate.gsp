@@ -2,20 +2,6 @@
 <%@ page import="pointeuse.Employee"%>
 <%@ page import="pointeuse.InAndOut"%>
 
-<div class="toggle">
-    <label><input type="radio" name="toggle"><span>On</span></label>    
-</div>
-<div class="toggle">
-    <label><input type="radio" name="toggle"><span>Off</span></label>
-</div>
-
-<div id="donate">
-    <label class="blue"><input type="radio" name="toggle" onclick="document.getElementById('employee-table').className='showDetail';if(document.all){document.getElementById('table').getElementsByTagName('th')[0].style.display='block';}" ><span>SHOW</span></label>
-    <label class="green"><input type="radio" name="toggle" onclick="document.getElementById('employee-table').className='';"><span>HIDE</span></label>
-</div>
-
-			<input type="button" value="Show" onclick="document.getElementById('employee-table').className='showDetail';if(document.all){document.getElementById('table').getElementsByTagName('th')[0].style.display='block';}" />
-			<input type="button" value="Hide" onclick="document.getElementById('employee-table').className='';" />
 
 <table id="employee-table">
 	<thead>

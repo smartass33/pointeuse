@@ -7,4 +7,10 @@ class EmployeeListTagLib {
 		
 	}
 	
+	
+	def listDailyTime ={attrs,body->
+		out<<render(template:"/common/listDailyTimeTemplate")
+		
+	}
+	
 }

@@ -15,7 +15,7 @@
    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
  }
 
-grails.views.javascript.library = "prototype"
+grails.views.javascript.library = "jquery"
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
@@ -157,6 +157,7 @@ jquery {
 
 prototype {
 	sources = 'prototype'
-	version = '1.0'	
+	version = '1.0'
 }
+
 
