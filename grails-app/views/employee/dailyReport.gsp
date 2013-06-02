@@ -62,7 +62,7 @@
 				<g:submitToRemote class="listButton"
 					value="rapport"
 					update="dailyTable" 
-					url="[controller:'employee', action:'dailyReport']"
+					url="[controller:'employee', action:'dailyReportAjax']"
 					/>
 				<g:actionSubmit class="listButton" value="export PDF" action="dailyTotalPDF"/>
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />

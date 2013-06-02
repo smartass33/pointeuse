@@ -24,20 +24,75 @@ class UtilService {
 		
 	}
 	
-	def getSundaysInYear(int year){
+	def getSundaysInYear(int year,int month){
 		def calendar = Calendar.instance
+		def endPeriodCalendar = Calendar.instance
+		
+		boolean twoLoops = false
+		if (month<6){
+		//	year=year-1
+			twoLoops = true
+		}
+		
+		def currentDate = calendar.time
+		
 		calendar.set(Calendar.YEAR,year)		
-		// set the date end of may
-		calendar.set(Calendar.MONTH,4)
-		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-		calendar.set(Calendar.HOUR_OF_DAY,23)
-		calendar.set(Calendar.MINUTE,59)
-		calendar.set(Calendar.SECOND,59)
-		calendar.set(Calendar.YEAR,year-1)
 		calendar.set(Calendar.MONTH,5)
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		calendar.clearTime()
+		
+		endPeriodCalendar.set(Calendar.YEAR,year)
+		endPeriodCalendar.set(Calendar.MONTH,month-1)
+		endPeriodCalendar.set(Calendar.DAY_OF_MONTH,endPeriodCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		
+		
+		
 		def yearlyCounter = 0
+		
+		if (twoLoops){
+			calendar.set(Calendar.YEAR,year-1)
+			log.warn("getting opened days from: "+calendar.time + " until end of year "+year-1)
+			
+			while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+					yearlyCounter ++
+				}
+				if (calendar.get(Calendar.DAY_OF_YEAR) == calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+					break
+				}
+				calendar.roll(Calendar.DAY_OF_YEAR, 1)
+			}
+			calendar.set(Calendar.YEAR,year)
+			calendar.set(Calendar.MONTH,0)
+			calendar.set(Calendar.DAY_OF_YEAR,1)
+			
+			log.warn("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
+			
+			while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
+				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+					yearlyCounter ++
+				}
+			
+				if (calendar.get(Calendar.DAY_OF_YEAR) == endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
+					break
+				}
+				calendar.roll(Calendar.DAY_OF_YEAR, 1)
+			}
+		}else{
+			log.warn("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
+			while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
+				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+					yearlyCounter ++
+				}
+			
+				if (calendar.get(Calendar.DAY_OF_YEAR) == endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
+					break
+				}
+				calendar.roll(Calendar.DAY_OF_YEAR, 1)
+			}		
+		}
+		
+		/*
 		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 			if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
 				yearlyCounter ++
@@ -51,21 +106,11 @@ class UtilService {
 		calendar.set(Calendar.DAY_OF_YEAR,1)
 		calendar.set(Calendar.YEAR,year)
 
-		def endPeriodCalendar = Calendar.instance
 		
 		endPeriodCalendar.set(Calendar.MONTH,4)
 		endPeriodCalendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+*/
 
-		while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
-			if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-				yearlyCounter ++
-			}
-		
-			if (calendar.get(Calendar.DAY_OF_YEAR) == endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
-				break
-			}
-			calendar.roll(Calendar.DAY_OF_YEAR, 1)
-		}
 		
 		return yearlyCounter
 	}

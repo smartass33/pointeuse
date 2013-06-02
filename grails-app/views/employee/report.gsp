@@ -4,8 +4,7 @@
 	<%@ page import="pointeuse.AbsenceType"%>
 	<%@ page import="pointeuse.MonthlyTotal"%>
 <head>
-	<!--g:javascript library="prototype" /-->
-	<g:javascript library="jquery" />
+	<g:javascript library="jquery" plugin="jquery"/>
  	<resource:include components="autoComplete, dateChooser"/>
 	<resource:dateChooser />
 	<modalbox:modalIncludes />	

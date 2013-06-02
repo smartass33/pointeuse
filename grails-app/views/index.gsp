@@ -248,23 +248,24 @@
 	    <g:javascript>window.onload = updateClock();document.getElementById('mytextfield').focus();</g:javascript>
 		<a href="#page-body" class="skip"><g:message code="default.link.skip.label" default="Skip to content&hellip;" /></a>
 		<div id="status" role="complementary">
-			<h2>menu administrateur</h2>
+			<h2><g:message code="admin.menu" default="Last Name" /></h2>
 			<sec:ifLoggedIn>
 			<ul>
-				<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:false,max:20]">Liste des employés</g:link></li>
-				<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:true,max:20]">Liste administrative</g:link></li>
-				<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20]">Suivi quotidien</g:link></li>	
-				<li class="controller"><g:link controller="user">Liste des administrateurs</g:link></li>
-				<li class="controller"><g:link controller="bankHoliday">Liste des jours fériés</g:link></li>	
-				<li class="controller"><g:link controller="site">Liste des sites</g:link></li>	
-				<li class="controller"><g:link controller="service">Liste des services</g:link></li>
-				<li class="controller"><g:link controller="reason">Raisons de régularisation</g:link></li>		
+				<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:false,max:20]"><g:message code="employee.list" default="Last Name" /></g:link></li>
+				<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:true,max:20]"><g:message code="employee.admin.list" default="Last Name" /></g:link></li>
+				<li class="controller"><g:link controller="user"><g:message code="admin.list" default="Last Name" /></g:link></li>
+				<li class="controller"><g:link controller="bankHoliday"><g:message code="bank.holiday.list" default="Last Name" /></g:link></li>	
+				<li class="controller"><g:link controller="site"><g:message code="site.list" default="Last Name" /></g:link></li>	
+				<li class="controller"><g:link controller="service"><g:message code="service.list" default="Last Name" /></g:link></li>
+				<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20]"><g:message code="daily.followup" default="Last Name" /></g:link></li>	
+				
+				<li class="controller"><g:link controller="reason"><g:message code="regularization.reasons" default="Last Name" /></g:link></li>		
 				<li><BR></li>
-				<li class="controller"><g:link controller="logout">Déconnectez vous</g:link></li>							
+				<li class="controller"><g:link controller="logout"><g:message code="logout.label" default="Last Name" /></g:link></li>							
 			</ul>
 			</sec:ifLoggedIn>
 			<sec:ifNotLoggedIn>
-				<g:link controller="login">identifiez vous</g:link>
+				<g:link controller="login"><g:message code="login.label" default="Last Name" /></g:link>
 			</sec:ifNotLoggedIn>					
 		</div>
 		<div id="page-body" role="main">

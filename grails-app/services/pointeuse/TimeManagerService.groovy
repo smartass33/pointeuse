@@ -474,7 +474,6 @@ class TimeManagerService {
 		return [hours,minutes,seconds]
 	}
 
-
 	
 	def recomputeDailyTotals(long id){
 		def tmpInOrOut

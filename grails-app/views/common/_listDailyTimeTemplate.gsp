@@ -6,9 +6,9 @@
 <table id="employee-table">
 	<thead>
 		<tr>
-			<g:sortableColumn property="lastName" style="width:120px;text-align:left"
+			<g:sortableColumn property="lastName" style="width:180px;text-align:left"
 				title="${message(code: 'employee.lastName.label', default: 'Last Name')}" />
-			<g:sortableColumn property="firstName" style="width:120px;text-align:left"
+			<g:sortableColumn property="firstName" style="width:180px;text-align:left"
 				title="${message(code: 'employee.firstName.label', default: 'First Name')}" />	
 			<g:sortableColumn property="site" style="width:120px;text-align:left"
 				title="${message(code: 'employee.site.label', default: 'Site')}" />
@@ -24,8 +24,8 @@
 	<tbody id='body_update' style="border:1px;">
 		<g:each in="${dailyMap}" status="i" var="entry">
 			<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-				<td style="width:120px">${entry.key.lastName}</td>
-				<td style="width:120px">${entry.key.firstName}</td>
+				<td style="width:180px">${entry.key.lastName}</td>
+				<td style="width:180px">${entry.key.firstName}</td>
 				<td style="width:120px;text-align:left">${entry.key.site.name}</td>
 				<td style="width:120px;text-align:left">
 					<g:if test='${entry.value.get(0)<10}'>0</g:if>${entry.value.get(0)} :
