@@ -43,7 +43,13 @@ class EmployeeController {
         redirect(action: "list", params: params)
     }
 
-	
+	def modifyAbsenceCounter(){
+		def year=params["year"]
+		def userId=params["userId"]
+		Employee employee = Employee.get(userId)
+		AbsenceCounter absenceCount = AbsenceCounter.findByEmployeeAndYear(employee,year)
+		[absenceCount:absenceCount]
+	}
 	
 	@Secured(['ROLE_ADMIN'])
 	def dailyReportAjax(){
@@ -1053,44 +1059,86 @@ class EmployeeController {
 	}
 	
 	def annualReport(Long userId){
-		def calendar = Calendar.instance
-		def employee = Employee.get(userId)
+		def year = params["year"]
+		def month = params["month"]
+		def currentDate = params["currentDate"]
+		def calendar
 		def criteria
-		def weeklyTotal
-		def mapByWeek =[:]
-		def myDate = params["myDate"]
-		if (myDate != null){
-			calendar.time=myDate
-		}
-		def year=calendar.getAt(Calendar.YEAR)
-		calendar.set(Calendar.WEEK_OF_YEAR,1)	
+		def dailySeconds
+		def monthlyTotalTime
+		Employee employee = Employee.get(userId)
 		
-		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+		if (userId==null){
+			log.error('userId is null. exiting')
+			return
+		}
 
-			
+		def lastYearMonthMap = [:]
+		def thisYearMonthMap = [:]
+		def lastYearTotalMap = [:]
+		def thisYearTotalMap = [:]
+		
+		//if (month==null || year==null){
+		calendar = Calendar.instance
+		
+		if (currentDate!=null){
+			calendar.time=currentDate	
+		}
+		month=calendar.get(Calendar.MONTH)+1
+		year=calendar.get(Calendar.YEAR)
+		
+		if (month < 6){
+			year = year - 1
+		}
+		
+		for (int lastYearMonth = 6 ;lastYearMonth <13 ; lastYearMonth++){
+			lastYearMonthMap.put(lastYearMonth, cartouche(userId,year,lastYearMonth))
+			monthlyTotalTime = 0
+			calendar.set(Calendar.MONTH,lastYearMonth-1)
+			calendar.set(Calendar.YEAR,year)
+			log.warn('current iteration '+calendar.time)
+			log.warn('current month '+calendar.get(Calendar.MONTH))
 			criteria = DailyTotal.createCriteria()
-			def dailyTotalList= criteria.list{
+			def dailyTotalList = criteria.list {
 				and {
 					eq('employee',employee)
-					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
-					eq('year',calendar.get(Calendar.YEAR))
+					eq('month',lastYearMonth)
+					eq('year',year)
 				}
-				
 			}
-			def totalTime
+			dailySeconds = 0
 			for (DailyTotal dailyTotal:dailyTotalList){
-				totalTime = timeManagerService.getDailyTotal(dailyTotal)
-				mapByWeek.put(calendar.get(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(totalTime))
-				
+				dailySeconds = timeManagerService.getDailyTotal(dailyTotal)
+				monthlyTotalTime += dailySeconds				
 			}
-
+			lastYearTotalMap.put(lastYearMonth, monthlyTotalTime)	
+		}
+		
+		for (int thisYearMonth = 1 ;thisYearMonth <6 ; thisYearMonth++){
+			thisYearMonthMap.put(thisYearMonth, cartouche(userId,year+1,thisYearMonth))			
+			monthlyTotalTime = 0
+			calendar.set(Calendar.MONTH,thisYearMonth-1)
+			calendar.set(Calendar.YEAR,year+1)
+			log.warn('current iteration '+calendar.time)
+			log.warn('current month '+calendar.get(Calendar.MONTH))
+			criteria = DailyTotal.createCriteria()
+			def dailyTotalList = criteria.list {
+				and {
+					eq('employee',employee)
+					eq('month',thisYearMonth)
+					eq('year',year+1)
+				}
+			}
+			dailySeconds = 0
+			for (DailyTotal dailyTotal:dailyTotalList){
+				dailySeconds = timeManagerService.getDailyTotal(dailyTotal)
+				monthlyTotalTime += dailySeconds
+			}
+			thisYearTotalMap.put(thisYearMonth, monthlyTotalTime)
 			
-			if (calendar.get(Calendar.WEEK_OF_YEAR) == calendar.getActualMaximum(Calendar.WEEK_OF_YEAR)){
-				break
-			}	
-		calendar.roll(Calendar.WEEK_OF_YEAR, 1)
-		}	
-		[employee:employee,mapByWeek:mapByWeek,period:year,userId:userId]	
+		}
+		[userId:userId,thisYearMonthMap:thisYearMonthMap,lastYearMonthMap:lastYearMonthMap,thisYearTotalMap:thisYearTotalMap,lastYearTotalMap:lastYearTotalMap]
+		
 	}
 	
 	
@@ -1345,10 +1393,7 @@ class EmployeeController {
 			SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 			myDate = dateFormat.parse(myDate)			
 		}
-			/*
-		if (userId==null && params["userId"] != null && !params["userId"].equals("")){
-			userId = params["userId"] as long
-		}*/
+
 		if (userId==null && params["userId"] != null ){
 			employee = Employee.get(params["userId"])
 		}else{
@@ -1378,7 +1423,7 @@ class EmployeeController {
 		def lastWeekParam = utilService.getLastWeekOfMonth(month, year)
 		def isSunday=lastWeekParam.get(1)
 		
-		currentWeek=0//calendar.get(Calendar.WEEK_OF_YEAR)
+		currentWeek=0
 		
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 			def currentDay=calendarLoop.time

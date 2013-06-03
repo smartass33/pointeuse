@@ -13,4 +13,10 @@ class EmployeeListTagLib {
 		
 	}
 	
+	
+	def annualReportTable ={attrs,body->
+		out<<render(template:"/common/annualReportTemplate")
+		
+	}
+	
 }

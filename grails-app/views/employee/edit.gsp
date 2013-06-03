@@ -2,6 +2,7 @@
 <!doctype html>
 <html>
 	<head>
+		<g:javascript library="jquery" plugin="jquery" />
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>
