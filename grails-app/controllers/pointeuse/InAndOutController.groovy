@@ -125,7 +125,7 @@ class InAndOutController {
 		}
 		
 		
-		def inAndOutInstance = timeManagerService.initializeTotals(employee, calendar.time,type,null)
+		def inAndOutInstance = timeManagerService.initializeTotals(employee, calendar.time,type,null,null)
 		inAndOutInstance.regularization=true
 		if (fromReport){
 			inAndOutInstance.regularizationType=InAndOut.INITIALE_ADMIN

@@ -1,6 +1,7 @@
 <%@ page import="pointeuse.Employee" %>
 <%@ page import="pointeuse.Service" %>
 <%@ page import="pointeuse.Site" %>
+<%@ page import="pointeuse.Function" %>
 
 
 
@@ -100,5 +101,24 @@
 	</g:else>
 </div>
 
-
+<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'function', 'error')} ">
+	<label for="function">
+		<g:message code="function.label" default="Site" />
+	</label>
+	
+	<g:if test="${employeeInstance?.function != null}">
+		<g:select name="employee.function.id"
+	          from="${Function.list([sort:'name'])}"
+	          noSelection="${['':employeeInstance?.function.name]}"          
+	          optionKey="id" optionValue="name"
+	          />
+	</g:if>
+	<g:else>
+			<g:select name="employee.function.id"
+	          from="${Function.list([sort:'name'])}"
+	          noSelection="${['':'-']}"          
+	          optionKey="id" optionValue="name"
+	          />
+	</g:else>
+</div>
 

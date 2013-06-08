@@ -10,13 +10,6 @@
 	<g:datePicker name="logging_time" precision="day"  value="${absenceCounterInstance?.logging_time}"  />
 </div>
 
-<div class="fieldcontain ${hasErrors(bean: absenceCounterInstance, field: 'type', 'error')} required">
-	<label for="type">
-		<g:message code="absenceCounter.type.label" default="Type" />
-		<span class="required-indicator">*</span>
-	</label>
-	<g:textField name="type" required="" value="${absenceCounterInstance?.type}"/>
-</div>
 
 <div class="fieldcontain ${hasErrors(bean: absenceCounterInstance, field: 'employee', 'error')} required">
 	<label for="employee">

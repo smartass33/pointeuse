@@ -9,8 +9,7 @@ class Employee{
 	String lastName
 	String userName
 	String matricule
-	//static searchable = true
-	//static embedded = ['site']
+	Function function
 	Site site
 	Service service
 	float weeklyContractTime //35H par défaut. 
@@ -18,21 +17,8 @@ class Employee{
 	boolean hasError
 	Date arrivalDate
 	
-	static hasMany = [absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]
-	
-
-	
-	static searchable = true
-	/*
-	 * 
-	 * static searchable ={
-		except = ['id', 'version']
-	}
-	static searchable = { 
-		//tags component: true 
-		site reference: true 
-	} 
-*/	
+	static hasMany = [absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
+	static searchable = true	
 	static constraints = {
 		firstName blank: false
 		lastName blank: false 

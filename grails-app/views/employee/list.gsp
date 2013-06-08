@@ -104,7 +104,6 @@ $('label').click(function(){
 						${message(code: 'default.period.label', default: 'List')}: <g:datePicker
 							name="myDate" value="${period ? period : new Date()}" 
 							precision="month" noSelection="['':'-Choose-']" style="vertical-align: middle;"/>
-		 
 
 						<g:actionSubmit class='listButton' value="pdf"  action="pdf"/>		
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
