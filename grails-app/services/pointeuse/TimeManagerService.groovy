@@ -28,8 +28,12 @@ class TimeManagerService {
 	def computeSupplementaryTime(Employee employee,int week, int year){
 		def dailySupplementarySeconds = 0
 		def weeklySupplementarySeconds = 0
-		def criteria = DailyTotal.createCriteria()
-		def dailyTotals = criteria.list {
+		def dailyTotalSum=0
+		def criteria 
+		def dailyTotals
+		
+		criteria = DailyTotal.createCriteria()
+		dailyTotals = criteria.list {
 			and {
 				eq('employee',employee)
 				eq('year',year)
@@ -37,8 +41,6 @@ class TimeManagerService {
 			}
 		}
 		criteria = WeeklyTotal.createCriteria()
-		WeeklyTotal previousWeeklyTotal
-		def dailyTotalSum=0
 		for (DailyTotal tmpDaily:dailyTotals){
 			def tmpElapsed = getDailyTotal(tmpDaily)
 			dailyTotalSum += tmpElapsed
@@ -142,7 +144,7 @@ class TimeManagerService {
 		}
 	}	
 	
-	def initializeTotals(Employee employee, Date currentDate,String type,def event){
+	def initializeTotals(Employee employee, Date currentDate,String type,def event, Boolean isOutside ){
 		def criteria = MonthlyTotal.createCriteria()
 		def monthlyTotal = criteria.get {
 				and {
@@ -164,7 +166,7 @@ class TimeManagerService {
 			and {
 				eq('employee',employee)
 				eq('year',currentDate.getAt(Calendar.YEAR))
-				eq('month',currentDate.getAt(Calendar.MONTH)+1)
+				eq('month',currentDate.getAt(Calendar.MONTH)+1)  
 				eq('week',currentDate.getAt(Calendar.WEEK_OF_YEAR))
 			}
 		}
@@ -195,7 +197,7 @@ class TimeManagerService {
 		}
 		 
 		if (event==null){
-			def inOrOut = new InAndOut(employee, currentDate,type)
+			def inOrOut = new InAndOut(employee, currentDate,type,isOutside)
 			inOrOut.dailyTotal=dailyTotal
 			dailyTotal.inAndOuts.add(inOrOut)
 			employee.inAndOuts.add(inOrOut)

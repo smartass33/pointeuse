@@ -51,7 +51,7 @@ class UtilService {
 		
 		if (twoLoops){
 			calendar.set(Calendar.YEAR,year-1)
-			log.warn("getting opened days from: "+calendar.time + " until end of year "+year-1)
+			//log.warn("getting opened days from: "+calendar.time + " until end of year "+year-1)
 			
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
@@ -66,7 +66,7 @@ class UtilService {
 			calendar.set(Calendar.MONTH,0)
 			calendar.set(Calendar.DAY_OF_YEAR,1)
 			
-			log.warn("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
+			//log.warn("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
 			
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
 				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
@@ -79,7 +79,7 @@ class UtilService {
 				calendar.roll(Calendar.DAY_OF_YEAR, 1)
 			}
 		}else{
-			log.warn("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
+			//log.warn("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
 				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
 					yearlyCounter ++
@@ -91,27 +91,6 @@ class UtilService {
 				calendar.roll(Calendar.DAY_OF_YEAR, 1)
 			}		
 		}
-		
-		/*
-		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
-			if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-				yearlyCounter ++
-			}
-			if (calendar.get(Calendar.DAY_OF_YEAR) == calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
-				break
-			}
-			calendar.roll(Calendar.DAY_OF_YEAR, 1)
-		}
-		
-		calendar.set(Calendar.DAY_OF_YEAR,1)
-		calendar.set(Calendar.YEAR,year)
-
-		
-		endPeriodCalendar.set(Calendar.MONTH,4)
-		endPeriodCalendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-*/
-
-		
 		return yearlyCounter
 	}
 	
