@@ -3,9 +3,8 @@ package pointeuse
 class Year {
 
 	int year
-	int openedDays
-	int bankHolidays
-	int solidarityDays
+	String period
+
 	
     static constraints = {
     }

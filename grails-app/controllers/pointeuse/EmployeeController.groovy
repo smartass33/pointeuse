@@ -1515,8 +1515,9 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 						eq('month',month)
 					}
 				}
-				monthlyTotalInstance.elapsedSeconds=monthlyTotalTime
-				
+				if (monthlyTotalInstance!=null){
+					monthlyTotalInstance.elapsedSeconds=monthlyTotalTime
+				}
 				def cartoucheTable = cartouche(userId,year,month)
 				def openedDays = timeManagerService.computeMonthlyHours(year,month)
 				def workingDays=cartoucheTable.get(3)

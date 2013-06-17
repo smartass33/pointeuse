@@ -35,22 +35,30 @@ function showSpinner() {
 <body>
 
 	<div class="nav" id="nav">
-		<g:headerMenu />
-	</div>
+		<ul>
+			<li><a class="home" href="${createLink(uri: '/')}"><g:message
+						code="default.home.label" /></a></li>
+			<li><g:link class="list" action="list"
+					params="${[isAdmin:isAdmin]}"><g:message code="employee.list.annualReport.label"/>
+				</g:link></li>
+			<g:if test="${username != null}">
+				<li><g:link class="list" action="" controller="logout">
+						${message(code: 'default.button.logout', default: 'Logout')}
+					</g:link></li>
+			</g:if>
+		</ul>	</div>
 	<div id="spinner" class="spinner" style="display: none;">
-
-    <span>Chargement des données. Veuillez patienter</span><img id="img-spinner" src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading"/>
+    <span><g:message code="spinner.loading.label"/></span><img id="img-spinner" src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading"/>
 </div>
 	<div id="list-employee" class="content scaffold-list">
 		<h1>
-			<g:message code="daily.recap.label"/>
-			<br>
-			<g:if test="${site!=null}"><g:message code="site.label"/>:${site.name}</g:if>
+			
+			<g:if test="${site!=null}">:${site.name}</g:if>
 			<br>
 			<g:form method="POST"
 				url="[controller:'employee', action:'pdf']">
-				<g:message code="laboratory.label" default="Search"
-					style="vertical-align: middle;" />	
+				<g:message code="default.period.label" default="Search"
+					style="vertical-align: middle;" />
 				<g:datePicker name="myDate" value="${new Date()}" precision="month"
               		noSelection="['':'-Choose-']" relativeYears="[-2..7]"/>
 
@@ -58,7 +66,7 @@ function showSpinner() {
 				<g:submitToRemote  class="listButton"
 					value="rapport"
 					update="monthlyTable" 
-					url="[controller:'employee', action:'annualReportAjax']"
+					url="[controller:'employee', action:'annualReport']"
 
 					                              onLoading="showSpinner()" 
                                 onComplete="hideSpinner()" 
@@ -67,6 +75,8 @@ function showSpinner() {
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:hiddenField name="siteId" value="${siteId}" />
 				<g:hiddenField name="userId" value="${userId}" />
+				<g:hiddenField name="isAjax" value="true" />
+				
 				
 			</g:form>
 
