@@ -51,7 +51,7 @@
 						${employeeInstance?.site.name}
 					</g:if></td>
 				<g:if test="${!isAdmin}">
-					<td style="border:1px;width:200px"><g:link controller="employee" action='annualReport' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
+					<td style="border:1px;width:200px"><g:link controller="employee" action='annualReport' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId,isAjax:false]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
 					<td style="border:1px;width:200px"><g:link controller="employee" action='report' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link></td>
 				<g:form controller="employee">
 						<g:hiddenField name="userId" value="${employeeInstance?.id}" />

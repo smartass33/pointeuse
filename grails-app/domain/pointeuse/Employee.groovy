@@ -17,7 +17,7 @@ class Employee{
 	boolean hasError
 	Date arrivalDate
 	
-	static hasMany = [absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
+	static hasMany = [vacationsCounters:Vacation,absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
 	static searchable = true	
 	static constraints = {
 		firstName blank: false

@@ -154,10 +154,12 @@ class InAndOutController {
 		}
 		try {
 			if (fromReport){
+				log.error('entry created from report: '+inAndOutInstance)
 				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])
 				
 			}else{
 				redirect(action: "pointage", controller:"employee", id: employeeId)
+				log.error('entry created from pointage: '+inAndOutInstance)			
 			}
 			return
 		}catch(CannotRedirectException e){

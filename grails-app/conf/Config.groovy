@@ -104,7 +104,7 @@ environments {
         serverURL = "http://pointeuse.biolab33"
 		context=
 		log4j = {
-			
+				'null' name:'stacktrace'
 				appenders {
 					rollingFile name:'myAppender',file:"/var/log/tomcat6/pointeuse.log", layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
