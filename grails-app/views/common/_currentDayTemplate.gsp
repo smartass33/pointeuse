@@ -85,16 +85,7 @@
 					class="entrybutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
 				</g:else>
 			</td>
-						<td>
-				<g:if test="${entranceStatus}">
-					<g:remoteLink action="addingEventToEmployee" update="currentDay"
-					class="exitbutton" params="[userId:employee?.id,type:entryName,isOutsideSite:true]">${entryName} EXT</g:remoteLink>
-				</g:if> 
-				<g:else>
-					<g:remoteLink action="addingEventToEmployee" update="currentDay"
-					class="entrybutton" params="[userId:employee?.id,type:entryName,isOutSideSite:true]">${entryName} EXT</g:remoteLink>
-				</g:else>
-			</td>
+
 			
 			<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
 			<td><g:link class="modalbox" controller="employee"

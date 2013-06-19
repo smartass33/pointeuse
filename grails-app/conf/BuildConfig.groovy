@@ -28,11 +28,17 @@ grails.project.dependency.resolution = {
 		compile 'log4j:apache-log4j-extras:1.0'
         runtime 'mysql:mysql-connector-java:5.1.21'
 		compile 'com.itextpdf:itextpdf:5.4.1'
+
+
+		
     }
 
     plugins {
         runtime ":hibernate:$grailsVersion"
-        runtime ":jquery:1.10.0"
+		compile ":jquery:1.10.0"
+		compile ":jquery-ui:1.8.24"
+		compile ":jquery-ui-timepicker:0.9.8.1"
+		compile ":jquery-date-time-picker:0.1.0"
         runtime ":resources:1.0"
 		compile ":tooltip:0.7"
 		compile ":mail:1.0.1"

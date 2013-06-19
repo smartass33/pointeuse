@@ -471,7 +471,7 @@ class EmployeeController {
 		def yearTheoritical=(
 			3600*(
 				yearlyCounter*employee.weeklyContractTime/Employee.WeekOpenedDays
-				+(Employee.Pentecote*monthNumber)
+				+(Employee.Pentecote*monthNumber)*(employee.weeklyContractTime/Employee.legalWeekTime)
 				-(WeeklyTotal.WeeklyLegalTime/Employee.WeekOpenedDays)*(yearlySickness.size()+yearlyHolidays.size()+yearlySansSolde.size())) - yearlyPregnancyCredit)as int	
 		return [yearlyCounter ,yearlyHolidays.size(),yearlyRtt.size(),yearlySickness.size(),yearTheoritical,yearlyPregnancyCredit,totalTime,yearlySansSolde.size()]
 	}
@@ -577,7 +577,7 @@ class EmployeeController {
 		// determine monthly theoritical time:
 		def monthTheoritical=(
 			3600*(counter*employeeInstance.weeklyContractTime/Employee.WeekOpenedDays
-				+(Employee.Pentecote)
+				+(Employee.Pentecote)*(employeeInstance.weeklyContractTime/Employee.legalWeekTime)
 				-(WeeklyTotal.WeeklyLegalTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size())) 
 			    - pregnancyCredit)as int
 		def monthTheoriticalHuman=timeManagerService.computeHumanTime(monthTheoritical)
@@ -700,6 +700,7 @@ class EmployeeController {
 		}
 		if (todayEmployeeEntries.size() > Employee.entryPerDay){
 			flash.message = "TROP D'ENTREES DANS LA JOURNEE. POINTAGE NON PRIS EN COMPTE"
+			log.error("employee: "+employeeInstance.lastName+" proceeded to too many entries")
 			redirect(action: "show", id: employeeInstance.id)
 			return
 		}
@@ -869,7 +870,6 @@ class EmployeeController {
 		def day=params["day"] as int
 		def month=params["month"] as int
 		def year=params["year"] as int
-		//def employeeId=params["employeeId"]
 		def employee = Employee.get(params["employeeId"])
 		def criteria = InAndOut.createCriteria()
 		def inAndOutList = criteria.list {

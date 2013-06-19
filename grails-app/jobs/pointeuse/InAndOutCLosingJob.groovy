@@ -41,16 +41,14 @@ class InAndOutCLosingJob {
 			def lastIn = InAndOut.findByEmployee(employee,[max:1,sort:"time",order:"desc"])
 			if (lastIn != null && lastIn.type == "E"){
 				log.error "we have a problem: user "+employee.lastName +" did not log out"
-				inOrOut = new InAndOut(employee, calendar.time,"S")
+				inOrOut = new InAndOut(employee, calendar.time,"S",false)
 				inOrOut.dailyTotal=lastIn.dailyTotal
 				inOrOut.systemGenerated=true
 				employee.inAndOuts.add(inOrOut)
 				employee.status=false
 				employee.hasError=true
 				log.error "creating inOrOut: "+inOrOut
-				
 			}
-		//	sendEmail(employee,inOrOut)
 		}
 		if (calendar.get(Calendar.DAY_OF_YEAR) == calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 			calendar.roll(Calendar.YEAR,1)

@@ -7,6 +7,8 @@
 	<g:javascript library="jquery" plugin="jquery"/>
  	<resource:include components="autoComplete, dateChooser"/>
 	<resource:dateChooser />
+	<resource:tooltip />
+	
 	<modalbox:modalIncludes />	
 	<meta name="layout" content="main">
 	<g:set var="weeklyRecap" value="0" />
@@ -61,6 +63,32 @@
 							params="[complete:true,report:true]">
 							<g:message code="inAndOut.regularization" default="Régul" />
 						</modalbox:createLink></li>
+					<li>
+					
+					<a id="legend"  title="
+					<table >
+						<tr>
+							<td ><g:message code='legend.NORMAL_EVENT' default='Régul' /></td>
+						</tr>
+						<tr>
+							<td style='color : red;font-weight: bold;'><g:message code='legend.INITIALE_SALARIE' default='Régul' /></td>
+						</tr>
+						<tr>
+							<td style='color : orange;font-weight: bold;'><g:message code='legend.MODIFIEE_SALARIE' default='Régul' /></td>
+						</tr>
+						<tr>
+							<td style='color : blue;font-weight: bold;'><g:message code='legend.INITIALE_ADMIN' default='Régul' /></td>
+						</tr>
+						<tr>
+							<td style='color : green;font-weight: bold;'><g:message code='legend.MODIFIEE_ADMIN' default='Régul' /></td>
+						</tr>
+						<tr>
+							<td style='font-weight: bold;'><g:message code='legend.SYSTEM_GENERATED' default='Régul' /></td>
+						</tr>
+						
+						</table>"><g:message code='legend.label' default='Régul' /></a>
+<richui:tooltip id="legend" />
+					</li>
 				</ul>		
 			<BR/>
 				<g:if test="${flash.message}">

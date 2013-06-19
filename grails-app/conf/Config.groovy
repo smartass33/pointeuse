@@ -106,7 +106,7 @@ environments {
 		log4j = {
 				'null' name:'stacktrace'
 				appenders {
-					rollingFile name:'myAppender',file:"/var/log/tomcat6/pointeuse.log", layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					rollingFile name:'myAppender',file:"/var/log/tomcat6/pointeuse.log", maxFileSize:1024,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
 			
 				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers

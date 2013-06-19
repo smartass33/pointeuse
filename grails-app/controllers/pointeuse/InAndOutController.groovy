@@ -48,8 +48,8 @@ class InAndOutController {
 		def userId = params["userId"]
 		def hour = params["myTime_hour"] as int
 		def minute = params["myTime_minute"] as int
-		def second = params["myTime_second"] as int
 		def instanceDate = params["inOrOutDate"]
+		def second = params["myTime_second"]!=null ? params["myTime_second"] as int :0
 		def fromReport = params["fromReport"].equals('true') ? true:false
 		if (userId != null && userId != ""){
 			employee=Employee.get(userId)

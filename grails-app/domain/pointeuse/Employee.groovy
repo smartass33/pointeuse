@@ -3,6 +3,7 @@ package pointeuse
 class Employee{
 
 	static final float Pentecote=7/12
+	static final float legalWeekTime=35
 	static final float WeekOpenedDays=6
 	static final int entryPerDay=6
 	String firstName

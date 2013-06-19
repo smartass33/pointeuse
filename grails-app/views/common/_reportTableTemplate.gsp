@@ -153,28 +153,28 @@
                       </g:if> <g:else>
                         <td bgcolor="#FFC0CB" style="height: 1px;text-align:center;">
                       </g:else> <font size="2"> <g:if
-                          test="${inOrOut.regularizationType!=0 || inOrOut.systemGenerated}">
+                          test="${inOrOut.regularizationType!=InAndOut.INIT || inOrOut.systemGenerated}">
                           <g:if test="${inOrOut.systemGenerated}">
                             <g:textField id="myinput" name="cell"
                               value="${inOrOut.time.format('HH:mm')}" align="center"
                              style="font-weight: bold" />
                           </g:if>
-                          <g:if test="${inOrOut.regularizationType==1}">
+                          <g:if test="${inOrOut.regularizationType==InAndOut.INITIALE_SALARIE}">
                             <g:textField id="myinput" name="cell"
                              value="${inOrOut.time.format('HH:mm')}" align="center"
                               style="color : red;font-weight: bold;" />
                           </g:if>
-                          <g:if test="${inOrOut.regularizationType==2}">
+                          <g:if test="${inOrOut.regularizationType==InAndOut.INITIALE_ADMIN}">
                             <g:textField id="myinput" name="cell"
                               value="${inOrOut.time.format('HH:mm')}" align="center"
                               style="color : blue;font-weight: bold;" />
                           </g:if>
-                          <g:if test="${inOrOut.regularizationType==3}">
+                          <g:if test="${inOrOut.regularizationType==InAndOut.MODIFIEE_ADMIN}">
                             <g:textField id="myinput" name="cell"
                               value="${inOrOut.time.format('HH:mm')}" align="center"
                               style="color : green;font-weight: bold;" />
                           </g:if>
-                          <g:if test="${inOrOut.regularizationType==4}">
+                          <g:if test="${inOrOut.regularizationType==InAndOut.MODIFIEE_SALARIE}">
                             <g:textField id="myinput" name="cell"
                               value="${inOrOut.time.format('HH:mm')}" align="center"
                               style="color : orange;font-weight: bold;" />
