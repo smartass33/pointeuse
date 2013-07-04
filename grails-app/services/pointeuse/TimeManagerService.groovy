@@ -31,6 +31,26 @@ class TimeManagerService {
 		def dailyTotalSum=0
 		def criteria 
 		def dailyTotals
+		def bankHolidays
+		def calendar = Calendar.instance
+		def bankHolidayCounter = 0
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.WEEK_OF_YEAR,week)
+		
+		criteria = BankHoliday.createCriteria()
+		bankHolidays = criteria.list {
+			and {
+				eq('year',year)
+				eq('month',calendar.get(Calendar.MONTH)+1)
+			}
+		}
+		
+		for (BankHoliday bankHoliday:bankHolidays){
+			if (bankHoliday.calendar.get(Calendar.WEEK_OF_YEAR)==week){
+				bankHolidayCounter+=1
+			}
+		}
+		
 		
 		criteria = DailyTotal.createCriteria()
 		dailyTotals = criteria.list {
@@ -46,14 +66,14 @@ class TimeManagerService {
 			dailyTotalSum += tmpElapsed
 			dailySupplementarySeconds += Math.max(tmpElapsed-DailyTotal.maxWorkingTime, 0)
 		}
-		if (dailyTotalSum<=WeeklyTotal.maxWorkingTime){
+		if (dailyTotalSum<=1.2*3600*(WeeklyTotal.WeeklyLegalTime-bankHolidayCounter*(Employee.legalWeekTime/Employee.WeekOpenedDays))){
 			weeklySupplementarySeconds = dailySupplementarySeconds
 		}else {
-			weeklySupplementarySeconds = Math.max(dailySupplementarySeconds,dailyTotalSum-WeeklyTotal.maxWorkingTime)
+			weeklySupplementarySeconds = Math.max(dailySupplementarySeconds,dailyTotalSum-1.2*3600*(WeeklyTotal.WeeklyLegalTime-bankHolidayCounter*(Employee.legalWeekTime/Employee.WeekOpenedDays)))
 		}
 		return weeklySupplementarySeconds
 	}
-
+		
 
 	
 	def computeSupplementaryTime(DailyTotal dailyTotal){

@@ -205,14 +205,28 @@
 .ui-timepicker-div dl dd{ margin: -25px 0 10px 65px; }
 	</style>
 	
-	
-	  <script src="js/jquery/jquery-1.10.0.js"></script>
-	  <script src="js/jquery/jquery-1.10.0.min.js"></script>
+	 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+
+<link rel="stylesheet" type="text/css" href="css/jquery.timepicker.css" />
+	  <!--script src="js/jquery/jquery.timepicker.js"></script-->
+	  <!--script src="js/jquery/jquery.timepicker.min.js"></script-->
+	  <!--script src="js/jquery/jquery-ui-timepicker-addon.js" type="text/javascript"></script-->
 	  
-	  <script src="js/jquery/jquery-ui-i18n.js"></script>
-	  	  <script src="js/jquery/jquery.ui.datepicker-af.js"></script>
+
+	  <!-- script src="js/jquery/jquery-1.10.0.js"></script-->
+	  <!-- script src="js/jquery/jquery-1.10.0.min.js"></script-->
+	  
+	  <!--script src="js/jquery/jquery-ui-i18n.js"></script-->
+	  <!--script src="js/jquery/jquery.ui.datepicker-af.js"></script-->
+	  <!--script src="js/jquery/jquery.ui.datepicker-fr.js"></script-->
 	  
 	  
+	  		<script type="text/javascript">
+
+		  jQuery(function($) {
+    $('#basicExample').timepicker();
+});
+		</script>
 	<script type="text/javascript">
 	
 	
@@ -242,17 +256,18 @@
 	   }
 	}
 
-	
+	/*
 	  $(function() {
     $( "#datepicker" ).datepicker();
   });
-	
+	*/
 
 	</script>
 
 	
 	</head>
-	<body>	
+	<body>
+	<jqui:resources/>	
 	    <g:javascript>window.onload = updateClock();document.getElementById('mytextfield').focus();</g:javascript>
 		<a href="#page-body" class="skip"><g:message code="default.link.skip.label" default="Skip to content&hellip;" /></a>
 		<div id="status" role="complementary">
@@ -283,6 +298,16 @@
 			<g:if test="${flash.message}">
 	        	<div class="message">${flash.message}</div>
 	      	</g:if>
+	      	
+		<!--div class="example">
+
+
+
+		<h3>Basic Example</h3>
+		<p><input id="basicExample" type="text" class="time" /></p>
+
+		<pre class="code" data-language="javascript">$('#basicExample').timepicker();</pre>
+	</div-->
 	  		<form id="myform" method="POST" action="employee/pointage" controller="employee">
 	  			<font size="5">	${message(code: 'employee.id', default: 'Create')}: <g:textField id="mytextfield" name="username" autofocus="true" style="vertical-align: middle;" />  	</font>	  				  						
 				<input type="submit" class="classname" value="${message(code: 'default.button.login.label', default: 'Create')}" style="vertical-align: middle;">

@@ -76,7 +76,7 @@ environments {
 		log4j = {
 			
 				appenders {
-					rollingFile name:'myAppender',file:"/Users/henri/Documents/workspace/pointeuse/logs/pointeuse.log", layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					rollingFile name:'myAppender',file:"/Users/henri/Documents/workspace/pointeuse/logs/pointeuse.log", maxFileSize:1024,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
 			
 				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers

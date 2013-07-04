@@ -345,12 +345,20 @@
 					<thead></thead>
 					<tr>
 						<td>${message(code: 'report.verification.date.label', default: 'Report')}: ${new Date().format('EEEE dd MMM yyyy')}</td>
+					</tr>
+					<tr><td/></tr>
+					<tr><td/></tr>
+					<tr><td/></tr>
+					<tr>
+						<td>${message(code: 'report.employee.signature.label', default: 'Report')}:</td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-						<td>${message(code: 'report.signature.label', default: 'Report')}:</td></tr>
+						<td>${message(code: 'report.employer.signature.label', default: 'Report')}:</td>
+					
+					</tr>
 				</table>
 		        
 
