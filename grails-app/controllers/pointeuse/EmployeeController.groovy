@@ -412,6 +412,7 @@ class EmployeeController {
 			and {
 				eq('employee',employee)
 				ge('month',6)
+				le('month',month)
 				eq('year',year-1)
 			}
 		}
@@ -1687,6 +1688,8 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		def myDate = params["myDate"]
 		if (myDate==null || myDate.equals("")){
 			myDate=calendar.time
+		}else {
+			calendar.time=myDate
 		}
 	
 		if (params["userId"]!=null && !params["userId"].equals("")){
