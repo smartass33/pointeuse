@@ -476,7 +476,7 @@ class EmployeeController {
 			3600*(
 				yearlyCounter*employee.weeklyContractTime/Employee.WeekOpenedDays
 				+(Employee.Pentecote*monthNumber)*(employee.weeklyContractTime/Employee.legalWeekTime)
-				-(WeeklyTotal.WeeklyLegalTime/Employee.WeekOpenedDays)*(yearlySickness.size()+yearlyHolidays.size()+yearlySansSolde.size())) - yearlyPregnancyCredit)as int	
+				-(employee.weeklyContractTime/Employee.WeekOpenedDays)*(yearlySickness.size()+yearlyHolidays.size()+yearlySansSolde.size())) - yearlyPregnancyCredit)as int	
 		return [yearlyCounter ,yearlyHolidays.size(),yearlyRtt.size(),yearlySickness.size(),yearTheoritical,yearlyPregnancyCredit,totalTime,yearlySansSolde.size()]
 	}
 	
@@ -582,7 +582,7 @@ class EmployeeController {
 		def monthTheoritical=(
 			3600*(counter*employeeInstance.weeklyContractTime/Employee.WeekOpenedDays
 				+(Employee.Pentecote)*(employeeInstance.weeklyContractTime/Employee.legalWeekTime)
-				-(WeeklyTotal.WeeklyLegalTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size())) 
+				-(employeeInstance.weeklyContractTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size())) 
 			    - pregnancyCredit)as int
 		def monthTheoriticalHuman=timeManagerService.computeHumanTime(monthTheoritical)
 		return [userId,employeeInstance,calendar,counter ,holidays.size(),rtt.size(),sickness.size(),sansSolde.size(),monthTheoritical,pregnancyCredit,yearlyCartouche.get(0),yearlyCartouche.get(1),yearlyCartouche.get(2),yearlyCartouche.get(3),yearlyCartouche.get(4),yearlyCartouche.get(5),yearlyCartouche.get(6),yearlyCartouche.get(7),monthTheoriticalHuman]	
@@ -908,6 +908,8 @@ class EmployeeController {
 		}
 		try{
 			timeManagerService.timeModification( idList, timeList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
+			// now, find if employee still has errors:
+			
 		}catch(PointeuseException ex){
 			flash.message = message(code: ex.message)
 			if (fromRegularize){
@@ -1218,7 +1220,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 				}else{
 					weeklySupTime = timeManagerService.computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 				}
-				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),timeManagerService.computeHumanTime(weeklySupTime))
+				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),timeManagerService.computeHumanTime(Math.round(weeklySupTime)))
 				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
 					monthlySupTime += weeklySupTime
 					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
@@ -1306,7 +1308,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(15))
 			def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get(16))
 			def yearlySansSolde=cartoucheTable.get(17)
-			def payableSupTime = timeManagerService.computeHumanTime(monthlySupTime)
+			def payableSupTime = timeManagerService.computeHumanTime(Math.round(monthlySupTime))
 			def payableCompTime = timeManagerService.computeHumanTime(0)
 			if (employee.weeklyContractTime!=35){
 				if (monthlyTotalTime > monthTheoritical){
@@ -1542,7 +1544,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 				def payableCompTime = timeManagerService.computeHumanTime(0)
 				if (employee.weeklyContractTime!=35){
 					if (monthlyTotalTime > monthTheoritical){
-						payableCompTime = timeManagerService.computeHumanTime(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0))
+						payableCompTime = timeManagerService.computeHumanTime(Math.round(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0)))
 					}
 				}
 				
@@ -2008,6 +2010,59 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			 }
 		 }
 		 print "I am done!!"
+		 
+	 }
+	 
+	 
+	 
+	 def execute() {
+		 log.error "Job run!"
+		 
+		 def inOrOut
+		 //trouver toutes les entrŽes du jour courant
+		 //trouver, pour chaque employŽ le plus rŽcent
+		 //Si ce dernier est une EntrŽe, rajouter une sortie
+		 // ajouter dans un nouveau champs de InAndOut que cette 'sortie' est gŽnŽrŽe automatiquement pour la resortir en erreur dans les rapprts.
+ 
+		 def employeeList = Employee.findAll()
+		 def calendar = Calendar.instance
+		 for (employee in employeeList){
+			 def lastIn = InAndOut.findByEmployee(employee,[max:1,sort:"time",order:"desc"])
+			 if (lastIn != null && lastIn.type == "E"){
+				 log.error "we have a problem: user "+employee.lastName +" did not log out"
+				 inOrOut = new InAndOut(employee, calendar.time,"S",false)
+				 inOrOut.dailyTotal=lastIn.dailyTotal
+				 inOrOut.systemGenerated=true
+				 employee.inAndOuts.add(inOrOut)
+				 employee.status=false
+				 employee.hasError=true
+				 log.error "creating inOrOut: "+inOrOut
+			 }
+			 
+			 //def inAndOutList = InAndOut.findAllBySystemGeneratedAndEmployee(true,employee)
+			 def criteria = InAndOut.createCriteria()
+			 def inAndOutList = criteria.list {
+				 or{
+					 and {
+						 eq('employee',employee)
+						 eq('systemGenerated',true)
+					 }
+					and {
+						eq('employee',employee)
+						eq('regularizationType',InAndOut.INITIALE_SALARIE)						
+					} 
+				 }
+				
+			 }
+			 
+			 if (inAndOutList != null && inAndOutList.size()>0){
+				 log.error("there still "+inAndOutList.size() +" errors for employee "+employee.id + " : " +employee.lastName)
+				 employee.hasError=true
+			 }else {
+			 	employee.hasError=false
+			 }
+			 
+		 }
 		 
 	 }
 	 

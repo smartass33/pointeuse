@@ -49,6 +49,28 @@ class InAndOutCLosingJob {
 				employee.hasError=true
 				log.error "creating inOrOut: "+inOrOut
 			}
+			
+			def criteria = InAndOut.createCriteria()
+			 def inAndOutList = criteria.list {
+				 or{
+					 and {
+						 eq('employee',employee)
+						 eq('systemGenerated',true)
+					 }
+					and {
+						eq('employee',employee)
+						eq('regularizationType',InAndOut.INITIALE_SALARIE)						
+					} 
+				 }
+				
+			 }
+			 if (inAndOutList != null && inAndOutList.size()>0){
+				 log.error("there still "+inAndOutList.size() +" errors for employee "+employee.id + " : " +employee.lastName)
+				 employee.hasError=true
+			 }else {
+			 	employee.hasError=false
+			 }
+			
 		}
 		if (calendar.get(Calendar.DAY_OF_YEAR) == calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 			calendar.roll(Calendar.YEAR,1)
