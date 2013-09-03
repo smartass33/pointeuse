@@ -898,19 +898,33 @@ class EmployeeController {
 		def employee = Employee.get(employeeId)
 		def newTimeList=params["cell"]
 		def fromRegularize=params["fromRegularize"].equals("true") ? true : false
-		def month=monthList[0]
-		def year=yearList[0]
-		
-		if (idList==null){
-			log.error("list is null")
-			def retour = report(employee.id as long,month as int,year as int)
-			render(view: "report", model: retour)		
-		}
+
+
 		try{
+
+			def month=monthList[0]
+			def year=yearList[0]
+			
+			if (idList==null){
+				log.error("list is null")
+				def retour = report(employee.id as long,month as int,year as int)
+				render(view: "report", model: retour)
+			}
+			
+			
 			timeManagerService.timeModification( idList, timeList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
 			// now, find if employee still has errors:
 			
-		}catch(PointeuseException ex){
+		
+	
+		if (fromRegularize){
+			redirect(action: "pointage", id: employee.id)
+		}else{
+		def retour = report(employee.id as long,month as int,year as int)
+		render(view: "report", model: retour)
+		}
+		}
+		catch(PointeuseException ex){
 			flash.message = message(code: ex.message)
 			if (fromRegularize){
 			render(view: "index")
@@ -919,13 +933,19 @@ class EmployeeController {
 			render(view: "report", model: retour)
 			}
 			
-		}
-	
-		if (fromRegularize){
-			redirect(action: "pointage", id: employee.id)
-		}else{
-		def retour = report(employee.id as long,month as int,year as int)
-		render(view: "report", model: retour)
+		}catch(NullPointerException e2){
+			flash.message = message(code: "appliquer.inutile.message")
+			log.error(e2.message)
+			if (fromRegularize){
+			render(view: "index")
+			}else{
+		//	def report=params["currentMonth"]
+			def currentMonth=params["myDate_month"] as int
+			def currentYear=params["myDate_year"] as int
+			
+			def retour = report(employee.id as long,currentMonth as int,currentYear as int)
+			render(view: "report", model: retour)
+			}
 		}
 	}
 	
@@ -1448,6 +1468,21 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
 				dailyTotalId=dailyTotal.id
 			} 
+			// daily total is null. Still, we need to check if supplementary time exists within the week
+			if (dailyTotal==null && calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+				if (calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
+					weeklySupTime = 0
+				}else{
+					weeklySupTime = timeManagerService.computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+				}
+					weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),timeManagerService.computeHumanTime(Math.round(weeklySupTime)))
+				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
+					monthlySupTime += weeklySupTime
+					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
+				}
+				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
+			
+			}
 						
 			criteria = InAndOut.createCriteria()
 			def entriesByDay = criteria{

@@ -63,8 +63,8 @@
                   <g:else>
                     <td><font size="2">00 : 00</font></td>
                   </g:else>
-                  <td><font size="2"> <g:if
-                        test="${employee.weeklyContractTime==35}">
+                  <td><font size="2"> 
+                  <g:if test="${employee.weeklyContractTime==35}">
                         <g:if
                           test="${weeklySupTotal.get(employee) != null && weeklySupTotal.get(employee).get(day.key) !=null}">
                           <g:if
@@ -72,7 +72,8 @@
                             ${dailySupTotalMap.get(entries.key).get(0)}H${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}
                           </g:if>
                         </g:if>
-                      </g:if> <g:else>
+                      </g:if> 
+                      <g:else>
                         <g:if
                           test="${dailySupTotalMap.get(entries.key) !=null && (dailySupTotalMap.get(entries.key).get(0)>0 ||dailySupTotalMap.get(entries.key).get(1)>0)}">
                           ${dailySupTotalMap.get(entries.key).get(0)}H${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}
@@ -206,7 +207,11 @@
                 </th>                                                        
               </g:if>
               <g:else>
-                <th colspan="34" scope="colgroup">Total fin de semaine: 0H</TH>
+                <th colspan="34" scope="colgroup">Total fin de semaine: 0H
+               		<g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null  && weeklySupTotal.get(employee).get(day.key) != null && ((weeklySupTotal.get(employee).get(day.key)).get(0) > 0 || (weeklySupTotal.get(employee).get(day.key)).get(1) >0)}">
+                   dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)}H${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}  
+                  </g:if>
+                </th>
               </g:else>
             </tr>  
           </g:each>

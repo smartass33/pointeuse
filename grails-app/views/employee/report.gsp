@@ -46,7 +46,10 @@
 							name="myDate" value="${period ? period : new Date()}" 
 							precision="month" noSelection="['':'-Choose-']" style="vertical-align: middle;"/>
 							<g:hiddenField name="userId" value="${userId}" />
-							<g:hiddenField name="siteId" value="${siteId}" />	
+							<g:hiddenField name="siteId" value="${siteId}" />
+							<g:hiddenField name="currentMonth" value='${period ? period.format("M") : (new Date()).format("M")}'/>
+														<g:hiddenField name="currentYear" value='${period ? period.format("yyyy") : (new Date()).format("yyyy")}'/>
+								
 					</li>
 					<li style="vertical-align: middle;">
 						<g:actionSubmit value="afficher" action="report" class="listButton"/>						
