@@ -437,10 +437,55 @@ class EmployeeController {
 		
 		
 		// count sundays during the period:
-		yearlyCounter = utilService.getSundaysInYear(year,month)
-		
+		if (month>5){
+			// this means month we are in the first half of the year
+			yearlyCounter = utilService.getSundaysInYear(year-1,month)
+		}else{
+			yearlyCounter = utilService.getSundaysInYear(year,month)
+		}
+			
 		def bankHolidayCounter=0
 		def bankHolidayList
+		
+		
+		if (month<6){
+			criteria = BankHoliday.createCriteria()
+			bankHolidayList = criteria.list{
+				
+				or{
+					and {
+						ge('month',1)
+						le('month',month)
+						eq('year',year)
+					}
+					and{
+						ge('month',6)
+						le('month',12)
+						eq('year',year-1)
+					}
+				}
+			}
+		}
+		else{
+			criteria = BankHoliday.createCriteria()
+			bankHolidayList = criteria.list{
+				and {
+					ge('month',6)
+					le('month',month)
+					eq('year',year-1)
+				}
+				
+			}
+			
+		}
+		
+		for (BankHoliday bankHoliday:bankHolidayList){
+			if (bankHoliday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				bankHolidayCounter ++
+			}
+		}
+		
+		/*
 		if (month<6){
 			criteria = BankHoliday.createCriteria()
 			bankHolidayList = criteria.list{
@@ -463,13 +508,9 @@ class EmployeeController {
 				le('month',month)
 				eq('year',year)
 			}
-		}
+		}*/
 		
-		for (BankHoliday bankHoliday:bankHolidayList){
-			if (bankHoliday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-				bankHolidayCounter ++
-			}
-		}
+
 		yearlyCounter -= bankHolidayCounter	
 		def yearlyPregnancyCredit=30*60*pregnancy.size()	
 		def yearTheoritical=(
@@ -1043,7 +1084,8 @@ class EmployeeController {
 			for (int currentWeek = firstWeekOfMonth; currentWeek <= lastWeekOfMonth; currentWeek++){
 				monthlySupTotalTime += timeManagerService.computeSupplementaryTime(employee,currentWeek, year)
 			}
-			yearMonthlySupTime.put(lastYearMonth,timeManagerService.computeHumanTime(monthlySupTotalTime))			
+
+			yearMonthlySupTime.put(lastYearMonth,timeManagerService.computeHumanTime(Math.round(monthlySupTotalTime)))			
 			def monthTheoritical = cartoucheTable.get(8)
 			if (employee.weeklyContractTime!=35){
 				if (monthlyTotalTime > monthTheoritical){
@@ -1130,7 +1172,7 @@ class EmployeeController {
 			
 		}
 		
-		def model=[annualTotalIncludingHS:timeManagerService.computeHumanTime(annualTotalIncludingHS),annualEmployeeWorkingDays:annualEmployeeWorkingDays,	annualTheoritical:timeManagerService.computeHumanTime(annualTheoritical),annualHoliday:annualHoliday,annualRTT:annualRTT,annualCSS:annualCSS,annualSickness:annualSickness,annualWorkingDays:annualWorkingDays,annualPayableSupTime:timeManagerService.computeHumanTime(annualPayableSupTime),annualPayableCompTime:timeManagerService.computeHumanTime(annualPayableCompTime),annualTotal:timeManagerService.computeHumanTime(annualTotal),
+		def model=[annualTotalIncludingHS:timeManagerService.computeHumanTime(Math.round(annualTotalIncludingHS)),annualEmployeeWorkingDays:annualEmployeeWorkingDays,	annualTheoritical:timeManagerService.computeHumanTime(Math.round(annualTheoritical)),annualHoliday:annualHoliday,annualRTT:annualRTT,annualCSS:annualCSS,annualSickness:annualSickness,annualWorkingDays:annualWorkingDays,annualPayableSupTime:timeManagerService.computeHumanTime(Math.round(annualPayableSupTime)),annualPayableCompTime:timeManagerService.computeHumanTime(Math.round(annualPayableCompTime)),annualTotal:timeManagerService.computeHumanTime(Math.round(annualTotal)),
 lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCompTime,yearMonthlySupTime:yearMonthlySupTime,yearTotalMap:yearTotalMap,yearMonthMap:yearMonthMap,userId:userId,employee:employee]
 		
 		if (isAjax){
@@ -2059,7 +2101,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		 //Si ce dernier est une Entrée, rajouter une sortie
 		 // ajouter dans un nouveau champs de InAndOut que cette 'sortie' est générée automatiquement pour la resortir en erreur dans les rapprts.
  
-		 def employeeList = Employee.findAll()
+		 def employeeList = Employee.findById(53)//Employee.findAll()
 		 def calendar = Calendar.instance
 		 for (employee in employeeList){
 			 def lastIn = InAndOut.findByEmployee(employee,[max:1,sort:"time",order:"desc"])

@@ -81,6 +81,7 @@ class UtilService {
 		}else{
 			//log.warn("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
+				//log.warn("date: "+calendar.time)
 				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
 					yearlyCounter ++
 				}
