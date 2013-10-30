@@ -39,6 +39,7 @@ class VacationController {
 		vacationInstance.period = year.year
 		vacationInstance.employee = employee
 		vacationInstance.user = user
+		vacationInstance.year=year
 		vacationInstance.loggingTime = new Date()
         if (!vacationInstance.save(flush: true)) {
             render(view: "create", model: [vacationInstance: vacationInstance])

@@ -311,13 +311,14 @@ class EmployeeController {
     def edit(Long id) {
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
         def employeeInstance = Employee.get(id)
+		def vacationList = Vacation.findAllByEmployee(employeeInstance)
 		def siteId=params["siteId"]
         if (!employeeInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'employee.label', default: 'Employee'), id])
             redirect(action: "list")
             return
         }
-        [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]	
+        [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,vacationList:vacationList]	
     }
 
 	
@@ -1928,6 +1929,10 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		}
 	}
 	
+	
+	def annualTotalPDF(){
+		
+	}
 	
 	def dailyTotalPDF(){
 		log.error('method dailyTotalPDF called with parameters:')

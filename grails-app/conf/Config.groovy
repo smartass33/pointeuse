@@ -1,3 +1,5 @@
+import org.apache.log4j.*;
+import org.apache.log4j.jdbc.JDBCAppender;
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
 // in the classpath in ConfigSlurper format
@@ -72,7 +74,68 @@ environments {
         grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
 		serverURL = "http://localhost:8080"
-		context="pointeuse"		
+		context="pointeuse"
+		
+		/*
+		log4j = {
+			appenders {
+				
+								console name: 'console', layout: pattern(conversionPattern: '%d{[HH:mm:ss]} %c{2} %m%n')
+				
+				
+
+				
+				
+								appender new DailyRollingFileAppender(
+									name:"logfile",
+									file:"./logs/development.log",
+									layout:pattern(conversionPattern: "%d{yyyy.MM.dd HH:mm:ss} [%t] %-5p %c %x - %m%n"),
+									datePattern:"'.'yyyy-MM-dd",
+									threshold: org.apache.log4j.Level.WARN
+								)//DailyRollingFileAppender
+				
+				
+								appender new JDBCAppender(
+									name: "database",
+									URL: "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true",
+									user: "root",
+									password: "",
+									driver: "com.mysql.jdbc.Driver",
+									sql: "INSERT INTO audit (log_date, log_message) VALUES ('%d{yyyy.MM.dd HH:mm:ss}', '[%-5p]. Category: %c. Message: %m. User: %X{sessionUserName} DU:[%X{sessionUserDU}]');",
+									threshold: org.apache.log4j.Level.INFO
+								)//JDBCAppender
+				
+				
+							}
+				
+							error  'org.codehaus.groovy.grails.scaffolding.view.ScaffoldingViewResolver', // scaffold vew resolver "when over riding grails default view"
+								   'org.codehaus.groovy.grails.web.servlet',  //  controllers
+								   'org.codehaus.groovy.grails.web.pages', //  GSP
+								   'org.codehaus.groovy.grails.web.sitemesh', //  layouts
+								   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+								   'org.codehaus.groovy.grails.web.mapping', // URL mapping
+								   'org.codehaus.groovy.grails.commons', // class
+								   'org.codehaus.groovy.grails.plugins', // plugins
+								   'org.codehaus.groovy.grails.orm.hibernate', // hibernate grails integration
+								   'org.springframework', // spring
+								   'org.hibernate', // hibernate
+								   'org.xhtmlrenderer.pdf.ITextRenderer' // iText, or add external/non-grails libraries
+				
+				
+							warn   'org.mortbay.log'
+				
+				
+							root {
+								//options: off,fatal,error,warn,info,debug,trace, all
+								debug 'console', 'logfile', 'mail', "database" // appender objects
+								//additivity = true // check docs
+							}
+				
+			
+		}
+		
+			
+		*/
 		log4j = {
 			
 				appenders {
@@ -94,6 +157,7 @@ environments {
 					warn 'rollingFile'//,'stdout'
 				}
 			}
+			
 		
     }
 	

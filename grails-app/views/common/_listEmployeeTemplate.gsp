@@ -32,6 +32,8 @@
 					title="${message(code: 'employee.service.label', default: 'service')}" />
 				<g:sortableColumn property="matricule" style="text-align:center"
 					title="${message(code: 'employee.matricule.label', default: 'matricule')}" />
+				<!--g:sortableColumn property="vacations" style="text-align:center"
+					title="${message(code: 'vacation.access.label', default: 'matricule')}" /-->	
 			</g:else>
 		</tr>
 	</thead>
@@ -76,12 +78,14 @@
 								N/A
 							</td>						
 						</g:else>
-						<g:if test="${employeeInstance?.hasError}">
+						<g:if test="${!employeeInstance?.hasError}">
+							
 							<td class="moreDetail" align="center" style="text-align:middle;" ondblclick="this.style.display = 'none';">
 								<img alt="tick" src="../images/skin/tick.png" style="vertical-align: middle;horizontal-align:middle;">
 							</td>
 						</g:if>
 						<g:else>
+							
 							<td class="moreDetail" align="center" style="text-align:middle;" ondblclick="this.style.display = 'none';">
 								<img alt="cross" src="../images/skin/cross.png" style="vertical-align: middle;horizontal-align:middle;">
 							</td>

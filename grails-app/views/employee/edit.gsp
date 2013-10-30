@@ -1,4 +1,6 @@
 <%@ page import="pointeuse.Employee" %>
+<%@ page import="pointeuse.Vacation" %>
+
 <!doctype html>
 <html>
 	<head>
@@ -42,6 +44,31 @@
 					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
 				</fieldset>
 			</g:form>
+			
+			
+			<table>
+				<thead>
+					<tr>				
+						<g:sortableColumn property="counter" title="${message(code: 'vacation.counter.label', default: 'Counter')}" />
+						<g:sortableColumn property="period" title="${message(code: 'vacation.period.label', default: 'Period')}" />				
+						<g:sortableColumn property="type" title="${message(code: 'vacation.type.label', default: 'Type')}" />				
+					</tr>
+				</thead>
+				<tbody>
+
+				<g:each in="${vacationList}" status="i" var="vacationInstance">
+					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
+						<g:if test="${vacationInstance != null}">
+							<td>${fieldValue(bean: vacationInstance, field: "counter")}</td>
+							<td>${vacationInstance.year.period}</td>					
+							<td>${fieldValue(bean: vacationInstance, field: "type")}</td> 		
+						</g:if>					
+					</tr>
+				</g:each>				
+				</tbody>
+			</table>
+			
+			
 		</div>
 	</body>
 </html>

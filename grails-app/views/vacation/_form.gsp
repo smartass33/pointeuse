@@ -22,7 +22,8 @@
 	</label>
 		<g:select name="year.id"
 	          from="${Year.list([sort:'period',order:'desc'])}"
-	          noSelection="${['':'-']}"          
+	          noSelection="${['':'-']}"    
+	          value="${year?.period}"      
 	          optionKey="id" optionValue="period"
 	          />
 	<!--g:field name="period" type="number" value="${vacationInstance.period}" required=""/-->

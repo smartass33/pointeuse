@@ -9,6 +9,7 @@ class Vacation {
 	int period // starting period: 2013 if 2013/2014 for instance
 	int counter
 	VacationType type
+	Year year
 	
 	static belongsTo = [employee:Employee]
     static constraints = {

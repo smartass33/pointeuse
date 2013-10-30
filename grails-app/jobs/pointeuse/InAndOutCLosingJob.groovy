@@ -77,7 +77,6 @@ class InAndOutCLosingJob {
 			calendar.set(Calendar.DAY_OF_YEAR,1)
 		}else{
 			calendar.roll(Calendar.DAY_OF_YEAR,1)	
-			//calendar.roll(Calendar.MINUTE, 1)
 		}
 		calendar.set(Calendar.HOUR_OF_DAY,22)
 		calendar.set(Calendar.MINUTE,0)
