@@ -12,8 +12,6 @@
 	<g:set var="entityName"
 		value="${message(code: 'employee.label', default: 'Employee')}" />
 	<title><g:message code="default.list.label" args="[entityName]" /></title>
-
-
 		<style type="text/css">
 			body {
 				font-family: Verdana, Arial, sans-serif;
@@ -31,8 +29,6 @@
 			th {
 				padding: 2px 4px 2px 4px;
 			}
-
-		
 		</style>
 <script type="text/javascript">
 

@@ -25,6 +25,9 @@ class VacationController {
 	}
 	
     def create(){ 
+		params.each{i->
+			log.error(i)
+		}
 		def employee = Employee.get(params["userId"])
 		def vacation = new Vacation(params)
 		vacation.employee = employee
@@ -36,7 +39,6 @@ class VacationController {
 		def employee = Employee.get(params["userId"])
 		def user = springSecurityService.currentUser
         def vacationInstance = new Vacation(params)
-		vacationInstance.period = year.year
 		vacationInstance.employee = employee
 		vacationInstance.user = user
 		vacationInstance.year=year
@@ -44,6 +46,9 @@ class VacationController {
         if (!vacationInstance.save(flush: true)) {
             render(view: "create", model: [vacationInstance: vacationInstance])
             return
+        }else{
+		flash.message = "toto"
+			render(view:"vacationDisplay")
         }
 
         flash.message = message(code: 'default.created.message', args: [message(code: 'vacation.label', default: 'Vacation'), vacationInstance.id])
@@ -119,4 +124,22 @@ class VacationController {
             redirect(action: "show", id: id)
         }
     }
+	
+	
+	def changeValue(){
+		log.error("entering changeValue")
+		
+		params.each{i->
+			log.error(i);
+		}
+	
+		def vacation = Vacation.get(params["vacationId"])
+		def employee = Employee.get(params["userId"])
+		def newCounterValue = params["counter"] as int
+		if (vacation){
+			vacation.counter=newCounterValue	
+			vacation.save(flush: true)
+			return
+		}
+	}
 }

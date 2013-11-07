@@ -19,4 +19,10 @@ class EmployeeListTagLib {
 		
 	}
 	
+	
+	def vacationEditTable ={attrs,body->
+		out<<render(template:"/common/vacationEditTemplate")
+		
+	}
+	
 }

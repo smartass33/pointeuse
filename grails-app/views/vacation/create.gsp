@@ -27,7 +27,9 @@
 			</ul>
 			</g:hasErrors>
 			<g:form action="save" >
-			<g:hiddenField name="userId" value="${employee.id}"/>
+			<g:if test="${employee != null}">
+				<g:hiddenField name="userId" value="${employee.id}"/>
+			</g:if>
 				<fieldset class="form">
 					<g:render template="form"/>
 				</fieldset>

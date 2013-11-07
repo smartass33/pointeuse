@@ -1,9 +1,30 @@
 <%@ page import="pointeuse.Employee" %>
 <%@ page import="pointeuse.Vacation" %>
+<%@ page import="pointeuse.Absence" %>
 
 <!doctype html>
 <html>
 	<head>
+		<style type="text/css">
+			body {
+				font-family: Verdana, Arial, sans-serif;
+				font-size: 0.9em;
+			}
+			table {
+				border-collapse: collapse;
+			}
+			thead {
+				background-color: #DDD;
+			}
+			td {
+				padding: 2px 4px 2px 4px;
+				text-align:center;
+			}
+			th {
+				padding: 2px 4px 2px 4px;
+			}
+		</style>
+
 		<g:javascript library="jquery" plugin="jquery" />
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
@@ -44,27 +65,12 @@
 					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
 				</fieldset>
 			</g:form>
-			
-			
 			<table>
 				<thead>
-					<tr>				
-						<g:sortableColumn property="counter" title="${message(code: 'vacation.counter.label', default: 'Counter')}" />
-						<g:sortableColumn property="period" title="${message(code: 'vacation.period.label', default: 'Period')}" />				
-						<g:sortableColumn property="type" title="${message(code: 'vacation.type.label', default: 'Type')}" />				
-					</tr>
+				Total des congés sur la période: 
 				</thead>
 				<tbody>
-
-				<g:each in="${vacationList}" status="i" var="vacationInstance">
-					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-						<g:if test="${vacationInstance != null}">
-							<td>${fieldValue(bean: vacationInstance, field: "counter")}</td>
-							<td>${vacationInstance.year.period}</td>					
-							<td>${fieldValue(bean: vacationInstance, field: "type")}</td> 		
-						</g:if>					
-					</tr>
-				</g:each>				
+				<g:vacationEditTable/>
 				</tbody>
 			</table>
 			

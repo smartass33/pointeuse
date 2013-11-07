@@ -59,11 +59,11 @@
 				</li>
 				</g:if>
 			
-				<g:if test="${vacationInstance?.period}">
+				<g:if test="${vacationInstance?.year}">
 				<li class="fieldcontain">
 					<span id="period-label" class="property-label"><g:message code="vacation.period.label" default="Period" /></span>
 					
-						<span class="property-value" aria-labelledby="period-label"><g:fieldValue bean="${vacationInstance}" field="period"/></span>
+						<span class="property-value" aria-labelledby="period-label">${vacationInstance?.year?.period}</span>
 					
 				</li>
 				</g:if>

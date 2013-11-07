@@ -51,7 +51,7 @@
 					
 						<td>${fieldValue(bean: vacationInstance, field: "user")}</td>
 					
-						<td>${fieldValue(bean: vacationInstance, field: "period")}</td>
+						<td>${vacationInstance.year.period}</td>
 					
 						<td>${fieldValue(bean: vacationInstance, field: "type")}</td>
 					

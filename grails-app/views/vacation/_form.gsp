@@ -12,6 +12,13 @@
 </div>
 
 
+<!--div class="fieldcontain ${hasErrors(bean: vacationInstance, field: 'employee', 'error')} required">
+	<label for="employee">
+		<g:message code="employee.label" default="Employee" />
+		<span class="required-indicator">*</span>
+	</label>
+	<g:textField name="employee" value="${vacationInstance.employee}" required=""/>
+</div-->
 
 
 
@@ -26,7 +33,6 @@
 	          value="${year?.period}"      
 	          optionKey="id" optionValue="period"
 	          />
-	<!--g:field name="period" type="number" value="${vacationInstance.period}" required=""/-->
 </div>
 
 <div class="fieldcontain ${hasErrors(bean: vacationInstance, field: 'type', 'error')} required">
