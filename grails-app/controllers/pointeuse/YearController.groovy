@@ -21,6 +21,10 @@ class YearController {
 
     def save() {
         def yearInstance = new Year(params)
+		
+		//instantiate vacation
+		
+		
         if (!yearInstance.save(flush: true)) {
             render(view: "create", model: [yearInstance: yearInstance])
             return
