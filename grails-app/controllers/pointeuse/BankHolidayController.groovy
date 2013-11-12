@@ -8,6 +8,7 @@ class BankHolidayController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 	def authenticateService
 	def springSecurityService
+	def utilService
     def index() {
         redirect(action: "list", params: params)
     }
@@ -35,7 +36,7 @@ class BankHolidayController {
 
     def save() {
 		def user = springSecurityService.currentUser
-		
+		def period
         def bankHolidayInstance = new BankHoliday(params)
 		if (bankHolidayInstance != null){
 			bankHolidayInstance.month=bankHolidayInstance.calendar.get(Calendar.MONTH)+1
@@ -45,14 +46,41 @@ class BankHolidayController {
 			if (user!=null){
 				bankHolidayInstance.user=user
 			}
+			
+			if (bankHolidayInstance.month>=6 && bankHolidayInstance.month<=12){
+				if (Period.findByYear(bankHolidayInstance.year)){
+					bankHolidayInstance.period=Period.findByYear(bankHolidayInstance.year)
+				}
+				else{
+					Period newPeriod = new Period()
+					newPeriod.year=bankHolidayInstance.year	
+					newPeriod.save()
+					utilService.initiateVacations(newPeriod)
+	//				newPeriod.openedDays=utilService.getOpenDays(newPeriod)
+					bankHolidayInstance.period=newPeriod	
+				}	
+			}
+			else{
+				if (Period.findByYear(bankHolidayInstance.year-1)){
+					bankHolidayInstance.period=Period.findByYear(bankHolidayInstance.year-1)
+				}
+				else{
+					Period newPeriod = new Period()
+					newPeriod.year=bankHolidayInstance.year-1
+					newPeriod.save()
+					utilService.initiateVacations(newPeriod)
+//					newPeriod.openedDays=utilService.getOpenDays(newPeriod)
+					bankHolidayInstance.period=newPeriod
+				}				
+			}
+			
+			if (!bankHolidayInstance.save(flush: true)) {
+				render(view: "create", model: [bankHolidayInstance: bankHolidayInstance])
+				return
+			}
+	
 		}
-		
-        if (!bankHolidayInstance.save(flush: true)) {
-            render(view: "create", model: [bankHolidayInstance: bankHolidayInstance])
-            return
-        }
-
-		setYearlyOpenDays(bankHolidayInstance.year)
+		//setYearlyOpenDays(bankHolidayInstance.year)
 		
         flash.message = message(code: 'default.created.message', args: [message(code: 'bankHoliday.label', default: 'BankHoliday'), bankHolidayInstance.calendar.time.format('EEEE MMM yyyy')])
         redirect(action: "show", id: bankHolidayInstance.id)
@@ -123,7 +151,7 @@ class BankHolidayController {
         }
 
         try {
-			def yearInstance = Year.findByYear(bankHolidayInstance.year)
+			def yearInstance = Period.findByYear(bankHolidayInstance.year)
 			bankHolidayInstance.delete(flush: true)
 			
 			if (yearInstance!=null){
@@ -139,21 +167,29 @@ class BankHolidayController {
             redirect(action: "show", id: id)
         }
     }
-	
+	/*
 	private setYearlyOpenDays(int year){
 		def calendar = Calendar.instance
 		calendar.set(Calendar.YEAR,year)
 		calendar.set(Calendar.DAY_OF_YEAR,1)
 		def yearInstance = Year.findByYear(year)
+		
+		if ()
+		
 		if (yearInstance==null){
 			yearInstance=new Year()
 			yearInstance.year=year
+			yearInstance.period=year.toString()+"/"(year+1).toString()
 		}
 		
 		yearInstance.bankHolidays=BankHoliday.findAllByYear(year).size()
 		yearInstance.solidarityDays=1
 		
 		def openedDays = 0
+		
+		def startCalendar = Calendar.instance
+		startCalendar = 
+		
 		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 			if (calendar.get(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
 				openedDays += 1
@@ -166,4 +202,5 @@ class BankHolidayController {
 		yearInstance.openedDays=openedDays
 		yearInstance.save()
 	}
+	*/
 }

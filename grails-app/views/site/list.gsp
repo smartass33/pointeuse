@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+        <resource:include components="map" />
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'site.label', default: 'Site')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>		
@@ -19,6 +20,7 @@
 			<g:if test="${flash.message}">
 			<div class="message" role="status">${flash.message}</div>
 			</g:if>
+
 			<table>
 				<thead>
 					<tr>
@@ -29,6 +31,12 @@
 						</sec:ifAnyGranted>
 					</tr>
 				</thead>
+				
+							<div>
+<richui:map type="GoogleMaps" lat="40.689299" lng="-74.044" search="true" />
+
+
+</div>
 				<tbody>
 					<g:each in="${siteInstanceList}" status="i" var="siteInstance">
 						<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">			

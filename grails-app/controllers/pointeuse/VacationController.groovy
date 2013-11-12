@@ -35,13 +35,13 @@ class VacationController {
     }
 
     def save() {
-		def year = Year.get(params["year.id"])
+		def period = Period.get(params["period.id"])
 		def employee = Employee.get(params["userId"])
 		def user = springSecurityService.currentUser
         def vacationInstance = new Vacation(params)
 		vacationInstance.employee = employee
 		vacationInstance.user = user
-		vacationInstance.year=year
+		vacationInstance.period=period
 		vacationInstance.loggingTime = new Date()
         if (!vacationInstance.save(flush: true)) {
             render(view: "create", model: [vacationInstance: vacationInstance])

@@ -308,6 +308,39 @@ class EmployeeController {
         [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]
     }
 
+	def vacationFollowup(){
+		def year = params["year"]
+		def startCalendar = Calendar.instance
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.set(Calendar.MONTH,5)
+		startCalendar.set(Calendar.HOUR_OF_DAY,00)
+		startCalendar.set(Calendar.MINUTE,00)
+		startCalendar.set(Calendar.SECOND,00)
+		
+		// ending calendar: 31 of May of the period
+		def endCalendar   = Calendar.instance
+		endCalendar.set(Calendar.DAY_OF_MONTH,31)
+		endCalendar.set(Calendar.MONTH,6)
+		endCalendar.set(Calendar.HOUR_OF_DAY,23)
+		endCalendar.set(Calendar.MINUTE,59)
+		endCalendar.set(Calendar.SECOND,59)
+		
+		if (year){
+			startCalendar.set(Calendar.YEAR,year)
+			endCalendar.set(Calendar.YEAR,year+1)
+		}else{
+			endCalendar.set(Calendar.YEAR,startCalendar.getAt(Calendar.YEAR)+1)
+		}
+		//1. get employees of a given site
+		
+		// for each employee, retrieve absences
+		
+		
+		
+		
+	}
+	
+	
 	def vacationDisplay(Long id){
 		
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
@@ -317,6 +350,9 @@ class EmployeeController {
 		def criteria
 		def takenCA=[]
 		def takenRTT=[]
+		def takenCSS=[]
+		def takenAutre=[]
+		def takenSickness = []
 		def takenRTTMap=[:]
 		def takenCAMap=[:]
 		def yearMap=[:]
@@ -324,6 +360,9 @@ class EmployeeController {
 		def remainingCAMap=[:]
 		def initialRTTMap=[:]
 		def remainingRTTMap=[:]
+		def takenSicknessMap=[:]
+		def takenCSSMap=[:]
+		def takenAutreMap=[:]
 		def holidayCounter = 0
 		// starting calendar: 1 of June of the period
 		def startCalendar = Calendar.instance
@@ -340,24 +379,22 @@ class EmployeeController {
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
-		for (Year year:Year.findAll([sort:'year',order:'asc'])){
-			
-			
-			yearMap.put(year.year, year.period)
+		for (Period period:Period.findAll([sort:'year',order:'asc'])){
+			yearMap.put(period.year, period.year+'/'+(period.year+1))
 			// step 1: fill initial values
 			//CA
 			criteria = Vacation.createCriteria()
 			def initialCA = criteria.get{
 				and {
 					eq('employee',employeeInstance)
-					eq('year',year)
+					eq('period',period)
 					eq('type',VacationType.CA)
 				}
 			}
 			if (initialCA != null){
-				initialCAMap.put(year.year, initialCA.counter)
+				initialCAMap.put(period.year, initialCA.counter)
 			}else{
-				initialCAMap.put(year.year, 0)
+				initialCAMap.put(period.year, 0)
 			
 			}
 			//RTT
@@ -365,19 +402,19 @@ class EmployeeController {
 			def initialRTT = criteria.get{
 				and {
 					eq('employee',employeeInstance)
-					eq('year',year)
+					eq('period',period)
 					eq('type',VacationType.RTT)
 				}
 			}
 			if (initialRTT != null){
-				initialRTTMap.put(year.year, initialRTT.counter)
+				initialRTTMap.put(period.year, initialRTT.counter)
 			}else{
-				initialRTTMap.put(year.year, 0)
+				initialRTTMap.put(period.year, 0)
 			}
 			
 			// step 2: fill actual counters
-			startCalendar.set(Calendar.YEAR,year.year)
-			endCalendar.set(Calendar.YEAR,year.year+1)
+			startCalendar.set(Calendar.YEAR,period.year)
+			endCalendar.set(Calendar.YEAR,period.year+1)
 			//CA
 			criteria = Absence.createCriteria()
 			takenCA = criteria.list {
@@ -389,11 +426,11 @@ class EmployeeController {
 				}
 			}
 			if (takenCA!=null){
-				remainingCAMap.put(year.year, initialCAMap.get(year.year)-takenCA.size())
-				takenCAMap.put(year.year, takenCA.size())
+				remainingCAMap.put(period.year, initialCAMap.get(period.year)-takenCA.size())
+				takenCAMap.put(period.year, takenCA.size())
 			}else{
-				remainingCAMap.put(year.year, initialCAMap.get(year.year))
-				takenCAMap.put(year.year, 0)
+				remainingCAMap.put(period.year, initialCAMap.get(period.year))
+				takenCAMap.put(period.year, 0)
 				
 			}
 			//RTT
@@ -407,17 +444,68 @@ class EmployeeController {
 				}
 			}
 			if (takenRTT!=null){
-				remainingRTTMap.put(year.year, initialRTTMap.get(year.year)-takenRTT.size())
-				takenRTTMap.put(year.year, takenRTT.size())
+				remainingRTTMap.put(period.year, initialRTTMap.get(period.year)-takenRTT.size())
+				takenRTTMap.put(period.year, takenRTT.size())
 				
 			}else{
-				remainingRTTMap.put(year.year, initialRTTMap.get(year.year))
-				takenRTTMap.put(year.year, 0)
-				
+				remainingRTTMap.put(period.year, initialRTTMap.get(period.year))
+				takenRTTMap.put(period.year, 0)			
 			}
-					
+			
+			criteria = Absence.createCriteria()
+			takenSickness = criteria.list {
+				and {
+					eq('employee',employeeInstance)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.MALADIE)
+				}
+			}
+			
+			if (takenSickness!=null){
+				takenSicknessMap.put(period.year, takenSickness.size())				
+			}else{
+				takenSicknessMap.put(period.year, 0)
+			}
+		
+			
+			
+			criteria = Absence.createCriteria()
+			takenCSS = criteria.list {
+				and {
+					eq('employee',employeeInstance)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.CSS)
+				}
+			}
+			
+			if (takenCSS!=null){
+				takenCSSMap.put(period.year, takenCSS.size())				
+			}else{
+				takenCSSMap.put(period.year, 0)		
+			}
+
+			criteria = Absence.createCriteria()
+			takenAutre = criteria.list {
+				and {
+					eq('employee',employeeInstance)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.AUTRE)
+				}
+			}
+			
+			if (takenAutre!=null){
+				takenAutreMap.put(period.year, takenAutre.size())
+			}else{
+				takenAutreMap.put(period.year, 0)
+			}
+
+			
+				
 		}
-	[takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,yearMap:yearMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
+	[takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,yearMap:yearMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
 		
 
 	}
@@ -451,22 +539,22 @@ class EmployeeController {
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
 			
-		for (Year year:Year.findAll([sort:'year',order:'asc'])){
-			yearMap.put(year.year, year.period)
+		for (Period period:Period.findAll([sort:'year',order:'asc'])){
+			yearMap.put(period.year, period.toString())
 			// step 1: fill initial values
 			//CA
 			criteria = Vacation.createCriteria()
 			def initialCA = criteria.get{
 				and {
 					eq('employee',employeeInstance)
-					eq('year',year)
+					eq('period',period)
 					eq('type',VacationType.CA)
 				}
 			}
 			if (initialCA != null){
-				initialCAMap.put(year.year, initialCA.counter)
+				initialCAMap.put(period.year, initialCA.counter)
 			}else{
-				initialCAMap.put(year.year, 0)
+				initialCAMap.put(period.year, 0)
 			
 			}
 			//RTT
@@ -474,19 +562,19 @@ class EmployeeController {
 			def initialRTT = criteria.get{
 				and {
 					eq('employee',employeeInstance)
-					eq('year',year)
+					eq('period',period)
 					eq('type',VacationType.RTT)
 				}
 			}
 			if (initialRTT != null){
-				initialRTTMap.put(year.year, initialRTT.counter)
+				initialRTTMap.put(period.year, initialRTT.counter)
 			}else{
-				initialRTTMap.put(year.year, 0)
+				initialRTTMap.put(period.year, 0)
 			}			
 			
 			// step 2: fill actual counters
-			startCalendar.set(Calendar.YEAR,year.year)
-			endCalendar.set(Calendar.YEAR,year.year+1)
+			startCalendar.set(Calendar.YEAR,period.year)
+			endCalendar.set(Calendar.YEAR,period.year+1)
 			//CA
 			criteria = Absence.createCriteria()
 			takenCA = criteria.list {
@@ -498,9 +586,9 @@ class EmployeeController {
 				}
 			}
 			if (takenCA!=null){
-				remainingCAMap.put(year.year, initialCAMap.get(year.year)-takenCA.size())
+				remainingCAMap.put(period.year, initialCAMap.get(period.year)-takenCA.size())
 			}else{
-				remainingCAMap.put(year.year, initialCAMap.get(year.year))		
+				remainingCAMap.put(period.year, initialCAMap.get(period.year))		
 			}
 			//RTT
 			criteria = Absence.createCriteria()
@@ -513,9 +601,9 @@ class EmployeeController {
 				}
 			}
 			if (takenRTT!=null){
-				remainingRTTMap.put(year.year, initialRTTMap.get(year.year)-takenRTT.size())
+				remainingRTTMap.put(period.year, initialRTTMap.get(period.year)-takenRTT.size())
 			}else{
-				remainingRTTMap.put(year.year, initialRTTMap.get(year.year))		
+				remainingRTTMap.put(period.year, initialRTTMap.get(period.year))		
 			}			
 					
 		}
@@ -1834,6 +1922,8 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 
 		
 	def pointage(Long id){		
+		def msg = "The Requestor IP: " + rfequest.getRemoteAddr() + " Requestor Host name: " + request.getRemoteHost()
+		log.error(msg)
 		try {	
 			def username = params["username"]
 			def employee

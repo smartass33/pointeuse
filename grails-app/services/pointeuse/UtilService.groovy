@@ -9,6 +9,8 @@ import java.util.Date;
 
 class UtilService {
 
+	def springSecurityService
+	
 	def getLastWeekOfMonth(int month, int year){
 		boolean isSunday=true
 		Calendar calendar = Calendar.instance
@@ -27,13 +29,7 @@ class UtilService {
 	def getSundaysInYear(int year,int month){
 		def calendar = Calendar.instance
 		def endPeriodCalendar = Calendar.instance
-		
-		boolean twoLoops = false
-		if (month<6){
-		//	year=year-1
-			twoLoops = true
-		}
-		
+		boolean twoLoops = month < 6 ? true : true
 		def currentDate = calendar.time
 		
 		calendar.set(Calendar.YEAR,year)		
@@ -44,9 +40,7 @@ class UtilService {
 		endPeriodCalendar.set(Calendar.YEAR,year)
 		endPeriodCalendar.set(Calendar.MONTH,month-1)
 		endPeriodCalendar.set(Calendar.DAY_OF_MONTH,endPeriodCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-		
-		
-		
+	
 		def yearlyCounter = 0
 		
 		if (twoLoops){
@@ -71,8 +65,7 @@ class UtilService {
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
 				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
 					yearlyCounter ++
-				}
-			
+				}		
 				if (calendar.get(Calendar.DAY_OF_YEAR) == endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
 					break
 				}
@@ -110,4 +103,106 @@ class UtilService {
 			absence.delete()
 		}
 	}
+	
+	def initiateVacations(Period year){
+		
+		def user = springSecurityService.currentUser
+
+		for (Employee employee:Employee.findAll()){
+			def vacationCA = new Vacation()
+			vacationCA.employee = employee
+			vacationCA.loggingTime = new Date()
+			if (user){
+				vacationCA.user=user
+			}
+			vacationCA.counter=32
+			vacationCA.type=VacationType.CA
+			vacationCA.period=year
+			vacationCA.save()
+			
+			def vacationRTT = new Vacation()		
+			vacationRTT.employee = employee
+			vacationRTT.loggingTime = new Date()
+			if (user){
+				vacationRTT.user=user
+			}
+			vacationRTT.counter = employee.weeklyContractTime==35 ? 4 : 0
+			vacationRTT.type=VacationType.RTT
+			vacationRTT.period=year
+			vacationRTT.save()
+		}
+	}
+	
+	def getOpenDays(Period period){
+		
+		def bankHolidayCounter=0
+		def bankHolidayList
+		def criteria
+		def openDays=0
+		def startCalendar = Calendar.instance
+		def endCalendar   = Calendar.instance
+		
+		startCalendar.set(Calendar.YEAR,period.year)
+		startCalendar.set(Calendar.MONTH,5)
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.clearTime()
+		
+		endCalendar.set(Calendar.YEAR,period.year+1)
+		endCalendar.set(Calendar.MONTH,6)
+
+		log.warn("getting opened days from: "+startCalendar.time + " until end of year "+period.year)
+		
+		while(startCalendar.get(Calendar.DAY_OF_YEAR) <= startCalendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+			if (startCalendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				openDays ++
+			}
+			if (startCalendar.get(Calendar.DAY_OF_YEAR) == startCalendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+				break
+			}
+			startCalendar.roll(Calendar.DAY_OF_YEAR, 1)
+		}
+		startCalendar.set(Calendar.YEAR,period.year+1)
+		startCalendar.set(Calendar.MONTH,0)
+		startCalendar.set(Calendar.DAY_OF_YEAR,1)
+		
+		log.warn("getting opened days from: "+startCalendar.time + " until "+endCalendar.time)
+		
+		while(startCalendar.get(Calendar.DAY_OF_YEAR) <= endCalendar.get(Calendar.DAY_OF_YEAR)){
+			if (startCalendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				openDays ++
+			}
+			if (startCalendar.get(Calendar.DAY_OF_YEAR) == endCalendar.get(Calendar.DAY_OF_YEAR)){
+				break
+			}
+			startCalendar.roll(Calendar.DAY_OF_YEAR, 1)	
+		}
+		
+		
+		criteria = BankHoliday.createCriteria()
+		bankHolidayList = criteria.list{
+			
+			or{
+				and {
+					ge('month',6)
+					le('month',12)
+					eq('year',period.year)
+				}
+				and{
+					ge('month',1)
+					le('month',5)
+					eq('year',period.year+1)
+				}
+			}
+		}
+	
+		for (BankHoliday bankHoliday:bankHolidayList){
+			if (bankHoliday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				bankHolidayCounter ++
+			}
+		}
+		
+		openDays -= bankHolidayCounter
+		return openDays
+	}
+	
 }
