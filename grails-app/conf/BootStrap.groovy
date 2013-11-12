@@ -1,4 +1,7 @@
 import org.apache.log4j.Logger
+import org.apache.log4j.jdbc.JDBCAppender
+import org.apache.log4j.net.SMTPAppender
+import org.apache.log4j.DailyRollingFileAppender
 import java.util.Calendar
 import pointeuse.InAndOutCLosingJob
 
