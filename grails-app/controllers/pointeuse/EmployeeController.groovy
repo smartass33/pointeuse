@@ -1922,7 +1922,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 
 		
 	def pointage(Long id){		
-		def msg = "The Requestor IP: " + rfequest.getRemoteAddr() + " Requestor Host name: " + request.getRemoteHost()
+		def msg = "The Requestor IP: " + request.getRemoteAddr() + " Requestor Host name: " + request.getRemoteHost()
 		log.error(msg)
 		try {	
 			def username = params["username"]
