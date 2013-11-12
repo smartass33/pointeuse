@@ -18,7 +18,37 @@ class SiteController {
     def list(Integer max) {
         params.max = Math.min(max ?: 10, 100)
 		params.sort='name'
-        [siteInstanceList: Site.list(params), siteInstanceTotal: Site.count()]
+		def mapData = []
+		def siteTable =[]
+		def siteInstanceList = Site.list(params)
+		
+		for (Site site:Site.findAll()){
+			siteTable =[]
+			if (site.latitude!=0 && site.longitude!=0){
+				siteTable[0]=site.latitude
+				siteTable[1]=site.longitude
+				siteTable[2]=site.name+'<BR>'+site.address
+				mapData.add(siteTable)
+			}
+		}
+		
+	/*	
+	 mapData = [[44.89156, -0.70898, 'Saint-Médard'],
+          [44.86548, -0.66613, 'Le Haillan'],
+          [44.85891, -0.51520, 'Cenon'],
+          [44.88016, -0.52311, 'Lormont'],        
+          [44.78527, -0.49689, 'Latresne'],
+          [45.19254, -0.74464, 'Pauillac'],
+          [44.88395, -0.63419, 'Eysines'],
+          [44.83345, -0.52929, 'Floirac'],
+          [44.73173, -0.60013, 'Leognan'],
+          [44.68911, -0.51577, 'La Brède'],
+ 		  [44.63227, -1.14408, 'La Teste'],         
+          [44.92655, -0.48949, 'Ambares']]
+	*/	
+	def mapColumns = [['number', 'Lat'], ['number', 'Lon'], ['string', 'Name']]
+	
+        [siteInstanceList: siteInstanceList, siteInstanceTotal: Site.count(),mapData:mapData,mapColumns:mapColumns]
     }
 
     def create() {

@@ -7,9 +7,9 @@ class Site {
 	String name
 	User user
 	Date loggingDate
-	//float longitude
-	//float latitude
-	
+	double longitude
+	double latitude
+	String address
 	
 	static hasMany = [employees: Employee]
 	
@@ -18,8 +18,9 @@ class Site {
     static constraints = {
 		name blank: false
 		name unique:true
-	//	latitude blank: true
-	//	longitude blank:true
+		latitude blank: true
+		longitude blank:true
+		address blank:true
 		
     }
 }
