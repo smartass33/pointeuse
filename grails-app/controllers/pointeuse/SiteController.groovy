@@ -1,54 +1,49 @@
 package pointeuse
 
 import org.springframework.dao.DataIntegrityViolationException
+import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
-
+import java.text.Normalizer
 
 class SiteController {
 	def authenticateService
 	def springSecurityService
-	
+	def geocoderService
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
     def index() {
         redirect(action: "list", params: params)
     }
 
+	
 	@Secured(['ROLE_ADMIN'])
-    def list(Integer max) {
-        params.max = Math.min(max ?: 10, 100)
-		params.sort='name'
+	def map(Integer max) {
 		def mapData = []
 		def siteTable =[]
-		def siteInstanceList = Site.list(params)
 		
 		for (Site site:Site.findAll()){
 			siteTable =[]
 			if (site.latitude!=0 && site.longitude!=0){
 				siteTable[0]=site.latitude
 				siteTable[1]=site.longitude
-				siteTable[2]=site.name+'<BR>'+site.address
+				siteTable[2]='<a href="show/'+site.id+'">'+site.name+'</a>'+'<BR>'+site.address +'<BR>'
 				mapData.add(siteTable)
 			}
 		}
-		
-	/*	
-	 mapData = [[44.89156, -0.70898, 'Saint-MŽdard'],
-          [44.86548, -0.66613, 'Le Haillan'],
-          [44.85891, -0.51520, 'Cenon'],
-          [44.88016, -0.52311, 'Lormont'],        
-          [44.78527, -0.49689, 'Latresne'],
-          [45.19254, -0.74464, 'Pauillac'],
-          [44.88395, -0.63419, 'Eysines'],
-          [44.83345, -0.52929, 'Floirac'],
-          [44.73173, -0.60013, 'Leognan'],
-          [44.68911, -0.51577, 'La Brde'],
- 		  [44.63227, -1.14408, 'La Teste'],         
-          [44.92655, -0.48949, 'Ambares']]
-	*/	
-	def mapColumns = [['number', 'Lat'], ['number', 'Lon'], ['string', 'Name']]
+		def mapColumns = [['number', 'Lat'], ['number', 'Lon'], ['string', 'Name']]
+		[mapData:mapData,mapColumns:mapColumns]
+	}
 	
-        [siteInstanceList: siteInstanceList, siteInstanceTotal: Site.count(),mapData:mapData,mapColumns:mapColumns]
+	
+	@Secured(['ROLE_ADMIN'])
+    def list(Integer max) {
+        params.max = Math.min(max ?: 10, 100)
+		params.sort='name'
+
+		def siteInstanceList = Site.list(params)
+
+	
+        [siteInstanceList: siteInstanceList, siteInstanceTotal: Site.count()]
     }
 
     def create() {
@@ -57,8 +52,13 @@ class SiteController {
 
     def save() {
 		def user = springSecurityService.currentUser
-		
+		def result
         def siteInstance = new Site(params)
+		
+		result = geocoderService.geocodeAddress(params["address"],params["town"])
+		siteInstance.latitude = result.lat
+		siteInstance.longitude = result.lng
+		
 		siteInstance.loggingDate=new Date()
 		if (user != null){
 			siteInstance.user=user
@@ -80,7 +80,7 @@ class SiteController {
             return
         }
 
-        [siteInstance: siteInstance]
+        [siteInstance: siteInstance,employeeInstanceList:siteInstance.employees,employeeInstanceTotal:siteInstance.employees.size()]
     }
 
     def edit(Long id) {
@@ -96,6 +96,7 @@ class SiteController {
 
     def update(Long id, Long version) {
         def siteInstance = Site.get(id)
+		def result
         if (!siteInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'site.label', default: 'Site'), id])
             redirect(action: "list")
@@ -112,8 +113,11 @@ class SiteController {
             }
         }
 
-        siteInstance.properties = params
-
+        siteInstance.properties = params	
+		result = geocoderService.geocodeAddress(params["address"],params["town"])
+		siteInstance.latitude = result.lat
+		siteInstance.longitude = result.lng
+	
         if (!siteInstance.save(flush: true)) {
             render(view: "edit", model: [siteInstance: siteInstance])
             return
@@ -141,4 +145,16 @@ class SiteController {
             redirect(action: "show", id: id)
         }
     }
+	
+	def geocode = {
+		params.each{i->
+			log.error(i);
+}
+		def address = params["address"]
+		address = Normalizer.normalize(address, Normalizer.Form.NFKD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+		
+		def result = geocoderService.geocodeAddress(address)
+		render result as String
+	  }
+	
 }
