@@ -2,7 +2,6 @@
 <%@ page import="pointeuse.Employee"%>
 <%@ page import="pointeuse.InAndOut"%>
 
-
 <table id="employee-table">
 	<thead>
 		<tr>
