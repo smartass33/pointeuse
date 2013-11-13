@@ -4,11 +4,6 @@
 	<head>
 	<gvisualization:apiImport/> 
 	    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-
-
-
-
-	
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'site.label', default: 'Site')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>		
