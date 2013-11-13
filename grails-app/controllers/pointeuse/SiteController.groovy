@@ -26,7 +26,7 @@ class SiteController {
 			if (site.latitude!=0 && site.longitude!=0){
 				siteTable[0]=site.latitude
 				siteTable[1]=site.longitude
-				siteTable[2]='<a href="show/'+site.id+'">'+site.name+'</a>'+'<BR>'+site.address +'<BR>'
+				siteTable[2]='<a href="show/'+site.id+'">'+site.name+'</a>'+'<BR>'+site.address +'<BR>'+site.postCode +', '+site.town
 				mapData.add(siteTable)
 			}
 		}
@@ -68,7 +68,7 @@ class SiteController {
             return
         }
 
-        flash.message = message(code: 'default.created.message', args: [message(code: 'site.label', default: 'Site'), siteInstance.id])
+        flash.message = message(code: 'default.created.message', args: [message(code: 'site.label', default: 'Site'), siteInstance.name])
         redirect(action: "show", id: siteInstance.id)
     }
 
@@ -117,13 +117,14 @@ class SiteController {
 		result = geocoderService.geocodeAddress(params["address"],params["town"])
 		siteInstance.latitude = result.lat
 		siteInstance.longitude = result.lng
+		siteInstance.postCode= result.postCode
 	
         if (!siteInstance.save(flush: true)) {
             render(view: "edit", model: [siteInstance: siteInstance])
             return
         }
 
-        flash.message = message(code: 'default.updated.message', args: [message(code: 'site.label', default: 'Site'), siteInstance.id])
+        flash.message = message(code: 'default.updated.message', args: [message(code: 'site.label', default: 'Site'), siteInstance.name])
         redirect(action: "show", id: siteInstance.id)
     }
 
@@ -136,8 +137,9 @@ class SiteController {
         }
 
         try {
+			def siteName = siteInstance.name
             siteInstance.delete(flush: true)
-            flash.message = message(code: 'default.deleted.message', args: [message(code: 'site.label', default: 'Site'), id])
+            flash.message = message(code: 'default.deleted.message', args: [message(code: 'site.label', default: 'Site'), siteName])
             redirect(action: "list")
         }
         catch (DataIntegrityViolationException e) {

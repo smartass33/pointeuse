@@ -33,6 +33,8 @@
 							<th>${message(code: 'administrator.label', default: 'Name')}</th>
 						</sec:ifAnyGranted>
 						<th>${message(code: 'address.label', default: 'Name')}</th>
+						<th>${message(code: 'site.town.label', default: 'Name')}</th>
+						<th>${message(code: 'site.postCode.label', default: 'Name')}</th>
 						
 					</tr>
 				</thead>
@@ -47,7 +49,8 @@
 								<td>${siteInstance.user.firstName} ${siteInstance.user.lastName}</td>
 							</sec:ifAnyGranted>
 							<td>${siteInstance.address}</td>				
-							
+							<td>${siteInstance.town}</td>
+							<td>${siteInstance.postCode}</td>
 						</tr>
 					</g:each>
 				</tbody>

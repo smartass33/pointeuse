@@ -35,6 +35,19 @@
 					<span class="property-value" aria-labelledby="name-label"><g:fieldValue bean="${siteInstance}" field="address"/></span>				
 				</li>
 				</g:if>
+				<g:if test="${siteInstance?.town}">
+				<li class="fieldcontain">
+					<span id="name-label" class="property-label"><g:message code="site.town.label" default="Name" /></span>
+					<span class="property-value" aria-labelledby="name-label"><g:fieldValue bean="${siteInstance}" field="town"/></span>				
+				</li>
+				</g:if>
+				<g:if test="${siteInstance?.postCode}">
+				<li class="fieldcontain">
+					<span id="name-label" class="property-label"><g:message code="site.postCode.label" default="Name" /></span>
+					<span class="property-value" aria-labelledby="name-label"><g:fieldValue bean="${siteInstance}" field="postCode"/></span>				
+				</li>
+				</g:if>
+
 			</ol>
 			<g:form>
 				<fieldset class="buttons">
