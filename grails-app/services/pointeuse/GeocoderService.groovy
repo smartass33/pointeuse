@@ -25,13 +25,11 @@ boolean transactional = false
 		def connection = url.openConnection()
 
 	      def result = [:]
-	      if(connection.responseCode == 200){
-			  
+	      if(connection.responseCode == 200){		  
 			  def geoCodeResultJSON = new JsonSlurper().parseText(connection.content.text)
 			  jsonMap.lat = geoCodeResultJSON.results.geometry.location.lat[0]
 			  jsonMap.lng = geoCodeResultJSON.results.geometry.location.lng[0]
 			  jsonMap.address = geoCodeResultJSON.results.formatted_address[0]
-	
 	      }
 	      else{
 	        log.error("GeocoderService.geocodeAddress FAILED")
