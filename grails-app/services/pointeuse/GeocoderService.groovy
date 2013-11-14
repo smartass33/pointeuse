@@ -11,10 +11,10 @@ boolean transactional = false
     def geocodeAddress(String address,String town) {
 		def jsonMap = [:]
 		
-		if (address!=null || address.size()==0){
+		if (address==null || address.size()==0){
 			jsonMap.lat = 0
 			jsonMap.lng = 0
-		}
+		}else{
 		
 		address = Normalizer.normalize(address, Normalizer.Form.NFKD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
 		town = Normalizer.normalize(town, Normalizer.Form.NFKD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
@@ -23,7 +23,6 @@ boolean transactional = false
 		qs << "address=" + URLEncoder.encode(address) + ","+URLEncoder.encode(town)
 		def url = new URL(base + qs.join("&"))
 		def connection = url.openConnection()
-
 	      def result = [:]
 	      if(connection.responseCode == 200){		  
 			  def geoCodeResultJSON = new JsonSlurper().parseText(connection.content.text)
@@ -38,7 +37,8 @@ boolean transactional = false
 	        log.error(url)
 	        log.error(connection.responseCode)
 	        log.error(connection.responseMessage)
-	      }      
+	      }     
+		} 
 	      return jsonMap
 	   }
 }
