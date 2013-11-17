@@ -1,4 +1,5 @@
 <%@ page import="pointeuse.Vacation" %>
+<%@ page import="pointeuse.Period" %>
 
 <body>
 	<h1>${message(code: 'vacation.total.label', default: 'Period')}</h1>	
@@ -11,6 +12,10 @@
 			</tr>
 		</thead>
 		<tbody>
+		<%def firstYear = (Period.findAll(sort:'year',order:'asc',max:1)).year
+		def lastYear = (Period.findAll(sort:'year',order:'desc',max:1)).year 
+		%>
+		${firstYear} ${lastYear}
 		<g:each in="${Vacation.findAllByEmployee(employeeInstance,[sort:'period.year',order:'asc'])}" status="i" var="vacationInstance">
 			<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">				
 				<td>${vacationInstance.period.year}</td>					
@@ -22,7 +27,6 @@
 									  	params:'\'userId=' + employeeInstance.id 						  
 											+ '&vacationId=' + vacationInstance.id
 									  		+ '&counter=\' + this.value'								  )}"
-		                    name="absenceType" 
 		                    value="${vacationInstance.counter}" 
 							min="0" max="32"	
 		            	/>

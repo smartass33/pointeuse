@@ -30,4 +30,10 @@ class EmployeeListTagLib {
 		
 	}
 	
+	
+	def listVacationEmployee ={attrs,body->
+		out<<render(template:"/common/listVacationEmployeeTemplate")
+		
+	}
+	
 }

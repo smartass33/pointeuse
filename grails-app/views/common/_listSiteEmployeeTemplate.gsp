@@ -22,12 +22,12 @@
 	<tbody id='body_update' style="border:1px;">
 		<g:each in="${employeeInstanceList}" status="i" var="employeeInstance">
 			<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-				<td style="width:120px"><g:link action="edit" id="${employeeInstance.id}"
-						params="${[isAdmin:isAdmin,siteId:siteId]}">
+				<td style="width:120px"><g:link action="edit" controller='employee' id="${employeeInstance.id}"
+						params="${[isAdmin:isAdmin,siteId:siteId,fromSite:fromSite]}">
 						${fieldValue(bean: employeeInstance, field: "lastName")}
 					</g:link></td>
-				<td style="width:120px"><g:link action="edit" id="${employeeInstance.id}"
-						params="${[isAdmin:isAdmin,siteId:siteId]}">
+				<td style="width:120px"><g:link action="edit" controller='employee' id="${employeeInstance.id}"
+						params="${[isAdmin:isAdmin,siteId:siteId,fromSite:fromSite]}">
 						${fieldValue(bean: employeeInstance, field: "firstName")}
 					</g:link></td>
 				<g:if test="${employeeInstance?.weeklyContractTime}">

@@ -160,10 +160,17 @@
                               value="${inOrOut.time.format('HH:mm')}" align="center"
                              style="font-weight: bold" />
                           </g:if>
-                          <g:if test="${inOrOut.regularizationType==InAndOut.INITIALE_SALARIE}">
-                            <g:textField id="myinput" name="cell"
-                             value="${inOrOut.time.format('HH:mm')}" align="center"
-                              style="color : red;font-weight: bold;" />
+                          <g:if test="${inOrOut.regularizationType==InAndOut.INITIALE_SALARIE}">          
+	          	              <g:remoteLink action="validate" id="link_${inOrOut.id}"			  				
+	                         	before="if(!confirm('${message(code: 'inAndOut.validate.confirmation', default: 'Create')}')) return false"
+	                         	onComplete="document.getElementById(${inOrOut.id}).style.color='green';"
+	                         	
+	                         	params="[employeeId: employee.id,inOrOutId:inOrOut.id]">
+	                          	<g:textField name="cell" class="myinput" id='${inOrOut.id}'
+	                          	
+	                             value="${inOrOut.time.format('HH:mm')}" align="center"
+	                              style="color : red;font-weight: bold;	border: 0; align: center; width: 45px; margin: -8px;" />
+	                          </g:remoteLink>
                           </g:if>
                           <g:if test="${inOrOut.regularizationType==InAndOut.INITIALE_ADMIN}">
                             <g:textField id="myinput" name="cell"

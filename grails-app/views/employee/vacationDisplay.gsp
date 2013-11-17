@@ -1,4 +1,3 @@
-
 <%@ page import="pointeuse.Vacation" %>
 <!DOCTYPE html>
 <html>

@@ -29,7 +29,7 @@ class UtilService {
 	def getSundaysInYear(int year,int month){
 		def calendar = Calendar.instance
 		def endPeriodCalendar = Calendar.instance
-		boolean twoLoops = month < 6 ? true : true
+		boolean twoLoops = month < 6 ? true : false
 		def currentDate = calendar.time
 		
 		calendar.set(Calendar.YEAR,year)		
@@ -45,7 +45,7 @@ class UtilService {
 		
 		if (twoLoops){
 			calendar.set(Calendar.YEAR,year-1)
-			//log.warn("getting opened days from: "+calendar.time + " until end of year "+year-1)
+			log.error("getting opened days from: "+calendar.time + " until end of year "+year-1)
 			
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
@@ -60,7 +60,7 @@ class UtilService {
 			calendar.set(Calendar.MONTH,0)
 			calendar.set(Calendar.DAY_OF_YEAR,1)
 			
-			//log.warn("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
+			log.error("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
 			
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
 				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
@@ -72,7 +72,7 @@ class UtilService {
 				calendar.roll(Calendar.DAY_OF_YEAR, 1)
 			}
 		}else{
-			//log.warn("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
+			log.error("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
 				//log.warn("date: "+calendar.time)
 				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){

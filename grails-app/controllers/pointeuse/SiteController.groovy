@@ -31,7 +31,7 @@ class SiteController {
 			}
 		}
 		def mapColumns = [['number', 'Lat'], ['number', 'Lon'], ['string', 'Name']]
-		[mapData:mapData,mapColumns:mapColumns]
+		[mapData:mapData,mapColumns:mapColumns,fromSite:true]
 	}
 	
 	
@@ -47,7 +47,7 @@ class SiteController {
     }
 
     def create() {
-        [siteInstance: new Site(params)]
+        [siteInstance: new Site(params),fromSite:true]
     }
 
     def save() {
@@ -83,7 +83,7 @@ class SiteController {
             return
         }
 
-        [siteInstance: siteInstance,employeeInstanceList:siteInstance.employees,employeeInstanceTotal:siteInstance.employees.size()]
+        [siteInstance: siteInstance,employeeInstanceList:siteInstance.employees,employeeInstanceTotal:siteInstance.employees.size(),fromSite:true]
     }
 
     def edit(Long id) {

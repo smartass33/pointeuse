@@ -310,6 +310,25 @@ class EmployeeController {
 
 	def vacationFollowup(){
 		def year = params["year"]
+		def myDate=params["myDate"]
+		def site
+		def siteId
+		def employeeList
+		def employeeVacations
+		def period
+		def employeeMap = [:]
+		def vacationMap = [:]
+		
+		params.each{i->
+			log.error(i)
+		}
+
+		if (params["site"]!=null && !params["site"].equals("")){
+			site = Site.get(params["site"] as int)
+			siteId=site.id
+			
+		}
+		
 		def startCalendar = Calendar.instance
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
@@ -327,17 +346,36 @@ class EmployeeController {
 		
 		if (year){
 			startCalendar.set(Calendar.YEAR,year)
+			period = Period.findByYear(year)
 			endCalendar.set(Calendar.YEAR,year+1)
 		}else{
+			period = Period.findByYear(startCalendar.getAt(Calendar.YEAR))
 			endCalendar.set(Calendar.YEAR,startCalendar.getAt(Calendar.YEAR)+1)
 		}
+		
+		if (myDate!=null & myDate instanceof java.util.Date)
+		{
+			startCalendar.set(Calendar.YEAR,myDate.getAt(Calendar.YEAR))
+			endCalendar.set(Calendar.YEAR,myDate.getAt(Calendar.YEAR)+1)
+			period = Period.findByYear(myDate.getAt(Calendar.YEAR))
+			
+		}
 		//1. get employees of a given site
+		if (site){
+			employeeList = Employee.findAllBySite(site)
+			for (Employee employee: employeeList){
+				employeeVacations = Vacation.findAllByEmployeeAndPeriod(employee,period)
+			}
+		}else{
+			employeeList = Employee.findAll()
+			employeeVacations = Vacation.findAllByPeriod(period)
+		}
 		
 		// for each employee, retrieve absences
 		
 		
-		
-		
+		log.error("done")
+		[employeeList:employeeList,period2:period]
 	}
 	
 	
@@ -513,6 +551,7 @@ class EmployeeController {
 	
     def edit(Long id) {
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
+		def fromSite = (params["fromSite"] != null  && params["fromSite"].equals("true")) ? true : false
         def employeeInstance = Employee.get(id)
 		def criteria
 		def takenCA=[]
@@ -615,7 +654,7 @@ class EmployeeController {
             return
         }
  
-		[employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,yearMap:yearMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
+		[fromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,yearMap:yearMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
 		
 	}
 
@@ -1161,6 +1200,15 @@ class EmployeeController {
             redirect(action: "show", id: id)
         }
     }
+	
+	
+	def validate(){
+		def eventId=params["inOrOutId"]
+		def inOrOut = InAndOut.get(eventId)
+		log.error('validating entry '+inOrOut)
+		inOrOut.regularizationType=InAndOut.MODIFIEE_ADMIN
+		inOrOut.save(flush:true)
+	}
 	
 	def trash(){	
 		def eventId=params["inOrOutId"] 
@@ -1922,6 +1970,12 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 
 		
 	def pointage(Long id){		
+		request.each{i->
+			log.error(i);
+		}
+		def headerNames = request.getHeaderNames()
+		def requestTT = request
+		def clientIP=request.getHeader("X-Forwarded-For");
 		def msg = "The Requestor IP: " + request.getRemoteAddr() + " Requestor Host name: " + request.getRemoteHost()
 		log.error(msg)
 		try {	
