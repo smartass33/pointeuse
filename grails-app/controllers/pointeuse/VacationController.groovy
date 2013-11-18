@@ -39,6 +39,7 @@ class VacationController {
 		def employee = Employee.get(params["userId"])
 		def user = springSecurityService.currentUser
         def vacationInstance = new Vacation(params)
+	
 		vacationInstance.employee = employee
 		vacationInstance.user = user
 		vacationInstance.period=period

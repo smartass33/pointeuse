@@ -318,16 +318,42 @@ class EmployeeController {
 		def period
 		def employeeMap = [:]
 		def vacationMap = [:]
+		def criteria
+		def initialCAMap=[:]
+		def remainingCAMap=[:]
+		def takenCAMap=[:]
+		def initialRTTMap=[:]
+		def remainingRTTMap=[:]
+		def takenRTTMap=[:]
+		def takenSicknessMap=[:]
+		def takenCSSMap=[:]
+		def takenAutreMap=[:]
+		def takenSickness
+		def takenRTT
+		def takenCA
+		def takenCSS
+		def takenAutre
+		def intermediate
 		
 		params.each{i->
 			log.error(i)
 		}
-
+/*
 		if (params["site"]!=null && !params["site"].equals("")){
-			site = Site.get(params["site"] as int)
+			intermediate=(params["site"]).toInteger()
+			site = Site.get((params["site"]).toInteger())		
+			siteId=site.id
+
+		}
+		*/
+		if (params["site.id"]!=null && !params["site.id"].equals("")){
+			intermediate=(params["site.id"]).toInteger()
+			
+			site = Site.get((params["site.id"]).toInteger())
 			siteId=site.id
 			
 		}
+		
 		
 		def startCalendar = Calendar.instance
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
@@ -363,19 +389,371 @@ class EmployeeController {
 		//1. get employees of a given site
 		if (site){
 			employeeList = Employee.findAllBySite(site)
-			for (Employee employee: employeeList){
-				employeeVacations = Vacation.findAllByEmployeeAndPeriod(employee,period)
-			}
+		//	for (Employee employee: employeeList){
+		//		employeeVacations = Vacation.findAllByEmployeeAndPeriod(employee,period)
+		//	}
 		}else{
 			employeeList = Employee.findAll()
-			employeeVacations = Vacation.findAllByPeriod(period)
+		//	employeeVacations = Vacation.findAllByPeriod(period)
 		}
 		
 		// for each employee, retrieve absences
 		
+		for (Employee employee: employeeList){
+			// step 1: fill initial values
+			//CA
+			criteria = Vacation.createCriteria()
+			def initialCA = criteria.get{
+				and {
+					eq('employee',employee)
+					eq('period',period)
+					eq('type',VacationType.CA)
+				}
+			}
+			if (initialCA != null){
+				initialCAMap.put(employee, initialCA.counter)
+			}else{
+				initialCAMap.put(employee, 0)
+			
+			}
+			//RTT
+			criteria = Vacation.createCriteria()
+			def initialRTT = criteria.get{
+				and {
+					eq('employee',employee)
+					eq('period',period)
+					eq('type',VacationType.RTT)
+				}
+			}
+			if (initialRTT != null){
+				initialRTTMap.put(employee, initialRTT.counter)
+			}else{
+				initialRTTMap.put(employee, 0)
+			}
+			
+			// step 2: fill actual counters
+			startCalendar.set(Calendar.YEAR,period.year)
+			endCalendar.set(Calendar.YEAR,period.year+1)
+			//CA
+			criteria = Absence.createCriteria()
+			takenCA = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.VACANCE)
+				}
+			}
+			if (takenCA!=null){
+				remainingCAMap.put(employee, initialCAMap.get(employee)-takenCA.size())
+				takenCAMap.put(employee, takenCA.size())
+			}else{
+				remainingCAMap.put(employee, initialCAMap.get(employee))
+				takenCAMap.put(employee, 0)
+				
+			}
+			//RTT
+			criteria = Absence.createCriteria()
+			takenRTT = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.RTT)
+				}
+			}
+			if (takenRTT!=null){
+				remainingRTTMap.put(employee, initialRTTMap.get(employee)-takenRTT.size())
+				takenRTTMap.put(employee, takenRTT.size())
+				
+			}else{
+				remainingRTTMap.put(employee, initialRTTMap.get(employee))
+				takenRTTMap.put(employee, 0)
+			}
+			
+			criteria = Absence.createCriteria()
+			takenSickness = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.MALADIE)
+				}
+			}
+			
+			if (takenSickness!=null){
+				takenSicknessMap.put(employee, takenSickness.size())
+			}else{
+				takenSicknessMap.put(employee, 0)
+			}
 		
+			
+			
+			criteria = Absence.createCriteria()
+			takenCSS = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.CSS)
+				}
+			}
+			
+			if (takenCSS!=null){
+				takenCSSMap.put(employee, takenCSS.size())
+			}else{
+				takenCSSMap.put(employee, 0)
+			}
+
+			criteria = Absence.createCriteria()
+			takenAutre = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.AUTRE)
+				}
+			}
+			
+			if (takenAutre!=null){
+				takenAutreMap.put(employee, takenAutre.size())
+			}else{
+				takenAutreMap.put(employee, 0)
+			}
+		}
 		log.error("done")
-		[employeeList:employeeList,period2:period]
+		[site:site,employeeList:employeeList,period2:period,takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
+		
+	}
+	
+	
+	def updateVacationTable(){
+		def year = params["year"]
+		def myDate=params["myDate"]
+		def site
+		def siteId
+		def employeeList
+		def employeeVacations
+		def period
+		def employeeMap = [:]
+		def vacationMap = [:]
+		def criteria
+		def initialCAMap=[:]
+		def remainingCAMap=[:]
+		def takenCAMap=[:]
+		def initialRTTMap=[:]
+		def remainingRTTMap=[:]
+		def takenRTTMap=[:]
+		def takenSicknessMap=[:]
+		def takenCSSMap=[:]
+		def takenAutreMap=[:]
+		def takenSickness
+		def takenRTT
+		def takenCA
+		def takenCSS
+		def takenAutre
+		def intermediate
+		
+		params.each{i->
+			log.error(i)
+		}
+		if (params["site.id"]!=null && !params["site.id"].equals("")){
+			intermediate=(params["site.id"]).toInteger()
+			
+			siteId = (params["site.id"]).toInteger()
+			site = Site.get(siteId)
+			siteId=site.id
+		}
+		if (params["site"]!=null && !params["site"].equals("")){
+			intermediate=(params["site"]).toInteger()
+			
+			site = Site.get(params["site"] as int)
+			siteId=site.id		
+		}
+
+		if (myDate!=null && !myDate.equals("")){
+			year = (Period.get(myDate as int)).year
+		}
+		
+		
+		def startCalendar = Calendar.instance
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.set(Calendar.MONTH,5)
+		startCalendar.set(Calendar.HOUR_OF_DAY,00)
+		startCalendar.set(Calendar.MINUTE,00)
+		startCalendar.set(Calendar.SECOND,00)
+		
+		// ending calendar: 31 of May of the period
+		def endCalendar   = Calendar.instance
+		endCalendar.set(Calendar.DAY_OF_MONTH,31)
+		endCalendar.set(Calendar.MONTH,6)
+		endCalendar.set(Calendar.HOUR_OF_DAY,23)
+		endCalendar.set(Calendar.MINUTE,59)
+		endCalendar.set(Calendar.SECOND,59)
+		
+		if (year){
+			startCalendar.set(Calendar.YEAR,year)
+			period = Period.findByYear(year)
+			endCalendar.set(Calendar.YEAR,year+1)
+		}else{
+			period = Period.findByYear(startCalendar.getAt(Calendar.YEAR))
+			endCalendar.set(Calendar.YEAR,startCalendar.getAt(Calendar.YEAR)+1)
+		}
+		
+		if (myDate!=null & myDate instanceof java.util.Date)
+		{
+			startCalendar.set(Calendar.YEAR,myDate.getAt(Calendar.YEAR))
+			endCalendar.set(Calendar.YEAR,myDate.getAt(Calendar.YEAR)+1)
+			period = Period.findByYear(myDate.getAt(Calendar.YEAR))
+			
+		}
+		//1. get employees of a given site
+		if (site){
+			employeeList = Employee.findAllBySite(site)
+		//	for (Employee employee: employeeList){
+		//		employeeVacations = Vacation.findAllByEmployeeAndPeriod(employee,period)
+		//	}
+		}else{
+			employeeList = Employee.findAll()
+		//	employeeVacations = Vacation.findAllByPeriod(period)
+		}
+		
+		def query = "*"+params.q+"*"
+		if(query!=null && !query.equals("*null*")){
+			employeeList=[]
+			def srchResults = searchableService.search(query)
+			for (Employee employee:srchResults.results){
+				def tmpEmployee = Employee.get(employee.id)
+				employeeList.add(tmpEmployee)
+			}
+		}
+		// for each employee, retrieve absences
+		
+		for (Employee employee: employeeList){
+			// step 1: fill initial values
+			//CA
+			criteria = Vacation.createCriteria()
+			def initialCA = criteria.get{
+				and {
+					eq('employee',employee)
+					eq('period',period)
+					eq('type',VacationType.CA)
+				}
+			}
+			if (initialCA != null){
+				initialCAMap.put(employee, initialCA.counter)
+			}else{
+				initialCAMap.put(employee, 0)
+			
+			}
+			//RTT
+			criteria = Vacation.createCriteria()
+			def initialRTT = criteria.get{
+				and {
+					eq('employee',employee)
+					eq('period',period)
+					eq('type',VacationType.RTT)
+				}
+			}
+			if (initialRTT != null){
+				initialRTTMap.put(employee, initialRTT.counter)
+			}else{
+				initialRTTMap.put(employee, 0)
+			}
+			
+			// step 2: fill actual counters
+			startCalendar.set(Calendar.YEAR,period.year)
+			endCalendar.set(Calendar.YEAR,period.year+1)
+			//CA
+			criteria = Absence.createCriteria()
+			takenCA = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.VACANCE)
+				}
+			}
+			if (takenCA!=null){
+				remainingCAMap.put(employee, initialCAMap.get(employee)-takenCA.size())
+				takenCAMap.put(employee, takenCA.size())
+			}else{
+				remainingCAMap.put(employee, initialCAMap.get(employee))
+				takenCAMap.put(employee, 0)
+				
+			}
+			//RTT
+			criteria = Absence.createCriteria()
+			takenRTT = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.RTT)
+				}
+			}
+			if (takenRTT!=null){
+				remainingRTTMap.put(employee, initialRTTMap.get(employee)-takenRTT.size())
+				takenRTTMap.put(employee, takenRTT.size())
+				
+			}else{
+				remainingRTTMap.put(employee, initialRTTMap.get(employee))
+				takenRTTMap.put(employee, 0)
+			}
+			
+			criteria = Absence.createCriteria()
+			takenSickness = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.MALADIE)
+				}
+			}
+			
+			if (takenSickness!=null){
+				takenSicknessMap.put(employee, takenSickness.size())
+			}else{
+				takenSicknessMap.put(employee, 0)
+			}
+		
+			
+			
+			criteria = Absence.createCriteria()
+			takenCSS = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.CSS)
+				}
+			}
+			
+			if (takenCSS!=null){
+				takenCSSMap.put(employee, takenCSS.size())
+			}else{
+				takenCSSMap.put(employee, 0)
+			}
+
+			criteria = Absence.createCriteria()
+			takenAutre = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.AUTRE)
+				}
+			}
+			
+			if (takenAutre!=null){
+				takenAutreMap.put(employee, takenAutre.size())
+			}else{
+				takenAutreMap.put(employee, 0)
+			}
+		}
+		render template: "/common/listVacationEmployeeTemplate", model:[period:startCalendar.time,site:site,employeeList:employeeList,period2:period,takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
+		return
+		
 	}
 	
 	
@@ -981,6 +1359,13 @@ class EmployeeController {
 					absence.delete(flush: true)
 				}else{
 					absence.type=updatedSelection
+					
+					if (absence.month<6){
+						absence.period=Period.findByYear(absence.year-1)
+					}else{
+						absence.period=Period.findByYear(absence.year)
+					}
+					
 					absence.save(flush: true)
 				}
 			}else {
@@ -992,6 +1377,13 @@ class EmployeeController {
 					absence.month=cal.get(Calendar.MONTH)+1
 					absence.year=cal.get(Calendar.YEAR)
 					absence.type=updatedSelection
+					
+					if (absence.month<6){
+						absence.period=Period.findByYear(absence.year-1)
+					}else{
+						absence.period=Period.findByYear(absence.year)
+					}
+					
 					absence.save(flush: true)
 				}
 			}

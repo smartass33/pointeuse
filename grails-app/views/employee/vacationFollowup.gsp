@@ -2,6 +2,8 @@
 <%@ page import="pointeuse.InAndOut"%>
 <%@ page import="pointeuse.Site"%>
 <%@ page import="pointeuse.Vacation"%>
+<%@ page import="pointeuse.Period"%>
+
 <!doctype html>
 <html>
 <head>
@@ -73,39 +75,48 @@ $('label').click(function(){
 	<div id="list-employee" class="content scaffold-list">
 		<h1>
 			<g:message code="default.list.label" args="[entityName]" />
+		
 			<br>
 			<br>
 			<g:form method="POST"
-				url="[controller:'employee', action:'pdf']">
+				url="[controller:'employee', action:'updateVacationTable']">
 				<g:message code="laboratory.label" default="Search"
 					style="vertical-align: middle;" />
 				<g:if test="${siteId != null && !siteId.equals('')}">
 					<g:select name="site.id" from="${Site.list([sort:'name'])}"
 						noSelection="${['':site.name]}" optionKey="id" optionValue="name"
-						onChange="${remoteFunction(action:'vacationFollowup', params:'\'site=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'divId')}"
+						onChange="${remoteFunction(action:'updateVacationTable', params:'\'site=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'[list-employee,vacationList]',onSuccess:site=site)}"
 						style="vertical-align: middle;" />
-
 				</g:if>
 				<g:else>
 					<g:select name="site.id" from="${Site.list([sort:'name'])}"
 						noSelection="${['':'-']}" optionKey="id" optionValue="name"
-						onChange="${remoteFunction(action:'vacationFollowup', params:'\'site=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'divId')}" />
-				</g:else>		
-				
-				<g:remoteField id="q" action="search" update="divId"
+						onChange="${remoteFunction(action:'updateVacationTable', params:'\'site=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'vacationList')}" />
+				</g:else>				
+				<g:remoteField id="q" action="updateVacationTable" update="vacationList"
 					onclick="if (this.value=='chercher un salarié') {this.value = '';}"
 					name="q" value="${params.q ?: 'chercher un salarié'}" paramName="q"
 					style="vertical-align: middle;"
 					params="\'q=\'+this.value+\'&isAdmin=\'+\'${isAdmin}+\'"/>
 
-						${message(code: 'default.period.label', default: 'List')}: <g:datePicker
-							name="myDate" value="${period ? period : new Date()}" 
-							precision="year" noSelection="['':'-Choose-']" style="vertical-align: middle;"/>
+				${message(code: 'default.period.label', default: 'List')}:
 
-						<g:actionSubmit class='listButton' value="period"  action="vacationFollowup"/>		
+					<g:select name="myDate" from="${Period.list([sort:'year'])}"
+						noSelection="${['':'-']}" optionKey="id" optionValue="year"
+						onChange="${remoteFunction(action:'updateVacationTable', params:'\'myDate=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'vacationList')}"
+						style="vertical-align: middle;" />
+
+
+
+
+				<g:actionSubmit class='listButton' value="period"  action="vacationFollowup"/>		
 						<!--g:actionSubmit class='listButton' value="excel"  action="excel"/-->		
 						
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
+				<g:if test="${site!=null}">	
+					toto			
+					<g:hiddenField name="site" value="${site}" />		
+				</g:if>
 				<g:hiddenField name="siteId" value="${siteId}" />
 			</g:form>
 
@@ -120,7 +131,7 @@ $('label').click(function(){
 	
 
 	<br>
-		<div id="divId"><g:listVacationEmployee /></div>
+		<div id="vacationList"><g:listVacationEmployee /></div>
 	
 	<g:if test="${employeeInstanceTotal!=null}">
 	<div class="pagination" id="pagination">

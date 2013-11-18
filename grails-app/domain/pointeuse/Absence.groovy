@@ -11,6 +11,7 @@ class Absence {
 	int year
 	AbsenceType type
 	static belongsTo = [employee:Employee]
+	Period period
 	
 	
     static constraints = {
