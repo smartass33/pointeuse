@@ -310,6 +310,7 @@ class EmployeeController {
 
 	def vacationFollowup(){
 		def year = params["year"]
+		
 		def myDate=params["myDate"]
 		def site
 		def siteId
@@ -334,6 +335,7 @@ class EmployeeController {
 		def takenCSS
 		def takenAutre
 		def intermediate
+		def employeeInstanceTotal
 		
 		params.each{i->
 			log.error(i)
@@ -353,7 +355,9 @@ class EmployeeController {
 			siteId=site.id
 			
 		}
-		
+		if (year!=null && !year.equals("")){
+			year=year.toInteger()
+		}
 		
 		def startCalendar = Calendar.instance
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
@@ -371,14 +375,14 @@ class EmployeeController {
 		endCalendar.set(Calendar.SECOND,59)
 		
 		if (year){
-			startCalendar.set(Calendar.YEAR,year)
-			period = Period.findByYear(year)
-			endCalendar.set(Calendar.YEAR,year+1)
+			period = Period.get(year)
+			startCalendar.set(Calendar.YEAR,period.year)
+			endCalendar.set(Calendar.YEAR,(period.year+1))
 		}else{
 			period = Period.findByYear(startCalendar.getAt(Calendar.YEAR))
 			endCalendar.set(Calendar.YEAR,startCalendar.getAt(Calendar.YEAR)+1)
 		}
-		
+		/*
 		if (myDate!=null & myDate instanceof java.util.Date)
 		{
 			startCalendar.set(Calendar.YEAR,myDate.getAt(Calendar.YEAR))
@@ -386,19 +390,14 @@ class EmployeeController {
 			period = Period.findByYear(myDate.getAt(Calendar.YEAR))
 			
 		}
-		//1. get employees of a given site
+		*/
 		if (site){
 			employeeList = Employee.findAllBySite(site)
-		//	for (Employee employee: employeeList){
-		//		employeeVacations = Vacation.findAllByEmployeeAndPeriod(employee,period)
-		//	}
 		}else{
 			employeeList = Employee.findAll()
-		//	employeeVacations = Vacation.findAllByPeriod(period)
 		}
 		
 		// for each employee, retrieve absences
-		
 		for (Employee employee: employeeList){
 			// step 1: fill initial values
 			//CA
@@ -521,8 +520,10 @@ class EmployeeController {
 				takenAutreMap.put(employee, 0)
 			}
 		}
+		employeeInstanceTotal=employeeList.size()
+		
 		log.error("done")
-		[site:site,employeeList:employeeList,period2:period,takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
+		[period:period,employeeInstanceTotal:employeeInstanceTotal,site:site,employeeList:employeeList,period2:period,takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
 		
 	}
 	
@@ -955,7 +956,7 @@ class EmployeeController {
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
-			
+		/*	
 		for (Period period:Period.findAll([sort:'year',order:'asc'])){
 			yearMap.put(period.year, period.toString())
 			// step 1: fill initial values
@@ -1025,6 +1026,22 @@ class EmployeeController {
 					
 		}
 
+		
+
+		
+		
+		*/
+		def orderedVacationList=[]
+		def periodList= Period.findAll(sort:'year',order:'asc')
+		for (Period period:periodList){
+			def vacations = Vacation.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
+			for (Vacation vacation:vacations){
+				orderedVacationList.add(vacation)
+			}
+			
+		}
+		
+
 		def siteId=params["siteId"]
         if (!employeeInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'employee.label', default: 'Employee'), id])
@@ -1032,7 +1049,8 @@ class EmployeeController {
             return
         }
  
-		[fromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,yearMap:yearMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
+	//	[fromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,yearMap:yearMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
+		[orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]
 		
 	}
 

@@ -55,7 +55,6 @@ $('label').click(function(){
       }
    });
    
-   
 
 </script>
 
@@ -79,48 +78,33 @@ $('label').click(function(){
 			<br>
 			<br>
 			<g:form method="POST"
-				url="[controller:'employee', action:'updateVacationTable']">
+				url="[controller:'employee', action:'vacationFollowup']">
 				<g:message code="laboratory.label" default="Search"
 					style="vertical-align: middle;" />
 				<g:if test="${siteId != null && !siteId.equals('')}">
 					<g:select name="site.id" from="${Site.list([sort:'name'])}"
 						noSelection="${['':site.name]}" optionKey="id" optionValue="name"
-						onChange="${remoteFunction(action:'updateVacationTable', params:'\'site=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'[list-employee,vacationList]',onSuccess:site=site)}"
 						style="vertical-align: middle;" />
 				</g:if>
 				<g:else>
 					<g:select name="site.id" from="${Site.list([sort:'name'])}"
 						noSelection="${['':'-']}" optionKey="id" optionValue="name"
-						onChange="${remoteFunction(action:'updateVacationTable', params:'\'site=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'vacationList')}" />
+												style="vertical-align: middle;" />						
 				</g:else>				
-				<g:remoteField id="q" action="updateVacationTable" update="vacationList"
-					onclick="if (this.value=='chercher un salarié') {this.value = '';}"
-					name="q" value="${params.q ?: 'chercher un salarié'}" paramName="q"
-					style="vertical-align: middle;"
-					params="\'q=\'+this.value+\'&isAdmin=\'+\'${isAdmin}+\'"/>
-
-				${message(code: 'default.period.label', default: 'List')}:
-
-					<g:select name="myDate" from="${Period.list([sort:'year'])}"
+				
+				${message(code: 'default.period.label', default: 'List')}
+					<g:select name="year" from="${Period.list([sort:'year'])}"
+						value="${period}"
 						noSelection="${['':'-']}" optionKey="id" optionValue="year"
-						onChange="${remoteFunction(action:'updateVacationTable', params:'\'myDate=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'vacationList')}"
 						style="vertical-align: middle;" />
-
-
-
-
-				<g:actionSubmit class='listButton' value="period"  action="vacationFollowup"/>		
-						<!--g:actionSubmit class='listButton' value="excel"  action="excel"/-->		
+				<g:actionSubmit class='listButton' value="${message(code: 'default.search.label', default: 'List')}"  action="vacationFollowup"/>		
 						
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:if test="${site!=null}">	
-					toto			
 					<g:hiddenField name="site" value="${site}" />		
 				</g:if>
 				<g:hiddenField name="siteId" value="${siteId}" />
 			</g:form>
-
-			
 		</h1>
 		<g:if test="${flash.message}">
 			<div class="message" id="flash">
@@ -131,14 +115,14 @@ $('label').click(function(){
 	
 
 	<br>
-		<div id="vacationList"><g:listVacationEmployee /></div>
+	<div id="vacationList"><g:listVacationEmployee /></div>
 	
 	<g:if test="${employeeInstanceTotal!=null}">
-	<div class="pagination" id="pagination">
-		<g:hiddenField name="isAdmin" value="${isAdmin}" />
-		<g:paginate total="${employeeInstanceTotal}"
-			params="${[isAdmin:isAdmin]}" />
-	</div>
+		<div class="pagination" id="pagination">
+			<g:hiddenField name="isAdmin" value="${isAdmin}" />
+			<g:paginate total="${employeeInstanceTotal}"
+				params="${[isAdmin:isAdmin]}" />
+		</div>
 	</g:if>
 </body>
 </html>

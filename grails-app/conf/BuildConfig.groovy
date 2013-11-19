@@ -28,15 +28,11 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 		compile 'log4j:apache-log4j-extras:1.0'
         runtime 'mysql:mysql-connector-java:5.1.21'
-		compile 'com.itextpdf:itextpdf:5.4.1'
-		
-
-		
+		compile 'com.itextpdf:itextpdf:5.4.1'	
     }
 
     plugins {
 		compile ":google-visualization:0.6.2"
-		
 		compile ":excel-export:0.1.5"
         runtime ":hibernate:$grailsVersion"
 		compile ":jquery:1.10.0"
