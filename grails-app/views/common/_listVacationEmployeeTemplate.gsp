@@ -18,10 +18,10 @@
 		</tr>
 	</thead>
 	<tbody>
-	<g:if test="${employeeList!=null}">
-		<g:each in="${employeeList}" var="employee" status='i'>
+	<g:if test="${employeeInstanceList!=null}">
+		<g:each in="${employeeInstanceList}" var="employee" status='i'>
 			<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">	
-				<g:if test="${period2!=null && employee != null}">
+				<g:if test="${period!=null && employee != null}">
 					<td>${employee.lastName}</td>
 					<td>${initialCAMap.get(employee)}</td>
 					<td>${takenCAMap.get(employee)}</td>

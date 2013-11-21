@@ -88,22 +88,26 @@ $('label').click(function(){
 				</g:if>
 				<g:else>
 					<g:select name="site.id" from="${Site.list([sort:'name'])}"
-						noSelection="${['':'-']}" optionKey="id" optionValue="name"
+					
+						noSelection="${['':(site?site.name:'-')]}" optionKey="id" optionValue="name"
 												style="vertical-align: middle;" />						
 				</g:else>				
 				
 				${message(code: 'default.period.label', default: 'List')}
 					<g:select name="year" from="${Period.list([sort:'year'])}"
 						value="${period}"
-						noSelection="${['':'-']}" optionKey="id" optionValue="year"
+						noSelection="${['':(period?period:'-')]}" optionKey="id" 
 						style="vertical-align: middle;" />
 				<g:actionSubmit class='listButton' value="${message(code: 'default.search.label', default: 'List')}"  action="vacationFollowup"/>		
-						
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:if test="${site!=null}">	
-					<g:hiddenField name="site" value="${site}" />		
+					<g:hiddenField name="site.id" value="${site.id}" />		
 				</g:if>
 				<g:hiddenField name="siteId" value="${siteId}" />
+				<g:if test="${period!=null}">	
+					<g:hiddenField name="year" value="${period.id}" />
+					
+				</g:if>
 			</g:form>
 		</h1>
 		<g:if test="${flash.message}">
@@ -115,14 +119,7 @@ $('label').click(function(){
 	
 
 	<br>
-	<div id="vacationList"><g:listVacationEmployee /></div>
-	
-	<g:if test="${employeeInstanceTotal!=null}">
-		<div class="pagination" id="pagination">
-			<g:hiddenField name="isAdmin" value="${isAdmin}" />
-			<g:paginate total="${employeeInstanceTotal}"
-				params="${[isAdmin:isAdmin]}" />
-		</div>
-	</g:if>
+	<div id="vacationList"><g:listVacationEmployee/></div>
+
 </body>
 </html>
