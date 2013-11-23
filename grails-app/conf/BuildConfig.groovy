@@ -4,6 +4,7 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.target.level = 1.6
 grails.project.source.level = 1.6
+//grails.project.dependency.resolver="maven"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -32,9 +33,11 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
+		//compile ':scaffolding:1.0.0'
 		compile ":google-visualization:0.6.2"
 		compile ":excel-export:0.1.5"
         runtime ":hibernate:$grailsVersion"
+		//runtime ':hibernate:3.6.10.2'
 		compile ":jquery:1.10.0"
 		compile ":jquery-ui:1.8.24"
 		compile ":jquery-ui-timepicker:0.9.8.1"
@@ -42,6 +45,9 @@ grails.project.dependency.resolution = {
         runtime ":resources:1.0"
 		compile ":tooltip:0.7"
 		compile ":mail:1.0.1"
+		//, {
+  // excludes 'spring-test'
+  //}  
 		runtime ":prototype:1.0"
 		compile ":spring-security-core:1.2.7.3"
 		compile ":joda-time:1.4"
@@ -52,7 +58,8 @@ grails.project.dependency.resolution = {
 		compile ":richui:0.8"
 		compile ":searchable:0.6.4"
         build ":tomcat:$grailsVersion"
-        runtime ":database-migration:1.1"
+      // build ':tomcat:7.0.42'
+		 runtime ":database-migration:1.1"
         compile ':cache:1.0.0'
     }
 }
