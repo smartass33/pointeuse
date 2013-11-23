@@ -700,8 +700,7 @@ class EmployeeController {
 			
 				
 		}
-	[takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,yearMap:yearMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
-		
+	[takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,yearMap:yearMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]	
 
 	}
 	
@@ -755,9 +754,6 @@ class EmployeeController {
 		[orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
 	}
 
-	
-
-
 	def cartouche(long userId,int year,int month){
 		def employeeInstance = Employee.get(userId)
 		return timeManagerService.getCartoucheData(employeeInstance,year,month)
@@ -805,8 +801,7 @@ class EmployeeController {
 						absence.period=Period.findByYear(absence.year-1)
 					}else{
 						absence.period=Period.findByYear(absence.year)
-					}
-					
+					}				
 					absence.save(flush: true)
 				}
 			}else {
@@ -823,32 +818,28 @@ class EmployeeController {
 						absence.period=Period.findByYear(absence.year-1)
 					}else{
 						absence.period=Period.findByYear(absence.year)
-					}
-					
+					}			
 					absence.save(flush: true)
 				}
 			}
 		}else{
 			flash.message=message(code: 'absence.impossible.update')
 		}
-		
-		
-		
 		def cartoucheTable = timeManagerService.getCartoucheData(employee,cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)	
-		def workingDays=cartoucheTable.get(3)
-		def holiday=cartoucheTable.get(4)
-		def rtt=cartoucheTable.get(5)
-		def sickness=cartoucheTable.get(6)
-		def sansSolde=cartoucheTable.get(7)
-		def monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get(8))
-		def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(9))
-		def yearlyHoliday=cartoucheTable.get(11)
-		def yearlyRtt=cartoucheTable.get(12)
-		def yearlySickness=cartoucheTable.get(13)
-		def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get(14))
-		def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(15))
-		def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get(16))
-		def yearlySansSolde=cartoucheTable.get(17)
+		def workingDays=cartoucheTable.getAt('workingDays')
+		def holiday=cartoucheTable.getAt('holidays')
+		def rtt=cartoucheTable.getAt('rtt')
+		def sickness=cartoucheTable.getAt('rtt')
+		def sansSolde=cartoucheTable.getAt('sansSolde')
+		def monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.getAt('monthTheoritical'))
+		def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.getAt('pregnancyCredit'))
+		def yearlyHoliday=cartoucheTable.getAt('yearlyHolidays')
+		def yearlyRtt=cartoucheTable.getAt('yearlyRtt')
+		def yearlySickness=cartoucheTable.getAt('yearlySickness')
+		def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.getAt('yearlyTheoritical'))
+		def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.getAt('yearlyPregnancyCredit'))
+		def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.getAt('yearlyActualTotal'))
+		def yearlySansSolde=cartoucheTable.getAt('yearlySansSolde')
 		def payableSupTime=timeManagerService.computeHumanTime(supTime)
 		def payableCompTime=timeManagerService.computeHumanTime(compTime)
 		def openedDays = timeManagerService.computeMonthlyHours(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)
@@ -1097,7 +1088,6 @@ class EmployeeController {
 		def newTimeList=params["cell"]
 		def fromRegularize=params["fromRegularize"].equals("true") ? true : false
 
-
 		try{
 
 			def month=monthList[0]
@@ -1109,12 +1099,9 @@ class EmployeeController {
 				render(view: "report", model: retour)
 			}
 			
-			
-			timeManagerService.timeModification( idList, timeList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
+		timeManagerService.timeModification( idList, timeList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
 			// now, find if employee still has errors:
 			
-		
-	
 		if (fromRegularize){
 			redirect(action: "pointage", id: employee.id)
 		}else{
@@ -1137,18 +1124,15 @@ class EmployeeController {
 			if (fromRegularize){
 			render(view: "index")
 			}else{
-		//	def report=params["currentMonth"]
-			def currentMonth=params["myDate_month"] as int
-			def currentYear=params["myDate_year"] as int
-			
-			def retour = report(employee.id as long,currentMonth as int,currentYear as int)
-			render(view: "report", model: retour)
+				def currentMonth=params["myDate_month"] as int
+				def currentYear=params["myDate_year"] as int	
+				def retour = report(employee.id as long,currentMonth as int,currentYear as int)
+				render(view: "report", model: retour)
 			}
 		}
 	}
 	
 
-	
 	def annualReport(Long userId){
 		def year
 		def month
@@ -1181,7 +1165,6 @@ class EmployeeController {
 		def annualTotalIncludingHS = 0
 		def calendar = Calendar.instance
 		
-		
 		if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
 			year = params["myDate_year"] as int
 		}else{
@@ -1193,8 +1176,7 @@ class EmployeeController {
 			month = calendar.get(Calendar.MONTH)+1
 		}
 		
-		boolean isAjax = params["isAjax"].equals("true") ? true : false
-		
+		boolean isAjax = params["isAjax"].equals("true") ? true : false	
 		
 		Employee employee = Employee.get(userId)
 		
@@ -1209,9 +1191,7 @@ class EmployeeController {
 		
 		for (int lastYearMonth = 6 ;lastYearMonth <13 ; lastYearMonth++){
 			yearMap.put(lastYearMonth, year)
-			cartoucheTable=cartouche(userId,year,lastYearMonth)	
-
-					
+			cartoucheTable=timeManagerService.getCartoucheData(employee,year,lastYearMonth)		
 			yearMonthMap.put(lastYearMonth, cartoucheTable)
 			monthlyTotalTime = 0
 			monthlySupTotalTime = 0
@@ -1243,7 +1223,7 @@ class EmployeeController {
 			}
 
 			yearMonthlySupTime.put(lastYearMonth,timeManagerService.computeHumanTime(Math.round(monthlySupTotalTime)))			
-			def monthTheoritical = cartoucheTable.get(8)
+			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
 			if (employee.weeklyContractTime!=35){
 				if (monthlyTotalTime > monthTheoritical){
 					payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime,0)
@@ -1257,22 +1237,20 @@ class EmployeeController {
 			
 			}
 			
-			annualTheoritical += cartoucheTable.get(8)
-			annualHoliday += cartoucheTable.get(4)
-			annualRTT += cartoucheTable.get(5)
-			annualCSS += cartoucheTable.get(7)
-			annualSickness += cartoucheTable.get(6)
-			annualWorkingDays += cartoucheTable.get(3)
-			
+			annualTheoritical += cartoucheTable.getAt('monthTheoritical')
+			annualHoliday += cartoucheTable.getAt('holidays')
+			annualRTT += cartoucheTable.getAt('rtt')
+			annualCSS += cartoucheTable.getAt('sansSolde')
+			annualSickness += cartoucheTable.getAt('sickness')
+			annualWorkingDays += cartoucheTable.getAt('workingDays')		
 			annualPayableSupTime += monthlySupTotalTime
 			annualPayableCompTime += payableCompTime
-			annualTotal += monthlyTotalTime
-			
+			annualTotal += monthlyTotalTime		
 		}
 		
 		for (int thisYearMonth = 1 ;thisYearMonth <6 ; thisYearMonth++){
 			yearMap.put(thisYearMonth, year+1)		
-			cartoucheTable=cartouche(userId,year+1,thisYearMonth)
+			cartoucheTable=timeManagerService.getCartoucheData(employee,year+1,thisYearMonth)	
 			yearMonthMap.put(thisYearMonth, cartoucheTable)
 			monthlyTotalTime = 0
 			monthlySupTotalTime = 0
@@ -1301,7 +1279,7 @@ class EmployeeController {
 				monthlySupTotalTime += timeManagerService.computeSupplementaryTime(employee,currentWeek, year+1)
 			}
 			yearMonthlySupTime.put(thisYearMonth,timeManagerService.computeHumanTime(monthlySupTotalTime))
-			def monthTheoritical = cartoucheTable.get(8)
+			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
 			if (employee.weeklyContractTime!=35){
 				if (monthlyTotalTime > monthTheoritical){
 					payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime,0)
@@ -1315,18 +1293,16 @@ class EmployeeController {
 			
 			}
 			
-			annualTheoritical += cartoucheTable.get(8)
-			annualHoliday += cartoucheTable.get(4)
-			annualRTT += cartoucheTable.get(5)
-			annualCSS += cartoucheTable.get(7)
-			annualSickness += cartoucheTable.get(6)
-			annualWorkingDays += cartoucheTable.get(3)
-			
+			annualTheoritical += cartoucheTable.getAt('monthTheoritical')
+			annualHoliday += cartoucheTable.getAt('holidays')
+			annualRTT += cartoucheTable.getAt('rtt')
+			annualCSS += cartoucheTable.getAt('sansSolde')
+			annualSickness += cartoucheTable.getAt('sickness')
+			annualWorkingDays += cartoucheTable.getAt('workingDays')	
 			annualPayableSupTime += monthlySupTotalTime
 			annualPayableCompTime += payableCompTime
 			annualTotal += monthlyTotalTime
 			annualTotalIncludingHS = annualTotal + annualPayableCompTime + annualPayableSupTime
-			
 		}
 		
 		def model=[annualTotalIncludingHS:timeManagerService.computeHumanTime(Math.round(annualTotalIncludingHS)),annualEmployeeWorkingDays:annualEmployeeWorkingDays,	annualTheoritical:timeManagerService.computeHumanTime(Math.round(annualTheoritical)),annualHoliday:annualHoliday,annualRTT:annualRTT,annualCSS:annualCSS,annualSickness:annualSickness,annualWorkingDays:annualWorkingDays,annualPayableSupTime:timeManagerService.computeHumanTime(Math.round(annualPayableSupTime)),annualPayableCompTime:timeManagerService.computeHumanTime(Math.round(annualPayableCompTime)),annualTotal:timeManagerService.computeHumanTime(Math.round(annualTotal)),
@@ -1725,20 +1701,15 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			siteId=site.id
 		}else{
 			flash.message = message(code: 'pdf.site.selection.error')
-		
         	redirect(action: "list")
 			return
 		}
-		
-		
-		
-
-		
+			
 		def employeeList = Employee.findAllBySite(site)
 		for (Employee employee:employeeList){			
 			log.error('method pdf called with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
 			
-			def cartoucheTable = cartouche(employee.id as int,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+			def cartoucheTable = timeManagerService.getCartoucheData(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 			def workingDays=cartoucheTable.get(3)
 			def holiday=cartoucheTable.get(4)
 			def rtt=cartoucheTable.get(5)

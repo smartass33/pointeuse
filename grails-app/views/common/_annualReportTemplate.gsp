@@ -53,9 +53,10 @@
 				<td style="vertical-align: middle;">${calendar.time.format('MMMM') }</td>
 				<td style="vertical-align: middle;">${yearMap.get(cartouche.key)}</td>
 				<td style="vertical-align: middle;">
+				
 					<g:if
-                		test="${cartouche.value.get(18) !=null && ((cartouche.value.get(18)).get(0)>0 ||(cartouche.value.get(18)).get(1)>0)}">
-                    	${(cartouche.value.get(18)).get(0)}H${(cartouche.value.get(18)).get(1)==0?'':(cartouche.value.get(18)).get(1)} 
+                		test="${cartouche.value.getAt('monthTheoriticalHuman') !=null && ((cartouche.value.getAt('monthTheoriticalHuman')).get(0)>0 ||(cartouche.value.getAt('monthTheoriticalHuman')).get(1)>0)}">
+                    	${(cartouche.value.getAt('monthTheoriticalHuman')).get(0)}H${(cartouche.value.getAt('monthTheoriticalHuman')).get(1)==0?'':(cartouche.value.getAt('monthTheoriticalHuman')).get(1)} 
                		</g:if>
                		<g:else>
                			0H0
@@ -66,15 +67,14 @@
                 		test="${yearTotalMap.get(cartouche.key) !=null && ((yearTotalMap.get(cartouche.key)).get(0)>0 ||(yearTotalMap.get(cartouche.key)).get(1)>0)}">
                     	${(yearTotalMap.get(cartouche.key)).get(0)}H${(yearTotalMap.get(cartouche.key)).get(1)==0?'':(yearTotalMap.get(cartouche.key)).get(1)} 
                		</g:if>
-               		               		<g:else>
+               		<g:else>
                			0H0
                		</g:else>
 				</td>
-				<!--td>${cartouche.value.get(3)}</td-->
-				<td>${cartouche.value.get(4)}</td>
-				<td>${cartouche.value.get(5)}</td>
-				<td>${cartouche.value.get(7)}</td>
-				<td>${cartouche.value.get(6)}</td>
+				<td>${cartouche.value.getAt('holidays')}</td>
+				<td>${cartouche.value.getAt('rtt')}</td>
+				<td>${cartouche.value.getAt('sansSolde')}</td>
+				<td>${cartouche.value.getAt('sickness')}</td>
 
 				<td>
 					<g:if
@@ -100,7 +100,7 @@
 			<td></td>
 			<td></td>
 			<td>
-								<g:if
+				<g:if
                		test="${annualTheoritical !=null && (annualTheoritical.get(0)>0 ||annualTheoritical.get(1)>0)}">
                		${annualTheoritical.get(0)}H${annualTheoritical.get(1)==0?'':annualTheoritical.get(1)} 
            		</g:if>
@@ -109,7 +109,7 @@
            		</g:else>
 			</td>
 			<td>
-											<g:if
+				<g:if
                		test="${annualTotal !=null && (annualTotal.get(0)>0 ||annualTotal.get(1)>0)}">
                		${annualTotal.get(0)}H${annualTotal.get(1)==0?'':annualTotal.get(1)} 
            		</g:if>
@@ -117,7 +117,6 @@
            			0H0
            		</g:else>
 		</td>
-			<!--td>${annualWorkingDays}</td-->
 			<td>${annualHoliday}</td>
 			<td>${annualRTT}</td>
 			<td>${annualCSS}</td>
