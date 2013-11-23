@@ -1487,22 +1487,22 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		}	
 		try {
 			if (userId != null){
-			def cartoucheTable = cartouche(userId,year,month)
+			def cartoucheTable = timeManagerService.getCartoucheData(employee,year,month)
 			def openedDays = timeManagerService.computeMonthlyHours(year,month)
-			def workingDays=cartoucheTable.get(3)
-			def holiday=cartoucheTable.get(4)
-			def rtt=cartoucheTable.get(5)
-			def sickness=cartoucheTable.get(6)
-			def sansSolde=cartoucheTable.get(7)
-			def monthTheoritical = cartoucheTable.get(8)
-			def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(9))
-			def yearlyHoliday=cartoucheTable.get(11)
-			def yearlyRtt=cartoucheTable.get(12)
-			def yearlySickness=cartoucheTable.get(13)
-			def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get(14))
-			def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get(15))
-			def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get(16))
-			def yearlySansSolde=cartoucheTable.get(17)
+			def workingDays=cartoucheTable.get('workingDays')
+			def holiday=cartoucheTable.get('holidays')
+			def rtt=cartoucheTable.get('rtt')
+			def sickness=cartoucheTable.get('sickness')
+			def sansSolde=cartoucheTable.get('sansSolde')
+			def monthTheoritical = cartoucheTable.get('monthTheoritical')
+			def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('pregnancyCredit'))
+			def yearlyHoliday=cartoucheTable.get('yearlyHolidays')
+			def yearlyRtt=cartoucheTable.get('yearlyRtt')
+			def yearlySickness=cartoucheTable.get('yearlySickness')
+			def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyTheoritical'))
+			def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyPregnancyCredit'))
+			def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyActualTotal'))
+			def yearlySansSolde=cartoucheTable.get('yearlySansSolde')
 			def payableSupTime = timeManagerService.computeHumanTime(Math.round(monthlySupTime))
 			def payableCompTime = timeManagerService.computeHumanTime(0)
 			if (employee.weeklyContractTime!=35){
@@ -1513,7 +1513,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			
 			monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotalTime))
 			def monthlyTotal=timeManagerService.computeHumanTime(monthlyTotalTime)
-			monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get(8))
+			monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical'))
 			
 			def yearInf
 			def yearSup
@@ -1526,8 +1526,10 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			}
 
 			def bankList = BankHoliday.findByCalendar(calendar);
-			
-			[isAdmin:false,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:cartoucheTable.get(3),holiday:cartoucheTable.get(4),rtt:cartoucheTable.get(5),sickness:cartoucheTable.get(6),sansSolde:cartoucheTable.get(7),yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:cartoucheTable.get(11),yearlyRtt:cartoucheTable.get(12),yearlySickness:cartoucheTable.get(13),yearlySansSolde:cartoucheTable.get(17),yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+			def model=[isAdmin:false,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+			model << cartoucheTable
+			return model
+			//[isAdmin:false,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,workingDays:cartoucheTable.get('workingDays'),holiday:cartoucheTable.get('holiday'),rtt:cartoucheTable.getAt('rtt'),sickness:cartoucheTable.get('sickness'),sansSolde:cartoucheTable.get('sansSolde'),yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:cartoucheTable.get('yearlyHolidays'),yearlyRtt:cartoucheTable.get(12),yearlySickness:cartoucheTable.get('yearlySickness'),yearlySansSolde:cartoucheTable.get('yearlySansSolde'),yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 					}
 		}catch (NullPointerException e){
 			log.error('error with application: '+e.toString())
