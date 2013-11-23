@@ -522,6 +522,14 @@ td, th {
 	
 }
 
+.myinput{
+		border: 0;
+		align: center;
+		width: 45px;
+		margin: -8px;
+	
+}
+
 
 th {
 	background-color: #efefef;
