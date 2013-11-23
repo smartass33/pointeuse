@@ -58,8 +58,10 @@ class PDFService {
 			fileNameList.add(filename)
 
 			outputStream = new FileOutputStream (folder+'/'+filename);
-			bytes.writeTo(outputStream);
-
+			bytes.writeTo(outputStream);   
+			
+			
+			
 			if(bytes)
 			   bytes.close();
 	

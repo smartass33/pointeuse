@@ -663,4 +663,504 @@ class TimeManagerService {
 	return elapsedSeconds
 	}
 	
+	
+	def getYearCartoucheData(Employee employee,int year,int month){
+		def monthNumber=0
+		def yearTheoritical
+		def calendar = Calendar.instance
+		calendar.set(Calendar.YEAR,year)
+		def yearlyCounter = 0
+		def totalTime = 0
+		def bankHolidayCounter=0
+		def bankHolidayList
+		def criteria = Absence.createCriteria()
+		
+		if (month>5){
+			year=year+1
+			monthNumber=month-6+1
+		}else{
+			monthNumber=month+1+6	
+		}
+		
+		// set the date end of may
+		calendar.set(Calendar.MONTH,month-1)
+		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		def maxDate = calendar.time
+		calendar.set(Calendar.YEAR,year-1)
+		calendar.set(Calendar.MONTH,5)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.clearTime()
+		def minDate = calendar.time	
+		
+		// get cumul holidays
+		def yearlyHolidays = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.VACANCE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def yearlyRtt = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.RTT)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def yearlySickness = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.MALADIE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def pregnancy = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.GROSSESSE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def yearlySansSolde = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.CSS)
+			}
+		}
+				
+		criteria = MonthlyTotal.createCriteria()
+		def monthsAggregate = criteria.list{
+			and {
+				eq('employee',employee)
+				ge('month',6)
+				le('month',month)
+				eq('year',year-1)
+			}
+		}
+		
+
+		for (MonthlyTotal monthIter:monthsAggregate){
+			totalTime += monthIter.elapsedSeconds
+		}
+		
+		criteria = MonthlyTotal.createCriteria()
+		monthsAggregate = criteria.list{
+			and {
+				eq('employee',employee)
+				le('month',month)
+				eq('year',year)
+			}
+		}
+		
+		for (MonthlyTotal monthIter:monthsAggregate){
+			totalTime += monthIter.elapsedSeconds
+		}
+		
+		yearlyCounter=month>5 ? utilService.getSundaysInYear(year-1,month) : utilService.getSundaysInYear(year,month)
+
+		criteria = BankHoliday.createCriteria()
+		
+		if (month<6){
+			bankHolidayList = criteria.list{				
+				or{
+					and {
+						ge('month',1)
+						le('month',month)
+						eq('year',year)
+					}
+					and{
+						ge('month',6)
+						le('month',12)
+						eq('year',year-1)
+					}
+				}
+			}
+		}
+		else{
+			bankHolidayList = criteria.list{
+				and {
+					ge('month',6)
+					le('month',month)
+					eq('year',year-1)
+				}				
+			}			
+		}
+		
+		for (BankHoliday bankHoliday:bankHolidayList){
+			if (bankHoliday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				bankHolidayCounter ++
+			}
+		}
+		
+		yearlyCounter -= bankHolidayCounter
+		def yearlyPregnancyCredit=30*60*pregnancy.size()
+		
+		
+		
+		yearTheoritical=3600*(
+					yearlyCounter*employee.weeklyContractTime/Employee.WeekOpenedDays 
+					+ (Employee.Pentecote*monthNumber)*(employee.weeklyContractTime/Employee.legalWeekTime)
+					-(employee.weeklyContractTime/Employee.WeekOpenedDays)*(yearlySickness.size()+yearlyHolidays.size()+yearlySansSolde.size())
+					-pregnancy.size()
+					) as int
+		
+			//	+(Employee.Pentecote*monthNumber)*(employee.weeklyContractTime/Employee.legalWeekTime)
+			//	-(employee.weeklyContractTime/Employee.WeekOpenedDays)*(yearlySickness.size()+yearlyHolidays.size()+yearlySansSolde.size()) - yearlyPregnancyCredit
+		/* yearTheoritical=(
+			3600*(
+				yearlyCounter*employee.weeklyContractTime/Employee.WeekOpenedDays
+				+(Employee.Pentecote*monthNumber)*(employee.weeklyContractTime/Employee.legalWeekTime)
+				-(employee.weeklyContractTime/Employee.WeekOpenedDays)*(yearlySickness.size()+yearlyHolidays.size()+yearlySansSolde.size())) - yearlyPregnancyCredit)as int
+		*/
+		
+		return [yearlyCounter ,yearlyHolidays.size(),yearlyRtt.size(),yearlySickness.size(),yearTheoritical,yearlyPregnancyCredit,totalTime,yearlySansSolde.size()]
+	}
+	
+	def getCartoucheData(Employee employeeInstance,int year,int month){	
+		def counter = 0
+		def holidayList
+		def holidayCounter = 0
+		def monthTheoritical
+		def criteria
+		def calendar = Calendar.instance
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.MONTH,month-1)
+		
+		// count sundays within given month
+		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+			if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				counter ++
+			}
+			if (calendar.get(Calendar.DAY_OF_MONTH) == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				break
+			}
+			calendar.roll(Calendar.DAY_OF_MONTH, 1)
+		}
+		
+		// count bank holiday
+		holidayList = BankHoliday.findAllByMonthAndYear(month,calendar.get(Calendar.YEAR))
+
+		for (BankHoliday holiday:holidayList){
+			if (holiday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				holidayCounter++
+			}
+		}
+				
+		counter -= holidayCounter
+
+		// get cumul holidays
+		criteria = Absence.createCriteria()
+		def holidays = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.VACANCE)
+			}
+		}
+		
+		// get cumul RTT
+		criteria = Absence.createCriteria()
+		def rtt = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.RTT)
+			}
+		}
+		// get cumul sickness
+		criteria = Absence.createCriteria()
+		def sickness = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.MALADIE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def pregnancy = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.GROSSESSE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def sansSolde = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.CSS)
+			}
+		}
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		calendar.set(Calendar.DATE,1)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.MONTH,month-1)
+	
+		def yearlyCartouche=getYearCartoucheData(employeeInstance,year,month)
+		def pregnancyCredit=30*60*pregnancy.size()
+		// determine monthly theoritical time:
+		monthTheoritical=(
+		3600*(counter*employeeInstance.weeklyContractTime/Employee.WeekOpenedDays
+			+(Employee.Pentecote)*(employeeInstance.weeklyContractTime/Employee.legalWeekTime)
+			-(employeeInstance.weeklyContractTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size()))
+			- pregnancyCredit)as int
+		
+		def monthTheoriticalHuman=computeHumanTime(monthTheoritical)
+		return [employeeInstance.id,employeeInstance,calendar,counter ,holidays.size(),rtt.size(),sickness.size(),sansSolde.size(),monthTheoritical,pregnancyCredit,yearlyCartouche.get(0),yearlyCartouche.get(1),yearlyCartouche.get(2),yearlyCartouche.get(3),yearlyCartouche.get(4),yearlyCartouche.get(5),yearlyCartouche.get(6),yearlyCartouche.get(7),monthTheoriticalHuman]
+	}
+	
+	
+	def getReportData(String siteId,Employee employee, Date myDate,int monthPeriod,int yearPeriod){
+		def calendar = Calendar.instance
+		def weekName="semaine "
+		def weeklyTotalTime = [:]
+		def weeklySuppTotalTime = [:]
+		def weeklyCompTotalTime = [:]
+		def weeklyTotalTimeByEmployee = [:]
+		def weeklySupTotalTimeByEmployee = [:]
+		def monthlyTotalTimeByEmployee = [:]
+		def weeklyAggregate = [:]
+		def dailyTotalMap = [:]
+		def dailyBankHolidayMap = [:]
+		def dailySupTotalMap = [:]
+		def holidayMap = [:]
+		def previousDay
+		def mapByDay = [:]
+		def dailyTotalId=0
+		def monthlySupTime = 0
+		def monthlyTotalTime = 0
+		def monthlyCompTime = 0
+		def criteria
+		def dailySeconds = 0
+		def weeklySupTime
+		def currentWeek=0
+
+		//get last day of the month
+		if (myDate==null){
+			if (yearPeriod!=0){
+				calendar.set(Calendar.MONTH,monthPeriod-1)
+				calendar.set(Calendar.YEAR,yearPeriod)
+			}
+			calendar.set(Calendar.MONTH,calendar.get(Calendar.MONTH))
+			calendar.set(Calendar.DATE,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		}else{
+			calendar.time=myDate
+		}
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		calendar.set(Calendar.DATE,1)
+		
+		
+		def calendarLoop = calendar
+		int month = calendar.get(Calendar.MONTH)+1 // starts at 0
+		int year = calendar.get(Calendar.YEAR)
+		calendarLoop.getTime().clearTime()
+		def lastWeekParam = utilService.getLastWeekOfMonth(month, year)
+		def isSunday=lastWeekParam.get(1)
+		
+		
+		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			def currentDay=calendarLoop.time
+			// Žlimine les dimanches du rapport
+			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
+				mapByDay = [:]
+			}
+			//print calendarLoop.time
+			criteria = DailyTotal.createCriteria()
+			def dailyTotal = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+					eq('month',month)
+					eq('year',year)
+				}
+			}
+			// permet de rŽcupŽrer le total hebdo
+			if (dailyTotal != null && dailyTotal != dailyTotalId){
+				dailySeconds = getDailyTotal(dailyTotal)
+				monthlyTotalTime += dailySeconds
+				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
+				if (previousValue!=null){
+					def newValue=previousValue.get(0)*3600+previousValue.get(1)*60+previousValue.get(2)
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), computeHumanTime(dailySeconds+newValue))
+				}else{
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), computeHumanTime(dailySeconds))
+				}
+				
+				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
+					weeklySupTime = 0
+				}else{
+					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+				}
+				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
+				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
+					monthlySupTime += weeklySupTime
+					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
+				}
+				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
+				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
+				dailyTotalId=dailyTotal.id
+			}
+			// daily total is null. Still, we need to check if supplementary time exists within the week
+			if (dailyTotal==null && calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+				if (calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
+					weeklySupTime = 0
+				}else{
+					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+				}
+					weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
+				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
+					monthlySupTime += weeklySupTime
+					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
+				}
+				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
+			
+			}
+						
+			criteria = InAndOut.createCriteria()
+			def entriesByDay = criteria{
+				and {
+					eq('employee',employee)
+					eq('day',calendarLoop.getAt(Calendar.DATE))
+					eq('month',month)
+					eq('year',year)
+					order('time')
+					}
+			}
+			// put in a map in and outs
+			def tmpDate = calendarLoop.time
+			if 	(entriesByDay.size()>0){
+				if (dailyTotal!=null){
+					dailyTotalMap.put(tmpDate, computeHumanTime(dailySeconds))
+					dailySupTotalMap.put(tmpDate, computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)))
+				}else {
+					dailyTotalMap.put(tmpDate, computeHumanTime(0))
+					dailySupTotalMap.put(tmpDate, computeHumanTime(0))
+				}
+				mapByDay.put(tmpDate, entriesByDay)
+			}
+			else{
+				dailyTotalMap.put(tmpDate, computeHumanTime(0))
+				mapByDay.put(tmpDate, null)
+			}
+			
+			// find out if day is a bank holiday:
+			criteria = BankHoliday.createCriteria()
+			def bankHoliday = criteria.get{
+				and {
+					eq('year',calendarLoop.get(Calendar.YEAR))
+					eq('month',calendarLoop.get(Calendar.MONTH)+1)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			if (bankHoliday!=null){
+				dailyBankHolidayMap.put(tmpDate, true)
+			}else{
+				dailyBankHolidayMap.put(tmpDate, false)
+			
+			}
+			
+			def absenceCriteria = Absence.createCriteria()
+			def dailyAbsence = absenceCriteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',calendarLoop.get(Calendar.YEAR))
+					eq('month',calendarLoop.get(Calendar.MONTH)+1)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			holidayMap.put(tmpDate, dailyAbsence)
+			weeklyAggregate.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), mapByDay)
+			if (calendarLoop.get(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				break
+			}
+			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
+		}
+
+		//update monthlyTotal
+		
+		criteria = MonthlyTotal.createCriteria()
+		def monthlyTotalInstance = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+			}
+		}
+		if (monthlyTotalInstance!=null){
+			monthlyTotalInstance.elapsedSeconds=monthlyTotalTime
+		}
+		def cartoucheTable = getCartoucheData(employee,year,month)
+		def openedDays = computeMonthlyHours(year,month)
+		def workingDays=cartoucheTable.get(3)
+		def holiday=cartoucheTable.get(4)
+		def rtt=cartoucheTable.get(5)
+		def sickness=cartoucheTable.get(6)
+		def sansSolde=cartoucheTable.get(7)
+		def monthTheoritical = cartoucheTable.get(8)
+		def pregnancyCredit = computeHumanTime(cartoucheTable.get(9))
+		def yearlyHoliday=cartoucheTable.get(11)
+		def yearlyRtt=cartoucheTable.get(12)
+		def yearlySickness=cartoucheTable.get(13)
+		def yearlyTheoritical = computeHumanTime(cartoucheTable.get(14))
+		def yearlyPregnancyCredit = computeHumanTime(cartoucheTable.get(15))
+		def yearlyActualTotal = computeHumanTime(cartoucheTable.get(16))
+		def yearlySansSolde=cartoucheTable.get(17)
+		def payableSupTime = computeHumanTime(Math.round(monthlySupTime))
+		def payableCompTime = computeHumanTime(0)
+		if (employee.weeklyContractTime!=35){
+			if (monthlyTotalTime > monthTheoritical){
+				payableCompTime = computeHumanTime(Math.round(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0)))
+			}
+		}
+		
+		monthlyTotalTimeByEmployee.put(employee, computeHumanTime(monthlyTotalTime))
+		def monthlyTotal=computeHumanTime(monthlyTotalTime)
+		monthTheoritical = computeHumanTime(cartoucheTable.get(8))
+		
+		def yearInf
+		def yearSup
+		if (month>5){
+			yearInf=year
+			yearSup=year+1
+		}else{
+			yearInf=year-1
+			yearSup=year
+		}
+
+		def bankList = BankHoliday.findByCalendar(calendar);
+		return [dailyBankHolidayMap:dailyBankHolidayMap,employeeId:employee.id,weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,firstName:employee.firstName,lastName:employee.lastName,monthlyTotalRecap:monthlyTotal,payableSupTime:payableSupTime,payableCompTime:payableCompTime,employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:employee.id,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlySansSolde:yearlySansSolde,yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+
+	}
+	
 }
