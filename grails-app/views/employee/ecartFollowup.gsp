@@ -109,7 +109,7 @@ $('label').click(function(){
 			<div class="message" id="flash">
 				${flash.message}
 			</div>
-		</g:if>
+		</g:if>  
 	</div>
 	
 

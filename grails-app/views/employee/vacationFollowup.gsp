@@ -120,6 +120,5 @@ $('label').click(function(){
 
 	<br>
 	<div id="vacationList"><g:listVacationEmployee/></div>
-
 </body>
 </html>

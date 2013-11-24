@@ -2,6 +2,11 @@ package pointeuse
 
 class EmployeeListTagLib {
 
+	def ecart ={attrs,body->
+		out<<render(template:"/common/ecartTemplate")
+		
+	}
+	
 	def listEmployee ={attrs,body->
 		out<<render(template:"/common/listEmployeeTemplate")
 		

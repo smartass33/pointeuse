@@ -283,6 +283,7 @@
 				<li class="controller"><g:link controller="function"><g:message code="function.list" default="Last Name" /></g:link></li>
 				<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20]"><g:message code="daily.followup" default="Last Name" /></g:link></li>	
 				<li class="controller"><g:link controller="employee" action='vacationFollowup' params="[isAdmin:false,max:20]"><g:message code="absence.followup" default="Last Name" /></g:link></li>	
+				<li class="controller"><g:link controller="employee" action='ecartFollowup' params="[isAdmin:false,max:20,fromIndex:true]"><g:message code="ecart.followup" default="Last Name" /></g:link></li>	
 
 				<li class="controller"><g:link controller="reason"><g:message code="regularization.reasons" default="Last Name" /></g:link></li>		
 				<li><BR></li>
