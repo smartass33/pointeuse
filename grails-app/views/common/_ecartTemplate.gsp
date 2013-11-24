@@ -9,10 +9,10 @@
 			<td/>
 			<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
 				<g:if test="${month_th>5}">
-					<td>${yearInf}</td>
+					<td>${period.year}</td>
 				</g:if>
 				<g:else>
-					<td>${yearSup}</td>		
+					<td>${period.year+1}</td>		
 				</g:else>
 			</g:each>
 		</tr>
