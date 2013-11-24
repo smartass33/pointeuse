@@ -94,7 +94,11 @@ $('label').click(function(){
 					value="${period}"
 					noSelection="${['':(period?period:'-')]}" optionKey="id" 
 					style="vertical-align: middle;" />
-				<g:actionSubmit class='listButton' value="${message(code: 'default.search.label', default: 'List')}"  action="ecartFollowup"/>		
+				<g:actionSubmit class='listButton' value="${message(code: 'default.search.label', default: 'List')}"  action="ecartFollowup"/>	
+				<g:actionSubmit class='listButton' value="ecartPDF"  action="ecartPDF"/>	
+				
+				
+					
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:if test="${site!=null}">	
 					<g:hiddenField name="site.id" value="${site.id}" />		

@@ -1668,8 +1668,73 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 
 	
 	def ecartPDF(){
+		def siteId=params["site.id"]
+		def myDate=params["myDate"]
+		def year = params["year"]
+		def folder = grailsApplication.config.pdf.directory
+		def calendar = Calendar.instance
+		def refCalendar = Calendar.instance
+		def currentMonth=6
+		def site
+		def period
+		def monthList=[]
+		
+		if (year!=null && !year.equals("")){
+			if (year instanceof String[]){
+				year=(year[0]!="")?year[0].toInteger():year[1].toInteger()
+			}else {
+				year=year.toInteger()
+			}
+			period = Period.get(year)
+		}else{
+			period = Period.findByYear(calendar.get(Calendar.YEAR))
+		}
+			 
+		refCalendar.set(Calendar.MONTH,5)
+		refCalendar.set(Calendar.YEAR,period.year)
+		
+		if (refCalendar.get(Calendar.YEAR)==calendar.get(Calendar.YEAR)){
+			while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
+				log.error('refCalendar: '+refCalendar.time)
+				monthList.add(refCalendar.get(Calendar.MONTH)+1)
+				refCalendar.roll(Calendar.MONTH, 1)
+			}
+		}else{
+			while(refCalendar.get(Calendar.MONTH) <= 11){
+				log.error('refCalendar: '+refCalendar.time)
+				monthList.add(refCalendar.get(Calendar.MONTH)+1)
+				if (refCalendar.get(Calendar.MONTH)==11){
+					break
+				}
+				refCalendar.roll(Calendar.MONTH, 1)
+			}
+			refCalendar.set(Calendar.MONTH,0)
+			refCalendar.set(Calendar.YEAR,calendar.get(Calendar.YEAR))
+			while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
+				log.error('refCalendar: '+refCalendar.time)
+				monthList.add(refCalendar.get(Calendar.MONTH)+1)
+				refCalendar.roll(Calendar.MONTH, 1)
+			}
+		
+		}
+				 
+		if (params["site.id"]!=null && !params["site.id"].equals("")){
+			def tmpSite = params["site.id"]
+			if (tmpSite instanceof String[]){
+				tmpSite=(tmpSite[0]!="")?tmpSite[0].toInteger():tmpSite[1].toInteger()
+			}else {
+				tmpSite=tmpSite.toInteger()
+			}
+			site = Site.get(tmpSite)
+			siteId=site.id
+		}
 		
 		
+		
+		def retour = PDFService.generateEcartSheet(site, folder, monthList, period)
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.outputStream << retour[0]
 	}
 	
 	def siteMonthlyPDF(){
@@ -2209,7 +2274,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			 employeeInstanceList=Employee.list(params)
 			 employeeInstanceTotal = employeeInstanceList.size()
 		 }	 
-		def ecartData = timeManagerService.getEcartData(employeeInstanceList, monthList, period)
+		def ecartData = timeManagerService.getEcartData(site, monthList, period)
 		def retour = [site:site,year:year,fromIndex:fromIndex,period:period,employeeInstanceTotal:employeeInstanceTotal,monthList:monthList,employeeInstanceList:employeeInstanceList]
 	 	retour << ecartData
 		return retour

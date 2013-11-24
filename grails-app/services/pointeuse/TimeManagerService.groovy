@@ -1151,7 +1151,7 @@ class TimeManagerService {
 
 	}
 	
-	def getEcartData(def employeeInstanceList, def monthList, Period period){
+	def getEcartData(Site site, def monthList, Period period){
 		def tmpYear
 		def criteria
 		def referenceRTT
@@ -1165,7 +1165,13 @@ class TimeManagerService {
 		def monthlyActualByEmployee = [:]
 		def ecartByEmployee = [:]
 		def rttByEmployee = [:]
+		def employeeInstanceList
 		
+		if (site){
+			employeeInstanceList = Employee.findAllBySite(site)
+		}else{
+			employeeInstanceList=Employee.findAll()
+		}	
 		
 		for (Employee employee:employeeInstanceList){
 			monthlyTheoriticalMap = [:]

@@ -47,7 +47,7 @@ class PDFService {
 	}
 	
 	
-	def generateEcartSheet(Date myDate,Site site,String folder){
+	def generateEcartSheet(Site site,String folder,def monthList,def period){
 		def bytesMap=[:]
 		def fileNameList=[]
 		def filename
@@ -60,11 +60,12 @@ class PDFService {
 		
 		def employeeList = Employee.findAllBySite(site)
 		for (Employee employee:employeeList){
-			log.error('method pdf siteMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
-			def modelReport=timeManagerService.getReportData((site.id).toString(),employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+			log.error('method pdf generateEcartSheet')
+			def modelEcart=timeManagerService.getEcartData(site, monthList, period)
+
 			// Get the bytes
-			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/ecartPDFTemplate', model: modelReport)
-			filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
+			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/ecartPDFTemplate', model: modelEcart)
+			filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name + '.pdf'
 			fileNameList.add(filename)
 			outputStream = new FileOutputStream (folder+'/'+filename);
 			bytes.writeTo(outputStream)
@@ -72,12 +73,6 @@ class PDFService {
 				bytes.close()
 			if(outputStream)
 				outputStream.close()
-		}
-		finalCopy = new PdfCopyFields(new FileOutputStream(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'));
-		finalCopy.open()
-		for (String tmpFile:fileNameList){
-			PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
-			finalCopy.addDocument(pdfReader)
 		}
 		finalCopy.close();
 		file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
