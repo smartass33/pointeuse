@@ -75,7 +75,7 @@ $('label').click(function(){
 			<br>
 			<br>
 			<g:form method="POST"
-				url="[controller:'employee', action:'pdf']">
+				url="[controller:'employee', action:'siteMonthlyPDF']">
 				<g:message code="laboratory.label" default="Search"
 					style="vertical-align: middle;" />
 				<g:if test="${siteId != null && !siteId.equals('')}">
@@ -101,7 +101,7 @@ $('label').click(function(){
 							name="myDate" value="${period ? period : new Date()}" 
 							precision="month" noSelection="['':'-Choose-']" style="vertical-align: middle;"/>
 
-						<g:actionSubmit class='listButton' value="pdf"  action="pdf"/>		
+						<g:actionSubmit class='listButton' value="pdf"  action="siteMonthlyPDF"/>		
 						<!--g:actionSubmit class='listButton' value="excel"  action="excel"/-->		
 						
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />

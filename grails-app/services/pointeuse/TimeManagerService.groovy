@@ -811,9 +811,6 @@ class TimeManagerService {
 		
 		yearlyCounter -= bankHolidayCounter
 		def yearlyPregnancyCredit=30*60*pregnancy.size()
-		
-		
-		
 		yearTheoritical=3600*(
 					yearlyCounter*employee.weeklyContractTime/Employee.WeekOpenedDays 
 					+ (Employee.Pentecote*monthNumber)*(employee.weeklyContractTime/Employee.legalWeekTime)
@@ -1152,6 +1149,131 @@ class TimeManagerService {
 		def bankList = BankHoliday.findByCalendar(calendar)
 		return [dailyBankHolidayMap:dailyBankHolidayMap,employeeId:employee.id,weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,firstName:employee.firstName,lastName:employee.lastName,monthlyTotalRecap:monthlyTotal,payableSupTime:payableSupTime,payableCompTime:payableCompTime,employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:employee.id,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlySansSolde:yearlySansSolde,yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 
+	}
+	
+	def getEcartData(def employeeInstanceList, def monthList, Period period){
+		def tmpYear
+		def criteria
+		def referenceRTT
+		def takenRTT
+		def data
+		def monthlyTheoriticalMap = [:]
+		def monthlyActualMap = [:]
+		def monthlyTakenRTTMap = [:]
+		def ecartMap = [:]
+		def monthlyTheoriticalByEmployee = [:]
+		def monthlyActualByEmployee = [:]
+		def ecartByEmployee = [:]
+		def rttByEmployee = [:]
+		
+		
+		for (Employee employee:employeeInstanceList){
+			monthlyTheoriticalMap = [:]
+			monthlyActualMap = [:]
+			monthlyTakenRTTMap = [:]
+			ecartMap = [:]
+			for (month in monthList){
+				tmpYear=(month<6)?period.year+1:period.year
+		   
+				criteria = MonthlyTotal.createCriteria()
+				def monthlyTotalInstance = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('year',tmpYear)
+						eq('month',month)
+					}
+				}
+				
+				criteria = Vacation.createCriteria()
+				referenceRTT = criteria.get{
+					and {
+						eq('employee',employee)
+						eq('period',period)
+						eq('type',VacationType.RTT)
+					}
+				}
+				
+				criteria = Absence.createCriteria()				
+				takenRTT = criteria.list{
+					and {
+						eq('employee',employee)
+						eq('year',tmpYear)
+						eq('month',month)
+						eq('type',VacationType.RTT)
+					}
+				}
+				data = getCartoucheData(employee,tmpYear,month)
+				if (month>6 || (month>1 && month<6)){
+					monthlyTheoriticalMap.put(month, data.get('monthTheoritical')+monthlyTheoriticalMap.get(month-1))
+					if (monthlyTotalInstance!=null){
+						monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds+monthlyActualMap.get(month-1))
+					}else{
+						monthlyActualMap.put(month, monthlyActualMap.get(month-1))
+					}
+					if (takenRTT!=null){
+						monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(month-1) - takenRTT.size())
+					}else{
+						monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(month-1))
+					}
+			   
+				}else{
+					if (month==6){
+						monthlyTheoriticalMap.put(month, data.get('monthTheoritical'))
+						if (monthlyTotalInstance!=null){
+							monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds)
+						}else{
+							monthlyActualMap.put(month, 0)
+						}
+						if (takenRTT!=null){
+							monthlyTakenRTTMap.put(month,referenceRTT.counter - takenRTT.size())
+						}else{
+							monthlyTakenRTTMap.put(month,referenceRTT.counter)
+						}
+					}else{
+						if (month==1){
+							monthlyTheoriticalMap.put(month, data.get('monthTheoritical')+monthlyTheoriticalMap.get(12))
+							if (monthlyTotalInstance!=null){
+								monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds+monthlyActualMap.get(12))
+							}else{
+								monthlyActualMap.put(month, monthlyActualMap.get(12))
+							}
+						}
+					if (takenRTT!=null){
+						monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(12) - takenRTT.size())
+					}else{
+						monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(12))
+					}
+					}
+				}
+				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))
+			}
+		
+			monthlyTheoriticalMap.each() {
+				def serviceData=computeHumanTime(it.value)
+				def hours=serviceData.get(0)
+				def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
+				it.value=hours+'H'+minutes
+				}
+			monthlyActualMap.each() {
+				def serviceData=computeHumanTime(it.value)
+				def hours=serviceData.get(0)
+				def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
+				it.value=hours+'H'+minutes
+		   }
+			ecartMap.each() {
+				def serviceData=computeHumanTime(it.value)
+				def hours=serviceData.get(0)
+				def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
+				it.value=hours+'H'+minutes
+		   }
+			 
+			monthlyTheoriticalByEmployee.put(employee,monthlyTheoriticalMap)
+			monthlyActualByEmployee.put(employee,monthlyActualMap)
+			ecartByEmployee.put(employee, ecartMap)
+			rttByEmployee.put(employee, monthlyTakenRTTMap)
+		}
+		return [monthlyTheoriticalByEmployee:monthlyTheoriticalByEmployee,monthlyActualByEmployee:monthlyActualByEmployee,ecartByEmployee:ecartByEmployee,rttByEmployee:rttByEmployee]
+	
 	}
 	
 }

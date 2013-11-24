@@ -23,7 +23,7 @@ import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.PdfCopyFields
 
 class EmployeeController {
-
+	def PDFService
 	def utilService
 	def mailService
 	def pdfRenderingService
@@ -1666,32 +1666,26 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		}
 	}	
 
-	def pdf(){
-		def bytesMap=[:]
-		def fileNameList=[]
+	
+	def ecartPDF(){
+		
+		
+	}
+	
+	def siteMonthlyPDF(){
+		def myDate = params["myDate"]
 		def userId
 		def site
 		def siteId
-		def filename
-		def yearInf
-		def yearSup
-		def modelReport
-		def modelCartouche
-		ByteArrayOutputStream bytes
-		def folder = grailsApplication.config.pdf.directory
 		Calendar calendar = Calendar.instance
-		OutputStream outputStream;
-		log.error('method pdf called with parameters:')
-		def myDate = params["myDate"]
+		def folder = grailsApplication.config.pdf.directory
+		
 		if (myDate==null || myDate.equals("")){
 			myDate=calendar.time
 		}else {
 			calendar.time=myDate
 		}
 	
-		if (params["userId"]!=null && !params["userId"].equals("")){
-			userId= params["userId"] as int
-		}
 
 		if (params["site.id"]!=null && !params["site.id"].equals('')){
 			siteId = params["site.id"].toInteger()
@@ -1703,69 +1697,10 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			return
 		}
 			
-		def employeeList = Employee.findAllBySite(site)
-		for (Employee employee:employeeList){			
-			log.error('method pdf called with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
-			
-			def cartoucheTable = timeManagerService.getCartoucheData(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-			def workingDays=cartoucheTable.get('workingDays')
-			def holiday=cartoucheTable.get('holidays')
-			def rtt=cartoucheTable.get('rtt')
-			def sickness=cartoucheTable.get('sickness')
-			def sansSolde=cartoucheTable.get('sansSolde')
-			def yearlyHoliday=cartoucheTable.get('yearlyHolidays')
-			def yearlyRtt=cartoucheTable.get('yearlyRtt')
-			def yearlySickness=cartoucheTable.get('yearlySickness')
-			def yearlySansSolde=cartoucheTable.get('yearlySansSolde')
-
-			def monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical'))
-			def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('pregnancyCredit'))
-			def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyTheoritical'))
-			def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyPregnancyCredit'))
-			def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyActualTotal'))
-			def openedDays = timeManagerService.computeMonthlyHours(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-	
-			if ((calendar.get(Calendar.MONTH)+1)>5){
-				yearInf=calendar.get(Calendar.YEAR)
-				yearSup=calendar.get(Calendar.YEAR)+1
-			}else{
-				yearInf=calendar.get(Calendar.YEAR)-1
-				yearSup=calendar.get(Calendar.YEAR)
-			}		
-			modelCartouche=[weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,firstName:employee.firstName,lastName:employee.lastName,yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde]
-			modelReport = timeManagerService.getReportData(null,employee,myDate,calendar.get(Calendar.MONTH)+1,calendar.get(Calendar.YEAR))
-			modelReport<<modelCartouche
-			// Get the bytes
-			bytes = pdfRenderingService.render(template: '/common/completeReportTemplate', model: modelReport)				
-
-			filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
-			fileNameList.add(filename)
-
-			outputStream = new FileOutputStream (folder+'/'+filename);
-			bytes.writeTo(outputStream);
-
-			if(bytes)
-			   bytes.close();
-	
-			if(outputStream)
-				outputStream.close();
-
-		}
-			PdfCopyFields finalCopy = new PdfCopyFields(new FileOutputStream(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'));
-			finalCopy.open();
-			for (String tmpFile:fileNameList){
-				PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
-				finalCopy.addDocument(pdfReader);
-				
-			}
-			finalCopy.close();		
-			
-			File file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
-			
-			response.setContentType("application/octet-stream")
-			response.setHeader("Content-disposition", "filename=${file.name}")
-			response.outputStream << file.bytes
-			return	
+		def retour = PDFService.generateSiteMonthlyTimeSheet(myDate,site,folder)
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.outputStream << retour[0]
 	}
 	
 	
@@ -2132,9 +2067,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			 
 		 for (int lastYearMonth = 6 ;lastYearMonth <13 ; lastYearMonth++){
 			 yearMap.put(lastYearMonth, year)
-			 cartoucheTable=cartouche(userId,year,lastYearMonth)
- 
-					 
+			 cartoucheTable=cartouche(userId,year,lastYearMonth)				 
 			 yearMonthMap.put(lastYearMonth, cartoucheTable)
 			 monthlyTotalTime = 0
 			 monthlySupTotalTime = 0
@@ -2143,8 +2076,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			 calendar.set(Calendar.DAY_OF_MONTH,1)
 			 firstWeekOfMonth = calendar.get(Calendar.WEEK_OF_YEAR)
 			 calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-			 lastWeekOfMonth = calendar.get(Calendar.WEEK_OF_YEAR)
-			 
+			 lastWeekOfMonth = calendar.get(Calendar.WEEK_OF_YEAR)			 
 			 criteria = DailyTotal.createCriteria()
 			 def dailyTotalList = criteria.list {
 				 and {
@@ -2175,8 +2107,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 					 yearMonthlyCompTime.put(lastYearMonth, timeManagerService.computeHumanTime(0))
 				 }
 			 }else{
-				 payableCompTime = 0
-			 
+			 	payableCompTime = 0 
 			 }
 			 
 			 annualTheoritical += cartoucheTable.get(8)
@@ -2184,12 +2115,10 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			 annualRTT += cartoucheTable.get(5)
 			 annualCSS += cartoucheTable.get(7)
 			 annualSickness += cartoucheTable.get(6)
-			 annualWorkingDays += cartoucheTable.get(3)
-			 
+			 annualWorkingDays += cartoucheTable.get(3)	 
 			 annualPayableSupTime += monthlySupTotalTime
 			 annualPayableCompTime += payableCompTime
-			 annualTotal += monthlyTotalTime
-			 
+			 annualTotal += monthlyTotalTime		 
 		 }		 
 
 		 def model=[annualTotalIncludingHS:timeManagerService.computeHumanTime(annualTotalIncludingHS),annualEmployeeWorkingDays:annualEmployeeWorkingDays,	annualTheoritical:timeManagerService.computeHumanTime(annualTheoritical),annualHoliday:annualHoliday,annualRTT:annualRTT,annualCSS:annualCSS,annualSickness:annualSickness,annualWorkingDays:annualWorkingDays,annualPayableSupTime:timeManagerService.computeHumanTime(annualPayableSupTime),annualPayableCompTime:timeManagerService.computeHumanTime(annualPayableCompTime),annualTotal:timeManagerService.computeHumanTime(annualTotal),
@@ -2202,8 +2131,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 	 def ecartFollowup(){
 		 def siteId=params["site.id"]
 		 def myDate=params["myDate"]
-		 def year = params["year"]
-		 
+		 def year = params["year"]		 
 		 def employeeInstanceList
 		 def employeeInstanceTotal
 		 def criteria
@@ -2211,63 +2139,20 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		 def refCalendar = Calendar.instance 
 		 def yearInf
 		 def yearSup
-		 def tmpYear
-		 def data
-		 def monthlyTheoriticalMap=[:]
-		 def monthlyActualMap=[:]
-		 def monthlyTakenRTTMap=[:]
-		 def ecartMap=[:]
 		 def monthlyTheoriticalByEmployee=[:]
 		 def monthlyActualByEmployee=[:]
 		 def ecartByEmployee=[:]
 		 def rttByEmployee=[:]
 		 def currentMonth=6
-		 def referenceRTT=0
 		 def takenRTT
 		 def site
 		 def period
-		 
-		 
-		 params.each{i->
-			 log.error('param: '+i)
-		 }
+		 def monthList=[]
 		 def fromIndex=params['fromIndex'].equals('true')?true:false
 		 
-		 /*
 		 if (year!=null && !year.equals("")){
 			 if (year instanceof String[]){
-				 if (year[0]!=""){
-					 year=year[0].toInteger()
-					 
-				 }else{
-					 year=year[1].toInteger()
-				 
-				 }
-			 }else {
-				 year=year.toInteger()
-			 }
-		 }
-
-		 if ((calendar.get(Calendar.MONTH)+1)>5){
-			 yearInf=calendar.get(Calendar.YEAR)
-			 yearSup=calendar.get(Calendar.YEAR)+1
-		 }else{
-			 yearInf=calendar.get(Calendar.YEAR)-1
-			 yearSup=calendar.get(Calendar.YEAR)
-		 }
-		  period = Period.findByYear(yearInf)
-		 */
-
-		 
-		 
-		 if (year!=null && !year.equals("")){
-			 if (year instanceof String[]){
-				 if (year[0]!=""){
-					 year=year[0].toInteger()
-				 }else{
-					 year=year[1].toInteger()
-				 
-				 }
+				 year=(year[0]!="")?year[0].toInteger():year[1].toInteger()
 			 }else {
 				 year=year.toInteger()
 			 }
@@ -2275,9 +2160,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		 }else{
 		 	period = Period.findByYear(calendar.get(Calendar.YEAR))
 		 }
-		 
-		 
-		 def monthList=[]
+		 	 
 		 refCalendar.set(Calendar.MONTH,5)
 		 refCalendar.set(Calendar.YEAR,period.year)
 		 
@@ -2310,162 +2193,25 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			 [site:site,year:year,fromIndex:fromIndex,period:period,employeeInstanceTotal:null,monthList:monthList,employeeInstanceList:null,yearInf:period.year,yearSup:period.year+1,calendar:calendar,monthlyTheoriticalByEmployee:null,monthlyActualByEmployee:null,ecartByEmployee:null,rttByEmployee:null]
 			 return
 		 }
-		 
-		 
-		 
-		 
+		 		 
 		 if (params["site.id"]!=null && !params["site.id"].equals("")){
 			 def tmpSite = params["site.id"]
 			 if (tmpSite instanceof String[]){
-				 if (tmpSite[0]!=""){
-					 tmpSite=tmpSite[0].toInteger()
-					 
-				 }else{
-					 tmpSite=tmpSite[1].toInteger()
-				 
-				 }
+				 tmpSite=(tmpSite[0]!="")?tmpSite[0].toInteger():tmpSite[1].toInteger()
 			 }else {
 				 tmpSite=tmpSite.toInteger()
 			 }
 			 site = Site.get(tmpSite)
-			 
-			 
 			 siteId=site.id
 			 employeeInstanceList = Employee.findAllBySite(site)
-			 employeeInstanceTotal = employeeInstanceList.size()
-			 
+			 employeeInstanceTotal = employeeInstanceList.size()	 
 		 }else{
 			 employeeInstanceList=Employee.list(params)
 			 employeeInstanceTotal = employeeInstanceList.size()
-		 }
-		 
-		 
-		 
-
-		 
-		 
-		 for (Employee employee:employeeInstanceList){
-			 monthlyTheoriticalMap=[:]
-			 monthlyActualMap=[:]
-			 monthlyTakenRTTMap=[:]
-			 ecartMap=[:]
-			 criteria = Vacation.createCriteria()
-			 
-			 referenceRTT = criteria.get {
-				 and {
-					 eq('employee',employee)
-					 eq('period',period)
-					 eq('type',VacationType.RTT)
-				 }
-			 }
-			 
-			
-		 	for (month in monthList){
-				 tmpYear=(month<6)?period.year+1:period.year
-			
-				 criteria = MonthlyTotal.createCriteria()
-				 def monthlyTotalInstance = criteria.get {
-					 and {
-						 eq('employee',employee)
-						 eq('year',tmpYear)
-						 eq('month',month)
-					 }
-				 }
-				 
-				 //monthlyTakenRTTMap
-				 criteria = Absence.createCriteria()
-				 
-				 takenRTT = criteria.list{
-					 and {
-						 eq('employee',employee)
-						 eq('year',tmpYear)
-						 eq('month',month)
-						 eq('type',VacationType.RTT)
-					 }
-				 }
-				 //monthlyTakenRTTMap.put(month,takenRTT.size())
-				 
-				 data = timeManagerService.getCartoucheData(employee,tmpYear,month)
-				 if (month>6 || (month>1 && month<6)){
-					 monthlyTheoriticalMap.put(month, data.get('monthTheoritical')+monthlyTheoriticalMap.get(month-1))
-					 if (monthlyTotalInstance!=null){
-						 monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds+monthlyActualMap.get(month-1))
-					 }else{
-					 	monthlyActualMap.put(month, monthlyActualMap.get(month-1))				 
-					 }
-					 if (takenRTT!=null){
-						 monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(month-1) - takenRTT.size())
-					 }else{
-					 	monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(month-1))				 
-					 }
-					 
-				
-				 }else{
-				 	if (month==6){
-				 		monthlyTheoriticalMap.put(month, data.get('monthTheoritical'))
-						 if (monthlyTotalInstance!=null){
-							 monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds)
-						 }else{
-							 monthlyActualMap.put(month, 0)
-						 }
-						 if (takenRTT!=null){
-							 monthlyTakenRTTMap.put(month,referenceRTT.counter - takenRTT.size())
-						 }else{
-							 monthlyTakenRTTMap.put(month,referenceRTT.counter)
-						 }
-				 	}else{
-					 	if (month==1){
-							 monthlyTheoriticalMap.put(month, data.get('monthTheoritical')+monthlyTheoriticalMap.get(12))	
-							 if (monthlyTotalInstance!=null){
-								 monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds+monthlyActualMap.get(12))
-							 }else{
-							 	monthlyActualMap.put(month, monthlyActualMap.get(12))				 
-							 }
-						 }
-					 if (takenRTT!=null){
-						 monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(12) - takenRTT.size())
-					 }else{
-					 	monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(12))				 
-					 }
-				 	}			 
-				 }
-				 ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))
-			 }
-			 
-			 monthlyTheoriticalMap.each() { 
-				 def serviceData=timeManagerService.computeHumanTime(it.value) 
-				 def hours=serviceData.get(0)
-				 def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
-				 it.value=hours+'H'+minutes
-				 }
-			 monthlyActualMap.each() { 
-				 def serviceData=timeManagerService.computeHumanTime(it.value) 
-				 def hours=serviceData.get(0)
-				 def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
-				 it.value=hours+'H'+minutes
-			}
-			 ecartMap.each() { 
-				 def serviceData=timeManagerService.computeHumanTime(it.value) 
-				 def hours=serviceData.get(0)
-				 def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
-				 it.value=hours+'H'+minutes				 
-			}
-			 
-			 
-			 monthlyTheoriticalByEmployee.put(employee,monthlyTheoriticalMap)
-			 monthlyActualByEmployee.put(employee,monthlyActualMap)
-			 ecartByEmployee.put(employee, ecartMap)
-			 rttByEmployee.put(employee, monthlyTakenRTTMap)
-		 }
-
-		 /*
-		 if (site){
-			 render template: "/common/ecartTemplate", model:[employeeInstanceTotal:employeeInstanceTotal,monthList:monthList,employeeInstanceList:employeeInstanceList,yearInf:yearInf,yearSup:yearSup,calendar:calendar,monthlyTheoriticalByEmployee:monthlyTheoriticalByEmployee,monthlyActualByEmployee:monthlyActualByEmployee,ecartByEmployee:ecartByEmployee,rttByEmployee:rttByEmployee]
-			 return
-		 }
-		 */
-
-		 [site:site,year:year,fromIndex:fromIndex,period:period,employeeInstanceTotal:employeeInstanceTotal,monthList:monthList,employeeInstanceList:employeeInstanceList,yearInf:period.year,yearSup:period.year+1,calendar:calendar,monthlyTheoriticalByEmployee:monthlyTheoriticalByEmployee,monthlyActualByEmployee:monthlyActualByEmployee,ecartByEmployee:ecartByEmployee,rttByEmployee:rttByEmployee]
-	 
+		 }	 
+		def ecartData = timeManagerService.getEcartData(employeeInstanceList, monthList, period)
+		def retour = [site:site,year:year,fromIndex:fromIndex,period:period,employeeInstanceTotal:employeeInstanceTotal,monthList:monthList,employeeInstanceList:employeeInstanceList]
+	 	retour << ecartData
+		return retour
 	}
 }
