@@ -26,6 +26,24 @@ class UtilService {
 		
 	}
 	
+	def getWeeksfMonth(int month, int year){
+		def weekList = []
+		boolean isSunday=true
+		Calendar calendar = Calendar.instance
+		calendar.set(Calendar.MONTH,month-1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		
+		def lastDay = calendar.get(Calendar.DAY_OF_WEEK)
+		def lastWeek=calendar.get(Calendar.WEEK_OF_YEAR)
+		if (lastDay!=Calendar.SUNDAY){
+			isSunday=false
+		}
+		return [calendar.get(Calendar.WEEK_OF_YEAR),isSunday,weekList]
+		
+	}
+	
+	
 	def getSundaysInYear(int year,int month){
 		def calendar = Calendar.instance
 		def endPeriodCalendar = Calendar.instance

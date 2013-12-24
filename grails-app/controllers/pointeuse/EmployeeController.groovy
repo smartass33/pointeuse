@@ -1,12 +1,15 @@
 package pointeuse
 
 import grails.plugins.springsecurity.Secured
+
 import org.apache.log4j.Logger
 import org.springframework.dao.DataIntegrityViolationException
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatter
+
 import pl.touk.excel.export.WebXlsxExporter
 import pl.touk.excel.export.XlsxExporter
+
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -21,6 +24,9 @@ import groovy.time.TimeDuration
 
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.PdfCopyFields
+
+import grails.converters.JSON
+
 
 class EmployeeController {
 	def PDFService
@@ -786,7 +792,7 @@ class EmployeeController {
 	
 			if (absence != null){
 				if (updatedSelection.equals(AbsenceType.ANNULATION.key)){
-					// annulation nŽcessaire: il faut effacer le tupple
+					// annulation nï¿½cessaire: il faut effacer le tupple
 					absence.delete(flush: true)
 				}else{
 					absence.type=updatedSelection
@@ -867,7 +873,7 @@ class EmployeeController {
 			
 		
 		log.error('trying to add event to employee '+employeeInstance.firstName+' '+employeeInstance.lastName+' with type: '+type)
-		// liste les entrees de la journŽe et vŽrifie que cette valeur n'est pas supŽrieure ˆ une valeur statique
+		// liste les entrees de la journï¿½e et vï¿½rifie que cette valeur n'est pas supï¿½rieure ï¿½ une valeur statique
 		def inAndOutcriteria = InAndOut.createCriteria()
 		def todayEmployeeEntries = inAndOutcriteria.list {
 			and {
@@ -1184,6 +1190,11 @@ class EmployeeController {
 		}
 		
 		for (int lastYearMonth = 6 ;lastYearMonth <13 ; lastYearMonth++){
+			log.error('thisYearMonth: '+lastYearMonth)
+			if (lastYearMonth==11){
+				log.error('TO BE STOPPED')
+			}
+			
 			yearMap.put(lastYearMonth, year)
 			cartoucheTable=timeManagerService.getCartoucheData(employee,year,lastYearMonth)		
 			yearMonthMap.put(lastYearMonth, cartoucheTable)
@@ -1212,10 +1223,13 @@ class EmployeeController {
 			}			
 			yearTotalMap.put(lastYearMonth, timeManagerService.computeHumanTime(monthlyTotalTime))						
 			// iterate over weeks of the given month to get supplementary time
+			/*
 			for (int currentWeek = firstWeekOfMonth; currentWeek <= lastWeekOfMonth; currentWeek++){
 				monthlySupTotalTime += timeManagerService.computeSupplementaryTime(employee,currentWeek, year)
 			}
-
+*/
+			
+			monthlySupTotalTime = timeManagerService.getMonthlySupTime(employee,lastYearMonth, year)
 			yearMonthlySupTime.put(lastYearMonth,timeManagerService.computeHumanTime(Math.round(monthlySupTotalTime)))			
 			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
 			if (employee.weeklyContractTime!=35){
@@ -1243,6 +1257,7 @@ class EmployeeController {
 		}
 		
 		for (int thisYearMonth = 1 ;thisYearMonth <6 ; thisYearMonth++){
+			log.error('thisYearMonth: '+thisYearMonth)
 			yearMap.put(thisYearMonth, year+1)		
 			cartoucheTable=timeManagerService.getCartoucheData(employee,year+1,thisYearMonth)	
 			yearMonthMap.put(thisYearMonth, cartoucheTable)
@@ -1254,6 +1269,9 @@ class EmployeeController {
 			calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
 			lastWeekOfMonth = calendar.get(Calendar.WEEK_OF_YEAR)
 			criteria = DailyTotal.createCriteria()
+			if (thisYearMonth==11){
+				log.error('month is 11')
+			}
 			def dailyTotalList = criteria.list {
 				and {
 					eq('employee',employee)
@@ -1269,9 +1287,13 @@ class EmployeeController {
 			}
 			yearTotalMap.put(thisYearMonth, timeManagerService.computeHumanTime(monthlyTotalTime))
 			// iterate over weeks of the given month to get supplementary time
+			/*
 			for (int currentWeek = firstWeekOfMonth; currentWeek <= lastWeekOfMonth; currentWeek++){
 				monthlySupTotalTime += timeManagerService.computeSupplementaryTime(employee,currentWeek, year+1)
 			}
+			*/
+			monthlySupTotalTime = timeManagerService.getMonthlySupTime(employee,thisYearMonth, year+1)
+			
 			yearMonthlySupTime.put(thisYearMonth,timeManagerService.computeHumanTime(monthlySupTotalTime))
 			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
 			if (employee.weeklyContractTime!=35){
@@ -1378,7 +1400,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 			def currentDay=calendarLoop.time
-			// Žlimine les dimanches du rapport
+			// ï¿½limine les dimanches du rapport
 			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
 				mapByDay = [:]					
 			}
@@ -1392,7 +1414,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 					eq('year',year)
 				}
 			}
-			// permet de rŽcupŽrer le total hebdo
+			// permet de rï¿½cupï¿½rer le total hebdo
 			if (dailyTotal != null && dailyTotal != dailyTotalId){
 				dailySeconds = timeManagerService.getDailyTotal(dailyTotal)
 				monthlyTotalTime += dailySeconds
@@ -1553,7 +1575,101 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			return timeManagerService.getReportData(siteId, employee,  myDate, monthPeriod, yearPeriod)
 	}
 
+	def getUser(){
+		def username = params["userName"]
+		def cal = Calendar.instance
+		Employee employeeInstance = Employee.findByUserName(username)
+		def currentDate = cal.time
+		def criteria
+		def inOrOut
+		def entranceStatus=false
+		def timeDiff
+		def flashMessage=true
+		def status="E"
+		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).time
+			
 		
+		// liste les entrees de la journï¿½e et vï¿½rifie que cette valeur n'est pas supï¿½rieure ï¿½ une valeur statique
+		def inAndOutcriteria = InAndOut.createCriteria()
+		def todayEmployeeEntries = inAndOutcriteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('type','E')
+				gt('time',today)
+			}
+		}
+		if (todayEmployeeEntries.size() > Employee.entryPerDay){
+			flash.message = "TROP D'ENTREES DANS LA JOURNEE. POINTAGE NON PRIS EN COMPTE"
+			log.error("employee: "+employeeInstance.lastName+" proceeded to too many entries")
+			redirect(action: "show", id: employeeInstance.id)
+			return
+		}
+
+		criteria = InAndOut.createCriteria()
+		def lastIn = criteria.get {
+			and {
+				eq('employee',employeeInstance)
+				eq('pointed',false)
+				eq('day',today.getAt(Calendar.DATE))
+				eq('month',today.getAt(Calendar.MONTH)+1)
+				eq('year',today.getAt(Calendar.YEAR))
+				order('time','desc')
+			}
+			maxResults(1)
+		}
+		
+		if (lastIn != null){
+			def LIT = lastIn.time
+			status = lastIn.type.equals("S") ? "E" : "S"
+			
+			use (TimeCategory){timeDiff=currentDate-LIT}
+			//empecher de represser le bouton pendant 30 seconds
+			if ((timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)<30){
+				flash.message = message(code: 'employee.overlogging.error')
+				flashMessage=false
+			}
+		}
+		
+		// initialisation
+		if (flashMessage){
+			inOrOut = timeManagerService.initializeTotals(employeeInstance,currentDate,status,null,false)
+			log.error('entry created with params: '+inOrOut)
+		}
+		criteria = InAndOut.createCriteria()
+		def inAndOuts = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('day',today.getAt(Calendar.DATE))
+				eq('month',today.getAt(Calendar.MONTH)+1)
+				eq('year',today.getAt(Calendar.YEAR))
+				order('time','asc')
+			}
+		}
+		
+		if (lastIn!=null){
+			if (flashMessage){
+				entranceStatus = lastIn.type.equals("S") ? true : false
+			}else{
+				entranceStatus = lastIn.type.equals("S") ? false : true
+			}
+		}else{
+			entranceStatus=true
+		}
+		
+		def humanTime = timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(inAndOuts))
+		def dailySupp = timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(inAndOuts)-DailyTotal.maxWorkingTime,0))
+
+		employeeInstance.status = entranceStatus
+		def result = new JSONEmployee()
+		result.firstName=employeeInstance.firstName
+		result.lastName=employeeInstance.lastName
+		result.status=employeeInstance.status
+		
+	//	render "{employee:{firstName:"+employeeInstance.firstName+",lastName:"+employeeInstance+",status:"+entranceStatus	+"}"	
+		render result as JSON
+		}
+	
+	
 	def pointage(Long id){		
 		def headerNames = request.getHeaderNames()
 		def requestTT = request
@@ -2009,10 +2125,10 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		 log.error "Job run!"
 		 
 		 def inOrOut
-		 //trouver toutes les entrŽes du jour courant
-		 //trouver, pour chaque employŽ le plus rŽcent
-		 //Si ce dernier est une EntrŽe, rajouter une sortie
-		 // ajouter dans un nouveau champs de InAndOut que cette 'sortie' est gŽnŽrŽe automatiquement pour la resortir en erreur dans les rapprts.
+		 //trouver toutes les entrï¿½es du jour courant
+		 //trouver, pour chaque employï¿½ le plus rï¿½cent
+		 //Si ce dernier est une Entrï¿½e, rajouter une sortie
+		 // ajouter dans un nouveau champs de InAndOut que cette 'sortie' est gï¿½nï¿½rï¿½e automatiquement pour la resortir en erreur dans les rapprts.
  
 		 def employeeList = Employee.get(53)//Employee.findAll()
 		 def calendar = Calendar.instance
@@ -2279,4 +2395,65 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 	 	retour << ecartData
 		return retour
 	}
+	 
+	 def getWeeksfMonth(int month, int year){
+		 def weekList = []
+		 boolean isSunday=true
+		 int daysToWithdraw
+		 def supTime = 0
+		 Calendar calendar = Calendar.instance
+		 calendar.set(Calendar.MONTH,month-1)
+		 calendar.set(Calendar.YEAR,year)
+		 Employee employee = Employee.get(16)
+		 
+		 Calendar firstDayOfMonth = calendar.clone()
+		 Calendar lastDayOfMonth = calendar.clone()
+		 lastDayOfMonth.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		// log.error('lastDayOfMonth: '+lastDayOfMonth.time)
+		 
+		  
+		 firstDayOfMonth.set(Calendar.DAY_OF_MONTH,1)
+		// log.error('firstDayOfMonth: '+firstDayOfMonth.time)
+		 
+		 if (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY){
+			 int currentDayInWeek = firstDayOfMonth.get(Calendar.DAY_OF_WEEK)
+			 int currentDayInYear = firstDayOfMonth.get(Calendar.DAY_OF_YEAR)
+			 if (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
+				 daysToWithdraw = 6
+			 }else{
+			 	daysToWithdraw = currentDayInWeek - Calendar.MONDAY 
+			 }
+			 firstDayOfMonth.set(Calendar.DAY_OF_YEAR, currentDayInYear - daysToWithdraw)
+		//	 log.error('firstDayOfMonth is now: '+firstDayOfMonth.time)
+		 }
+		 
+		 Calendar calendarLoop = firstDayOfMonth.clone()
+		// log.error('calendarLoop.get(Calendar.DAY_OF_YEAR): '+calendarLoop.get(Calendar.DAY_OF_YEAR))
+		 
+		// log.error('lastDayOfMonth.get(Calendar.DAY_OF_YEAR)'+lastDayOfMonth.get(Calendar.DAY_OF_YEAR))
+		 // now that we have the first day of the period, iterate over each week of the period to retrieve supplementary time
+		 
+		// log.error('calendarLoop before special loop '+calendarLoop.time)
+		 
+		 // special case if hover 2 years
+		 if (calendarLoop.get(Calendar.DAY_OF_YEAR)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){	 
+			 supTime += timeManagerService.computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			 calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
+			 calendarLoop.set(Calendar.YEAR,year)
+			// log.error('calendarLoop after special loop '+calendarLoop.time)		 
+		 }
+		 
+		 while(calendarLoop.get(Calendar.DAY_OF_YEAR)<=lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
+			// log.error('calendarLoop: '+calendarLoop.time)
+			// log.error('(calendarLoop.get(Calendar.DAY_OF_YEAR)+7): '+(calendarLoop.get(Calendar.DAY_OF_YEAR)+7))
+			// log.error('lastDayOfMonth.get(Calendar.DAY_OF_YEAR): '+lastDayOfMonth.get(Calendar.DAY_OF_YEAR))
+			 if ((calendarLoop.get(Calendar.DAY_OF_YEAR)+7)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
+				 break
+			 }
+			 supTime += timeManagerService.computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			 calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
+		 }
+		 return supTime 
+	 }
+	 
 }

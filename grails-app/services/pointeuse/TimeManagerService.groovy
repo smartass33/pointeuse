@@ -1078,8 +1078,7 @@ class TimeManagerService {
 			if (bankHoliday!=null){
 				dailyBankHolidayMap.put(tmpDate, true)
 			}else{
-				dailyBankHolidayMap.put(tmpDate, false)
-			
+				dailyBankHolidayMap.put(tmpDate, false)	
 			}
 			
 			def absenceCriteria = Absence.createCriteria()
@@ -1281,5 +1280,57 @@ class TimeManagerService {
 		return [monthlyTheoriticalByEmployee:monthlyTheoriticalByEmployee,monthlyActualByEmployee:monthlyActualByEmployee,ecartByEmployee:ecartByEmployee,rttByEmployee:rttByEmployee]
 	
 	}
-	
+		
+	def getMonthlySupTime(Employee employee,int month, int year){
+		int daysToWithdraw
+		def supTime = 0
+		Calendar calendar = Calendar.instance
+		calendar.set(Calendar.MONTH,month-1)
+		calendar.set(Calendar.YEAR,year)		
+		Calendar firstDayOfMonth = calendar.clone()
+		Calendar lastDayOfMonth = calendar.clone()
+		lastDayOfMonth.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		firstDayOfMonth.set(Calendar.DAY_OF_MONTH,1)
+		// log.error('lastDayOfMonth: '+lastDayOfMonth.time)
+	   // log.error('firstDayOfMonth: '+firstDayOfMonth.time)
+		
+		if (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY){
+			int currentDayInWeek = firstDayOfMonth.get(Calendar.DAY_OF_WEEK)
+			int currentDayInYear = firstDayOfMonth.get(Calendar.DAY_OF_YEAR)
+			if (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
+				daysToWithdraw = 6
+			}else{
+				daysToWithdraw = currentDayInWeek - Calendar.MONDAY
+			}
+			firstDayOfMonth.set(Calendar.DAY_OF_YEAR, currentDayInYear - daysToWithdraw)
+	   //	 log.error('firstDayOfMonth is now: '+firstDayOfMonth.time)
+		}
+		
+		Calendar calendarLoop = firstDayOfMonth.clone()
+	   // log.error('calendarLoop.get(Calendar.DAY_OF_YEAR): '+calendarLoop.get(Calendar.DAY_OF_YEAR))
+		
+	   // log.error('lastDayOfMonth.get(Calendar.DAY_OF_YEAR)'+lastDayOfMonth.get(Calendar.DAY_OF_YEAR))
+		// now that we have the first day of the period, iterate over each week of the period to retrieve supplementary time
+		
+	    log.error('calendarLoop before special loop '+calendarLoop.time)
+		
+		// special case if hover 2 years
+		if (calendarLoop.get(Calendar.DAY_OF_YEAR)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
+			supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
+			calendarLoop.set(Calendar.YEAR,year)
+		    log.error('calendarLoop after special loop '+calendarLoop.time)
+		}
+		
+		while(calendarLoop.get(Calendar.DAY_OF_YEAR)<=lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
+			log.error('calendarLoop : '+calendarLoop.time)
+			
+			if ((calendarLoop.get(Calendar.DAY_OF_YEAR)+7)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
+				break
+			}
+			supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
+		}
+		return supTime
+	}
 }
