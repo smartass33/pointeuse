@@ -3,32 +3,11 @@
 <%@ page import="pointeuse.InAndOut"%>
 
 <h1>
-	<g:message code="yearly.recap.label"/> ${lastYear} / ${thisYear}
+	<g:message code="yearly.recap.label"/> ${lastYear} / ${thisYear} pour <g:if test="${employee != null }">${employee.firstName} ${employee.lastName}</g:if>
 	<g:set var="calendar" value="${Calendar.instance}"/>
 	
 </h1>
 
-<table cellspacing="1px">
-	<tbody>
-		<tr>
-			<td>Nombre de jours ouvrés:</td>
-			<td>${annualWorkingDays}</td>
-		</tr>
-		<tr>
-			
-			<td><g:if test="${employee != null }">${employee.firstName} ${employee.lastName}</g:if></td>
-		</tr>
-		<tr>
-			<td>Horaire Hebdomadaire:</td>
-			<td><g:if test="${employee != null }">${employee.weeklyContractTime}</g:if></td>
-		</tr>
-		<tr>
-			<td>Matricule:</td>
-			<td><g:if test="${employee != null }">${employee.matricule}</g:if></td>
-		</tr>
-	</tbody>
-
-</table>
 
 <h1>SUIVI MENSUEL</h1>
 <table id="annual-report-table">
@@ -139,19 +118,24 @@
            			0H0
            		</g:else>
            	</td>
+			<td></td>
+
 		</tr>
 	</tbody>
 </table>
 
 <h1>SYNTHESE ANNUELLE</h1>
-<table>
-	<tr>
-		<td>Jours Travaillés</td>
-		<td>${annualEmployeeWorkingDays}</td>
-	</tr>
-	<tr>
-		<td>Quota Annuel de base</td>
-		<td>
+
+
+<table id='jours' style="width:800px;text-align:center">
+		<th style="width:200px;">Nombre de jours ouvrés</th>
+		<th>Jours Travaillés</th>
+		<th>Quota Annuel de base</th>
+		<th>Solde Jours congés</th>
+	<tr id='values'>
+		<td style="text-align:center">${annualWorkingDays}</td>
+		<td style="text-align:center">${annualEmployeeWorkingDays}</td>
+		<td style="text-align:center">
 			<g:if
           		test="${annualTheoritical !=null && (annualTheoritical.get(0)>0 ||annualTheoritical.get(1)>0)}">
                		${annualTheoritical.get(0)}H${annualTheoritical.get(1)==0?'':annualTheoritical.get(1)} 
@@ -160,10 +144,16 @@
            			0H0
            	</g:else>
         </td>
+        <td style="text-align:center">${remainingCA}</td>
 	</tr>
+</table>
+<table id='heures_sup'>
+	<th>Total Heures Sup/An</th>
+		<th>Total Heures Comp/An</th>
+		<th>Quota Annuel avec H Sup et HC</th>
+		<th></th>
 	<tr>
-		<td>Total Heures Sup/An</td>
-		<td>				
+		<td style="text-align:center">				
 			<g:if
                		test="${annualPayableSupTime !=null && (annualPayableSupTime.get(0)>0 ||annualPayableSupTime.get(1)>0)}">
                		${annualPayableSupTime.get(0)}H${annualPayableSupTime.get(1)==0?'':annualPayableSupTime.get(1)} 
@@ -172,10 +162,7 @@
            			0H0
            </g:else>
         </td>
-	</tr>
-	<tr>
-		<td>Total Heures Comp/An</td>
-		<td>
+		<td style="text-align:center">
 			<g:if
            		test="${annualPayableCompTime !=null && (annualPayableCompTime.get(0)>0 ||annualPayableCompTime.get(1)>0)}">
                		${annualPayableCompTime.get(0)}H${annualPayableCompTime.get(1)==0?'':annualPayableCompTime.get(1)} 
@@ -184,22 +171,9 @@
            			0H0
            	</g:else>
         </td>
-	</tr>
-	<tr>
-		<td>Quota Annuel avec H Sup et HC</td>
-		<td>0</td>
-	</tr>
-	<tr>
-		<td>Heures sup à payer</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>Heures comp à payer</td>
-		<td></td>
-	</tr>
-	<tr>
-		<td>Solde Jours congés</td>
-		<td></td>
+
+		<td style="text-align:center">0</td>
+<td></td>
 	</tr>
 </table>
 

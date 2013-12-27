@@ -46,42 +46,23 @@ function showSpinner() {
 						${message(code: 'default.button.logout', default: 'Logout')}
 					</g:link></li>
 			</g:if>
-		</ul>	</div>
+			<li>
+				<g:form method="POST"
+					url="[controller:'employee', action:'annualTotalPDF']">
+	
+					<g:actionSubmit class="listButton" value="export PDF" action="annualTotalPDF"/>
+					<g:hiddenField name="isAdmin" value="${isAdmin}" />
+					<g:hiddenField name="siteId" value="${siteId}" />
+					<g:hiddenField name="userId" value="${userId}" />
+					<g:hiddenField name="isAjax" value="true" />			
+				</g:form>
+			</li>
+		</ul>	
+	</div>
 	<div id="spinner" class="spinner" style="display: none;">
     <span><g:message code="spinner.loading.label"/></span><img id="img-spinner" src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading"/>
 </div>
 	<div id="list-employee" class="content scaffold-list">
-		<h1>
-			
-			<g:if test="${site!=null}">:${site.name}</g:if>
-			<br>
-			<g:form method="POST"
-				url="[controller:'employee', action:'pdf']">
-				<g:message code="default.period.label" default="Search"
-					style="vertical-align: middle;" />
-				<g:datePicker name="myDate" value="${new Date()}" precision="month"
-              		noSelection="['':'-Choose-']" relativeYears="[-2..7]"/>
-
-				
-				<g:submitToRemote  class="listButton"
-					value="rapport"
-					update="monthlyTable" 
-					url="[controller:'employee', action:'annualReport']"
-
-					                              onLoading="showSpinner()" 
-                                onComplete="hideSpinner()" 
-					/>
-				<g:actionSubmit class="listButton" value="export PDF" action="annualTotalPDF"/>
-				<g:hiddenField name="isAdmin" value="${isAdmin}" />
-				<g:hiddenField name="siteId" value="${siteId}" />
-				<g:hiddenField name="userId" value="${userId}" />
-				<g:hiddenField name="isAjax" value="true" />
-				
-				
-			</g:form>
-
-			
-		</h1>
 		<g:if test="${flash.message}">
 			<div class="message" id="flash">
 				${flash.message}

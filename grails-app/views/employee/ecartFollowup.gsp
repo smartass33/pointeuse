@@ -95,7 +95,7 @@ $('label').click(function(){
 					noSelection="${['':(period?period:'-')]}" optionKey="id" 
 					style="vertical-align: middle;" />
 				<g:actionSubmit class='listButton' value="${message(code: 'default.search.label', default: 'List')}"  action="ecartFollowup"/>	
-				<g:actionSubmit class='listButton' value="ecartPDF"  action="ecartPDF"/>	
+				<g:actionSubmit class='listButton' value="générer PDF"  action="ecartPDF"/>	
 				
 				
 					

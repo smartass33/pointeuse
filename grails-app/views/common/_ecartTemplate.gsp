@@ -2,6 +2,7 @@
 <%@ page import="pointeuse.Employee"%>
 <%@ page import="pointeuse.InAndOut"%>
 
+<g:set var="calendar" value="${Calendar.instance}"/>
 
 <table id="employee-table" border="1">
 	<tbody id='body_update' style="border:1px;">
@@ -9,27 +10,22 @@
 			<td/>
 			<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
 				<g:if test="${month_th>5}">
-					<td>${yearInf}</td>
+					<td>${period.year}</td>
 				</g:if>
 				<g:else>
-					<td>${yearSup}</td>		
+					<td>${period.year + 1}</td>		
 				</g:else>
 			</g:each>
 		</tr>
 		<tr>
 			<td/>
-			<td>Juin</td>
-			<td>Juil</td>
-			<td>Aout</td>			
-			<td>Sept</td>
-			<td>Oct</td>
-			<td>Nov</td>	
-			<td>Déc</td>
-			<td>Jan</td>
-			<td>Fév</td>	
-			<td>Mar</td>
-			<td>Avrl</td>
-			<td>Mai</td>
+			
+			<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th_2'>
+			
+				<%= calendar.set(Calendar.MONTH,month_th_2-1) %>
+				<td style="vertical-align: middle;">${calendar.time.format('MMMM') }</td>
+			</g:each>
+
 		</tr>										
 		<g:each in="${employeeInstanceList}" status="i" var="employee">
 			<th colspan='14'>${employee.firstName} ${employee.lastName}</th>

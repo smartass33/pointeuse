@@ -1,7 +1,5 @@
 package pointeuse
 
-
-
 class EmployeeService {
 
 	public int getRemainingCA(Employee employee,Period period){

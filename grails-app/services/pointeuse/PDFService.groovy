@@ -47,36 +47,79 @@ class PDFService {
 	}
 	
 	
+	def generateUserMonthlyTimeSheet(Date myDate,Employee employee,String folder){
+		def bytesMap=[:]
+		def filename
+		def userId
+		def siteId
+		Calendar calendar = Calendar.instance
+		OutputStream outputStream
+		File file
+		
+		log.error('method pdf generateUserMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
+		def modelReport=timeManagerService.getReportData(employee.site.id as String,employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/pdf/completeReportTemplate', model: modelReport)
+		filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName+'.pdf')
+		return [file.bytes,file.name]
+	}
+	
+	def generateUserAnnualTimeSheet(int year,int month,Employee employee,String folder){
+		def bytesMap=[:]
+		def filename
+		def userId
+		Calendar calendar = Calendar.instance
+		OutputStream outputStream
+		File file
+		
+		log.error('method pdf generateUserAnnualTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+year+', Month= '+month)
+		
+		def modelReport = timeManagerService.getAnnualReportData(year,month, employee)
+		
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/pdf/completeAnnualReportTemplate', model: modelReport)
+		filename = year.toString()+'-'+employee.lastName +'-annualReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
+	
 	def generateEcartSheet(Site site,String folder,def monthList,def period){
 		def bytesMap=[:]
 		def fileNameList=[]
 		def filename
 		def userId
 		def siteId
-		PdfCopyFields finalCopy
-		Calendar calendar = Calendar.instance
 		OutputStream outputStream
 		File file
 		
-		def employeeList = Employee.findAllBySite(site)
-		for (Employee employee:employeeList){
-			log.error('method pdf generateEcartSheet')
-			def modelEcart=timeManagerService.getEcartData(site, monthList, period)
-
-			// Get the bytes
-			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/ecartPDFTemplate', model: modelEcart)
-			filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name + '.pdf'
-			fileNameList.add(filename)
-			outputStream = new FileOutputStream (folder+'/'+filename);
-			bytes.writeTo(outputStream)
-			if(bytes)
-				bytes.close()
-			if(outputStream)
-				outputStream.close()
-		}
-		finalCopy.close();
-		file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+		def modelEcart=timeManagerService.getEcartData(site, monthList, period)
+		modelEcart << [site:site]
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/pdf/ecartPDFTemplate', model: modelEcart)
+		filename = period.year.toString()+'-'+site.name +'-ecartReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
 		return [file.bytes,file.name]
 	}
+	
+
 	
 }

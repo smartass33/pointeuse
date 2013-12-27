@@ -5,7 +5,6 @@
 <%@ page import="pointeuse.Absence"%>
 
 <table>
-
 	<thead>
 		<tr>			
 			<g:sortableColumn property="last_name" title="${message(code: 'employee.lastName.label', default: 'Type')}" />						
