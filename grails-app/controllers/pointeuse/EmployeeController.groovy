@@ -1884,7 +1884,29 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		response.outputStream << retour[0]
 	}
 	
+	def userPDF(){
+		def myDate = params["myDate"]
+		def userId = params["userId"]
+		Employee employee = Employee.get(userId as int)
+		Calendar calendar = Calendar.instance
+		def folder = grailsApplication.config.pdf.directory
+		
+		if (myDate==null || myDate.equals("")){
+			myDate=calendar.time
+		}else {
+			calendar.time=myDate
+		}
 	
+
+
+			
+		def retour = PDFService.generateUserMonthlyTimeSheet(myDate,employee,folder)
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.outputStream << retour[0]
+	}
+	
+	/*
 	def userPDF(){
 		log.error('method pdf called with parameters:')
 		def myDate = params["myDate"]
@@ -1953,7 +1975,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		}
 	}
 	
-	
+	*/
 	def annualTotalPDF(){
 		
 	}
@@ -2350,6 +2372,9 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 				 log.error('refCalendar: '+refCalendar.time)
 				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
 				 refCalendar.roll(Calendar.MONTH, 1)
+				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+					 break
+				 }
 			 }
 	 	}else{
 			 while(refCalendar.get(Calendar.MONTH) <= 11){
@@ -2366,6 +2391,9 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 				 log.error('refCalendar: '+refCalendar.time)
 				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
 				 refCalendar.roll(Calendar.MONTH, 1)
+				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+					 break
+				 }
 			 }
 		 
 	 	} 
