@@ -2,6 +2,7 @@
  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
  <html>
 <head>
+
 	<%@ page import="pointeuse.Site"%>
 	<%@ page import="pointeuse.Employee"%>
 	<%@ page import="pointeuse.InAndOut"%>
