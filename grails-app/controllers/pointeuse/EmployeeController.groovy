@@ -745,7 +745,7 @@ class EmployeeController {
 			
 		}
 		
-		def previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'date',order:'desc'])
+		def previousContracts = Contract.findByEmployee(employeeInstance,[sort:'date',order:'desc'])
 		
 		def siteId=params["siteId"]
         if (!employeeInstance) {

@@ -1278,7 +1278,7 @@ class TimeManagerService {
 			ecartByEmployee.put(employee, ecartMap)
 			rttByEmployee.put(employee, monthlyTakenRTTMap)
 		}
-		return [monthList:monthList,period:period,employeeInstanceList:employeeInstanceList,monthlyTheoriticalByEmployee:monthlyTheoriticalByEmployee,monthlyActualByEmployee:monthlyActualByEmployee,ecartByEmployee:ecartByEmployee,rttByEmployee:rttByEmployee]
+		return [period:period,employeeInstanceList:employeeInstanceList,monthlyTheoriticalByEmployee:monthlyTheoriticalByEmployee,monthlyActualByEmployee:monthlyActualByEmployee,ecartByEmployee:ecartByEmployee,rttByEmployee:rttByEmployee]
 	
 	}
 		

@@ -108,7 +108,7 @@ class PDFService {
 		
 		def modelEcart=timeManagerService.getEcartData(site, monthList, period)
 		modelEcart << [site:site]
-		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/pdf/completeEcartPDFTemplate', model: modelEcart)
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/pdf/ecartPDFTemplate', model: modelEcart)
 		filename = period.year.toString()+'-'+site.name +'-ecartReport' +'.pdf'
 		outputStream = new FileOutputStream (folder+'/'+filename);
 		bytes.writeTo(outputStream)

@@ -19,60 +19,46 @@
 		def iterator = firstYear.get(0) as int
 		def sameLine=false
 		%>
-		
-		
-		
-		<g:each in="${orderedVacationList}" status="i" var="vacationInstance">
-			<% if (iterator==vacationInstance.period.year){
-				iterator=iterator+1
-				sameLine=true
-			}else{
-				sameLine=false
-			}
-			 %>
-			<g:if test="${sameLine}">
-				<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">				
-					<td>${vacationInstance.period.year}</td>					
-					<!--td>${fieldValue(bean: vacationInstance, field: "type")}</td-->				
-					<td>				
-				        <div>
-		            		<input type="number" name="name"          		
-			           			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
-										  	params:'\'userId=' + employeeInstance.id 						  
-												+ '&vacationId=' + vacationInstance.id
-										  		+ '&counter=\' + this.value')}"
-			                    value="${vacationInstance.counter}" 
-								min="0" max="32"	
-			            	/>
-		        		</div>
-					</td>	
-						
-			</g:if>	
-			<g:else>
-					<!--td>${fieldValue(bean: vacationInstance, field: "type")}</td-->				
-					<td>				
-				        <div>
-		            		<input type="number" name="name"          		
-			           			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
-										  	params:'\'userId=' + employeeInstance.id 						  
-												+ '&vacationId=' + vacationInstance.id
-										  		+ '&counter=\' + this.value')}"
-			                    value="${vacationInstance.counter}" 
-								min="0" max="32"	
-			            	/>
-		        		</div>
-					</td>
-					
-				</tr>
-				
-			</g:else>														
-			
-		</g:each>
-		
-		
-		
-	
-		
+			<g:each in="${orderedVacationList}" status="i" var="vacationInstance">
+				<% if (iterator==vacationInstance.period.year){
+					iterator=iterator+1
+					sameLine=true
+				}else{
+					sameLine=false
+				}
+				 %>
+				<g:if test="${sameLine}">
+					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">				
+						<td>${vacationInstance.period}</td>					
+						<td>				
+					        <div>
+			            		<input type="number" name="name"          		
+				           			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
+											  	params:'\'userId=' + employeeInstance.id 						  
+													+ '&vacationId=' + vacationInstance.id
+											  		+ '&counter=\' + this.value')}"
+				                    value="${vacationInstance.counter}" 
+									min="0" max="32"	
+				            	/>
+			        		</div>
+						</td>		
+						</g:if>	
+						<g:else>
+							<td>				
+						        <div>
+				            		<input type="number" name="name"          		
+					           			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
+												  	params:'\'userId=' + employeeInstance.id 						  
+														+ '&vacationId=' + vacationInstance.id
+												  		+ '&counter=\' + this.value')}"
+					                    value="${vacationInstance.counter}" 
+										min="0" max="32"	
+					            	/>
+				        		</div>
+							</td>
+					</tr>	
+				</g:else>															
+			</g:each>
 		</tbody>
 	</table>
 </body>

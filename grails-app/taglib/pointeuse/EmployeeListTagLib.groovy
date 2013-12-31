@@ -41,4 +41,10 @@ class EmployeeListTagLib {
 		
 	}
 	
+	
+	def employeeContractTable ={attrs,body->
+		out<<render(template:"/employee/template/contractTable")
+		
+	}
+	
 }
