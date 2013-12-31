@@ -20,24 +20,30 @@ $("#datepicker").datepicker();
     });
 
 });  
-
+  
 
 </script>
 
 <table class="form-table" id="customFields">
-<g:form method="POST"
-					url="[controller:'employee', action:'someAction']">
-<tr valign="top">
-    <th scope="row"><label for="customFieldName"><g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" /></label></th>
-    <td>
-    	<richui:dateChooser id="customFieldName" name="customFieldName[]" format="dd/MM/yyyy" value="${employeeInstance ? employeeInstance.arrivalDate : new Date()}" locale="fr" firstDayOfWeek="Mo"/>
-        <input type="number" class="code" id="customFieldName" name="customFieldName[]" value="${employeeInstance ? employeeInstance.weeklyContractTime : 35}" /> &nbsp;
-        <a href="javascript:void(0);" id="addCF">Add</a> &nbsp;
-        
-    </td>
-</tr>
-</g:form>
-
+	<g:form method="POST" url="[controller:'employee', action:'someAction']">
+		<tr valign="top">
+		    <th scope="row"><label for="customFieldName"><g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" /></label></th>
+		    <td>
+		    	<richui:dateChooser id="customFieldName" name="customFieldName[]" format="dd/MM/yyyy" value="${employeeInstance ? employeeInstance.arrivalDate : new Date()}" locale="fr" firstDayOfWeek="Mo"/>
+		        <input type="number" class="code" id="customFieldName" name="customFieldName[]" value="${employeeInstance ? employeeInstance.weeklyContractTime : 35}" /> &nbsp;
+		        <a href="javascript:void(0);" id="addCF">Add</a> &nbsp;		        
+		    </td>
+		</tr>
+		<g:each in="${previousContracts}"  status="i" var="previousContract">
+			<tr valign="top">
+			    <th scope="row">contrat précédent</th>
+			    <td>
+			    	${previousContract.date.format('dd/MM/yyyy')} ${previousContract.weeklyLength}    
+			    	
+			    </td>
+			</tr>
+		</g:each>
+	</g:form>
 </table>
 
 
