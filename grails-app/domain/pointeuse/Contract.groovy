@@ -16,3 +16,4 @@ class Contract {
 		return 'contract: '+ this.employee.lastName+' '+this.date+' '+this.weeklyLength
 	}
 }
+  

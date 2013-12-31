@@ -3,7 +3,14 @@
 <%@ page import="pointeuse.Site" %>
 <%@ page import="pointeuse.Function" %>
 
-
+<script>
+$("#someButtonId").on("click", function(e) {
+  e.preventDefault();
+  $.get("/employee/someAction", function(html) {
+    $("#myTable>tbody").append(html);
+  });
+});
+</script>
 
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'firstName', 'error')} ">
 	<label for="firstName">
@@ -48,19 +55,35 @@
 
 
 
-					        <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'weeklyContractTime', 'error')}">
-					        	<label for="weeklyContractTime">
-		<g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" />
+<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'weeklyContractTime', 'error')}">
+	<label for="weeklyContractTime">
+<g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" />
 	</label>
-			            		<input type="number" name="name"          		
-				           			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
-											  	params:'\'userId=' + employeeInstance.id 						  
-													
-											  		+ '&counter=\' + this.value')}"
-				                    value="${employeeInstance?.weeklyContractTime}" 
-									min="0" max="32"	
-				            	/>
-			        		</div>
+	<input 	type="number" name="name"          		
+			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
+			params:'\'userId=' + employeeInstance.id 						  
+			+ '&counter=\' + this.value')}"
+	      	value="${employeeInstance?.weeklyContractTime}" 
+			min="0" max="32"	
+	/>
+</div>
+
+
+
+
+<div id='contractTable'>
+	<g:employeeContractTable/>
+</div>
+<!--div>
+	<table id="myTable">
+		<tbody>
+    		<g:render template="template/tableRows" model="[loopCount:loopCount, arrivalDate:arrivalDate]" />
+		</tbody>
+	</table>
+</div-->
+<!--div id='remoteLink'>
+	<g:remoteLink action="someAction" update="contractTable" params="[loopCount:loopCount,arrivalDate:arrivalDate]">Add More Rows</g:remoteLink>
+</div-->
 
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'arrivalDate', 'error')} ">
 	<label for="arrivalDate">

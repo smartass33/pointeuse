@@ -208,18 +208,6 @@
 	 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 
 <link rel="stylesheet" type="text/css" href="css/jquery.timepicker.css" />
-	  <!--script src="js/jquery/jquery.timepicker.js"></script-->
-	  <!--script src="js/jquery/jquery.timepicker.min.js"></script-->
-	  <!--script src="js/jquery/jquery-ui-timepicker-addon.js" type="text/javascript"></script-->
-	  
-
-	  <!-- script src="js/jquery/jquery-1.10.0.js"></script-->
-	  <!-- script src="js/jquery/jquery-1.10.0.min.js"></script-->
-	  
-	  <!--script src="js/jquery/jquery-ui-i18n.js"></script-->
-	  <!--script src="js/jquery/jquery.ui.datepicker-af.js"></script-->
-	  <!--script src="js/jquery/jquery.ui.datepicker-fr.js"></script-->
-	  
 	  
 	  		<script type="text/javascript">
 

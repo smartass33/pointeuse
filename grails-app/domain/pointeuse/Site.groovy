@@ -21,11 +21,11 @@ class Site {
     static constraints = {
 		name blank: false
 		name unique:true
-		latitude blank: true
-		longitude blank:true
+		//latitude blank: true
+		//longitude blank:true
 		address blank:true
 		town blank:true
-		postCode blank:true
+		//postCode blank:true
 		
     }
 }

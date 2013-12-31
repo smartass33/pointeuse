@@ -745,14 +745,17 @@ class EmployeeController {
 			
 		}
 		
+		def previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'date',order:'desc'])
+		
 		def siteId=params["siteId"]
         if (!employeeInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'employee.label', default: 'Employee'), id])
             redirect(action: "list")
             return
         }
- 
-		[orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
+		def loopCount=1
+		def arrivalDate = employeeInstance.arrivalDate
+		[previousContracts:previousContracts,loopCount:loopCount,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
 	}
 
 	def cartouche(long userId,int year,int month){
@@ -2220,64 +2223,60 @@ class EmployeeController {
 		return retour
 	}
 	 
-	 def getWeeksfMonth(int month, int year){
-		 def weekList = []
-		 boolean isSunday=true
-		 int daysToWithdraw
-		 def supTime = 0
-		 Calendar calendar = Calendar.instance
-		 calendar.set(Calendar.MONTH,month-1)
-		 calendar.set(Calendar.YEAR,year)
-		 Employee employee = Employee.get(16)
-		 
-		 Calendar firstDayOfMonth = calendar.clone()
-		 Calendar lastDayOfMonth = calendar.clone()
-		 lastDayOfMonth.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-		// log.error('lastDayOfMonth: '+lastDayOfMonth.time)
-		 
-		  
-		 firstDayOfMonth.set(Calendar.DAY_OF_MONTH,1)
-		// log.error('firstDayOfMonth: '+firstDayOfMonth.time)
-		 
-		 if (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY){
-			 int currentDayInWeek = firstDayOfMonth.get(Calendar.DAY_OF_WEEK)
-			 int currentDayInYear = firstDayOfMonth.get(Calendar.DAY_OF_YEAR)
-			 if (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
-				 daysToWithdraw = 6
-			 }else{
-			 	daysToWithdraw = currentDayInWeek - Calendar.MONDAY 
-			 }
-			 firstDayOfMonth.set(Calendar.DAY_OF_YEAR, currentDayInYear - daysToWithdraw)
-		//	 log.error('firstDayOfMonth is now: '+firstDayOfMonth.time)
-		 }
-		 
-		 Calendar calendarLoop = firstDayOfMonth.clone()
-		// log.error('calendarLoop.get(Calendar.DAY_OF_YEAR): '+calendarLoop.get(Calendar.DAY_OF_YEAR))
-		 
-		// log.error('lastDayOfMonth.get(Calendar.DAY_OF_YEAR)'+lastDayOfMonth.get(Calendar.DAY_OF_YEAR))
-		 // now that we have the first day of the period, iterate over each week of the period to retrieve supplementary time
-		 
-		// log.error('calendarLoop before special loop '+calendarLoop.time)
-		 
-		 // special case if hover 2 years
-		 if (calendarLoop.get(Calendar.DAY_OF_YEAR)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){	 
-			 supTime += timeManagerService.computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
-			 calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
-			 calendarLoop.set(Calendar.YEAR,year)
-			// log.error('calendarLoop after special loop '+calendarLoop.time)		 
-		 }
-		 
-		 while(calendarLoop.get(Calendar.DAY_OF_YEAR)<=lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
-			// log.error('calendarLoop: '+calendarLoop.time)
-			// log.error('(calendarLoop.get(Calendar.DAY_OF_YEAR)+7): '+(calendarLoop.get(Calendar.DAY_OF_YEAR)+7))
-			// log.error('lastDayOfMonth.get(Calendar.DAY_OF_YEAR): '+lastDayOfMonth.get(Calendar.DAY_OF_YEAR))
-			 if ((calendarLoop.get(Calendar.DAY_OF_YEAR)+7)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
-				 break
-			 }
-			 supTime += timeManagerService.computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
-			 calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
-		 }
-		 return supTime 
-	 }
+	def appendContract(){
+		log.error('appendContract called')
+		params.each{i->log.error(i)}
+	}
+	
+	def someAction = {
+		def DATE_PATTERN = 'date_'
+		def CONTRACT_PATTERN='contract_info'
+		log.error('someAction called')
+		def contractList =[]
+		def contractDate 
+		def contractLength
+	//	def contractDate=[]
+		params.each{i->
+		//	log.error(i)
+			
+			
+			if ((i.key).contains(CONTRACT_PATTERN)){
+				
+				log.error('param value: '+i.value)
+				def contractInfos = i.value
+				def length = contractInfos.size()
+				for (int j = 0 ;j <length ; j++){
+					if (j%2==0){
+						//contractDate = 
+						//contractLength = 
+						Contract contract = new Contract()
+						contract.date = new Date().parse("d/M/yyyy",  contractInfos[j])
+						contract.weeklyLength = contractInfos[j+1].toFloat()
+						contract.employee = Employee.get(params.id)
+						contract.save()
+						contractList.add(contract)
+					}
+						
+				}
+				
+
+			}
+
+			
+			
+		
+
+			
+			
+		}
+		Long userId = params.id
+		
+		def moreData=[]
+		def model=[loopCount:5,moreData:moreData]
+
+		//render template: "template/tableRows", model:model
+		redirect(action: "edit", params: [id:params.id,isAdmin:false])
+		
+	  }
 	 
 }

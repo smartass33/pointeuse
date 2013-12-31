@@ -10,10 +10,10 @@ class AbsenceCounter {
 	float counter
 	
     static constraints = {
-		logging_time blank: false
+		//logging_time blank: false
 		//type blank: false
-		employee blank: false
-		year blank: false
-		counter blank: false	
+		//employee blank: false
+		//year blank: false
+		//counter blank: false	
     }
 }

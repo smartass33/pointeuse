@@ -6,7 +6,7 @@ class Period {
 	
 	static hasMany = [bankHolidays:BankHoliday]
     static constraints = {
-		year (unique: true,blank: false)
+		year (unique: true)
 		bankHolidays nullable: true
     }
 	

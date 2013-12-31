@@ -19,7 +19,7 @@ $("#datepicker").datepicker();
         $(this).parent().parent().remove();
     });
 
-});
+});  
 
 
 </script>

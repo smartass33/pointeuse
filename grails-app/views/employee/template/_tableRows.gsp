@@ -6,4 +6,4 @@
 	        <input type="number" class="code" id="contractTime" name="contractTime" value="" placeholder="35" /> &nbsp;
 	    </td>
 	</tr>
-</g:each>
+</g:each>  
