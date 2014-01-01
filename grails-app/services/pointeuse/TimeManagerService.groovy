@@ -1198,6 +1198,19 @@ class TimeManagerService {
 						eq('type',VacationType.RTT)
 					}
 				}
+				//special case for employees for which vacations were not properly instanciated
+				if (referenceRTT == null){
+					utilService.initiateVacations(employee)
+					criteria = Vacation.createCriteria()
+					
+					referenceRTT = criteria.get{
+						and {
+							eq('employee',employee)
+							eq('period',period)
+							eq('type',VacationType.RTT)
+						}
+					}
+				}
 				
 				criteria = Absence.createCriteria()
 				takenRTT = criteria.list{
@@ -1435,6 +1448,34 @@ class TimeManagerService {
 		return [remainingCA:remainingCA,annualTotalIncludingHS:computeHumanTime(Math.round(annualTotalIncludingHS)),annualEmployeeWorkingDays:annualEmployeeWorkingDays,	annualTheoritical:computeHumanTime(Math.round(annualTheoritical)),annualHoliday:annualHoliday,annualRTT:annualRTT,annualCSS:annualCSS,annualSickness:annualSickness,annualWorkingDays:annualWorkingDays,annualPayableSupTime:computeHumanTime(Math.round(annualPayableSupTime)),annualPayableCompTime:computeHumanTime(Math.round(annualPayableCompTime)),annualTotal:computeHumanTime(Math.round(annualTotal)),
 lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCompTime,yearMonthlySupTime:yearMonthlySupTime,yearTotalMap:yearTotalMap,yearMonthMap:yearMonthMap,userId:employee.id,employee:employee]
 
+	}
+	
+	
+	def getMonthTheoritical(Employee employee, int year, int month,int openDays, int sickness, int holidays, int sansSolde, int pregnancy){
+		def monthTheoritical = 0
+		
+		def criteria
+		def previousContracts
+		previousContracts = criteria.list {
+			and {
+				eq('year',year)
+				eq('month',month)
+				eq('employee',employee)
+			}
+		}
+		
+		if (previousContracts!=null){
+			log.error('previsouContract not null')
+		}
+				
+		monthTheoritical=(
+			3600*(
+					openDays*employee.weeklyContractTime/Employee.WeekOpenedDays
+					+(Employee.Pentecote)*(employee.weeklyContractTime/Employee.legalWeekTime)
+					-(employee.weeklyContractTime/Employee.WeekOpenedDays)*(sickness+holidays+sansSolde))
+				- pregnancy) as int
+			
+		return monthTheoritical
 	}
 	
 	

@@ -7,21 +7,13 @@
 <script>
 $(document).ready(function(){
     $("#addCF").click(function(){
-		$("#customFields").append('<tr valign="top"><th scope="row"><label for="customFieldName">Custom Field</label></th><td><input type="text" class="code" id="datepicker" name="contract_info" value="" /> &nbsp; <input type="number" class="code" name="contract_info" value="" placeholder="Input Value" /> &nbsp; <a href="javascript:void(0);" class="remCF">Remove</a> &nbsp;<input type="submit" class="listButton" value="export PDF" name="_action_someAction"></td></tr>');
-     	
-       // $( "#datepicker" ).datepicker();
-
-$("#datepicker").datepicker();
-
+		$("#customFields").append('<tr valign="top"><th scope="row"><label for="previousContract">contrat précédent</label></th><td><input type="text" class="code" id="datepicker" name="contract_info" value="" /> &nbsp; <input type="number" class="code" name="contract_info" value="" placeholder="Input Value" /> &nbsp;</td> <td><a href="javascript:void(0);" class="remCF">Annuler</a> &nbsp;<input type="submit" class="listButton" value="Confirmer l\'ajout" name="_action_someAction"></td></tr>');
+		$("#datepicker").datepicker();
      });
-
     $("#customFields").on('click', '.remCF', function(){
         $(this).parent().parent().remove();
     });
-
 });  
-  
-
 </script>
 
 <table class="form-table" id="customFields">
@@ -29,20 +21,22 @@ $("#datepicker").datepicker();
 		<tr valign="top">
 		    <th scope="row"><label for="customFieldName"><g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" /></label></th>
 		    <td>
-		    	<richui:dateChooser id="customFieldName" name="customFieldName[]" format="dd/MM/yyyy" value="${employeeInstance ? employeeInstance.arrivalDate : new Date()}" locale="fr" firstDayOfWeek="Mo"/>
-		        <input type="number" class="code" id="customFieldName" name="customFieldName[]" value="${employeeInstance ? employeeInstance.weeklyContractTime : 35}" /> &nbsp;
-		        <a href="javascript:void(0);" id="addCF">Add</a> &nbsp;		        
+		    	<richui:dateChooser id="contractDate" name="contractDate format="dd/MM/yyyy" value="${employeeInstance ? employeeInstance.arrivalDate : new Date()}" locale="fr" firstDayOfWeek="Mo"/>
+		        <input type="number" class="code" id="weeklyContractTime" name="weeklyContractTime" value="${employeeInstance ? employeeInstance.weeklyContractTime : 35}" /> &nbsp;
 		    </td>
 		</tr>
 		<g:each in="${previousContracts}"  status="i" var="previousContract">
 			<tr valign="top">
-			    <th scope="row">contrat précédent</th>
-			    <td>
-			    	${previousContract.date.format('dd/MM/yyyy')} ${previousContract.weeklyLength}    
-			    	
-			    </td>
+			    <th scope="row"><label for="previousContract">contrat précédent</label></th>
+			    <td>		    
+			    	<richui:dateChooser id="previousDate" name="previousDate" format="dd/MM/yyyy" value="${previousContract ? previousContract.date : new Date()}" locale="fr" firstDayOfWeek="Mo"/>
+		        	<input type="number" class="code" id="previousContractLength" name="previousContractLength" value="${previousContract ? previousContract.weeklyLength : 35}" /> &nbsp;		    
+				</td>
 			</tr>
 		</g:each>
+		<tr>
+			<td><a href="javascript:void(0);" id="addCF">Ajouter de nouvelles valeurs de contrat</a> &nbsp;</td>     	
+		</tr>		
 	</g:form>
 </table>
 

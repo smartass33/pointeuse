@@ -68,22 +68,9 @@ $("#someButtonId").on("click", function(e) {
 	/>
 </div>
 
-
-
-
 <div id='contractTable'>
 	<g:employeeContractTable/>
 </div>
-<!--div>
-	<table id="myTable">
-		<tbody>
-    		<g:render template="template/tableRows" model="[loopCount:loopCount, arrivalDate:arrivalDate]" />
-		</tbody>
-	</table>
-</div-->
-<!--div id='remoteLink'>
-	<g:remoteLink action="someAction" update="contractTable" params="[loopCount:loopCount,arrivalDate:arrivalDate]">Add More Rows</g:remoteLink>
-</div-->
 
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'arrivalDate', 'error')} ">
 	<label for="arrivalDate">

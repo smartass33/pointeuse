@@ -274,6 +274,8 @@ class EmployeeController {
 		employeeInstance.site=Site.get(site)
 		employeeInstance.function=Function.get(function)
 		
+		utilService.initiateVacations(employeeInstance)
+		
         if (!employeeInstance.save(flush: true)) {
             render(view: "create", model: [employeeInstance: employeeInstance])
             return
@@ -745,7 +747,7 @@ class EmployeeController {
 			
 		}
 		
-		def previousContracts = Contract.findByEmployee(employeeInstance,[sort:'date',order:'desc'])
+		def previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'date',order:'desc'])
 		
 		def siteId=params["siteId"]
         if (!employeeInstance) {
@@ -753,9 +755,8 @@ class EmployeeController {
             redirect(action: "list")
             return
         }
-		def loopCount=1
 		def arrivalDate = employeeInstance.arrivalDate
-		[previousContracts:previousContracts,loopCount:loopCount,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
+		[previousContracts:previousContracts,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
 	}
 
 	def cartouche(long userId,int year,int month){
@@ -2235,48 +2236,29 @@ class EmployeeController {
 		def contractList =[]
 		def contractDate 
 		def contractLength
-	//	def contractDate=[]
-		params.each{i->
-		//	log.error(i)
-			
-			
+		params.each{i->		
 			if ((i.key).contains(CONTRACT_PATTERN)){
-				
 				log.error('param value: '+i.value)
 				def contractInfos = i.value
 				def length = contractInfos.size()
 				for (int j = 0 ;j <length ; j++){
 					if (j%2==0){
-						//contractDate = 
-						//contractLength = 
 						Contract contract = new Contract()
 						contract.date = new Date().parse("d/M/yyyy",  contractInfos[j])
+						contract.year=contract.date.getAt(Calendar.YEAR)
+						contract.month=(contract.date.getAt(Calendar.MONTH))+1
+						contract.period=contract.month<6?Period.findByYear(contract.year-1):Period.findByYear(contract.year)
 						contract.weeklyLength = contractInfos[j+1].toFloat()
 						contract.employee = Employee.get(params.id)
+						
 						contract.save()
 						contractList.add(contract)
-					}
-						
+					}		
 				}
-				
-
 			}
-
-			
-			
-		
-
-			
-			
 		}
 		Long userId = params.id
-		
-		def moreData=[]
-		def model=[loopCount:5,moreData:moreData]
-
-		//render template: "template/tableRows", model:model
-		redirect(action: "edit", params: [id:params.id,isAdmin:false])
-		
+		redirect(action: "edit", params: [id:params.id,isAdmin:false])		
 	  }
 	 
 }

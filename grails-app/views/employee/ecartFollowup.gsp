@@ -72,7 +72,9 @@ $('label').click(function(){
 	</div>
 	<div id="list-employee" class="content scaffold-list">
 		<h1>
-			<g:message code="default.list.label" args="[entityName]" />
+			<g:message code="ecart.followup" /> 			<g:if test="${site}">pour le site ${site.name}</g:if>
+			
+			
 			<br>
 			<br>
 			<g:form method="POST"

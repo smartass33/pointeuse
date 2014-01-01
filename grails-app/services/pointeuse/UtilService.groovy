@@ -151,6 +151,35 @@ class UtilService {
 		}
 	}
 	
+	def initiateVacations(Employee employee){
+		
+		def user = springSecurityService.currentUser
+
+		for (Period period:Period.findAll()){
+			def vacationCA = new Vacation()
+			vacationCA.employee = employee
+			vacationCA.loggingTime = new Date()
+			if (user){
+				vacationCA.user=user
+			}
+			vacationCA.counter=32
+			vacationCA.type=VacationType.CA
+			vacationCA.period=period
+			vacationCA.save()
+			
+			def vacationRTT = new Vacation()
+			vacationRTT.employee = employee
+			vacationRTT.loggingTime = new Date()
+			if (user){
+				vacationRTT.user=user
+			}
+			vacationRTT.counter = employee.weeklyContractTime==35 ? 4 : 0
+			vacationRTT.type=VacationType.RTT
+			vacationRTT.period=period
+			vacationRTT.save()
+		}
+	}
+	
 	def getOpenDays(Period period){
 		
 		def bankHolidayCounter=0

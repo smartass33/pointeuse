@@ -100,7 +100,7 @@
 				<td>Total H Théorique</td>	
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_theoritical'>	
 					<g:if test="${monthlyTheoriticalByEmployee.get(employee)!=null}">
-						<g:if test="${monthList.contains(month_theoritical)}">
+						<g:if test="${monthList != null && monthList.contains(month_theoritical)}">
 							<td>${monthlyTheoriticalByEmployee.get(employee).get(month_theoritical)}</td>
 						</g:if>
 						<g:else>
@@ -114,7 +114,7 @@
 				<td>Total H réalisées</td>
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_actual'>						
 					<g:if test='${monthlyActualByEmployee.get(employee)!=null}'>
-						<g:if test="${monthList.contains(month_actual)}">
+						<g:if test="${monthList != null && monthList.contains(month_actual)}">
 							<td>${monthlyActualByEmployee.get(employee).get(month_actual)}</td>
 						</g:if>
 						<g:else>
@@ -127,7 +127,7 @@
 				<td>Ecart HR - HT</td>
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_ecart'>									
 					<g:if test='${ecartByEmployee.get(employee)!=null}'>
-						<g:if test="${monthList.contains(month_ecart)}">
+						<g:if test="${monthList != null && monthList.contains(month_ecart)}">
 							<td>${ecartByEmployee.get(employee).get(month_ecart)}</td>
 						</g:if>
 						<g:else>
@@ -140,7 +140,7 @@
 				<td>RTT restant</td>
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
 					<g:if test='${rttByEmployee.get(employee)!=null}'>
-						<g:if test="${monthList.contains(month_rtt)}">				
+						<g:if test="${monthList != null && monthList.contains(month_rtt)}">				
 							<td>${rttByEmployee.get(employee).get(month_rtt)}</td>
 						</g:if>
 						<g:else>
