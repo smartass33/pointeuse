@@ -274,13 +274,14 @@ class EmployeeController {
 		employeeInstance.site=Site.get(site)
 		employeeInstance.function=Function.get(function)
 		
-		utilService.initiateVacations(employeeInstance)
 		
         if (!employeeInstance.save(flush: true)) {
             render(view: "create", model: [employeeInstance: employeeInstance])
             return
         }
 
+		utilService.initiateVacations(employeeInstance)
+		
         flash.message = message(code: 'default.created.message', args: [message(code: 'employee.label', default: 'Employee'), employeeInstance.id])
         redirect(action: "show", id: employeeInstance.id,params: [isAdmin: isAdmin])
     }
