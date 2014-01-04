@@ -5,7 +5,10 @@ import java.util.Calendar;
 class Contract {
 
 	Employee employee
+	Period period
 	Date date
+	int year
+	int month
 	float weeklyLength
 	static belongsTo = [employee:Employee]
 	

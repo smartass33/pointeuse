@@ -415,6 +415,7 @@ class EmployeeController {
 			// step 1: fill initial values
 			//CA
 			criteria = Vacation.createCriteria()
+			log.error('employeeID: '+employee.id)
 			def initialCA = criteria.get{
 				and {
 					eq('employee',employee)
@@ -844,7 +845,7 @@ class EmployeeController {
 		def yearlySickness=cartoucheTable.getAt('yearlySickness')
 		def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.getAt('yearlyTheoritical'))
 		def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.getAt('yearlyPregnancyCredit'))
-		def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.getAt('yearlyActualTotal'))
+		def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.getAt('yearlyTotalTime'))
 		def yearlySansSolde=cartoucheTable.getAt('yearlySansSolde')
 		def payableSupTime=timeManagerService.computeHumanTime(supTime)
 		def payableCompTime=timeManagerService.computeHumanTime(compTime)

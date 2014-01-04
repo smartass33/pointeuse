@@ -746,33 +746,42 @@ class TimeManagerService {
 			}
 		}
 				
-		criteria = MonthlyTotal.createCriteria()
-		def monthsAggregate = criteria.list{
-			and {
-				eq('employee',employee)
-				ge('month',6)
-				le('month',month)
-				eq('year',year-1)
+		def monthsAggregate
+		if (month>6){
+			criteria = MonthlyTotal.createCriteria()
+			
+			monthsAggregate = criteria.list{
+				and {
+					eq('employee',employee)
+					ge('month',6)
+					le('month',month)
+					eq('year',year-1)
+				}
+			}	
+		}else{
+			criteria = MonthlyTotal.createCriteria()	
+			monthsAggregate = criteria.list{
+				// year -1
+				or{
+					and {
+						eq('employee',employee)
+						ge('month',6)
+						le('month',12)
+						eq('year',year-1)
+					}
+					and {
+						eq('employee',employee)
+						le('month',month)
+						eq('year',year)
+					}
+				}
 			}
 		}
-		
 
-		for (MonthlyTotal monthIter:monthsAggregate){
+		for (MonthlyTotal monthIter:monthsAggregate){			
 			totalTime += monthIter.elapsedSeconds
 		}
-		
-		criteria = MonthlyTotal.createCriteria()
-		monthsAggregate = criteria.list{
-			and {
-				eq('employee',employee)
-				le('month',month)
-				eq('year',year)
-			}
-		}
-		
-		for (MonthlyTotal monthIter:monthsAggregate){
-			totalTime += monthIter.elapsedSeconds
-		}
+
 		
 		yearlyCounter=month>5 ? utilService.getSundaysInYear(year-1,month) : utilService.getSundaysInYear(year,month)
 
@@ -917,12 +926,14 @@ class TimeManagerService {
 		def yearlyCartouche=getYearCartoucheData(employeeInstance,year,month)
 		def pregnancyCredit=30*60*pregnancy.size()
 		// determine monthly theoritical time:
-		monthTheoritical=(
+		
+		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year, counter,  sickness.size(), holidays.size(), sansSolde.size(),  pregnancyCredit)
+		/*monthTheoritical=(
 		3600*(counter*employeeInstance.weeklyContractTime/Employee.WeekOpenedDays
 			+(Employee.Pentecote)*(employeeInstance.weeklyContractTime/Employee.legalWeekTime)
 			-(employeeInstance.weeklyContractTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size()))
 			- pregnancyCredit)as int
-		
+		*/
 		def monthTheoriticalHuman=computeHumanTime(monthTheoritical)
 		def cartoucheMap=[employeeInstance:employeeInstance,workingDays:counter ,holidays:holidays.size(),rtt:rtt.size(),sickness:sickness.size(),sansSolde:sansSolde.size(),monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,monthTheoriticalHuman:monthTheoriticalHuman,calendar:calendar]
 		def mergedMap = cartoucheMap << yearlyCartouche
@@ -1161,8 +1172,10 @@ class TimeManagerService {
 		def monthlyActualMap = [:]
 		def monthlyTakenRTTMap = [:]
 		def ecartMap = [:]
+		def ecartMinusRTTMap = [:]
 		def monthlyTheoriticalByEmployee = [:]
 		def monthlyActualByEmployee = [:]
+		def ecartMinusRTTByEmployee = [:]
 		def ecartByEmployee = [:]
 		def rttByEmployee = [:]
 		def employeeInstanceList
@@ -1178,6 +1191,7 @@ class TimeManagerService {
 			monthlyActualMap = [:]
 			monthlyTakenRTTMap = [:]
 			ecartMap = [:]
+			ecartMinusRTTMap = [:]
 			for (month in monthList){
 				tmpYear=(month<6)?period.year+1:period.year
 		   
@@ -1199,19 +1213,18 @@ class TimeManagerService {
 					}
 				}
 				//special case for employees for which vacations were not properly instanciated
-				if (referenceRTT == null){
-					utilService.initiateVacations(employee)
-					criteria = Vacation.createCriteria()
-					
-					referenceRTT = criteria.get{
-						and {
-							eq('employee',employee)
-							eq('period',period)
-							eq('type',VacationType.RTT)
+				if (referenceRTT == null && employee.weeklyContractTime == Employee.legalWeekTime){
+						utilService.initiateVacations(employee)
+						criteria = Vacation.createCriteria()
+						referenceRTT = criteria.get{
+							and {
+								eq('employee',employee)
+								eq('period',period)
+								eq('type',VacationType.RTT)
+							}
 						}
 					}
-				}
-				
+					
 				criteria = Absence.createCriteria()
 				takenRTT = criteria.list{
 					and {
@@ -1229,12 +1242,13 @@ class TimeManagerService {
 					}else{
 						monthlyActualMap.put(month, monthlyActualMap.get(month-1))
 					}
-					if (takenRTT!=null){
-						monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(month-1) - takenRTT.size())
-					}else{
-						monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(month-1))
+					if (employee.weeklyContractTime == Employee.legalWeekTime){
+						if (takenRTT!=null){
+							monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(month-1) - takenRTT.size())
+						}else{
+							monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(month-1))
+						}
 					}
-			   
 				}else{
 					if (month==6){
 						monthlyTheoriticalMap.put(month, data.get('monthTheoritical'))
@@ -1243,10 +1257,12 @@ class TimeManagerService {
 						}else{
 							monthlyActualMap.put(month, 0)
 						}
-						if (takenRTT!=null){
-							monthlyTakenRTTMap.put(month,referenceRTT.counter - takenRTT.size())
-						}else{
-							monthlyTakenRTTMap.put(month,referenceRTT.counter)
+						if (employee.weeklyContractTime == Employee.legalWeekTime){
+							if (takenRTT!=null){
+								monthlyTakenRTTMap.put(month,referenceRTT.counter - takenRTT.size())
+							}else{
+								monthlyTakenRTTMap.put(month,referenceRTT.counter)
+							}
 						}
 					}else{
 						if (month==1){
@@ -1257,14 +1273,24 @@ class TimeManagerService {
 								monthlyActualMap.put(month, monthlyActualMap.get(12))
 							}
 						}
-					if (takenRTT!=null){
-						monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(12) - takenRTT.size())
-					}else{
-						monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(12))
-					}
+						if (employee.weeklyContractTime == Employee.legalWeekTime){	
+							if (takenRTT!=null){
+								monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(12) - takenRTT.size())
+							}else{
+								monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(12))
+							}
+						}
 					}
 				}
 				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))
+				if (employee.weeklyContractTime == Employee.legalWeekTime){	
+					def ecart = ecartMap.get(month)
+					def remainingRTT = (3600*(monthlyTakenRTTMap.get(month))*(employee.weeklyContractTime/Employee.WeekOpenedDays)) as long
+					def minusRtt = ecart - remainingRTT
+					//ecartMinusRTTMap.put(month, ecart)
+					
+					ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(employee.weeklyContractTime/Employee.WeekOpenedDays)) as long)
+				}
 			}
 		
 			monthlyTheoriticalMap.each() {
@@ -1285,13 +1311,34 @@ class TimeManagerService {
 				def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
 				it.value=hours+'H'+minutes
 		   }
-			 
+			ecartMinusRTTMap.each() {
+				/*
+				if (it.value<0){
+					def serviceData=computeHumanTime(-(it.value) as long)
+					def hours=serviceData.get(0)
+					def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
+					it.value='-'+hours+'H'+minutes
+				}else{
+					def serviceData=computeHumanTime(it.value as long)
+					def hours=serviceData.get(0)
+					def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
+					it.value=hours+'H'+minutes
+				}*/
+				def serviceData=computeHumanTime(it.value as long)
+				def hours=serviceData.get(0)
+				def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
+				it.value=hours+'H'+minutes
+		   }
+		   
+			
 			monthlyTheoriticalByEmployee.put(employee,monthlyTheoriticalMap)
 			monthlyActualByEmployee.put(employee,monthlyActualMap)
 			ecartByEmployee.put(employee, ecartMap)
+			if (employee.weeklyContractTime == Employee.legalWeekTime)
+				ecartMinusRTTByEmployee.put(employee,ecartMinusRTTMap)
 			rttByEmployee.put(employee, monthlyTakenRTTMap)
 		}
-		return [period:period,employeeInstanceList:employeeInstanceList,monthlyTheoriticalByEmployee:monthlyTheoriticalByEmployee,monthlyActualByEmployee:monthlyActualByEmployee,ecartByEmployee:ecartByEmployee,rttByEmployee:rttByEmployee]
+		return [period:period,employeeInstanceList:employeeInstanceList,monthlyTheoriticalByEmployee:monthlyTheoriticalByEmployee,monthlyActualByEmployee:monthlyActualByEmployee,ecartByEmployee:ecartByEmployee,rttByEmployee:rttByEmployee,ecartMinusRTTByEmployee:ecartMinusRTTByEmployee]
 	
 	}
 		
@@ -1305,8 +1352,6 @@ class TimeManagerService {
 		Calendar lastDayOfMonth = calendar.clone()
 		lastDayOfMonth.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
 		firstDayOfMonth.set(Calendar.DAY_OF_MONTH,1)
-		// log.error('lastDayOfMonth: '+lastDayOfMonth.time)
-	   // log.error('firstDayOfMonth: '+firstDayOfMonth.time)
 		
 		if (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY){
 			int currentDayInWeek = firstDayOfMonth.get(Calendar.DAY_OF_WEEK)
@@ -1317,13 +1362,8 @@ class TimeManagerService {
 				daysToWithdraw = currentDayInWeek - Calendar.MONDAY
 			}
 			firstDayOfMonth.set(Calendar.DAY_OF_YEAR, currentDayInYear - daysToWithdraw)
-	   //	 log.error('firstDayOfMonth is now: '+firstDayOfMonth.time)
 		}
-		
 		Calendar calendarLoop = firstDayOfMonth.clone()
-	   // log.error('calendarLoop.get(Calendar.DAY_OF_YEAR): '+calendarLoop.get(Calendar.DAY_OF_YEAR))
-		
-	   // log.error('lastDayOfMonth.get(Calendar.DAY_OF_YEAR)'+lastDayOfMonth.get(Calendar.DAY_OF_YEAR))
 		// now that we have the first day of the period, iterate over each week of the period to retrieve supplementary time
 		
 		log.debug('calendarLoop before special loop '+calendarLoop.time)
@@ -1451,11 +1491,15 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 	}
 	
 	
-	def getMonthTheoritical(Employee employee, int year, int month,int openDays, int sickness, int holidays, int sansSolde, int pregnancy){
+	def getMonthTheoritical(Employee employee, int month,int year, int openDays, int sickness, int holidays, int sansSolde, int pregnancy){
 		def monthTheoritical = 0
-		
+		def calendar = Calendar.instance
+		def weeklyContractTime
+		def contract
 		def criteria
 		def previousContracts
+		criteria = Contract.createCriteria()
+		
 		previousContracts = criteria.list {
 			and {
 				eq('year',year)
@@ -1465,14 +1509,29 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		}
 		
 		if (previousContracts!=null){
-			log.error('previsouContract not null')
+		//	log.error('previsouContract not null')
+			criteria = Contract.createCriteria()
+			contract = criteria.get {
+				and {
+					eq('year',year)
+					eq('month',month)
+					eq('employee',employee)
+				}
+			}
+			if (contract != null){
+				weeklyContractTime = contract.weeklyLength
+			}else{
+				weeklyContractTime =employee.weeklyContractTime
+			}
+		}else{
+				weeklyContractTime =employee.weeklyContractTime
 		}
 				
 		monthTheoritical=(
 			3600*(
-					openDays*employee.weeklyContractTime/Employee.WeekOpenedDays
-					+(Employee.Pentecote)*(employee.weeklyContractTime/Employee.legalWeekTime)
-					-(employee.weeklyContractTime/Employee.WeekOpenedDays)*(sickness+holidays+sansSolde))
+					openDays*weeklyContractTime/Employee.WeekOpenedDays
+					+(Employee.Pentecote)*(weeklyContractTime/Employee.legalWeekTime)
+					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness+holidays+sansSolde))
 				- pregnancy) as int
 			
 		return monthTheoritical
