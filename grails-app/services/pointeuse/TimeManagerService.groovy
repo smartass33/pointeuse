@@ -747,7 +747,7 @@ class TimeManagerService {
 		}
 				
 		def monthsAggregate
-		if (month>6){
+		if (month>=6){
 			criteria = MonthlyTotal.createCriteria()
 			
 			monthsAggregate = criteria.list{
@@ -928,12 +928,7 @@ class TimeManagerService {
 		// determine monthly theoritical time:
 		
 		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year, counter,  sickness.size(), holidays.size(), sansSolde.size(),  pregnancyCredit)
-		/*monthTheoritical=(
-		3600*(counter*employeeInstance.weeklyContractTime/Employee.WeekOpenedDays
-			+(Employee.Pentecote)*(employeeInstance.weeklyContractTime/Employee.legalWeekTime)
-			-(employeeInstance.weeklyContractTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size()))
-			- pregnancyCredit)as int
-		*/
+
 		def monthTheoriticalHuman=computeHumanTime(monthTheoritical)
 		def cartoucheMap=[employeeInstance:employeeInstance,workingDays:counter ,holidays:holidays.size(),rtt:rtt.size(),sickness:sickness.size(),sansSolde:sansSolde.size(),monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,monthTheoriticalHuman:monthTheoriticalHuman,calendar:calendar]
 		def mergedMap = cartoucheMap << yearlyCartouche
@@ -1235,60 +1230,44 @@ class TimeManagerService {
 					}
 				}
 				data = getCartoucheData(employee,tmpYear,month)
-				if (month>6 || (month>1 && month<6)){
-					monthlyTheoriticalMap.put(month, data.get('monthTheoritical')+monthlyTheoriticalMap.get(month-1))
-					if (monthlyTotalInstance!=null){
-						monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds+monthlyActualMap.get(month-1))
-					}else{
-						monthlyActualMap.put(month, monthlyActualMap.get(month-1))
-					}
-					if (employee.weeklyContractTime == Employee.legalWeekTime){
-						if (takenRTT!=null){
-							monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(month-1) - takenRTT.size())
-						}else{
-							monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(month-1))
-						}
-					}
+				def theoricalTime2add = 0
+				def actualTime2add = 0
+				def takenRTT2add
+				// initialization month
+				if (month==6){
+					theoricalTime2add = 0
+					actualTime2add = 0
+					takenRTT2add = referenceRTT.counter	
+				}
+				
+				// special case for 1st month of year
+				if (month==1){
+					theoricalTime2add = monthlyTheoriticalMap.get(12)
+					actualTime2add = monthlyActualMap.get(12)
+					takenRTT2add = monthlyTakenRTTMap.get(12)
+				}
+				
+				if (month != 6 && month != 1){
+					theoricalTime2add = monthlyTheoriticalMap.get(month-1)
+					actualTime2add = monthlyActualMap.get(month-1)
+					takenRTT2add = monthlyTakenRTTMap.get(month-1)			
+				}
+				
+				monthlyTheoriticalMap.put(month, data.get('monthTheoritical') + theoricalTime2add)
+				if (monthlyTotalInstance!=null){
+					monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds + actualTime2add)
 				}else{
-					if (month==6){
-						monthlyTheoriticalMap.put(month, data.get('monthTheoritical'))
-						if (monthlyTotalInstance!=null){
-							monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds)
-						}else{
-							monthlyActualMap.put(month, 0)
-						}
-						if (employee.weeklyContractTime == Employee.legalWeekTime){
-							if (takenRTT!=null){
-								monthlyTakenRTTMap.put(month,referenceRTT.counter - takenRTT.size())
-							}else{
-								monthlyTakenRTTMap.put(month,referenceRTT.counter)
-							}
-						}
+					monthlyActualMap.put(month, actualTime2add)
+				}
+				if (employee.weeklyContractTime == Employee.legalWeekTime){
+					if (takenRTT!=null){
+						monthlyTakenRTTMap.put(month,takenRTT2add - takenRTT.size())
 					}else{
-						if (month==1){
-							monthlyTheoriticalMap.put(month, data.get('monthTheoritical')+monthlyTheoriticalMap.get(12))
-							if (monthlyTotalInstance!=null){
-								monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds+monthlyActualMap.get(12))
-							}else{
-								monthlyActualMap.put(month, monthlyActualMap.get(12))
-							}
-						}
-						if (employee.weeklyContractTime == Employee.legalWeekTime){	
-							if (takenRTT!=null){
-								monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(12) - takenRTT.size())
-							}else{
-								monthlyTakenRTTMap.put(month,monthlyTakenRTTMap.get(12))
-							}
-						}
+						monthlyTakenRTTMap.put(month,takenRTT2add)
 					}
 				}
 				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))
-				if (employee.weeklyContractTime == Employee.legalWeekTime){	
-					def ecart = ecartMap.get(month)
-					def remainingRTT = (3600*(monthlyTakenRTTMap.get(month))*(employee.weeklyContractTime/Employee.WeekOpenedDays)) as long
-					def minusRtt = ecart - remainingRTT
-					//ecartMinusRTTMap.put(month, ecart)
-					
+				if (employee.weeklyContractTime == Employee.legalWeekTime){		
 					ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(employee.weeklyContractTime/Employee.WeekOpenedDays)) as long)
 				}
 			}

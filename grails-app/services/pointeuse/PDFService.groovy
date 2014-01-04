@@ -25,7 +25,7 @@ class PDFService {
 			log.error('method pdf siteMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
 			def modelReport=timeManagerService.getReportData((site.id).toString(),employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 			// Get the bytes
-			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/completeReportTemplate', model: modelReport)
+			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/pdf/completeReportTemplate', model: modelReport)
 			filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
 			fileNameList.add(filename)
 			outputStream = new FileOutputStream (folder+'/'+filename);
