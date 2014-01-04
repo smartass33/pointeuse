@@ -11,26 +11,20 @@
 
 	<style  type="text/css">
 				@page {
-				   size: 297mm 210mm;
+				   size: 210mm 297mm;
 				   margin: 0px 0px 13px 0px;
 				 }
 				table {
 				  font: normal 11px verdana, arial, helvetica, sans-serif;
 				  color: #363636;
 				  background: #f6f6f6;
-				  text-align:center;
+				  text-align:left;
 				  }
-				caption {
-				  text-align: center;
-				  font: bold 16px arial, helvetica, sans-serif;
-				  background: transparent;
-				  padding:6px 4px 8px 0px;
-				  color: #CC00FF;
-				  text-transform: uppercase;
-				}
+
 				thead, tfoot {
 					background:url(bg1.png) repeat-x;
-					text-align:center;
+					text-align:left;
+					width:180px;			
 					height:30px;
 				}
 				thead th, tfoot th {
@@ -47,24 +41,28 @@
 					background: #f1f1f1;
 				}
 				tbody td {
-				 	text-align:center;
+				 	text-align:left;
 				 	height:5px;
-				 	width:90px;
+				 	width:180px;
 				 	font-size:95%;
 				}
 				
 				tbody th{
-				 	text-align:center;
+				 	text-align:left;
 				 	height:5px;
 				 	width:250px;
 				}
 
+
+				h1{
+					font: bold 16px arial, helvetica, sans-serif;
+				}
 				
 			</style>
 
 </head>
 <h1>
-	<g:message code="yearly.recap.label"/> ${lastYear} / ${thisYear} pour <g:if test="${employee != null }">${employee.firstName} ${employee.lastName}</g:if>
+	<g:message code="yearly.recap.label"/> ${lastYear} / ${thisYear} : <g:if test="${employee != null }">${employee.firstName} ${employee.lastName}</g:if>
 	<g:set var="calendar" value="${Calendar.instance}"/>
 	
 </h1>
@@ -73,12 +71,10 @@
 <h1>SUIVI MENSUEL</h1>
 <table id="annual-report-table">
 	<thead>
-
 		<th><g:message code="annual.report.month.label"/></th>	
 		<th><g:message code="annual.report.year.label"/></th>
 		<th><g:message code="annual.report.theoritical.label"/></th>
 		<th><g:message code="annual.report.elapsed.label"/></th>
-		<!--th><g:message code="annual.report.working.days.label"/></th-->	
 		<th><g:message code="annual.report.holidays.label"/></th>
 		<th><g:message code="annual.report.RTT.label"/></th>
 		<th><g:message code="annual.report.CSS.label"/></th>
@@ -136,8 +132,8 @@
 				</td>							
 			</tr>
 		</g:each>
-		<tr>
-			<td></td>
+		<tr class='even'>
+			<td>TOTAL</td>
 			<td></td>
 			<td>
 				<g:if
@@ -188,15 +184,18 @@
 <h1>SYNTHESE ANNUELLE</h1>
 
 
-<table id='jours' style="width:800px;text-align:center">
-		<th style="width:200px;">Nombre de jours ouvrés</th>
+<table id='jours' style="width:600px">
+		<th>Nombre de jours ouvrés</th>
 		<th>Jours Travaillés</th>
 		<th>Quota Annuel de base</th>
+		<th>Congés aquis</th>
+		<th>Congés pris</th>
 		<th>Solde Jours congés</th>
-	<tr id='values'>
-		<td style="text-align:center">${annualWorkingDays}</td>
-		<td style="text-align:center">${annualEmployeeWorkingDays}</td>
-		<td style="text-align:center">
+		
+	<tr id='values' class='odd'>
+		<td>${annualWorkingDays}</td>
+		<td>${annualEmployeeWorkingDays}</td>
+		<td>
 			<g:if
           		test="${annualTheoritical !=null && (annualTheoritical.get(0)>0 ||annualTheoritical.get(1)>0)}">
                		${annualTheoritical.get(0)}H${annualTheoritical.get(1)==0?'':annualTheoritical.get(1)} 
@@ -205,16 +204,18 @@
            			0H0
            	</g:else>
         </td>
-        <td style="text-align:center">${remainingCA}</td>
+        <td>${initialCA}</td>
+        <td>${takenCA}</td>        
+        <td>${remainingCA}</td>
 	</tr>
 </table>
 <table id='heures_sup'>
-	<th>Total Heures Sup/An</th>
-		<th>Total Heures Comp/An</th>
-		<th>Quota Annuel avec H Sup et HC</th>
-		<th></th>
-	<tr>
-		<td style="text-align:center">				
+	<th>Total HS/An</th>
+	<th>Total HC/An</th>
+	<th>Quota Annuel avec HS et HC</th>
+	<th></th>
+	<tr class='odd'>
+		<td >				
 			<g:if
                		test="${annualPayableSupTime !=null && (annualPayableSupTime.get(0)>0 ||annualPayableSupTime.get(1)>0)}">
                		${annualPayableSupTime.get(0)}H${annualPayableSupTime.get(1)==0?'':annualPayableSupTime.get(1)} 
@@ -223,7 +224,7 @@
            			0H0
            </g:else>
         </td>
-		<td style="text-align:center">
+		<td>
 			<g:if
            		test="${annualPayableCompTime !=null && (annualPayableCompTime.get(0)>0 ||annualPayableCompTime.get(1)>0)}">
                		${annualPayableCompTime.get(0)}H${annualPayableCompTime.get(1)==0?'':annualPayableCompTime.get(1)} 
@@ -233,9 +234,19 @@
            	</g:else>
         </td>
 
-		<td style="text-align:center">0</td>
+		<td >0</td>
 <td></td>
 	</tr>
+</table>
+
+<table style="width:1000px">
+<thead></thead>
+<tr>
+	<td style="width:300px;">${message(code: 'report.verification.date.label', default: 'Report')}: ${new Date().format('EEEE dd MMM yyyy')}</td>
+	<td style="width:400px;">${message(code: 'report.employee.signature.label', default: 'Report')}:</td>
+	<td style="width:400px;">${message(code: 'report.employer.signature.label', default: 'Report')}:</td>
+	
+</tr>
 </table>
 
 </html>

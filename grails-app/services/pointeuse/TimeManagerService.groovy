@@ -1399,6 +1399,9 @@ class TimeManagerService {
 		def currentMonth
 		def currentYear=year
 		
+
+		
+				
 		for (int monthLoop = 6 ;monthLoop <18 ; monthLoop++){
 			if (monthLoop>12){
 				currentYear=year+1
@@ -1460,11 +1463,14 @@ class TimeManagerService {
 			annualPayableCompTime += payableCompTime
 			annualTotal += monthlyTotalTime
 		}
-
 		def period = Period.findByYear(year)
-		def remainingCA = employeeService.getRemainingCA(employee,period)
 		
-		return [remainingCA:remainingCA,annualTotalIncludingHS:computeHumanTime(Math.round(annualTotalIncludingHS)),annualEmployeeWorkingDays:annualEmployeeWorkingDays,	annualTheoritical:computeHumanTime(Math.round(annualTheoritical)),annualHoliday:annualHoliday,annualRTT:annualRTT,annualCSS:annualCSS,annualSickness:annualSickness,annualWorkingDays:annualWorkingDays,annualPayableSupTime:computeHumanTime(Math.round(annualPayableSupTime)),annualPayableCompTime:computeHumanTime(Math.round(annualPayableCompTime)),annualTotal:computeHumanTime(Math.round(annualTotal)),
+		//def period = (month>=6)?Period.findByYear(year):Period.findByYear(year-1)
+		def remainingCA = employeeService.getRemainingCA(employee,period)
+		def takenCA = employeeService.getTakenCA(employee,period)
+		def initialCA = employeeService.getInitialCA(employee,period)
+		
+		return [takenCA:takenCA,initialCA:initialCA,remainingCA:remainingCA,annualTotalIncludingHS:computeHumanTime(Math.round(annualTotalIncludingHS)),annualEmployeeWorkingDays:annualEmployeeWorkingDays,	annualTheoritical:computeHumanTime(Math.round(annualTheoritical)),annualHoliday:annualHoliday,annualRTT:annualRTT,annualCSS:annualCSS,annualSickness:annualSickness,annualWorkingDays:annualWorkingDays,annualPayableSupTime:computeHumanTime(Math.round(annualPayableSupTime)),annualPayableCompTime:computeHumanTime(Math.round(annualPayableCompTime)),annualTotal:computeHumanTime(Math.round(annualTotal)),
 lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCompTime,yearMonthlySupTime:yearMonthlySupTime,yearTotalMap:yearTotalMap,yearMonthMap:yearMonthMap,userId:employee.id,employee:employee]
 
 	}

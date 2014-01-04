@@ -740,11 +740,18 @@ class EmployeeController {
 		endCalendar.set(Calendar.SECOND,59)
 		
 		def orderedVacationList=[]
+		def orderedSupTimeList = [:]
+		def orderedCompTimeList = [:]
 		def periodList= Period.findAll(sort:'year',order:'asc')
 		for (Period period:periodList){
 			def vacations = Vacation.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
+			def supTimes = SupplementaryTime.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
 			for (Vacation vacation:vacations){
 				orderedVacationList.add(vacation)
+			}
+			
+			for (SupplementaryTime supTime:supTimes){
+				orderedSupTimeList.add(supTime)
 			}
 			
 		}
@@ -758,7 +765,9 @@ class EmployeeController {
             return
         }
 		def arrivalDate = employeeInstance.arrivalDate
-		[previousContracts:previousContracts,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
+		
+		
+		[orderedSupTimeList:orderedSupTimeList,previousContracts:previousContracts,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
 	}
 
 	def cartouche(long userId,int year,int month){
@@ -2263,4 +2272,30 @@ class EmployeeController {
 		redirect(action: "edit", params: [id:params.id,isAdmin:false])		
 	  }
 	 
+	def payHS(){
+		log.error('payHS called')
+		params.each{i->
+			
+			log.error(i)
+		}
+
+		def userId = (params["userId"].split(" ").getAt(0)) as long
+		def year = (params["period"].split(" ").getAt(0)) as long
+		
+		def value = params.long('value')
+		def employee = Employee.get(userId)
+		def period = Period.findByYear(year)
+		log.error('employeeId: '+employee.id)
+		
+		def criteria
+		criteria = SupplementaryTime.createCriteria()
+		def res = criteria.list{
+			and {
+				eq('employee',employee)
+				eq('period',period)
+				eq('type',SupplementaryType.HS)
+			}
+		}
+		
+	}
 }

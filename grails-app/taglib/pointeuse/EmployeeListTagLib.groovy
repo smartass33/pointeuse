@@ -35,6 +35,11 @@ class EmployeeListTagLib {
 		
 	}
 	
+	def paidHSEditTable ={attrs,body->
+		out<<render(template:"/common/paidHSEditTemplate")
+		
+	}
+	
 	
 	def listVacationEmployee ={attrs,body->
 		out<<render(template:"/common/listVacationEmployeeTemplate")

@@ -3,7 +3,7 @@
 <%@ page import="pointeuse.InAndOut"%>
 
 <h1>
-	<g:message code="yearly.recap.label"/> ${lastYear} / ${thisYear} pour <g:if test="${employee != null }">${employee.firstName} ${employee.lastName}</g:if>
+	<g:message code="yearly.recap.label"/> ${lastYear} / ${thisYear} : <g:if test="${employee != null }">${employee.firstName} ${employee.lastName}</g:if>
 	<g:set var="calendar" value="${Calendar.instance}"/>
 	
 </h1>
@@ -12,12 +12,10 @@
 <h1>SUIVI MENSUEL</h1>
 <table id="annual-report-table">
 	<thead>
-
 		<th><g:message code="annual.report.month.label"/></th>	
 		<th><g:message code="annual.report.year.label"/></th>
 		<th><g:message code="annual.report.theoritical.label"/></th>
 		<th><g:message code="annual.report.elapsed.label"/></th>
-		<!--th><g:message code="annual.report.working.days.label"/></th-->	
 		<th><g:message code="annual.report.holidays.label"/></th>
 		<th><g:message code="annual.report.RTT.label"/></th>
 		<th><g:message code="annual.report.CSS.label"/></th>
@@ -75,8 +73,8 @@
 				</td>							
 			</tr>
 		</g:each>
-		<tr>
-			<td></td>
+		<tr class='even'>
+			<td>TOTAL</td>
 			<td></td>
 			<td>
 				<g:if
@@ -127,15 +125,18 @@
 <h1>SYNTHESE ANNUELLE</h1>
 
 
-<table id='jours' style="width:800px;text-align:center">
-		<th style="width:200px;">Nombre de jours ouvrés</th>
+<table id='jours' style="width:600px">
+		<th>Nombre de jours ouvrés</th>
 		<th>Jours Travaillés</th>
 		<th>Quota Annuel de base</th>
+		<th>Congés aquis</th>
+		<th>Congés pris</th>
 		<th>Solde Jours congés</th>
-	<tr id='values'>
-		<td style="text-align:center">${annualWorkingDays}</td>
-		<td style="text-align:center">${annualEmployeeWorkingDays}</td>
-		<td style="text-align:center">
+		
+	<tr id='values' class='odd'>
+		<td>${annualWorkingDays}</td>
+		<td>${annualEmployeeWorkingDays}</td>
+		<td>
 			<g:if
           		test="${annualTheoritical !=null && (annualTheoritical.get(0)>0 ||annualTheoritical.get(1)>0)}">
                		${annualTheoritical.get(0)}H${annualTheoritical.get(1)==0?'':annualTheoritical.get(1)} 
@@ -144,16 +145,18 @@
            			0H0
            	</g:else>
         </td>
-        <td style="text-align:center">${remainingCA}</td>
+        <td>${initialCA}</td>
+        <td>${takenCA}</td>        
+        <td>${remainingCA}</td>
 	</tr>
 </table>
 <table id='heures_sup'>
-	<th>Total Heures Sup/An</th>
-		<th>Total Heures Comp/An</th>
-		<th>Quota Annuel avec H Sup et HC</th>
-		<th></th>
-	<tr>
-		<td style="text-align:center">				
+	<th>Total HS/An</th>
+	<th>Total HC/An</th>
+	<th>Quota Annuel avec HS et HC</th>
+	<th></th>
+	<tr class='odd'>
+		<td >				
 			<g:if
                		test="${annualPayableSupTime !=null && (annualPayableSupTime.get(0)>0 ||annualPayableSupTime.get(1)>0)}">
                		${annualPayableSupTime.get(0)}H${annualPayableSupTime.get(1)==0?'':annualPayableSupTime.get(1)} 
@@ -162,7 +165,7 @@
            			0H0
            </g:else>
         </td>
-		<td style="text-align:center">
+		<td>
 			<g:if
            		test="${annualPayableCompTime !=null && (annualPayableCompTime.get(0)>0 ||annualPayableCompTime.get(1)>0)}">
                		${annualPayableCompTime.get(0)}H${annualPayableCompTime.get(1)==0?'':annualPayableCompTime.get(1)} 
@@ -172,8 +175,7 @@
            	</g:else>
         </td>
 
-		<td style="text-align:center">0</td>
+		<td >0</td>
 <td></td>
 	</tr>
 </table>
-
