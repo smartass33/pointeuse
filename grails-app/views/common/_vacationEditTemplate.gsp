@@ -10,7 +10,8 @@
 				<g:sortableColumn property="period" title="${message(code: 'vacation.period.label', default: 'Period')}" />					
 				<g:sortableColumn property="counter" title="${message(code: 'CA.type.label', default: 'Counter')}" />					
 				<g:sortableColumn property="counter" title="${message(code: 'RTT.type.label', default: 'Counter')}" />					
-							
+				<g:sortableColumn property="paidHS" title="${message(code: 'paid.HS.label', default: 'Counter')}" />					
+				<g:sortableColumn property="paidHS" title="${message(code: 'paid.HC.label', default: 'Counter')}" />								
 			</tr>
 		</thead>
 		<tbody>
@@ -19,6 +20,8 @@
 		def iterator = firstYear.get(0) as int
 		def sameLine=false
 		%>
+		
+		
 			<g:each in="${orderedVacationList}" status="i" var="vacationInstance">
 				<% if (iterator==vacationInstance.period.year){
 					iterator=iterator+1
@@ -41,7 +44,8 @@
 									min="0" max="32"	
 				            	/>
 			        		</div>
-						</td>		
+						</td>	
+							
 						</g:if>	
 						<g:else>
 							<td>				
@@ -57,7 +61,8 @@
 				        		</div>
 							</td>
 					</tr>	
-				</g:else>															
+				</g:else>		
+											
 			</g:each>
 		</tbody>
 	</table>

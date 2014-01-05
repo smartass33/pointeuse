@@ -37,6 +37,7 @@ class EmployeeController {
 	def authenticateService
 	def springSecurityService
 	def timeManagerService 
+	def supplementaryTimeService
 	def employeeService
 	def dataSource
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -81,7 +82,7 @@ class EmployeeController {
 
 		
 		if (siteId!=null && !siteId.equals("")){
-			 site = Site.get(params["site.id"] as int)
+			 site = Site.get(params.int('site.id'))
 			 employeeInstanceList = Employee.findAllBySite(site)
 		}
 		
@@ -151,7 +152,7 @@ class EmployeeController {
 
 		
 		if (siteId!=null && !siteId.equals("")){
-			 site = Site.get(params["site.id"] as int)
+			 site = Site.get(params.int('site.id'))
 			 employeeInstanceList = Employee.findAllBySite(site)
 		}
 		
@@ -215,12 +216,12 @@ class EmployeeController {
 		
 		
 		if (params["site"]!=null && !params["site"].equals('')){
-			site = Site.get(params["site"] as int)
+			site = Site.get(params.int('site'))
 			siteId=site.id
 			
 		}	
 		if (params["siteId"]!=null && !params["siteId"].equals("")){
-			site = Site.get(params["siteId"] as int)
+			site = Site.get(params.int('siteId'))
 			siteId=site.id
 			
 		}		
@@ -740,21 +741,19 @@ class EmployeeController {
 		endCalendar.set(Calendar.SECOND,59)
 		
 		def orderedVacationList=[]
-		def orderedSupTimeList = [:]
-		def orderedCompTimeList = [:]
+		def orderedSupTimeMap = [:]
+		def orderedCompTimeMap = [:]
 		def periodList= Period.findAll(sort:'year',order:'asc')
 		for (Period period:periodList){
 			def vacations = Vacation.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
-			def supTimes = SupplementaryTime.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
+			
+			//def supTimes = SupplementaryTime.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
 			for (Vacation vacation:vacations){
 				orderedVacationList.add(vacation)
 			}
 			
-			for (SupplementaryTime supTime:supTimes){
-				orderedSupTimeList.add(supTime)
-			}
-			
 		}
+		def data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance)
 		
 		def previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'date',order:'desc'])
 		
@@ -765,9 +764,11 @@ class EmployeeController {
             return
         }
 		def arrivalDate = employeeInstance.arrivalDate
+		def retour = [previousContracts:previousContracts,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
+		retour << data
+		return retour
 		
-		
-		[orderedSupTimeList:orderedSupTimeList,previousContracts:previousContracts,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
+//		[orderedSupTimeMap:orderedSupTimeMap,orderedCompTimeMap:orderedCompTimeMap,previousContracts:previousContracts,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
 	}
 
 	def cartouche(long userId,int year,int month){
@@ -777,11 +778,11 @@ class EmployeeController {
 	
 	
 	def modifyAbsence(){
-		def employee = Employee.get(params["employeeId"] as int)
+		def employee = Employee.get(params.int('employeeId'))
 		def day = params["day"]
-		def supTime=params["payableSupTime"] as int
-		def compTime=params["payableCompTime"] as int
-		def monthlyTotal=params["monthlyTotalRecap"] as int
+		def supTime=params.int('payableSupTime')
+		def compTime=params.int('payableCompTime')
+		def monthlyTotal=params.int('monthlyTotalRecap')
 		def updatedSelection = params["updatedSelection"].toString()
 		if (updatedSelection.equals('G'))
 			updatedSelection = AbsenceType.GROSSESSE
@@ -879,7 +880,7 @@ class EmployeeController {
 		def cal = Calendar.instance	
 		def type = params["type"].equals("Entrer") ? "E" : "S" 
 		def isOutSideSite=params["isOutSideSite"].equals("true") ? true : false
-		Employee employeeInstance = Employee.get(params["userId"] as int)		
+		Employee employeeInstance = Employee.get(params.int('userId'))		
 		def currentDate = cal.time
 		def criteria
 		def entranceStatus=false
@@ -1076,9 +1077,9 @@ class EmployeeController {
 	}
 	
 	def showDay(){
-		def day=params["day"] as int
-		def month=params["month"] as int
-		def year=params["year"] as int
+		def day=params.int('day')
+		def month=params.int('month')
+		def year=params.int('year')
 		def employee = Employee.get(params["employeeId"])
 		def criteria = InAndOut.createCriteria()
 		def inAndOutList = criteria.list {
@@ -1140,8 +1141,8 @@ class EmployeeController {
 			if (fromRegularize){
 			render(view: "index")
 			}else{
-				def currentMonth=params["myDate_month"] as int
-				def currentYear=params["myDate_year"] as int	
+				def currentMonth=params.int('myDate_month')
+				def currentYear=params.int('myDate_year')	
 				def retour = report(employee.id as long,currentMonth as int,currentYear as int)
 				render(view: "report", model: retour)
 			}
@@ -1157,12 +1158,12 @@ class EmployeeController {
 		Employee employee = Employee.get(userId)
 		
 		if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
-			year = params["myDate_year"] as int
+			year = params.int('myDate_year')
 		}else{
 			year = calendar.get(Calendar.YEAR)
 		}
 		if (params["myDate_month"] != null && !params["myDate_month"].equals('')){
-			month = params["myDate_month"] as int
+			month = params.int('myDate_month')
 		}else{
 			month = calendar.get(Calendar.MONTH)+1
 		}
@@ -1743,8 +1744,8 @@ class EmployeeController {
 	
 	def userPDF(){
 		def myDate = params["myDate"]
-		def userId = params["userId"]
-		Employee employee = Employee.get(userId as int)
+		def userId = params.int('userId')
+		Employee employee = Employee.get(userId)
 		Calendar calendar = Calendar.instance
 		def folder = grailsApplication.config.pdf.directory
 		
@@ -1772,12 +1773,12 @@ class EmployeeController {
 		
 		
 		if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
-			year = params["myDate_year"] as int
+			year = params.int('myDate_year')
 		}else{
 			year = calendar.get(Calendar.YEAR)
 		}
 		if (params["myDate_month"] != null && !params["myDate_month"].equals('')){
-			month = params["myDate_month"] as int
+			month = params.int('myDate_month')
 		}else{
 			month = calendar.get(Calendar.MONTH)+1
 		}
@@ -1821,7 +1822,7 @@ class EmployeeController {
 		calendar.time=currentDate
 
 		if (siteId!=null && !siteId.equals("")){
-			site = Site.get(params["site.id"] as int)
+			site = Site.get(params.int('site.id'))
 			employeeInstanceList = Employee.findAllBySite(site)
 	   }
 	   
@@ -2054,12 +2055,12 @@ class EmployeeController {
 		 def userId=2
 		 
 		 if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
-			 year = params["myDate_year"] as int
+			 year = params.int('myDate_year')
 		 }else{
 			 year = calendar.get(Calendar.YEAR)
 		 }
 		 if (params["myDate_month"] != null && !params["myDate_month"].equals('')){
-			 month = params["myDate_month"] as int
+			 month = params.int('myDate_month')
 		 }else{
 			 month = calendar.get(Calendar.MONTH)+1
 		 }
@@ -2281,7 +2282,8 @@ class EmployeeController {
 
 		def userId = (params["userId"].split(" ").getAt(0)) as long
 		def year = (params["period"].split(" ").getAt(0)) as long
-		
+		def type = ((params["type"].split(" ").getAt(0))).equals('HS')?SupplementaryType.HS:SupplementaryType.HC
+
 		def value = params.long('value')
 		def employee = Employee.get(userId)
 		def period = Period.findByYear(year)
@@ -2289,13 +2291,37 @@ class EmployeeController {
 		
 		def criteria
 		criteria = SupplementaryTime.createCriteria()
-		def res = criteria.list{
+		def supplementaryOccurence = criteria.get{
 			and {
 				eq('employee',employee)
 				eq('period',period)
-				eq('type',SupplementaryType.HS)
+				eq('type',type)
 			}
 		}
+		
+		if (supplementaryOccurence != null){
+			supplementaryOccurence.value=value
+			supplementaryOccurence.save()
+			//update value
+		}else{
+			SupplementaryTime ST = new SupplementaryTime()
+			ST.employee = employee
+			ST.loggingTime = new Date()
+			ST.value = value
+			ST.type = type
+			ST.period = period			
+			ST.user =  springSecurityService.currentUser
+			ST.save()
+
+		}
+		def data = supplementaryTimeService.getAllSupAndCompTime(employee)
+		
+		
+		def model = [employeeInstance: employee] << data
+		
+		
+		render template: "/common/paidHSEditTemplate", model:model
+		return
 		
 	}
 }
