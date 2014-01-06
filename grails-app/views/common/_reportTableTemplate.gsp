@@ -98,9 +98,6 @@
 	
 	                      </font>
 	                    </g:if> <g:else>
-	                    
-	                    					
-	                    					
 	                      <font size="2"> <g:select
 	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2',		  
 								  params:'\'employeeId=' + employee.id 						  
@@ -129,8 +126,7 @@
 								  + '&updatedSelection=\' + this.value'								  )}"
 	                          name="absenceType" from="${AbsenceType.values()}"
 	                          value="${AbsenceType}" optionKey="key"
-	                          noSelection="${['-':holidayMap.get(entries.key).type]}" />
-	
+	                          noSelection="${['-':holidayMap.get(entries.key).type]}" />	
 	                      </font>
 	                </g:if> 
 	                <g:else>
@@ -223,6 +219,6 @@
             </tr>  
           </g:each>
         </g:each>
-        <g:hiddenField name="employee.id" value="${employeeId}" />
+        <g:hiddenField name="employee.id" value="${userId}" />
       </tbody>
     </table>

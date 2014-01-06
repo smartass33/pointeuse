@@ -68,23 +68,21 @@
 				<td width="20%">
 					<table width="100%" >
 						<tr>
-							<td style="font-weight: bold;text-align:left;" >${firstName} ${lastName}</td>
+							<td style="font-weight: bold;text-align:left;" >${fieldValue(bean: employee, field: "firstName")} ${fieldValue(bean: employee, field: "lastName")}</td>
 						</tr>
-						<tr/><tr/><tr/><tr/><tr/><tr/><tr/><tr/>
-						
+						<tr/><tr/><tr/><tr/><tr/><tr/><tr/><tr/>						
 						<tr>
-							<td style="text-align:left;">${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${weeklyContractTime}</td>
+							<td style="text-align:left;">${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${fieldValue(bean: employee, field: "weeklyContractTime")}</td>
 						</tr>
 						<tr>
-							<td style="text-align:left;">${message(code: 'employee.matricule.label', default: 'report')}: ${matricule}</td>
+							<td style="text-align:left;">${message(code: 'employee.matricule.label', default: 'report')}: ${fieldValue(bean: employee, field: "matricule")}</td>
 						</tr>
 					</table> 
 				</td>
 				<td width="80%">
 					<table width="100%" >						
 						<tbody>		
-							<tr>
-							
+							<tr>					
 								<td width="35%" style="text-align:left;" ></td>	
 	 							<td>
 	 								<table>
@@ -95,7 +93,7 @@
 	        					<td>
 	 								<table>
 	 									<thead></thead>
-	 									<tr><td style="font-weight: bold">${message(code: 'employee.cumul', default: 'report')} ${yearInf}/${yearSup}</td></tr>
+	 									<tr><td style="font-weight: bold">${message(code: 'employee.cumul', default: 'report')} ${period2.year}/${period2.year + 1}</td></tr>
 	        						</table>
 	        					</td>
 							</tr>			

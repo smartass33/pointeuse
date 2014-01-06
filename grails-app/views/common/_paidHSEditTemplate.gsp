@@ -20,30 +20,31 @@
 		</thead>
 		
 		<tbody>
-		<g:each in="${Period.findAll(sort:'year',order:'asc') }"  status="p" var="period">
+		<! --g:each in="${Period.findAll(sort:'year',order:'asc') }"  status="p" var="period"-->
+		<% def period_sup = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)%>
 			<tr>
-				<td>${period}</td>
-				<td>${orderedSupTimeMap.get(period).value}</td>	
+				<td>${period_sup}</td>
+				<td>${orderedSupTimeMap.get(period_sup).value}</td>	
 				<td>
 					<g:remoteField id="value" action="payHS" update="divId"
-					name="HS" value="${orderedSupTimeMap.get(period).value ?: '0'}" paramName="HS"
+					name="HS" value="${orderedSupTimeMap.get(period_sup).value ?: '0'}" paramName="HS"
 					style="vertical-align: middle;"
-					params="\'value=\'+this.value+\'&userId=\'+\'${employeeInstance.id}+\'+\'&period=\'+\'${period.year}+\'+\'&type=\'+\'HS+\'"/>
+					params="\'value=\'+this.value+\'&userId=\'+\'${employeeInstance.id}+\'+\'&period=\'+\'${period_sup.year}+\'+\'&type=\'+\'HS+\'"/>
 				</td>
 				
-				<td>solde: ${orderedSupTimeMap.get(period).value}</td>
-				<td>${orderedCompTimeMap.get(period).value}</td>
+				<td>solde: ${orderedSupTimeMap.get(period_sup).value}</td>
+				<td>${orderedCompTimeMap.get(period_sup).value}</td>
 				<td>
 					<g:remoteField id="value" action="payHS" update="divId"
-					name="HC" value="${orderedCompTimeMap.get(period).value ?: '0'}" paramName="HC"
+					name="HC" value="${orderedCompTimeMap.get(period_sup).value ?: '0'}" paramName="HC"
 					style="vertical-align: middle;"
-					params="\'value=\'+this.value+\'&userId=\'+\'${employeeInstance.id}+\'+\'&period=\'+\'${period.year}+\'+\'&type=\'+\'HC+\'"/>
+					params="\'value=\'+this.value+\'&userId=\'+\'${employeeInstance.id}+\'+\'&period=\'+\'${period_sup.year}+\'+\'&type=\'+\'HC+\'"/>
 				</td>
-				<td>solde: ${orderedCompTimeMap.get(period).value}</td>
+				<td>solde: ${orderedCompTimeMap.get(period_sup).value}</td>
 			
 			<tr>
 		
-		</g:each>
+		<!-- /g:each-->
 		</tbody>
 
 	</table>

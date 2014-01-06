@@ -28,6 +28,7 @@ import com.itextpdf.text.pdf.PdfCopyFields
 import grails.converters.JSON
 
 
+
 class EmployeeController {
 	def PDFService
 	def utilService
@@ -80,15 +81,11 @@ class EmployeeController {
 		if (currentDate!=null)
 		calendar.time=currentDate
 
-		
 		if (siteId!=null && !siteId.equals("")){
 			 site = Site.get(params.int('site.id'))
 			 employeeInstanceList = Employee.findAllBySite(site)
-		}
-		
-		else{
-			employeeInstanceList = Employee.findAll([sort:'site',order:'asc'])
-			
+		}else{
+			employeeInstanceList = Employee.findAll([sort:'site',order:'asc'])	
 		}
 		for (Employee employee:employeeInstanceList){
 			
@@ -99,8 +96,7 @@ class EmployeeController {
 					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
 					eq('year',calendar.get(Calendar.YEAR))
 					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-				}
-				
+				}				
 			}
 			criteria = InAndOut.createCriteria()
 			
@@ -112,8 +108,7 @@ class EmployeeController {
 					eq('month',calendar.get(Calendar.MONTH)+1)
 					eq('year',calendar.get(Calendar.YEAR))
 					order('time')
-				}
-				
+				}			
 			}
 			
 			dailyInAndOutMap.put(employee, inAndOutList)
@@ -125,10 +120,8 @@ class EmployeeController {
 			}
 			dailyMap.put(employee,timeManagerService.computeHumanTime(elapsedSeconds))
 		}
-
 		render template: "/common/listDailyTimeTemplate", model:[dailyMap: dailyMap,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
 		return	
-
 	}
 	
 	@Secured(['ROLE_ADMIN'])
@@ -154,14 +147,10 @@ class EmployeeController {
 		if (siteId!=null && !siteId.equals("")){
 			 site = Site.get(params.int('site.id'))
 			 employeeInstanceList = Employee.findAllBySite(site)
+		}else{
+			employeeInstanceList = Employee.findAll()	
 		}
-		
-		else{
-			employeeInstanceList = Employee.findAll()
-			
-		}
-		for (Employee employee:employeeInstanceList){
-			
+		for (Employee employee:employeeInstanceList){		
 			criteria = DailyTotal.createCriteria()
 			dailyTotal= criteria.get{
 				and {
@@ -169,11 +158,9 @@ class EmployeeController {
 					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
 					eq('year',calendar.get(Calendar.YEAR))
 					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-				}
-				
+				}				
 			}
-			criteria = InAndOut.createCriteria()
-			
+			criteria = InAndOut.createCriteria()			
 			inAndOutList= criteria.list{
 				and {
 						eq('employee',employee)
@@ -193,13 +180,12 @@ class EmployeeController {
 				dailySupMap.put(employee,timeManagerService.computeHumanTime(0))
 			}
 			dailyMap.put(employee,timeManagerService.computeHumanTime(elapsedSeconds))
-		}
-		
+		}		
 		if (site!=null){
-		render template: "/common/listDailyTimeTemplate", model:[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
-		return	}
+			render template: "/common/listDailyTimeTemplate", model:[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
+			return	
+		}
 		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
-
 	}
 	
 	
@@ -210,20 +196,15 @@ class EmployeeController {
 		def employeeInstanceTotal
 		def site
 		def siteId=params["site"]
-		boolean back = (params["back"] != null && params["back"].equals("true")) ? true : false
-		
-		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
-		
-		
+		boolean back = (params["back"] != null && params["back"].equals("true")) ? true : false		
+		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false				
 		if (params["site"]!=null && !params["site"].equals('')){
 			site = Site.get(params.int('site'))
-			siteId=site.id
-			
+			siteId=site.id			
 		}	
 		if (params["siteId"]!=null && !params["siteId"].equals("")){
 			site = Site.get(params.int('siteId'))
 			siteId=site.id
-			
 		}		
 		
 		def user = springSecurityService.currentUser 
@@ -744,6 +725,7 @@ class EmployeeController {
 		def orderedSupTimeMap = [:]
 		def orderedCompTimeMap = [:]
 		def periodList= Period.findAll(sort:'year',order:'asc')
+		
 		for (Period period:periodList){
 			def vacations = Vacation.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
 			
@@ -753,7 +735,9 @@ class EmployeeController {
 			}
 			
 		}
-		def data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance)
+		def period = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)
+		
+		def data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)
 		
 		def previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'date',order:'desc'])
 		
@@ -2315,6 +2299,8 @@ class EmployeeController {
 
 		}
 		def data = supplementaryTimeService.getAllSupAndCompTime(employee)
+		
+		
 		
 		
 		def model = [employeeInstance: employee] << data
