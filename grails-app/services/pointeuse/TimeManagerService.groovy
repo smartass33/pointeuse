@@ -201,7 +201,7 @@ class TimeManagerService {
 	}
 	
 	
-	def regularizeTime(String type,String userId,InAndOut inOrOut,Calendar calendar){
+	def regularizeTime(String type,Long userId,InAndOut inOrOut,Calendar calendar){
 		if (calendar == null){
 			calendar = Calendar.instance
 		}
@@ -267,7 +267,7 @@ class TimeManagerService {
 		
 		
 		for( int p = 0 ; ( p < idList.size() ) ; p++ ) {
-		// l'id�e: comparer time et newTime
+		// l'id���e: comparer time et newTime
 			def inOrOut = InAndOut.get(idList[p])
 			if (inOrOut==null){
 				log.error("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification")
@@ -411,6 +411,10 @@ class TimeManagerService {
 		return [hours,minutes,seconds]
 	}
 
+	
+	def computeSecondsFromHumanTime(def table){
+		return table.get(0)*3600+table.get(1)*60+table.get(2)
+	}
 	
 	def recomputeDailyTotals(long id){
 		def tmpInOrOut
@@ -974,6 +978,7 @@ class TimeManagerService {
 		}else{
 			calendar.time=myDate
 		}
+
 		calendar.set(Calendar.HOUR_OF_DAY,23)
 		calendar.set(Calendar.MINUTE,59)
 		calendar.set(Calendar.SECOND,59)
@@ -983,6 +988,7 @@ class TimeManagerService {
 		def calendarLoop = calendar
 		int month = calendar.get(Calendar.MONTH)+1 // starts at 0
 		int year = calendar.get(Calendar.YEAR)
+			
 		calendarLoop.getTime().clearTime()
 		def lastWeekParam = utilService.getLastWeekOfMonth(month, year)
 		def isSunday=lastWeekParam.get(1)
@@ -990,7 +996,7 @@ class TimeManagerService {
 		
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 			def currentDay=calendarLoop.time
-			// �limine les dimanches du rapport
+			// ���limine les dimanches du rapport
 			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
 				mapByDay = [:]
 			}
@@ -1004,7 +1010,7 @@ class TimeManagerService {
 					eq('year',year)
 				}
 			}
-			// permet de r�cup�rer le total hebdo
+			// permet de r��cup��rer le total hebdo
 			if (dailyTotal != null && dailyTotal != dailyTotalId){
 				dailySeconds = getDailyTotal(dailyTotal)
 				monthlyTotalTime += dailySeconds
@@ -1136,25 +1142,50 @@ class TimeManagerService {
 		def yearlySansSolde=cartoucheTable.get('yearlySansSolde')
 		def payableSupTime = computeHumanTime(Math.round(monthlySupTime))
 		def payableCompTime = computeHumanTime(0)
-		if (employee.weeklyContractTime!=Employee.legalWeekTime && (monthlyTotalTime > monthTheoritical)){
+		if (employee.weeklyContractTime!=Employee.legalWeekTime && monthlyTotalTime > monthTheoritical){
 			payableCompTime = computeHumanTime(Math.round(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0)))
-		}
-		
+			
+		}	
 		monthlyTotalTimeByEmployee.put(employee, computeHumanTime(monthlyTotalTime))
 		def monthlyTotal=computeHumanTime(monthlyTotalTime)
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
-		
-		if (month>5){
-			yearInf=year
-			yearSup=year+1
-		}else{
-			yearInf=year-1
-			yearSup=year
-		}
-
+		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)	
 		def bankList = BankHoliday.findByCalendar(calendar)
-		return [dailyBankHolidayMap:dailyBankHolidayMap,employeeId:employee.id,weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,firstName:employee.firstName,lastName:employee.lastName,monthlyTotalRecap:monthlyTotal,payableSupTime:payableSupTime,payableCompTime:payableCompTime,employee:employee,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:employee.id,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlySansSolde:yearlySansSolde,yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
-
+		return [period2:period,
+			dailyBankHolidayMap:dailyBankHolidayMap,
+			monthlyTotalRecap:monthlyTotal,
+			payableSupTime:payableSupTime,
+			payableCompTime:payableCompTime,
+			employee:employee,
+			siteId:siteId,
+			userId:employee.id,
+			workingDays:workingDays,
+			holiday:holiday,
+			rtt:rtt,
+			sickness:sickness,
+			sansSolde:sansSolde,
+			yearlyActualTotal:yearlyActualTotal,
+			monthTheoritical:monthTheoritical,
+			pregnancyCredit:pregnancyCredit,
+			yearlyPregnancyCredit:yearlyPregnancyCredit,
+			yearlyTheoritical:yearlyTheoritical,
+			yearlyHoliday:yearlyHoliday,
+			yearlyRtt:yearlyRtt,
+			yearlySickness:yearlySickness,
+			yearlySansSolde:yearlySansSolde,
+			yearlyTheoritical:yearlyTheoritical,
+			period:calendar,
+			monthlyTotal:monthlyTotalTimeByEmployee,
+			weeklyTotal:weeklyTotalTimeByEmployee,
+			weeklySupTotal:weeklySupTotalTimeByEmployee,
+			dailySupTotalMap:dailySupTotalMap,
+			dailyTotalMap:dailyTotalMap,
+			month:month,
+			year:year,
+			period:calendarLoop.getTime(),
+			dailyTotalMap:dailyTotalMap,
+			holidayMap:holidayMap,
+			weeklyAggregate:weeklyAggregate]
 	}
 	
 	def getEcartData(Site site, def monthList, Period period){
@@ -1291,18 +1322,6 @@ class TimeManagerService {
 				it.value=hours+'H'+minutes
 		   }
 			ecartMinusRTTMap.each() {
-				/*
-				if (it.value<0){
-					def serviceData=computeHumanTime(-(it.value) as long)
-					def hours=serviceData.get(0)
-					def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
-					it.value='-'+hours+'H'+minutes
-				}else{
-					def serviceData=computeHumanTime(it.value as long)
-					def hours=serviceData.get(0)
-					def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
-					it.value=hours+'H'+minutes
-				}*/
 				def serviceData=computeHumanTime(it.value as long)
 				def hours=serviceData.get(0)
 				def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
@@ -1522,6 +1541,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		return monthTheoritical
 	}
 	
+
 	
 	
 }

@@ -1,3 +1,5 @@
+<%@ page import="pointeuse.Reason" %>
+
 <h1>
 	<g:formatDate format="E dd MMM yyyy'" date="${Calendar.instance.time}" />
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span
@@ -86,7 +88,6 @@
 				</g:else>
 			</td>
 
-			
 			<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
 			<td><g:link class="modalbox" controller="employee"
 					action="reportLight" params="[userId:employee.id]">rapport</g:link>
@@ -95,10 +96,88 @@
 					${message(code: 'employee.disconnect.label', default: 'Sortie')}
 				</g:link></td>
 			<td></td>
-			<td><modalbox:createLink controller="inAndOut" action="create"
-					id="${employee.id}" css="modalbox"
-					title="Ajouter un évenement oublié" width="500">
-					<g:message code="inAndOut.regularization" default="Régul" />
-				</modalbox:createLink></td>
+			<td>				<div>
+						<div>
+							<a href="#join_form" id="join_pop">Ajouter un élement</a>
+						</div>
+
+					</div> <a href="#x" class="overlay" id="join_form"></a>
+					<div class="popup">
+						<h2>Creer Entrée/Sortie</h2>
+						<p>Renseignez les informations pour creer un nouvel évènement</p>
+							<table>
+								<tbody>
+									<tr class="prop">
+										<td class="name" valign="top">choisissez la date:</td>
+										<td class="value" valign="top"><input type="text"
+											name="date_picker" id="date_picker" /> <script>
+							$.datepicker.regional['fr'] = {
+								closeText: 'Fermer',
+								prevText: '<Précédent',
+								nextText: 'Suivant>',
+								currentText: 'Сегодня',
+								monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin',
+								'Juillet','Aout','Septembre','Octobre','Novembre','Décembre'],
+								monthNamesShort: ['Jan','Fev','Mar','Avr','Mai','Jun',
+								'Jui','Аou','Sep','Oct','Nov','Dec'],
+								dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+								dayNamesShort: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
+								dayNamesMin: ['D','L','M','M','J','V','S'],
+								weekHeader: 'Semaine',
+								dateFormat: 'dd/mm/yy',
+								firstDay: 1,
+								isRTL: false,
+								showMonthAfterYear: false,
+								yearSuffix: ''
+							};
+							
+							$.timepicker.regional['fr'] = {
+	timeOnlyTitle: 'Horaire',
+	timeText: 'Horaire',
+	hourText: 'Heure',
+	minuteText: 'Minute',
+	secondText: 'Seconde',
+	millisecText: 'Milliseconde',
+	timezoneText: 'Fuseau Horaire',
+	currentText: 'Horaire Actuel',
+	closeText: 'Fermer',
+	timeFormat: 'HH:mm',
+	amNames: ['AM', 'A'],
+	pmNames: ['PM', 'P'],
+	isRTL: false
+};
+$.timepicker.setDefaults($.timepicker.regional['fr']);
+							$.datepicker.setDefaults($.datepicker.regional['fr']);							
+							$("#date_picker").datetimepicker();</script></td>
+									</tr>
+									<tr class="prop">
+										<td class="name" valign="top">Evènement:</td>
+										<td class="value" valign="top"><g:select
+												name="event.type" from="${['E','S']}"
+												valueMessagePrefix="entry.name"
+												noSelection="['':'-Choisissez votre élément-']" /></td>
+									</tr>
+
+
+									<tr class="prop">
+										<td class="name" valign="top">Raison:</td>
+										<td class="value" valign="top"><g:select name="reason.id"
+												from="${Reason.list([sort:'name'])}"
+												noSelection="['':'-Ajouter une raison-']" optionKey="id"
+												optionValue="name" /></td>
+										</tr>
+
+
+								</tbody>
+							</table>
+
+							
+							<g:submitToRemote oncomplete="showSpinner(false)"
+								onloading="showSpinner(true)" update="c"
+								url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
+						<a class="close" href="#close"></a>
+					</div>
+				
+		</td>
 		</tr>
 	</table>

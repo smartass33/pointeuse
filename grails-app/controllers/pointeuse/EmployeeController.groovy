@@ -1609,7 +1609,7 @@ class EmployeeController {
 				entranceStatus=false
 			}
 			
-			[employee: employee,inAndOuts:inAndOuts,dailyTotal:dailyTotal,humanTime:humanTime, dailySupp:dailySupp,mapByDay:mapByDay,entranceStatus:entranceStatus,totalByDay:totalByDay]
+			[userId: employee.id,employee: employee,inAndOuts:inAndOuts,dailyTotal:dailyTotal,humanTime:humanTime, dailySupp:dailySupp,mapByDay:mapByDay,entranceStatus:entranceStatus,totalByDay:totalByDay]
 		}
 		catch (Exception e){
 			log.error('error with application: '+e.toString())		
@@ -1784,94 +1784,7 @@ class EmployeeController {
 
 	}
 	
-	def dailyTotalPDF(){
-		log.error('method dailyTotalPDF called with parameters:')
-		def employeeMap = [:]
-		def dailyMap = [:]
-		
-		def day=params["day"]
-		def siteId=params["site.id"]
-		def currentDate = params["currentDate"]
-		def dailyTotal
-		def criteria 
-		def elapsedSeconds
-		def site
-		def dailyInAndOutMap = [:]
-		def dailySupMap = [:]
-		def inAndOutList
-		def employeeInstanceList
-		def filename
-		def calendar = Calendar.instance
-		if (currentDate!=null)
-		calendar.time=currentDate
 
-		if (siteId!=null && !siteId.equals("")){
-			site = Site.get(params.int('site.id'))
-			employeeInstanceList = Employee.findAllBySite(site)
-	   }
-	   
-	   else{
-		   employeeInstanceList = Employee.findAll([sort:'site',order:'asc'])	   
-	   }
-	   for (Employee employee:employeeInstanceList){
-		   
-		   criteria = DailyTotal.createCriteria()
-		   dailyTotal= criteria.get{
-			   and {
-				   eq('employee',employee)
-				   eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
-				   eq('year',calendar.get(Calendar.YEAR))
-				   eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-			   }		   
-		   }
-		   criteria = InAndOut.createCriteria()
-		   
-		   inAndOutList= criteria.list{
-			   and {
-				   eq('employee',employee)
-				   eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
-				   eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-				   eq('month',calendar.get(Calendar.MONTH)+1)
-				   eq('year',calendar.get(Calendar.YEAR))
-			   }		   
-		   }
-		   
-		   dailyInAndOutMap.put(employee, inAndOutList)
-		   elapsedSeconds = timeManagerService.getDailyTotal(dailyTotal)
-		   if (elapsedSeconds > DailyTotal.maxWorkingTime){
-			   dailySupMap.put(employee,timeManagerService.computeHumanTime(elapsedSeconds-DailyTotal.maxWorkingTime))
-		   }else{
-			   dailySupMap.put(employee,timeManagerService.computeHumanTime(0))
-		   }
-		   dailyMap.put(employee,timeManagerService.computeHumanTime(elapsedSeconds))
-	   }
-		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/listDailyTimePDFTemplate', model: [dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,site:site,currentDate:calendar.time])
-		OutputStream outputStream;	
-		def folder = grailsApplication.config.pdf.directory
-		if (site!=null)
-			filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+(calendar.get(Calendar.DAY_OF_MONTH)).toString() +'-'+site.name+'.pdf'
-		else
-			filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+(calendar.get(Calendar.DAY_OF_MONTH)).toString() + '.pdf'
-		
-		try {
-			outputStream = new FileOutputStream (folder+'/'+filename);
-			bytes.writeTo(outputStream);
-			return
-		}finally {
-			if(bytes)
-			   bytes.close();
-
-			if(outputStream)
-			outputStream.close();
-			File file = new File(folder+'/'+filename)
-			
-			response.setContentType("application/octet-stream")
-			response.setHeader("Content-disposition", "filename=${file.name}")
-			response.outputStream << file.bytes
-			return
-		}
-	}
-	
 	
 	
 	def sendEmail(){

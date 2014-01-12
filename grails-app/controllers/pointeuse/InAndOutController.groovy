@@ -26,9 +26,20 @@ class InAndOutController {
     }
 
     def create(Long id) {
+		params.each{i->
+			log.error('param: '+i)
+		}
+		
+		def reason = params["reason"]
+		def event = params["event"]
+		def date_picker =params["date_picker"]
 		def employee
 		def complete = params["complete"] ? true : false
 		def reportRedirect = params["report"] ? true : false
+		
+		
+		Date date =  new Date().parse("d/M/yyyy H:m", date_picker)
+		
 		def inAndOutInstance = new InAndOut(params)
 		
 		if (id!=null){
@@ -46,13 +57,22 @@ class InAndOutController {
 		def employeeId
 		def timeDiff
 		def userId = params["userId"]
-		def hour = params["myTime_hour"] as int
-		def minute = params["myTime_minute"] as int
-		def instanceDate = params["inOrOutDate"]
-		def second = params["myTime_second"]!=null ? params["myTime_second"] as int :0
+		Date date
+		def date_picker =params["date_picker"]
+		if (date_picker != null && date_picker.size()>0){
+			date =  new Date().parse("d/M/yyyy H:m", date_picker)
+			params["myTime_hour"]=date.getAt(Calendar.HOUR)
+			params["myTime_minute"]=date.getAt(Calendar.MINUTE)
+		}
+		
+		
+		def hour = params.int("myTime_hour")
+		def minute = params.int("myTime_minute")
+		def instanceDate = date!=null?date:params["inOrOutDate"]
+		def second = params["myTime_second"]!=null ? params.int("myTime_second") :0
 		def fromReport = params["fromReport"].equals('true') ? true:false
-		if (userId != null && userId != ""){
-			employee=Employee.get(userId)
+		if (userId != null && userId != "" & userId.size()>0){
+			employee=Employee.get(userId[0])
 			employeeId=employee.id
 		}else{
 			flash.message = message(code: 'employee.not.null')
@@ -145,7 +165,7 @@ class InAndOutController {
 	
 
 		
-		timeManagerService.regularizeTime(type,userId,inAndOutInstance,calendar)
+		timeManagerService.regularizeTime(type,employeeId,inAndOutInstance,calendar)
 		
 		if (inAndOutInstance.type.equals('E')){
 			flash.message = message(code: 'inAndOut.create.label', args: [message(code:'inAndOut.entry.label'), calendar.time])
