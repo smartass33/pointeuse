@@ -28,7 +28,7 @@ grails.project.dependency.resolution = {
         // specify dependency exclusions here; for example, uncomment this to disable ehcache:
         // excludes 'ehcache'
     }
-    log "info" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
     legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
@@ -41,6 +41,8 @@ grails.project.dependency.resolution = {
         grailsCentral()
         mavenCentral()
         // uncomment these (or add new ones) to enable remote dependency resolution from public Maven repositories
+		mavenRepo "http://repo.grails.org/grails/core" // needed for compass, etc.
+	
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
@@ -48,7 +50,6 @@ grails.project.dependency.resolution = {
 
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
-        // runtime 'mysql:mysql-connector-java:5.1.24'
 		compile 'log4j:apache-log4j-extras:1.0'
 		runtime 'mysql:mysql-connector-java:5.1.21'
 		compile 'com.itextpdf:itextpdf:5.4.1'
@@ -61,37 +62,26 @@ grails.project.dependency.resolution = {
         // plugins for the compile step
         compile ":scaffolding:2.0.1"
         compile ':cache:1.1.1'
-		compile ":joda-time:1.4"
 		
         // plugins needed at runtime but not for compilation
-        runtime ":hibernate:3.6.10.6" // or ":hibernate4:4.1.11.6"
+		compile ":hibernate:3.6.10.6" // or ":hibernate4:4.1.11.6"
+		//runtime ":hibernate4:4.1.11.4"
+		
+		
         runtime ":database-migration:1.3.8"
         runtime ":jquery:1.10.2.2"
-        runtime ":resources:1.2.1"
-        // Uncomment these (or add new ones) to enable additional resources capabilities
-        //runtime ":zipped-resources:1.0.1"
-        //runtime ":cached-resources:1.1"
-        //runtime ":yui-minify-resources:0.1.5"
-		
+        runtime ":resources:1.2.1"	
 		compile ":google-visualization:0.6.2"
 		compile ":excel-export:0.1.10"
 		compile ":jquery-ui:1.10.3"
 		compile ":jquery-ui-timepicker:0.9.8.1"
 		compile ":jquery-date-time-picker:0.1.1"
-		compile ":tooltip:0.8"
-		
+		compile ":tooltip:0.8"		
 		runtime ":prototype:1.0"
 		compile ":spring-security-core:1.2.7.3"
-
 		compile ":rendering:0.4.4"
 		compile ":quartz2:2.1.6.2"
-		//compile ":modalbox:0.4"
 		compile ":richui:0.8"
-		runtime ":searchable:0.6.6"
-		//compile ":mail:1.0.1"
-		
-//runtime 'org.springframework:spring-test:3.1.0.RELEASE'		//compile ":spring-test:3.2.5.RELEASE"
-		//runtime ":simple-modal:1.0"
-		
+		runtime ":searchable:0.6.6"	
     }
 }
