@@ -178,6 +178,7 @@ class InAndOutController {
 				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])
 				
 			}else{
+		//		render template: "/common/listDailyTimeTemplate", model:[result:'DONE']
 				redirect(action: "pointage", controller:"employee", id: employeeId)
 				log.error('entry created from pointage: '+inAndOutInstance)			
 			}

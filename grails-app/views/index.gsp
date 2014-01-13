@@ -244,11 +244,7 @@
 	   }
 	}
 
-	/*
-	  $(function() {
-    $( "#datepicker" ).datepicker();
-  });
-	*/
+
 
 	</script>
 

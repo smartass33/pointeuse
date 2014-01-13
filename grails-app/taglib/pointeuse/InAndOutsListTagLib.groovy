@@ -7,4 +7,9 @@ class InAndOutsListTagLib {
 		
 	}
 	
+	def inAndOutResult ={attrs,body->
+		out<<render(template:"/common/inAndOutResultTemplate")
+		
+	}
+	
 }

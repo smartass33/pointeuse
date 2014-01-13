@@ -64,7 +64,7 @@ $("#someButtonId").on("click", function(e) {
 			params:'\'userId=' + employeeInstance.id 						  
 			+ '&counter=\' + this.value')}"
 	      	value="${employeeInstance?.weeklyContractTime}" 
-			min="0" max="32"	
+			min="0" 
 	/>
 </div>
 

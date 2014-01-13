@@ -98,7 +98,7 @@
 			<td></td>
 			<td>				<div>
 						<div>
-							<a href="#join_form" id="join_pop">Ajouter un élement</a>
+							<a href="#join_form" id="join_pop" >Ajouter un élement</a>
 						</div>
 
 					</div> <a href="#x" class="overlay" id="join_form"></a>
@@ -174,6 +174,8 @@ $.timepicker.setDefaults($.timepicker.regional['fr']);
 							
 							<g:submitToRemote oncomplete="showSpinner(false)"
 								onloading="showSpinner(true)" update="c"
+								onSuccess="closePopup ();"
+								
 								url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
 						<a class="close" href="#close"></a>
 					</div>

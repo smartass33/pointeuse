@@ -4,8 +4,6 @@ import grails.plugins.springsecurity.Secured
 
 import org.apache.log4j.Logger
 import org.springframework.dao.DataIntegrityViolationException
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormatter
 
 import pl.touk.excel.export.WebXlsxExporter
 import pl.touk.excel.export.XlsxExporter

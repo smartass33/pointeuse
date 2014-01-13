@@ -57,7 +57,7 @@
 a#login_pop:hover,a#join_pop:hover {
 	border-color: #eee;
 }
-
+/*
 .overlay {
 	background-color: rgba(0, 0, 0, 0.6);
 	bottom: 0;
@@ -80,7 +80,7 @@ a#login_pop:hover,a#join_pop:hover {
 	visibility: visible;
 	opacity: 1;
 }
-
+*/
 .popup {
 	background-color: #fff;
 	border: 3px solid #fff;
@@ -222,6 +222,13 @@ a#login_pop:hover,a#join_pop:hover {
 	margin: 0 45% 10px 10px;
 }
 </style>
+
+<script type="text/javascript">
+function closePopup ( ){
+	$( ".popup" ).remove();
+	window.location.reload()
+}
+</script>
 </head>
 
 <body>
@@ -271,11 +278,11 @@ a#login_pop:hover,a#join_pop:hover {
 
 					<div>
 						<div>
-							<a href="#join_form" id="join_pop">Ajouter un élement</a>
+							<a href="#join_form" id="join_pop" class="modalbox">Ajouter un élement</a>
 						</div>
 
 					</div> <a href="#x" class="overlay" id="join_form"></a>
-					<div class="popup">
+					<div id="popup" class="popup">
 						<h2>Creer Entrée/Sortie</h2>
 						<p>Renseignez les informations pour creer un nouvel évènement</p>
 						<g:form action="create">
@@ -347,8 +354,10 @@ $.timepicker.setDefaults($.timepicker.regional['fr']);
 
 							<g:submitToRemote oncomplete="showSpinner(false)"
 								onloading="showSpinner(true)" update="c"
+								onSuccess="closePopup ();"
 								url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
 						</g:form>
+						<!-- div id="c">${result}</div-->
 						<a class="close" href="#close"></a>
 					</div>
 

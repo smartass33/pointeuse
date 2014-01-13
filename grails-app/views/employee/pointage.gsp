@@ -89,28 +89,6 @@ a#login_pop:hover,a#join_pop:hover {
 	border-color: #eee;
 }
 
-.overlay {
-	background-color: rgba(0, 0, 0, 0.6);
-	bottom: 0;
-	cursor: default;
-	left: 0;
-	opacity: 0;
-	position: fixed;
-	right: 0;
-	top: 0;
-	visibility: hidden;
-	z-index: 1;
-	-webkit-transition: opacity .5s;
-	-moz-transition: opacity .5s;
-	-ms-transition: opacity .5s;
-	-o-transition: opacity .5s;
-	transition: opacity .5s;
-}
-
-.overlay:target {
-	visibility: visible;
-	opacity: 1;
-}
 
 .popup {
 	background-color: #fff;
@@ -253,6 +231,14 @@ a#login_pop:hover,a#join_pop:hover {
 	margin: 0 45% 10px 10px;
 }
 </style>
+
+
+<script type="text/javascript">
+function closePopup ( ){
+	$( ".popup" ).remove();
+	window.location.reload()
+}
+</script>
 	</head>
 	<body>
 		<g:javascript>window.onload = updateClock();window.onload=resetTimer();</g:javascript>	
