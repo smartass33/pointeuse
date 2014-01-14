@@ -21,7 +21,7 @@ class SiteController {
 		def mapData = []
 		def siteTable =[]
 		
-		for (Site site:Site.findAll()){
+		for (Site site:Site.findAll("from Site")){
 			siteTable =[]
 			if (site.latitude!=0 && site.longitude!=0){
 				siteTable[0]=site.latitude

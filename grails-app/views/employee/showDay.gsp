@@ -8,6 +8,13 @@
 	</head>
 	<body>
 		<g:listInAndOuts id='koko'/>
-			<a href="employee/report/?userId=32" title="Close window" onclick="Modalbox.hide(); return false;">Close</a>	
+		<form method="POST">
+							<g:hiddenField name="userId" value="${userId}" />
+														<g:hiddenField name="monthPeriod" value="${month}" />
+														<g:hiddenField name="yearPeriod" value="${year}" />
+							
+			<g:actionSubmit controller="employee"
+						value="Retour" action="report" class="listButton" />
+		</form>
 	</body>
 </html>

@@ -21,7 +21,7 @@ class InAndOutCLosingJob {
 		to "henri.martin@orange.com"
 		from "henri.martin@gmail.com"
 		subject "Erreur de badgage pour" +employee.firstName+" "+employee.lastName
-		body "L'employŽ "+employee.firstName+" "+employee.lastName+" a oubliŽ de badger sa sortie du "+inOrOut.day+" "+inOrOut.month""
+		body "L'employï¿½ "+employee.firstName+" "+employee.lastName+" a oubliï¿½ de badger sa sortie du "+inOrOut.day+" "+inOrOut.month""
 		}
 	}
 	
@@ -30,12 +30,12 @@ class InAndOutCLosingJob {
 		log.error "Job run!"
 		
 		def inOrOut
-		//trouver toutes les entrŽes du jour courant
-		//trouver, pour chaque employŽ le plus rŽcent
-		//Si ce dernier est une EntrŽe, rajouter une sortie
-		// ajouter dans un nouveau champs de InAndOut que cette 'sortie' est gŽnŽrŽe automatiquement pour la resortir en erreur dans les rapprts.
+		//trouver toutes les entrï¿½es du jour courant
+		//trouver, pour chaque employï¿½ le plus rï¿½cent
+		//Si ce dernier est une Entrï¿½e, rajouter une sortie
+		// ajouter dans un nouveau champs de InAndOut que cette 'sortie' est gï¿½nï¿½rï¿½e automatiquement pour la resortir en erreur dans les rapprts.
 
-		def employeeList = Employee.findAll()
+		def employeeList = Employee.findAll("from Employee")
 		def calendar = Calendar.instance
 		for (employee in employeeList){
 			def lastIn = InAndOut.findByEmployee(employee,[max:1,sort:"time",order:"desc"])
