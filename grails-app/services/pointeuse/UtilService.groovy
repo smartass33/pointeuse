@@ -126,7 +126,7 @@ class UtilService {
 		
 		def user = springSecurityService.currentUser
 
-		for (Employee employee:Employee.findAll()){
+		for (Employee employee:Employee.findAll("from Employee")){
 			def vacationCA = new Vacation()
 			vacationCA.employee = employee
 			vacationCA.loggingTime = new Date()
@@ -155,7 +155,7 @@ class UtilService {
 		
 		def user = springSecurityService.currentUser
 
-		for (Period period:Period.findAll()){
+		for (Period period:Period.findAll("from Period")){
 			def vacationCA = new Vacation()
 			vacationCA.employee = employee
 			vacationCA.loggingTime = new Date()

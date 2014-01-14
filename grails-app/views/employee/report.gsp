@@ -8,9 +8,12 @@
 <%@ page import="pointeuse.Reason"%>
 
 <head>
-<resource:include components="autoComplete, dateChooser" />
-<resource:dateChooser />
+<r:require module="jquery"/>
+<r:require module="jquery-ui"/>
 <resource:tooltip />
+<g:javascript library="application" /> 
+<r:layoutResources/>
+<g:javascript library="application"/>
 <meta name="layout" content="main">
 <g:set var="weeklyRecap" value="0" />
 <title>
@@ -229,6 +232,35 @@ function closePopup ( ){
 	window.location.reload()
 }
 </script>
+
+
+				<script type="text/javascript">
+				$(document).ready(function() {
+ 
+    $("#dialogPlaceholder").dialog({
+        autoOpen: false,
+        height: 200,
+        width: 350,
+        modal: true,
+        title: 'modal window',
+        close: function(){
+            $("#dialogPlaceholder").html('');
+        }
+    });
+ 
+    $("#trigger_btn").bind("click", function() {
+        $.ajax({
+            url:'/pointeuse/employee/trigger',
+            success: function(data){
+                $("#dialogPlaceholder").html(data);
+                $("#dialogPlaceholder").dialog("open");
+            }
+        });
+    });
+ 
+});
+
+				</script>
 </head>
 
 <body>
@@ -280,8 +312,8 @@ function closePopup ( ){
 						<div>
 							<a href="#join_form" id="join_pop" class="modalbox">Ajouter un élement</a>
 						</div>
-
-					</div> <a href="#x" class="overlay" id="join_form"></a>
+					</div> 
+					<a href="#x" class="overlay" id="join_form"></a>
 					<div id="popup" class="popup">
 						<h2>Creer Entrée/Sortie</h2>
 						<p>Renseignez les informations pour creer un nouvel évènement</p>
@@ -363,6 +395,13 @@ $.timepicker.setDefaults($.timepicker.regional['fr']);
 
 
 				</li>
+				<li>
+				
+				
+				    								<div id="dialogPlaceholder"><g:inAndOutResult/></div>		
+				
+				</li>
+
 				<form method="POST">
 				<li style="vertical-align: middle;"><g:actionSubmit
 						value="appliquer" action="modifyTime" class="listButton" /></li>

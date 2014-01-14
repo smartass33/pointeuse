@@ -20,7 +20,7 @@
 		</thead>
 		
 		<tbody>
-		<! --g:each in="${Period.findAll(sort:'year',order:'asc') }"  status="p" var="period"-->
+		<!--g:each in="${Period.findAll("from Period as p order by year asc") }"  status="p" var="period"-->
 		<% def period_sup = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)%>
 			<tr>
 				<td>${period_sup}</td>

@@ -16,7 +16,6 @@ class SupplementaryTimeService {
 		def periodSupTime = 0
 		def payableSupTime = 0
 		
-		//for (Period period:Period.findAll(sort:'year',order:'asc')){			
 			criteria = SupplementaryTime.createCriteria()
 			def supTime = criteria.get {
 				and {

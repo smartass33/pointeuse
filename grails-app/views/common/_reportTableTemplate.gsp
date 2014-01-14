@@ -26,6 +26,7 @@
 	                          params="[employeeId: employee.id, month: entries.key.format('MM'), year: entries.key.format('yyyy'), day: entries.key.format('dd')]">
 	                         <font size="2" style="color:red;"> ${entries.key.format('E dd MMM yyyy')}</font>
 	                        </modalbox:createLink>
+
 	                    </i>
 	                    </td>
                   </g:if>

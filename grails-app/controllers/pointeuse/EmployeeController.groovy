@@ -83,7 +83,7 @@ class EmployeeController {
 			 site = Site.get(params.int('site.id'))
 			 employeeInstanceList = Employee.findAllBySite(site)
 		}else{
-			employeeInstanceList = Employee.findAll([sort:'site',order:'asc'])	
+			employeeInstanceList = Employee.findAll("from Employee as e order by e.site asc")	
 		}
 		for (Employee employee:employeeInstanceList){
 			
@@ -146,7 +146,7 @@ class EmployeeController {
 			 site = Site.get(params.int('site.id'))
 			 employeeInstanceList = Employee.findAllBySite(site)
 		}else{
-			employeeInstanceList = Employee.findAll()	
+			employeeInstanceList = Employee.findAll("from Employee")	
 		}
 		for (Employee employee:employeeInstanceList){		
 			criteria = DailyTotal.createCriteria()
@@ -227,7 +227,7 @@ class EmployeeController {
 			if (site!=null){
 				employeeInstanceList=Employee.findAllBySite(site)
 			}else {
-				employeeInstanceList=Employee.findAll()	
+				employeeInstanceList=Employee.findAll("from Employee")	
 				employeeInstanceTotal = employeeInstanceList.size()
 			}
 		}else{
@@ -387,7 +387,7 @@ class EmployeeController {
 			employeeInstanceList = Employee.findAllBySite(site,params)
 			
 		}else{
-			employeeInstanceList = Employee.findAll(params)		
+			employeeInstanceList = Employee.findAll("from Employee",[max:params.int("max")])		
 		}
 		
 		// for each employee, retrieve absences
@@ -395,7 +395,7 @@ class EmployeeController {
 			// step 1: fill initial values
 			//CA
 			criteria = Vacation.createCriteria()
-			log.error('employeeID: '+employee.id)
+			//log.error('employeeID: '+employee.id)
 			def initialCA = criteria.get{
 				and {
 					eq('employee',employee)
@@ -559,7 +559,7 @@ class EmployeeController {
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
-		for (Period period:Period.findAll([sort:'year',order:'asc'])){
+		for (Period period:Period.findAll("from Period as p order by p.year asc")){
 			yearMap.put(period.year, period.year+'/'+(period.year+1))
 			// step 1: fill initial values
 			//CA
@@ -722,12 +722,10 @@ class EmployeeController {
 		def orderedVacationList=[]
 		def orderedSupTimeMap = [:]
 		def orderedCompTimeMap = [:]
-		def periodList= Period.findAll(sort:'year',order:'asc')
+		def periodList= Period.findAll("from Period as p order by year asc")
 		
 		for (Period period:periodList){
 			def vacations = Vacation.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
-			
-			//def supTimes = SupplementaryTime.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
 			for (Vacation vacation:vacations){
 				orderedVacationList.add(vacation)
 			}
@@ -749,8 +747,6 @@ class EmployeeController {
 		def retour = [previousContracts:previousContracts,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
 		retour << data
 		return retour
-		
-//		[orderedSupTimeMap:orderedSupTimeMap,orderedCompTimeMap:orderedCompTimeMap,previousContracts:previousContracts,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
 	}
 
 	def cartouche(long userId,int year,int month){
@@ -852,8 +848,9 @@ class EmployeeController {
 			yearSup=cal.get(Calendar.YEAR)
 		}
 		monthlyTotal=timeManagerService.computeHumanTime(monthlyTotal)
+		Period period = ((cal.get(Calendar.MONTH)+1)>5)?Period.findByYear(cal.get(Calendar.YEAR)):Period.findByYear(cal.get(Calendar.YEAR)-1)
 		
-		def model=[period:cal.time,firstName:employee.firstName,lastName:employee.lastName,weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,monthlyTotalRecap:monthlyTotal,yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+		def model=[period2:period,period:cal.time,firstName:employee.firstName,lastName:employee.lastName,weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,monthlyTotalRecap:monthlyTotal,yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 		render template: "/common/cartoucheTemplate", model:model
 		return
 	}
@@ -1073,7 +1070,7 @@ class EmployeeController {
 				order('time','asc')
 			}
 		}
-		[inAndOutList:inAndOutList,day:day,month:month,year:year]
+		[inAndOutList:inAndOutList,day:day,month:month,year:year,userId:employee.id]
 	}
 	
 	def modifyTime(){
@@ -1391,6 +1388,10 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def report(Long userId,int monthPeriod,int yearPeriod){
+		params.each{i->
+			
+			log.error(i)
+		}
 		def siteId=params["siteId"]
 		def weekName="semaine "
 		def myDate = params["myDate"]
@@ -1782,269 +1783,7 @@ class EmployeeController {
 
 	}
 	
-
-	
-	
-	def sendEmail(){
-		sendMail{
-		to "henri.martin@orange.com"
-		from "henri.martin@gmail.com"
-		subject "Hello to mutliple recipients"
-		body "Hello Fred! Hello Ginger!"
-		}
-	}
-	
-	 def sendMail(){
-		 def employeeList = Employee.list()
-		 Calendar calendar = Calendar.instance
-		 //find orphans
-		 
-		// for (Employee employee:employeeList){
-		//	 employee
-		 //}		 
-		 
-		 mailService.sendMail {
-			 to "henri.martin@gmail.com"
-			 from "pointeuse.biolab33@gmail.com"
-			 subject "Hello John"
-			 body 'this is some text'
-		  }
-	 }
-
-	 def recomputeDailyTotals(){
-		 def tmpInOrOut
-		 def dailyDelta=0
-		 def timeDiff
-		 def criteria
-		 def employeeList = Employee.findAll()
-		//def employee = Employee.get(3)
-		 for (Employee employee:employeeList){
-			 print employee.firstName + " "+employee.lastName
-			 criteria = DailyTotal.createCriteria()
-			 def dailyTotalList = DailyTotal.findAllByEmployee(employee)
-			 
-			 for (DailyTotal dailyTotal: dailyTotalList){
-				 tmpInOrOut=null
-				 dailyDelta=0
-				 criteria=InAndOut.createCriteria()
-				 def inOrOutList = criteria.list {
-					 and {
-						 eq('employee',employee)
-						 eq('year',dailyTotal.year)
-						 eq('month',dailyTotal.month)
-						 eq('day',dailyTotal.day)
-					 }
-					 order('time','asc')
-				 }
-				 
-				 for (InAndOut inOrOut:inOrOutList){
-					 if (inOrOut.type.equals("E")){
-						 tmpInOrOut=inOrOut
-					 }else{
-						 if (tmpInOrOut!=null){
-							 use (TimeCategory){timeDiff=inOrOut.time-tmpInOrOut.time}
-							 dailyDelta+=timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600
-						 }
-					 }
-				 }
-				 dailyTotal.elapsedSeconds=dailyDelta
-				 dailyTotal.weeklyTotal.elapsedSeconds+=dailyDelta
-				 dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds+=dailyDelta
-			 }
-		 }
-		 print "I am done!!"
-		 
-	 }
 	 
-	 
-	 
-	 def execute() {
-		 log.error "Job run!"
-		 
-		 def inOrOut
-		 //trouver toutes les entr�es du jour courant
-		 //trouver, pour chaque employ� le plus r�cent
-		 //Si ce dernier est une Entr�e, rajouter une sortie
-		 // ajouter dans un nouveau champs de InAndOut que cette 'sortie' est g�n�r�e automatiquement pour la resortir en erreur dans les rapprts.
- 
-		 def employeeList = Employee.get(53)//Employee.findAll()
-		 def calendar = Calendar.instance
-		 for (employee in employeeList){
-			 def lastIn = InAndOut.findByEmployee(employee,[max:1,sort:"time",order:"desc"])
-			 if (lastIn != null && lastIn.type == "E"){
-				 log.error "we have a problem: user "+employee.lastName +" did not log out"
-				 inOrOut = new InAndOut(employee, calendar.time,"S",false)
-				 inOrOut.dailyTotal=lastIn.dailyTotal
-				 inOrOut.systemGenerated=true
-				 employee.inAndOuts.add(inOrOut)
-				 employee.status=false
-				 employee.hasError=true
-				 log.error "creating inOrOut: "+inOrOut
-			 }
-			 
-			 //def inAndOutList = InAndOut.findAllBySystemGeneratedAndEmployee(true,employee)
-			 def criteria = InAndOut.createCriteria()
-			 def inAndOutList = criteria.list {
-				 or{
-					 and {
-						 eq('employee',employee)
-						 eq('systemGenerated',true)
-					 }
-					and {
-						eq('employee',employee)
-						eq('regularizationType',InAndOut.INITIALE_SALARIE)						
-					} 
-				 }
-				
-			 }
-			 
-			 if (inAndOutList != null && inAndOutList.size()>0){
-				 log.error("there still "+inAndOutList.size() +" errors for employee "+employee.id + " : " +employee.lastName)
-				 employee.hasError=true
-			 }else {
-			 	employee.hasError=false
-			 }
-			 
-		 }
-		 
-	 }
-	 
-	 def excel(){
-		 log.error('calling function excel')
-		 def employeeList = Employee.getAll()
-		 
-		 OutputStream outputStream;
-		 
-		 
-		 def year
-		 def month
-		 def criteria
-		 def dailySeconds
-		 def monthlyTotalTime
-		 def monthlySupTotalTime
-		 def yearMonthMap = [:]
-		 def yearTotalMap = [:]
-		 def yearSupMap = [:]
-		 def yearMonthlySupTime = [:]
-		 def yearMonthlyCompTime = [:]
-		 def yearMap = [:]
-		 def cartoucheTable=[]
-		 def firstWeekOfMonth
-		 def lastWeekOfMonth
-		 def weeklySupTime
-		 def payableCompTime
-		 def payableSupTime
-		 def annualTheoritical = 0
-		 def annualTotal = 0
-		 def annualHoliday = 0
-		 def annualRTT = 0
-		 def annualCSS = 0
-		 def annualSickness = 0
-		 def annualPayableSupTime = 0
-		 def annualPayableCompTime = 0
-		 def annualWorkingDays = 0
-		 def annualEmployeeWorkingDays = 0
-		 def annualTotalIncludingHS = 0
-		 def calendar = Calendar.instance
-		 
-		 def userId=2
-		 
-		 if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
-			 year = params.int('myDate_year')
-		 }else{
-			 year = calendar.get(Calendar.YEAR)
-		 }
-		 if (params["myDate_month"] != null && !params["myDate_month"].equals('')){
-			 month = params.int('myDate_month')
-		 }else{
-			 month = calendar.get(Calendar.MONTH)+1
-		 }
-		 
-		 boolean isAjax = params["isAjax"].equals("true") ? true : false
-		 
-		 
-		 Employee employee = Employee.get(userId)
-		 
-		 if (userId==null){
-			 log.error('userId is null. exiting')
-			 return
-		 }
- 
-		 if (month < 6){
-			 year = year - 1
-		 }
-		 
-		 new WebXlsxExporter().with {
-			 setResponseHeaders(response)
-			 
-			 fillRow(["aaa", "bbb", 13, new Date()], 1)
-			 fillRow(["ccc", "ddd", 87, new Date()], 2)
-			 putCellValue(3, 3, "Now I'm here")
-			 save(response.outputStream)
-		 }	 
-			 
-		 for (int lastYearMonth = 6 ;lastYearMonth <13 ; lastYearMonth++){
-			 yearMap.put(lastYearMonth, year)
-			 cartoucheTable=cartouche(userId,year,lastYearMonth)				 
-			 yearMonthMap.put(lastYearMonth, cartoucheTable)
-			 monthlyTotalTime = 0
-			 monthlySupTotalTime = 0
-			 calendar.set(Calendar.MONTH,lastYearMonth-1)
-			 calendar.set(Calendar.YEAR,year)
-			 calendar.set(Calendar.DAY_OF_MONTH,1)
-			 firstWeekOfMonth = calendar.get(Calendar.WEEK_OF_YEAR)
-			 calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-			 lastWeekOfMonth = calendar.get(Calendar.WEEK_OF_YEAR)			 
-			 criteria = DailyTotal.createCriteria()
-			 def dailyTotalList = criteria.list {
-				 and {
-					 eq('employee',employee)
-					 eq('month',lastYearMonth)
-					 eq('year',year)
-				 }
-			 }
-			 dailySeconds = 0
-			 for (DailyTotal dailyTotal:dailyTotalList){
-				 dailySeconds = timeManagerService.getDailyTotal(dailyTotal)
-				 monthlyTotalTime += dailySeconds
-				 annualEmployeeWorkingDays += 1
-			 }
-			 yearTotalMap.put(lastYearMonth, timeManagerService.computeHumanTime(monthlyTotalTime))
-			 // iterate over weeks of the given month to get supplementary time
-			 for (int currentWeek = firstWeekOfMonth; currentWeek <= lastWeekOfMonth; currentWeek++){
-				 monthlySupTotalTime += timeManagerService.computeSupplementaryTime(employee,currentWeek, year)
-			 }
-			 yearMonthlySupTime.put(lastYearMonth,timeManagerService.computeHumanTime(monthlySupTotalTime))
-			 def monthTheoritical = cartoucheTable.get(8)
-			 if (employee.weeklyContractTime!=35){
-				 if (monthlyTotalTime > monthTheoritical){
-					 payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime,0)
-					 yearMonthlyCompTime.put(lastYearMonth, timeManagerService.computeHumanTime(payableCompTime))
-				 }else{
-					 payableCompTime = 0
-					 yearMonthlyCompTime.put(lastYearMonth, timeManagerService.computeHumanTime(0))
-				 }
-			 }else{
-			 	payableCompTime = 0 
-			 }
-			 
-			 annualTheoritical += cartoucheTable.get(8)
-			 annualHoliday += cartoucheTable.get(4)
-			 annualRTT += cartoucheTable.get(5)
-			 annualCSS += cartoucheTable.get(7)
-			 annualSickness += cartoucheTable.get(6)
-			 annualWorkingDays += cartoucheTable.get(3)	 
-			 annualPayableSupTime += monthlySupTotalTime
-			 annualPayableCompTime += payableCompTime
-			 annualTotal += monthlyTotalTime		 
-		 }		 
-
-		 def model=[annualTotalIncludingHS:timeManagerService.computeHumanTime(annualTotalIncludingHS),annualEmployeeWorkingDays:annualEmployeeWorkingDays,	annualTheoritical:timeManagerService.computeHumanTime(annualTheoritical),annualHoliday:annualHoliday,annualRTT:annualRTT,annualCSS:annualCSS,annualSickness:annualSickness,annualWorkingDays:annualWorkingDays,annualPayableSupTime:timeManagerService.computeHumanTime(annualPayableSupTime),annualPayableCompTime:timeManagerService.computeHumanTime(annualPayableCompTime),annualTotal:timeManagerService.computeHumanTime(annualTotal),
- lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCompTime,yearMonthlySupTime:yearMonthlySupTime,yearTotalMap:yearTotalMap,yearMonthMap:yearMonthMap,userId:userId,employee:employee]
-
-		 def withProperties = ['firstName', 'lastName']
-		 new XlsxExporter('/Users/henri/Documents/myReportFile.xlsx').add(employeeList, withProperties).save()
-	 }
 	 
 	 def ecartFollowup(){
 		 def siteId=params["site.id"]
@@ -2210,15 +1949,15 @@ class EmployeeController {
 
 		}
 		def data = supplementaryTimeService.getAllSupAndCompTime(employee)
-		
-		
-		
-		
 		def model = [employeeInstance: employee] << data
-		
-		
 		render template: "/common/paidHSEditTemplate", model:model
 		return
 		
+	}
+	
+	def trigger (){
+		def result="I HAVE BEEN TRIGGERED!!"
+		render template: "/common/inAndOutResultTemplate", model:[result:result]
+		return
 	}
 }

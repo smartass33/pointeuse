@@ -421,7 +421,7 @@ class TimeManagerService {
 		def dailyDelta=0
 		def timeDiff
 		def criteria
-		def employeeList = Employee.findAll()
+		def employeeList = Employee.findAll("from Employee")
 		
 		for (Employee employee:employeeList){
 			criteria = DailyTotal.createCriteria()
@@ -1209,7 +1209,7 @@ class TimeManagerService {
 		if (site){
 			employeeInstanceList = Employee.findAllBySite(site)
 		}else{
-			employeeInstanceList=Employee.findAll()
+			employeeInstanceList=Employee.findAll("from Employee")
 		}
 		
 		for (Employee employee:employeeInstanceList){

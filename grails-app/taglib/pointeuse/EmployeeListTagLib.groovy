@@ -52,4 +52,9 @@ class EmployeeListTagLib {
 		
 	}
 	
+	def displayDay ={attrs,body->
+		out<<render(template:"/employee/template/displayDay")
+		
+	}
+	
 }

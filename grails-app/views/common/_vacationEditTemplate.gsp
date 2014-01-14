@@ -15,8 +15,8 @@
 			</tr>
 		</thead>
 		<tbody>
-		<%def firstYear = (Period.findAll(sort:'year',order:'asc',max:1)).year
-		def lastYear = (Period.findAll(sort:'year',order:'desc',max:1)).year 
+		<%def firstYear = (Period.findAll("from Period as p order by year asc",[max:1])).year
+		def lastYear = (Period.findAll("from Period as p order by year desc",[max:1])).year 
 		def iterator = firstYear.get(0) as int
 		def sameLine=false
 		%>
@@ -41,7 +41,7 @@
 													+ '&vacationId=' + vacationInstance.id
 											  		+ '&counter=\' + this.value')}"
 				                    value="${vacationInstance.counter}" 
-									min="0" max="32"	
+									min="0"
 				            	/>
 			        		</div>
 						</td>	
@@ -56,7 +56,7 @@
 														+ '&vacationId=' + vacationInstance.id
 												  		+ '&counter=\' + this.value')}"
 					                    value="${vacationInstance.counter}" 
-										min="0" max="32"	
+										min="0"
 					            	/>
 				        		</div>
 							</td>

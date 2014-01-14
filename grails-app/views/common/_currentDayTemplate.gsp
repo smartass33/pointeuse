@@ -98,7 +98,7 @@
 			<td></td>
 			<td>				<div>
 						<div>
-							<a href="#join_form" id="join_pop" >Ajouter un élement</a>
+							<a href="#join_form" id="join_pop"  class="modalbox">Ajouter un élement</a>
 						</div>
 
 					</div> <a href="#x" class="overlay" id="join_form"></a>
