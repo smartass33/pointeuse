@@ -23,11 +23,16 @@ import groovy.time.TimeDuration
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.PdfCopyFields
 
+import grails.async.Promise
 import grails.converters.JSON
+import static grails.async.Promises.*
+import org.apache.commons.logging.LogFactory
 
 
+import static grails.async.Promises.*
 
-class EmployeeController {
+
+class EmployeeController {	
 	def PDFService
 	def utilService
 	def mailService
@@ -45,7 +50,9 @@ class EmployeeController {
 	long hourInMillis = minuteInMillis * 60;
 	long dayInMillis = hourInMillis * 24;
 	long yearInMillis = dayInMillis * 365;
-	Logger log = Logger.getInstance(EmployeeController.class)
+	//Logger log = Logger.getInstance(EmployeeController.class)
+	private static final log = LogFactory.getLog(this)
+	
 	
 
     def index() {
@@ -702,6 +709,8 @@ class EmployeeController {
 		def remainingCAMap=[:]
 		def initialRTTMap=[:]
 		def remainingRTTMap=[:]
+		def data
+		def previousContracts
 		def holidayCounter = 0
 		// starting calendar: 1 of June of the period
 		def startCalendar = Calendar.instance		
@@ -733,9 +742,19 @@ class EmployeeController {
 		}
 		def period = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)
 		
-		def data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)
 		
-		def previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'date',order:'desc'])
+		//Promise p = task {
+		//	data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)	
+		/*}
+		p.onError { Throwable err ->
+				println "An error occured ${err.message}"
+		}
+		p.onComplete { result ->
+				println "Promise returned $result"
+		}
+		*/
+		
+		previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'date',order:'desc'])
 		
 		def siteId=params["siteId"]
         if (!employeeInstance) {
@@ -745,9 +764,32 @@ class EmployeeController {
         }
 		def arrivalDate = employeeInstance.arrivalDate
 		def retour = [previousContracts:previousContracts,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
-		retour << data
+		//retour << data
 		return retour
 	}
+	
+	
+	def getSupplementaryTime(Long id) {
+		id = 3
+		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
+		def fromSite = (params["fromSite"] != null  && params["fromSite"].equals("true")) ? true : false
+		def employeeInstance = Employee.get(id)
+		def data
+
+		def periodList= Period.findAll("from Period as p order by year asc")
+		
+
+		def period = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)
+		
+		
+		data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)
+		def model = [employeeInstance:employeeInstance]
+		model << data 
+			
+		render template: "/common/paidHSEditTemplate", model:model
+		return
+	}
+	
 
 	def cartouche(long userId,int year,int month){
 		def employeeInstance = Employee.get(userId)
@@ -1950,7 +1992,7 @@ class EmployeeController {
 		}
 		def data = supplementaryTimeService.getAllSupAndCompTime(employee)
 		def model = [employeeInstance: employee] << data
-		render template: "/common/paidHSEditTemplate", model:model
+		render template: "/common/paidHSEditTemplate", model: tasks model
 		return
 		
 	}

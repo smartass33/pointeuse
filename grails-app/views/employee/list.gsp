@@ -5,7 +5,6 @@
 <html>
 <head>
 	<g:javascript library="jquery" plugin="jquery" />
-	<resource:autoComplete skin="default" />
 	<meta name="layout" content="main" id="mainLayout">
 	<g:set var="isNotSelected" value="true" />
 	
