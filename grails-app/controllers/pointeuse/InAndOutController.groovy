@@ -1,14 +1,7 @@
 package pointeuse
 
-import java.text.DateFormat
-import java.util.Calendar;
-import java.util.Date
-import java.text.SimpleDateFormat
 import org.codehaus.groovy.grails.web.servlet.mvc.exceptions.CannotRedirectException
 import org.springframework.dao.DataIntegrityViolationException
-import groovy.time.TimeDuration;
-import groovy.time.TimeCategory
-
 
 class InAndOutController {
 
@@ -26,22 +19,10 @@ class InAndOutController {
     }
 
     def create(Long id) {
-		params.each{i->
-			log.error('param: '+i)
-		}
-		
-		def reason = params["reason"]
-		def event = params["event"]
-		def date_picker =params["date_picker"]
 		def employee
 		def complete = params["complete"] ? true : false
-		def reportRedirect = params["report"] ? true : false
-		
-		
-		Date date =  new Date().parse("d/M/yyyy H:m", date_picker)
-		
-		def inAndOutInstance = new InAndOut(params)
-		
+		def reportRedirect = params["report"] ? true : false		
+		def inAndOutInstance = new InAndOut(params)	
 		if (id!=null){
 			employee=Employee.get(id)
 			inAndOutInstance.employee=employee
@@ -71,7 +52,7 @@ class InAndOutController {
 		def instanceDate = date!=null?date:params["inOrOutDate"]
 		def second = params["myTime_second"]!=null ? params.int("myTime_second") :0
 		def fromReport = params["fromReport"].equals('true') ? true:false
-		if (userId != null && userId != "" & userId.size()>0){
+		if (userId != null && userId != "" && userId.size()>0){
 			employee=Employee.get(userId[0])
 			employeeId=employee.id
 		}else{
@@ -84,9 +65,7 @@ class InAndOutController {
 			return
 		}
 
-		
 		def calendar = Calendar.instance
-		def currentTime = calendar.time
 		if (instanceDate != null){
 			calendar.time=instanceDate
 		}

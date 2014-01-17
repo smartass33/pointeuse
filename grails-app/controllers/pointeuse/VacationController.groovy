@@ -19,15 +19,12 @@ class VacationController {
 
 	def userList(Integer max) {
 		def employee = Employee.get(params["userId"])
-		def vacationInstanceList = Vacation.findAllByEmployee(employee)
+	//	def vacationInstanceList = Vacation.findAllByEmployee(employee)
 		params.max = Math.min(max ?: 10, 100)
 		[vacationInstanceList: Vacation.list(params), vacationInstanceTotal: Vacation.count(),userId:employee.id,employee:employee]
 	}
 	
     def create(){ 
-		params.each{i->
-			log.error(i)
-		}
 		def employee = Employee.get(params["userId"])
 		def vacation = new Vacation(params)
 		vacation.employee = employee
@@ -129,13 +126,8 @@ class VacationController {
 	
 	def changeValue(){
 		log.error("entering changeValue")
-		
-		params.each{i->
-			log.error(i);
-		}
-	
 		def vacation = Vacation.get(params["vacationId"])
-		def employee = Employee.get(params["userId"])
+		//def employee = Employee.get(params["userId"])
 		def newCounterValue = params["counter"] as int
 		if (vacation){
 			vacation.counter=newCounterValue	

@@ -1,7 +1,5 @@
 package pointeuse
 
-import java.util.Date;
-
 class SupplementaryTimeService {
 
 	def timeManagerService
@@ -14,7 +12,6 @@ class SupplementaryTimeService {
 		def criteria
 		def result
 		def periodSupTime = 0
-		def payableSupTime = 0
 		
 			criteria = SupplementaryTime.createCriteria()
 			def supTime = criteria.get {

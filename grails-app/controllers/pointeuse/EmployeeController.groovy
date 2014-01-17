@@ -2,34 +2,13 @@ package pointeuse
 
 import grails.plugins.springsecurity.Secured
 
-import org.apache.log4j.Logger
 import org.springframework.dao.DataIntegrityViolationException
 
-import pl.touk.excel.export.WebXlsxExporter
-import pl.touk.excel.export.XlsxExporter
-
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.concurrent.TimeUnit
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.SystemMenuBar
-
 import groovy.time.TimeCategory
-import groovy.sql.Sql
-import groovy.time.TimeDuration
 
-import com.itextpdf.text.pdf.PdfReader
-import com.itextpdf.text.pdf.PdfCopyFields
-
-import grails.async.Promise
 import grails.converters.JSON
-import static grails.async.Promises.*
 import org.apache.commons.logging.LogFactory
-
-
-import static grails.async.Promises.*
 
 
 class EmployeeController {	
@@ -50,7 +29,6 @@ class EmployeeController {
 	long hourInMillis = minuteInMillis * 60;
 	long dayInMillis = hourInMillis * 24;
 	long yearInMillis = dayInMillis * 365;
-	//Logger log = Logger.getInstance(EmployeeController.class)
 	private static final log = LogFactory.getLog(this)
 	
 	
@@ -69,11 +47,9 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def dailyReportAjax(){
-		def employeeMap = [:]
 		def dailyMap = [:]
 		def dailySupMap = [:]
 		def dailyInAndOutMap = [:]
-		def day=params["day"]
 		def siteId=params["site.id"]
 		def currentDate = params["currentDate"]
 		def dailyTotal
@@ -131,11 +107,9 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def dailyReport(){
-		def employeeMap = [:]
 		def dailyMap = [:]
 		def dailySupMap = [:]
 		def dailyInAndOutMap = [:]
-		def day=params["day"]
 		def siteId=params["site.id"]
 		def currentDate = params["currentDate"]
 		def dailyTotal
@@ -305,16 +279,12 @@ class EmployeeController {
         [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]
     }
 
-	def vacationFollowup(Integer max){
+	def vacationFollowup(){
 		def year = params["year"]
-		def myDate=params["myDate"]
 		def site
 		def siteId
 		def employeeInstanceList
-		def employeeVacations
 		def period
-		def employeeMap = [:]
-		def vacationMap = [:]
 		def criteria
 		def initialCAMap=[:]
 		def remainingCAMap=[:]
@@ -336,30 +306,17 @@ class EmployeeController {
 			def tmpSite = params["site.id"]
 			if (tmpSite instanceof String[]){
 				if (tmpSite[0]!=""){
-					tmpSite=tmpSite[0].toInteger()
-					
-				}else{
-					tmpSite=tmpSite[1].toInteger()
-				
+					tmpSite=tmpSite[0]!=""?tmpSite[0].toInteger():tmpSite[1].toInteger()
 				}
 			}else {
 				tmpSite=tmpSite.toInteger()
 			}
-			site = Site.get(tmpSite)
-			
-			
-			siteId=site.id
-			
+			site = Site.get(tmpSite)						
+			siteId=site.id			
 		}
 		if (year!=null && !year.equals("")){
 			if (year instanceof String[]){
-				if (year[0]!=""){
-					year=year[0].toInteger()
-					
-				}else{
-					year=year[1].toInteger()
-				
-				}
+				year=year[0]!=""?year[0].toInteger():year[1].toInteger()					
 			}else {
 				year=year.toInteger()	
 			}
@@ -388,15 +345,9 @@ class EmployeeController {
 			period = Period.findByYear(startCalendar.getAt(Calendar.YEAR))
 			endCalendar.set(Calendar.YEAR,startCalendar.getAt(Calendar.YEAR)+1)
 		}
-
-		
-		if (site){
-			employeeInstanceList = Employee.findAllBySite(site,params)
-			
-		}else{
-			employeeInstanceList = Employee.findAll("from Employee",[max:params.int("max")])		
-		}
-		
+	
+		employeeInstanceList = site!=null?Employee.findAllBySite(site,params):Employee.findAll("from Employee",[max:params.int("max")])		
+	
 		// for each employee, retrieve absences
 		for (Employee employee: Employee.list(params)){
 			// step 1: fill initial values
@@ -528,12 +479,10 @@ class EmployeeController {
 	}
 	
 	
-	def vacationDisplay(Long id){
-		
+	def vacationDisplay(Long id){		
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
 		def siteId=params["siteId"]
-		def employeeInstance = Employee.get(id)
-		
+		def employeeInstance = Employee.get(id)		
 		def criteria
 		def takenCA=[]
 		def takenRTT=[]
@@ -550,7 +499,6 @@ class EmployeeController {
 		def takenSicknessMap=[:]
 		def takenCSSMap=[:]
 		def takenAutreMap=[:]
-		def holidayCounter = 0
 		// starting calendar: 1 of June of the period
 		def startCalendar = Calendar.instance
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
@@ -701,17 +649,7 @@ class EmployeeController {
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
 		def fromSite = (params["fromSite"] != null  && params["fromSite"].equals("true")) ? true : false
         def employeeInstance = Employee.get(id)
-		def criteria
-		def takenCA=[]
-		def takenRTT=[]
-		def yearMap=[:]
-		def initialCAMap=[:]
-		def remainingCAMap=[:]
-		def initialRTTMap=[:]
-		def remainingRTTMap=[:]
-		def data
 		def previousContracts
-		def holidayCounter = 0
 		// starting calendar: 1 of June of the period
 		def startCalendar = Calendar.instance		
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
@@ -729,8 +667,6 @@ class EmployeeController {
 		endCalendar.set(Calendar.SECOND,59)
 		
 		def orderedVacationList=[]
-		def orderedSupTimeMap = [:]
-		def orderedCompTimeMap = [:]
 		def periodList= Period.findAll("from Period as p order by year asc")
 		
 		for (Period period:periodList){
@@ -739,9 +675,7 @@ class EmployeeController {
 				orderedVacationList.add(vacation)
 			}
 			
-		}
-		def period = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)
-		
+		}		
 		
 		//Promise p = task {
 		//	data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)	
@@ -770,18 +704,10 @@ class EmployeeController {
 	
 	
 	def getSupplementaryTime(Long id) {
-		id = 3
-		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
-		def fromSite = (params["fromSite"] != null  && params["fromSite"].equals("true")) ? true : false
 		def employeeInstance = Employee.get(id)
 		def data
-
-		def periodList= Period.findAll("from Period as p order by year asc")
-		
-
+		//def periodList= Period.findAll("from Period as p order by year asc")
 		def period = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)
-		
-		
 		data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)
 		def model = [employeeInstance:employeeInstance]
 		model << data 
@@ -897,7 +823,7 @@ class EmployeeController {
 		return
 	}
 	
-	def addingEventToEmployee(Long id){
+	def addingEventToEmployee(){
 		def cal = Calendar.instance	
 		def type = params["type"].equals("Entrer") ? "E" : "S" 
 		def isOutSideSite=params["isOutSideSite"].equals("true") ? true : false
@@ -1117,7 +1043,6 @@ class EmployeeController {
 	
 	def modifyTime(){
 		def idList=params["inOrOutId"]
-		def timeList=params["time"]
 		def dayList=params["day"]
 		def monthList=params["month"]
 		def yearList=params["year"]
@@ -1137,15 +1062,15 @@ class EmployeeController {
 				render(view: "report", model: retour)
 			}
 			
-		timeManagerService.timeModification( idList, timeList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
-			// now, find if employee still has errors:
-			
-		if (fromRegularize){
-			redirect(action: "pointage", id: employee.id)
-		}else{
-		def retour = report(employee.id as long,month as int,year as int)
-		render(view: "report", model: retour)
-		}
+			timeManagerService.timeModification( idList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
+				// now, find if employee still has errors:
+				
+			if (fromRegularize){
+				redirect(action: "pointage", id: employee.id)
+			}else{
+				def retour = report(employee.id as long,month as int,year as int)
+				render(view: "report", model: retour)
+			}
 		}
 		catch(PointeuseException ex){
 			flash.message = message(code: ex.message)
@@ -1199,7 +1124,7 @@ class EmployeeController {
 		}
 
 				
-		def model = timeManagerService.getAnnualReportData(year,month, employee)
+		def model = timeManagerService.getAnnualReportData(year, employee)
 		if (isAjax){
 			render template: "/common/annualReportTemplate", model:	model
 			return
@@ -1211,12 +1136,13 @@ class EmployeeController {
 	}
 
 	def reportLight(Long userId,int monthPeriod,int yearPeriod){
+		def yearInf
+		def yearSup
 		def siteId=params["siteId"]
 		def calendar = Calendar.instance
 		def weekName="semaine "
 		def weeklyTotalTime = [:]
 		def weeklySuppTotalTime = [:]
-		def weeklyCompTotalTime = [:]
 		def weeklyTotalTimeByEmployee = [:]
 		def weeklySupTotalTimeByEmployee = [:]
 		def monthlyTotalTimeByEmployee = [:]
@@ -1225,14 +1151,12 @@ class EmployeeController {
 		def dailyBankHolidayMap = [:]
 		def dailySupTotalMap = [:]
 		def holidayMap = [:]
-		def previousDay
 		def employee
 		def mapByDay = [:]
 		def dailyTotalId=0
 		def myDate = params["myDate"]
 		def monthlySupTime = 0
 		def monthlyTotalTime = 0
-		def monthlyCompTime = 0				
 		def criteria
 		def dailySeconds = 0
 		def weeklySupTime
@@ -1275,7 +1199,6 @@ class EmployeeController {
 		currentWeek=0//calendar.get(Calendar.WEEK_OF_YEAR)
 		
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-			def currentDay=calendarLoop.time
 			// �limine les dimanches du rapport
 			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
 				mapByDay = [:]					
@@ -1380,21 +1303,11 @@ class EmployeeController {
 		try {
 			if (userId != null){
 			def cartoucheTable = timeManagerService.getCartoucheData(employee,year,month)
-			def openedDays = timeManagerService.computeMonthlyHours(year,month)
-			def workingDays=cartoucheTable.get('workingDays')
-			def holiday=cartoucheTable.get('holidays')
-			def rtt=cartoucheTable.get('rtt')
-			def sickness=cartoucheTable.get('sickness')
-			def sansSolde=cartoucheTable.get('sansSolde')
 			def monthTheoritical = cartoucheTable.get('monthTheoritical')
 			def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('pregnancyCredit'))
-			def yearlyHoliday=cartoucheTable.get('yearlyHolidays')
-			def yearlyRtt=cartoucheTable.get('yearlyRtt')
-			def yearlySickness=cartoucheTable.get('yearlySickness')
 			def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyTheoritical'))
 			def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyPregnancyCredit'))
 			def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyActualTotal'))
-			def yearlySansSolde=cartoucheTable.get('yearlySansSolde')
 			def payableSupTime = timeManagerService.computeHumanTime(Math.round(monthlySupTime))
 			def payableCompTime = timeManagerService.computeHumanTime(0)
 			if (employee.weeklyContractTime!=35){
@@ -1404,11 +1317,8 @@ class EmployeeController {
 			}
 			
 			monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotalTime))
-			def monthlyTotal=timeManagerService.computeHumanTime(monthlyTotalTime)
-			monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical'))
-			
-			def yearInf
-			def yearSup
+			monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical'))			
+
 			if (month>5){
 				yearInf=year
 				yearSup=year+1
@@ -1417,8 +1327,7 @@ class EmployeeController {
 				yearSup=year
 			}
 
-			def bankList = BankHoliday.findByCalendar(calendar);
-			def model=[isAdmin:false,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,yearlyTheoritical:yearlyTheoritical,period:calendar,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),dailyTotalMap:dailyTotalMap,holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+			def model=[isAdmin:false,siteId:siteId,yearInf:yearInf,yearSup:yearSup,userId:userId,yearlyActualTotal:yearlyActualTotal,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTheoritical:yearlyTheoritical,monthlyTotal:monthlyTotalTimeByEmployee,weeklyTotal:weeklyTotalTimeByEmployee,weeklySupTotal:weeklySupTotalTimeByEmployee,dailySupTotalMap:dailySupTotalMap,dailyTotalMap:dailyTotalMap,month:month,year:year,period:calendarLoop.getTime(),holidayMap:holidayMap,weeklyAggregate:weeklyAggregate,employee:employee,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
 			model << cartoucheTable
 			return model
 		}
@@ -1430,12 +1339,7 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def report(Long userId,int monthPeriod,int yearPeriod){
-		params.each{i->
-			
-			log.error(i)
-		}
 		def siteId=params["siteId"]
-		def weekName="semaine "
 		def myDate = params["myDate"]
 		def employee
 
@@ -1535,9 +1439,6 @@ class EmployeeController {
 			entranceStatus=true
 		}
 		
-		def humanTime = timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(inAndOuts))
-		def dailySupp = timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(inAndOuts)-DailyTotal.maxWorkingTime,0))
-
 		employeeInstance.status = entranceStatus
 		def result = new JSONEmployee()
 		result.firstName=employeeInstance.firstName
@@ -1549,11 +1450,6 @@ class EmployeeController {
 	
 	
 	def pointage(Long id){		
-		def headerNames = request.getHeaderNames()
-		def requestTT = request
-		def clientIP=request.getHeader("X-Forwarded-For");
-		def msg = "The Requestor IP: " + request.getRemoteAddr() + " Requestor Host name: " + request.getRemoteHost()
-		log.error(msg)
 		try {	
 			def username = params["username"]
 			def employee
@@ -1561,7 +1457,6 @@ class EmployeeController {
 			def mapByDay=[:]
 			def totalByDay=[:]
 			def dailyCriteria
-			def timeDiff
 			def elapsedSeconds=0
 			if (id!=null){
 				employee = Employee.get(id)		
@@ -1663,12 +1558,10 @@ class EmployeeController {
 	
 	def ecartPDF(){
 		def siteId=params["site.id"]
-		def myDate=params["myDate"]
 		def year = params["year"]
 		def folder = grailsApplication.config.pdf.directory
 		def calendar = Calendar.instance
 		def refCalendar = Calendar.instance
-		def currentMonth=6
 		def site
 		def period
 		def monthList=[]
@@ -1727,9 +1620,6 @@ class EmployeeController {
 			site = Site.get(tmpSite)
 			siteId=site.id
 		}
-		
-		
-		
 		def retour = PDFService.generateEcartSheet(site, folder, monthList, period)
 		response.setContentType("application/octet-stream")
 		response.setHeader("Content-disposition", "filename=${retour[1]}")
@@ -1738,7 +1628,6 @@ class EmployeeController {
 	
 	def siteMonthlyPDF(){
 		def myDate = params["myDate"]
-		def userId
 		def site
 		def siteId
 		Calendar calendar = Calendar.instance
@@ -1792,10 +1681,8 @@ class EmployeeController {
 		def year
 		def month
 		def calendar = Calendar.instance
-		boolean isAjax = params["isAjax"].equals("true") ? true : false
 		Employee employee = Employee.get(userId)
 		def folder = grailsApplication.config.pdf.directory
-		
 		
 		if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
 			year = params.int('myDate_year')
@@ -1829,13 +1716,11 @@ class EmployeeController {
 	 
 	 def ecartFollowup(){
 		 def siteId=params["site.id"]
-		 def myDate=params["myDate"]
 		 def year = params["year"]		 
 		 def employeeInstanceList
 		 def employeeInstanceTotal
 		 def calendar = Calendar.instance
 		 def refCalendar = Calendar.instance 
-		 def currentMonth=6
 		 def site
 		 def period
 		 def monthList=[]
@@ -1922,8 +1807,6 @@ class EmployeeController {
 		def CONTRACT_PATTERN='contract_info'
 		log.error('someAction called')
 		def contractList =[]
-		def contractDate 
-		def contractLength
 		params.each{i->		
 			if ((i.key).contains(CONTRACT_PATTERN)){
 				log.error('param value: '+i.value)
@@ -1945,7 +1828,6 @@ class EmployeeController {
 				}
 			}
 		}
-		Long userId = params.id
 		redirect(action: "edit", params: [id:params.id,isAdmin:false])		
 	  }
 	 

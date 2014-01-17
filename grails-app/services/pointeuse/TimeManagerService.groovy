@@ -1,12 +1,8 @@
 package pointeuse
 
 import groovy.time.TimeDuration;
-import groovy.time.TimeCategory
-
-
+import groovy.time.TimeCategory;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 class TimeManagerService {
@@ -205,8 +201,6 @@ class TimeManagerService {
 		if (calendar == null){
 			calendar = Calendar.instance
 		}
-		def dailyTotal
-		def currentDate = calendar.time
 		def employee = Employee.get(userId)
 		def criteria
 	
@@ -227,19 +221,13 @@ class TimeManagerService {
 			return
 		}
 		employee.inAndOuts.add(inOrOut)
-		
-		
-		//getDailyTotal(inOrOut.dailyTotal)
 		getDailyTotalWithMonth(inOrOut.dailyTotal)
 		
 		utilService.removeAbsence( employee, calendar)
 		employee.status=type.equals("S")?false:true
 	}
 		
-	def timeModification(def idList,def timeList,def dayList,def monthList, def yearList,Employee employee,def newTimeList,def fromRegularize) throws PointeuseException{
-		def deltaUp
-		def deltaDown
-		def timeDiff
+	def timeModification(def idList,def dayList,def monthList, def yearList,Employee employee,def newTimeList,def fromRegularize) throws PointeuseException{
 		def criteria
 		def toCompare
 		def calendar = Calendar.instance
@@ -262,12 +250,9 @@ class TimeManagerService {
 			yearList.add(tmpyearList)
 			newTimeList.add(tmpnewTimeList)
 		}
-		def month=monthList[0]
-		def year=yearList[0]
-		
 		
 		for( int p = 0 ; ( p < idList.size() ) ; p++ ) {
-		// l'id���e: comparer time et newTime
+		// l'idée: comparer time et newTime
 			def inOrOut = InAndOut.get(idList[p])
 			if (inOrOut==null){
 				log.error("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification")
@@ -416,7 +401,7 @@ class TimeManagerService {
 		return table.get(0)*3600+table.get(1)*60+table.get(2)
 	}
 	
-	def recomputeDailyTotals(long id){
+	def recomputeDailyTotals(){
 		def tmpInOrOut
 		def dailyDelta=0
 		def timeDiff
@@ -563,22 +548,8 @@ class TimeManagerService {
 		return elapsedSeconds
 	}
 	
-	def updateWeekAndMonth(DailyTotal dailyTotal, int delta){
-		def criteria
-		def previousValue
-		def monthlyTotal = criteria.get {
-			and {
-				eq('employee',dailyTotal.employee)
-				eq('year',dailyTotal.year)
-				eq('month',dailyTotal.month)
-			}
-		}
-		previousValue=monthlyTotal.elapsedSeconds
-	}
-	
 	
 	def getDailyTotal(def inOrOutList){
-		def criteria = InAndOut.createCriteria()
 		def elapsedSeconds = 0
 		def tmpInOrOut
 		def timeDifference
@@ -613,7 +584,6 @@ class TimeManagerService {
 		calendar.set(Calendar.MONTH,5)
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		calendar.clearTime()
-		def yearlyCounter = 0
 		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 			criteria = DailyTotal.createCriteria()
 			dailyTotal = criteria.get {
@@ -625,8 +595,7 @@ class TimeManagerService {
 					}
 				}
 			if (dailyTotal!=null){
-				elapsedSeconds += dailyTotal.elapsedSeconds//getDailyTotal(dailyTotal)
-				//elapsedSeconds += getDailyTotal(dailyTotal)
+				elapsedSeconds += dailyTotal.elapsedSeconds
 			}
 			
 			if (calendar.get(Calendar.DAY_OF_YEAR) == calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
@@ -945,7 +914,6 @@ class TimeManagerService {
 		def weekName="semaine "
 		def weeklyTotalTime = [:]
 		def weeklySuppTotalTime = [:]
-		def weeklyCompTotalTime = [:]
 		def weeklyTotalTimeByEmployee = [:]
 		def weeklySupTotalTimeByEmployee = [:]
 		def monthlyTotalTimeByEmployee = [:]
@@ -954,18 +922,14 @@ class TimeManagerService {
 		def dailyBankHolidayMap = [:]
 		def dailySupTotalMap = [:]
 		def holidayMap = [:]
-		def previousDay
 		def mapByDay = [:]
 		def dailyTotalId=0
 		def monthlySupTime = 0
 		def monthlyTotalTime = 0
-		def monthlyCompTime = 0
 		def criteria
 		def dailySeconds = 0
 		def weeklySupTime
 		def currentWeek=0
-		def yearInf
-		def yearSup
 
 		//get last day of the month
 		if (myDate==null){
@@ -995,8 +959,7 @@ class TimeManagerService {
 		
 		
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-			def currentDay=calendarLoop.time
-			// ���limine les dimanches du rapport
+			// élimine les dimanches du rapport
 			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
 				mapByDay = [:]
 			}
@@ -1010,7 +973,7 @@ class TimeManagerService {
 					eq('year',year)
 				}
 			}
-			// permet de r��cup��rer le total hebdo
+			// permet de récupérer le total hebdo
 			if (dailyTotal != null && dailyTotal != dailyTotalId){
 				dailySeconds = getDailyTotal(dailyTotal)
 				monthlyTotalTime += dailySeconds
@@ -1125,7 +1088,6 @@ class TimeManagerService {
 			monthlyTotalInstance.elapsedSeconds=monthlyTotalTime
 		}
 		def cartoucheTable = getCartoucheData(employee,year,month)
-		def openedDays = computeMonthlyHours(year,month)
 		def workingDays=cartoucheTable.get('workingDays')
 		def holiday=cartoucheTable.get('holidays')
 		def rtt=cartoucheTable.get('rtt')
@@ -1150,7 +1112,6 @@ class TimeManagerService {
 		def monthlyTotal=computeHumanTime(monthlyTotalTime)
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
 		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)	
-		def bankList = BankHoliday.findByCalendar(calendar)
 		return [period2:period,
 			dailyBankHolidayMap:dailyBankHolidayMap,
 			monthlyTotalRecap:monthlyTotal,
@@ -1168,13 +1129,11 @@ class TimeManagerService {
 			monthTheoritical:monthTheoritical,
 			pregnancyCredit:pregnancyCredit,
 			yearlyPregnancyCredit:yearlyPregnancyCredit,
-			yearlyTheoritical:yearlyTheoritical,
 			yearlyHoliday:yearlyHoliday,
 			yearlyRtt:yearlyRtt,
 			yearlySickness:yearlySickness,
 			yearlySansSolde:yearlySansSolde,
 			yearlyTheoritical:yearlyTheoritical,
-			period:calendar,
 			monthlyTotal:monthlyTotalTimeByEmployee,
 			weeklyTotal:weeklyTotalTimeByEmployee,
 			weeklySupTotal:weeklySupTotalTimeByEmployee,
@@ -1183,7 +1142,6 @@ class TimeManagerService {
 			month:month,
 			year:year,
 			period:calendarLoop.getTime(),
-			dailyTotalMap:dailyTotalMap,
 			holidayMap:holidayMap,
 			weeklyAggregate:weeklyAggregate]
 	}
@@ -1386,23 +1344,20 @@ class TimeManagerService {
 		return supTime
 	}
 	
-	def getAnnualReportData(int year,int month, Employee employee){
+	def getAnnualReportData(int year, Employee employee){
 		def criteria
 		def dailySeconds
 		def monthlyTotalTime
 		def monthlySupTotalTime
 		def yearMonthMap = [:]
 		def yearTotalMap = [:]
-		def yearSupMap = [:]
 		def yearMonthlySupTime = [:]
 		def yearMonthlyCompTime = [:]
 		def yearMap = [:]
 		def cartoucheTable=[]
 		def firstWeekOfMonth
 		def lastWeekOfMonth
-		def weeklySupTime
 		def payableCompTime
-		def payableSupTime
 		def annualTheoritical = 0
 		def annualTotal = 0
 		def annualHoliday = 0
@@ -1497,7 +1452,6 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 	
 	def getMonthTheoritical(Employee employee, int month,int year, int openDays, int sickness, int holidays, int sansSolde, int pregnancy){
 		def monthTheoritical = 0
-		def calendar = Calendar.instance
 		def weeklyContractTime
 		def contract
 		def criteria

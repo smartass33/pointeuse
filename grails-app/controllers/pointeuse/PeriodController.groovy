@@ -1,6 +1,5 @@
 package pointeuse
 
-import java.util.Date;
 
 import org.springframework.dao.DataIntegrityViolationException
 

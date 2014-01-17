@@ -80,5 +80,6 @@ grails.project.dependency.resolution = {
 		compile ":quartz2:2.1.6.2"
 		compile ":richui:0.8"
 		runtime ":searchable:0.6.6"	
+		compile ":codenarc:0.20"
     }
 }

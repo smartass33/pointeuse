@@ -1,7 +1,6 @@
 package pointeuse
 
 import org.springframework.dao.DataIntegrityViolationException
-import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
 import java.text.Normalizer
 
@@ -17,7 +16,7 @@ class SiteController {
 
 	
 	@Secured(['ROLE_ADMIN'])
-	def map(Integer max) {
+	def map() {
 		def mapData = []
 		def siteTable =[]
 		

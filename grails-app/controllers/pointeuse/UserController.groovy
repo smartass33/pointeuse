@@ -2,8 +2,6 @@ package pointeuse
 
 import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
-import pointeuse.User;
-import pointeuse.UserRole;
 
 class UserController {
 	def authenticateService

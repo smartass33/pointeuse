@@ -1,6 +1,5 @@
 package pointeuse
 
-import java.util.Calendar;
 
 class Vacation {
 	Employee employee

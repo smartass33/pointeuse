@@ -1,7 +1,5 @@
 package pointeuse
 
-import java.util.Date;
-
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.PdfCopyFields
 
@@ -10,11 +8,8 @@ class PDFService {
 	def pdfRenderingService
 	
 	def generateSiteMonthlyTimeSheet(Date myDate,Site site,String folder){
-		def bytesMap=[:]
 		def fileNameList=[]
 		def filename
-		def userId
-		def siteId
 		PdfCopyFields finalCopy
 		Calendar calendar = Calendar.instance
 		OutputStream outputStream
@@ -48,10 +43,7 @@ class PDFService {
 	
 	
 	def generateUserMonthlyTimeSheet(Date myDate,Employee employee,String folder){
-		def bytesMap=[:]
 		def filename
-		def userId
-		def siteId
 		Calendar calendar = Calendar.instance
 		OutputStream outputStream
 		File file
@@ -72,16 +64,13 @@ class PDFService {
 	}
 	
 	def generateUserAnnualTimeSheet(int year,int month,Employee employee,String folder){
-		def bytesMap=[:]
 		def filename
-		def userId
-		Calendar calendar = Calendar.instance
 		OutputStream outputStream
 		File file
 		
 		log.error('method pdf generateUserAnnualTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+year+', Month= '+month)
 		
-		def modelReport = timeManagerService.getAnnualReportData(year,month, employee)
+		def modelReport = timeManagerService.getAnnualReportData(year, employee)
 		
 		// Get the bytes
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/pdf/completeAnnualReportTemplate', model: modelReport)
@@ -98,11 +87,7 @@ class PDFService {
 	
 	
 	def generateEcartSheet(Site site,String folder,def monthList,def period){
-		def bytesMap=[:]
-		def fileNameList=[]
 		def filename
-		def userId
-		def siteId
 		OutputStream outputStream
 		File file
 		

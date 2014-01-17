@@ -14,7 +14,7 @@ class BankHolidayController {
     }
 
 	@Secured(['ROLE_ADMIN'])
-    def list(Integer max) {
+    def list() {
 		params.order = "desc"
 		params.sort = "calendar"
 		def yearlyCounts=[:]
@@ -30,13 +30,12 @@ class BankHolidayController {
     }
 
     def create() {
-		def bankHolidayInstance = new BankHoliday(params)
+	//	def bankHolidayInstance = new BankHoliday(params)
         [bankHolidayInstance:new BankHoliday(params)]
     }
 
     def save() {
 		def user = springSecurityService.currentUser
-		def period
         def bankHolidayInstance = new BankHoliday(params)
 		if (bankHolidayInstance != null){
 			bankHolidayInstance.month=bankHolidayInstance.calendar.get(Calendar.MONTH)+1
@@ -56,7 +55,6 @@ class BankHolidayController {
 					newPeriod.year=bankHolidayInstance.year	
 					newPeriod.save()
 					utilService.initiateVacations(newPeriod)
-	//				newPeriod.openedDays=utilService.getOpenDays(newPeriod)
 					bankHolidayInstance.period=newPeriod	
 				}	
 			}
@@ -69,19 +67,15 @@ class BankHolidayController {
 					newPeriod.year=bankHolidayInstance.year-1
 					newPeriod.save()
 					utilService.initiateVacations(newPeriod)
-//					newPeriod.openedDays=utilService.getOpenDays(newPeriod)
 					bankHolidayInstance.period=newPeriod
 				}				
-			}
-			
+			}		
 			if (!bankHolidayInstance.save(flush: true)) {
 				render(view: "create", model: [bankHolidayInstance: bankHolidayInstance])
 				return
 			}
 	
-		}
-		//setYearlyOpenDays(bankHolidayInstance.year)
-		
+		}		
         flash.message = message(code: 'default.created.message', args: [message(code: 'bankHoliday.label', default: 'BankHoliday'), bankHolidayInstance.calendar.time.format('EEEE MMM yyyy')])
         redirect(action: "show", id: bankHolidayInstance.id)
     }

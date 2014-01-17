@@ -23,7 +23,6 @@ boolean transactional = false
 		qs << "address=" + URLEncoder.encode(address) + ","+URLEncoder.encode(town)
 		def url = new URL(base + qs.join("&"))
 		def connection = url.openConnection()
-	      def result = [:]
 	      if(connection.responseCode == 200){		  
 			  def geoCodeResultJSON = new JsonSlurper().parseText(connection.content.text)
 			  jsonMap.lat = geoCodeResultJSON.results.geometry.location.lat[0]

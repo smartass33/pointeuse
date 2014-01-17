@@ -75,7 +75,6 @@ environments {
 		grails.resources.processing.enabled=false
 		serverURL = "http://localhost:8080"
 		context="pointeuse"
-		
 		/*
 		log4j = {
 			appenders {

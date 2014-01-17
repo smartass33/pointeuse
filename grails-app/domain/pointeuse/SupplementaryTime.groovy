@@ -1,7 +1,5 @@
 package pointeuse
 
-import java.util.Calendar;
-
 class SupplementaryTime {
 	Employee employee
 	Date loggingTime
