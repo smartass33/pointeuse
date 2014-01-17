@@ -26,8 +26,7 @@
 		</style>
 
 		<g:javascript library="jquery" plugin="jquery" />
-		<resource:include components="autoComplete, dateChooser"/>
-		<resource:dateChooser />
+
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>
@@ -36,6 +35,9 @@
 
 <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
 <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script> 
+
+
+
 <script>
 
 jQuery(function($){
@@ -101,8 +103,17 @@ jQuery(function($){
 				</fieldset>
 			</g:form>		
 			<g:vacationEditTable/>	
+			<script type="text/javascript">
+	$(function(){
+		$('#divId').load('${createLink(controller:'employee', action:'getSupplementaryTime',params:[id:employeeInstance?.id])}');
+     });
+
+     
+ 
+</script>
 			<div id="divId">
-				<g:paidHSEditTable/>	
+				Chargement des données..
+				<!--g:paidHSEditTable/-->	
 			</div>
 		</div>
 	</body>
