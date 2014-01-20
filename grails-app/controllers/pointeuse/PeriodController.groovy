@@ -2,11 +2,13 @@ package pointeuse
 
 
 import org.springframework.dao.DataIntegrityViolationException
+import org.apache.commons.logging.LogFactory
 
 class PeriodController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
-	def utilService
+	def utilServic
+	private static final log = LogFactory.getLog(this)
 	
     def index() {
         redirect(action: "list", params: params)

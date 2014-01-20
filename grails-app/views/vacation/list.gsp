@@ -1,9 +1,7 @@
-
 <%@ page import="pointeuse.Vacation" %>
 <!DOCTYPE html>
 <html>
-	<head>
-	
+	<head>	
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'vacation.label', default: 'Vacation')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>
@@ -23,45 +21,28 @@
 			</g:if>
 			<table>
 				<thead>
-					<tr>
-					
-						<g:sortableColumn property="counter" title="${message(code: 'vacation.counter.label', default: 'Counter')}" />
-					
-						<th><g:message code="vacation.employee.label" default="Employee" /></th>
-					
-						<g:sortableColumn property="loggingTime" title="${message(code: 'vacation.loggingTime.label', default: 'Logging Time')}" />
-					
-						<th><g:message code="vacation.user.label" default="Logging User" /></th>
-					
-						<g:sortableColumn property="period" title="${message(code: 'vacation.period.label', default: 'Period')}" />
-					
-						<g:sortableColumn property="type" title="${message(code: 'vacation.type.label', default: 'Type')}" />
-					
+					<tr>				
+						<g:sortableColumn property="counter" title="${message(code: 'vacation.counter.label', default: 'Counter')}" />					
+						<th><g:message code="vacation.employee.label" default="Employee" /></th>					
+						<g:sortableColumn property="loggingTime" title="${message(code: 'vacation.loggingTime.label', default: 'Logging Time')}" />					
+						<th><g:message code="vacation.user.label" default="Logging User" /></th>					
+						<g:sortableColumn property="period" title="${message(code: 'vacation.period.label', default: 'Period')}" />					
+						<g:sortableColumn property="type" title="${message(code: 'vacation.type.label', default: 'Type')}" />					
 					</tr>
 				</thead>
 				<tbody>
 				<g:each in="${vacationInstanceList}" status="i" var="vacationInstance">
-					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-					
-						<td><g:link action="show" id="${vacationInstance.id}">${fieldValue(bean: vacationInstance, field: "counter")}</g:link></td>
-					
-						<td>${fieldValue(bean: vacationInstance, field: "employee")}</td>
-					
-						<td><g:formatDate date="${vacationInstance.loggingTime}" /></td>
-					
-						<td>${fieldValue(bean: vacationInstance, field: "user")}</td>
-					
-						<td>${vacationInstance.year.period}</td>
-					
-						<td>${fieldValue(bean: vacationInstance, field: "type")}</td>
-					
+					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">			
+						<td><g:link action="show" id="${vacationInstance.id}">${fieldValue(bean: vacationInstance, field: "counter")}</g:link></td>					
+						<td>${fieldValue(bean: vacationInstance, field: "employee")}</td>					
+						<td><g:formatDate date="${vacationInstance.loggingTime}" /></td>					
+						<td>${fieldValue(bean: vacationInstance, field: "user")}</td>					
+						<td>${vacationInstance.year.period}</td>					
+						<td>${fieldValue(bean: vacationInstance, field: "type")}</td>					
 					</tr>
 				</g:each>
 				</tbody>
-			</table>
-			
-
-			
+			</table>						
 			<div class="pagination">
 				<g:paginate total="${vacationInstanceTotal}" />
 			</div>

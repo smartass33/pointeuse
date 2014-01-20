@@ -1,6 +1,4 @@
-
-<%@ page
-	import="org.codehaus.groovy.grails.plugins.web.taglib.JavascriptValue"%>
+<%@ page import="org.codehaus.groovy.grails.plugins.web.taglib.JavascriptValue"%>
 <%@ page import="pointeuse.Employee"%>
 <%@ page import="pointeuse.InAndOut"%>
 <%@ page import="pointeuse.AbsenceType"%>
@@ -13,15 +11,14 @@
 <resource:tooltip />
 <g:javascript library="application" /> 
 <r:layoutResources/>
-<g:javascript library="application"/>
 <meta name="layout" content="main">
 <g:set var="weeklyRecap" value="0" />
 <title>${message(code: 'employee.report.label', default: 'Report')}</title>
-<link href="main.css" rel="stylesheet" type="text/css">
+<link href="${grailsApplication.config.context}/css/main.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
 <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<script src="/${grailsApplication.config.context}/js/jquery-ui-timepicker-addon.js"></script>
+<script src="${grailsApplication.config.context}/js/jquery-ui-timepicker-addon.js"></script>
 
 
 <style>
@@ -57,30 +54,7 @@
 	a#login_pop:hover,a#join_pop:hover {
 		border-color: #eee;
 	}
-	/*
-	.overlay {
-		background-color: rgba(0, 0, 0, 0.6);
-		bottom: 0;
-		cursor: default;
-		left: 0;
-		opacity: 0;
-		position: fixed;
-		right: 0;
-		top: 0;
-		visibility: hidden;
-		z-index: 1;
-		-webkit-transition: opacity .5s;
-		-moz-transition: opacity .5s;
-		-ms-transition: opacity .5s;
-		-o-transition: opacity .5s;
-		transition: opacity .5s;
-	}
 	
-	.overlay:target {
-		visibility: visible;
-		opacity: 1;
-	}
-	*/
 	.popup {
 		background-color: #fff;
 		border: 3px solid #fff;
@@ -221,48 +195,112 @@
 	.ui-timepicker-rtl dl dd {
 		margin: 0 45% 10px 10px;
 	}
+	
+	.reportTable {
+		margin:0px;padding:0px;
+		width:100%;
+		border:1px solid #ffffff;
+		
+		-moz-border-radius-bottomleft:8px;
+		-webkit-border-bottom-left-radius:8px;
+		border-bottom-left-radius:8px;
+		
+		-moz-border-radius-bottomright:8px;
+		-webkit-border-bottom-right-radius:8px;
+		border-bottom-right-radius:8px;
+		
+		-moz-border-radius-topright:8px;
+		-webkit-border-top-right-radius:8px;
+		border-top-right-radius:8px;
+		
+		-moz-border-radius-topleft:8px;
+		-webkit-border-top-left-radius:8px;
+		border-top-left-radius:8px;
+	}.reportTable table{
+	    border-collapse: collapse;
+	        border-spacing: 0;
+		width:100%;
+		height:100%;
+		margin:0px;padding:0px;
+	}.reportTable tr:last-child td:last-child {
+		-moz-border-radius-bottomright:8px;
+		-webkit-border-bottom-right-radius:8px;
+		border-bottom-right-radius:8px;
+	}
+	.reportTable table tr:first-child td:first-child {
+		-moz-border-radius-topleft:8px;
+		-webkit-border-top-left-radius:8px;
+		border-top-left-radius:8px;
+	}
+	.reportTable table tr:first-child td:last-child {
+		-moz-border-radius-topright:8px;
+		-webkit-border-top-right-radius:8px;
+		border-top-right-radius:8px;
+	}.reportTable tr:last-child td:first-child{
+		-moz-border-radius-bottomleft:8px;
+		-webkit-border-bottom-left-radius:8px;
+		border-bottom-left-radius:8px;
+	}.reportTable tr:hover td{
+		
+	}
+	.reportTable tr:nth-child(odd){ background-color:#ffffff; }
+	.reportTable tr:nth-child(even)    { background-color:#ffffff; }.reportTable td{
+		vertical-align:middle;
+		border:1px solid #ffffff;
+		border-width:0px 1px 1px 0px;
+		text-align:center;
+		padding:0px;
+		font-size:10px;
+		font-family:Arial;
+		font-weight:bold;
+		color:#000000;
+	}.reportTable tr:last-child td{
+		border-width:0px 1px 0px 0px;
+	}.reportTable tr td:last-child{
+		border-width:0px 0px 1px 0px;
+	}.reportTable tr:last-child td:last-child{
+		border-width:0px 0px 0px 0px;
+	}
+	.reportTable tr:first-child td{
+			background:-o-linear-gradient(bottom, #ffffff 5%, #ffffff 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ffffff), color-stop(1, #ffffff) );
+		background:-moz-linear-gradient( center top, #ffffff 5%, #ffffff 100% );
+		filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff", endColorstr="#ffffff");	background: -o-linear-gradient(top,#ffffff,ffffff);
+	
+		background-color:#ffffff;
+		border:0px solid #ffffff;
+		text-align:center;
+		border-width:0px 0px 1px 1px;
+		font-size:10px;
+		font-family:Arial;
+		font-weight:bold;
+		color:#000000;
+	}
+	.reportTable tr:first-child:hover td{
+		background:-o-linear-gradient(bottom, #ffffff 5%, #ffffff 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ffffff), color-stop(1, #ffffff) );
+		background:-moz-linear-gradient( center top, #ffffff 5%, #ffffff 100% );
+		filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff", endColorstr="#ffffff");	background: -o-linear-gradient(top,#ffffff,ffffff);
+	
+		background-color:#ffffff;
+	}
+	.reportTable tr:first-child td:first-child{
+		border-width:0px 0px 1px 0px;
+	}
+	.reportTable tr:first-child td:last-child{
+		border-width:0px 0px 1px 1px;
+	}
 	</style>
 
 	<script type="text/javascript">
 	function closePopup ( ){
-		$( ".popup" ).remove();
-		window.location.reload()
+		window.location = $('#closeId').attr('href');
 	}
-	</script>
-
-
-	<script type="text/javascript">
-		$(document).ready(function() {
-	 
-	    $("#dialogPlaceholder").dialog({
-	        autoOpen: false,
-	        height: 200,
-	        width: 350,
-	        modal: true,
-	        title: 'modal window',
-	        close: function(){
-	            $("#dialogPlaceholder").html('');
-	        }
-	    });
-	 
-	    $("#trigger_btn").bind("click", function() {
-	        $.ajax({
-	            url:'/${grailsApplication.config.pointeuse.context}/employee/trigger',
-	            success: function(data){
-	                $("#dialogPlaceholder").html(data);
-	                $("#dialogPlaceholder").dialog("open");
-	            }
-	        });
-	    });
-	 
-		});
-	
 	</script>
 </head>
 
 <body>
 
 
+<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requète...</div>
 
 
 	<a href="#list-employee" class="skip" tabindex="-1"><g:message
@@ -276,14 +314,8 @@
 		<div class="nav" role="navigation" id="nav">
 			<ul>
 				<g:form method="post" >
-				<li style="vertical-align: middle;"><a class="home"
-					href="${createLink(uri: '/')}"><g:message
-							code="default.home.label" /></a></li>
-				<li style="vertical-align: middle;"><g:link class="list"
-						action="list"
-						params="${[isAdmin:isAdmin,siteId:siteId,back:true]}">
-						${message(code: 'employee.back.to.list.label', default: 'List')}
-					</g:link></li>
+				<li style="vertical-align: middle;"><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label" /></a></li>
+				<li style="vertical-align: middle;"><g:link class="list" action="list" params="${[isAdmin:isAdmin,siteId:siteId,back:true]}">${message(code: 'employee.back.to.list.label', default: 'List')}</g:link></li>
 				<li style="vertical-align: middle;">
 					${message(code: 'default.period.label', default: 'List')}: <g:datePicker
 						name="myDate" value="${period ? period : new Date()}"
@@ -292,24 +324,13 @@
 						value="${userId}" /> <g:hiddenField name="siteId"
 						value="${siteId}" /> <g:hiddenField name="currentMonth"
 						value='${period ? period.format("M") : (new Date()).format("M")}' />
-					<g:hiddenField name="currentYear"
-						value='${period ? period.format("yyyy") : (new Date()).format("yyyy")}' />
-
+					<g:hiddenField name="currentYear" value='${period ? period.format("yyyy") : (new Date()).format("yyyy")}' />
 				</li>
-				<li style="vertical-align: middle;"><g:actionSubmit
-						value="afficher" action="report" class="listButton" /></li>
-				
-				<li style="vertical-align: middle;"><g:actionSubmit value="pdf"
-						action="userPDF" class="listButton" /></li>
+				<li style="vertical-align: middle;"><g:actionSubmit value="afficher" action="report" class="listButton" /></li>				
+				<li style="vertical-align: middle;"><g:actionSubmit value="pdf" action="userPDF" class="listButton" /></li>
 			</g:form>
 				<li>
-
-
-					<div>
-						<div>
-							<a href="#join_form" id="join_pop" class="modalbox">Ajouter un élement</a>
-						</div>
-					</div> 
+					<div><a href="#join_form" id="join_pop" class="modalbox">Ajouter un élement</a></div>
 					<a href="#x" class="overlay" id="join_form"></a>
 					<div id="popup" class="popup">
 						<h2>Creer Entrée/Sortie</h2>
@@ -320,45 +341,48 @@
 									<tr class="prop">
 										<td class="name" valign="top">choisissez la date:</td>
 										<td class="value" valign="top"><input type="text"
-											name="date_picker" id="date_picker" /> <script>
-							$.datepicker.regional['fr'] = {
-								closeText: 'Fermer',
-								prevText: '<Précédent',
-								nextText: 'Suivant>',
-								currentText: 'Сегодня',
-								monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin',
-								'Juillet','Aout','Septembre','Octobre','Novembre','Décembre'],
-								monthNamesShort: ['Jan','Fev','Mar','Avr','Mai','Jun',
-								'Jui','Аou','Sep','Oct','Nov','Dec'],
-								dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
-								dayNamesShort: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
-								dayNamesMin: ['D','L','M','M','J','V','S'],
-								weekHeader: 'Semaine',
-								dateFormat: 'dd/mm/yy',
-								firstDay: 1,
-								isRTL: false,
-								showMonthAfterYear: false,
-								yearSuffix: ''
-							};
-							
-							$.timepicker.regional['fr'] = {
-	timeOnlyTitle: 'Horaire',
-	timeText: 'Horaire',
-	hourText: 'Heure',
-	minuteText: 'Minute',
-	secondText: 'Seconde',
-	millisecText: 'Milliseconde',
-	timezoneText: 'Fuseau Horaire',
-	currentText: 'Horaire Actuel',
-	closeText: 'Fermer',
-	timeFormat: 'HH:mm',
-	amNames: ['AM', 'A'],
-	pmNames: ['PM', 'P'],
-	isRTL: false
-};
-$.timepicker.setDefaults($.timepicker.regional['fr']);
-							$.datepicker.setDefaults($.datepicker.regional['fr']);							
-							$("#date_picker").datetimepicker();</script></td>
+											name="date_picker" id="date_picker" /> 
+										<script>
+											$.datepicker.regional['fr'] = {
+												closeText: 'Fermer',
+												prevText: '<Précédent',
+												nextText: 'Suivant>',
+												currentText: 'Сегодня',
+												monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin',
+												'Juillet','Aout','Septembre','Octobre','Novembre','Décembre'],
+												monthNamesShort: ['Jan','Fev','Mar','Avr','Mai','Jun',
+												'Jui','Аou','Sep','Oct','Nov','Dec'],
+												dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+												dayNamesShort: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
+												dayNamesMin: ['D','L','M','M','J','V','S'],
+												weekHeader: 'Semaine',
+												dateFormat: 'dd/mm/yy',
+												firstDay: 1,
+												isRTL: false,
+												showMonthAfterYear: false,
+												yearSuffix: ''
+											};
+																	
+											$.timepicker.regional['fr'] = {
+												timeOnlyTitle: 'Horaire',
+												timeText: 'Horaire',
+												hourText: 'Heure',
+												minuteText: 'Minute',
+												secondText: 'Seconde',
+												millisecText: 'Milliseconde',
+												timezoneText: 'Fuseau Horaire',
+												currentText: 'Horaire Actuel',
+												closeText: 'Fermer',
+												timeFormat: 'HH:mm',
+												amNames: ['AM', 'A'],
+												pmNames: ['PM', 'P'],
+												isRTL: false
+											};
+											$.timepicker.setDefaults($.timepicker.regional['fr']);
+											$.datepicker.setDefaults($.datepicker.regional['fr']);							
+											$("#date_picker").datetimepicker();
+										</script>
+										</td>
 									</tr>
 									<tr class="prop">
 										<td class="name" valign="top">Evènement:</td>
@@ -374,63 +398,31 @@ $.timepicker.setDefaults($.timepicker.regional['fr']);
 												noSelection="['':'-Ajouter une raison-']" optionKey="id"
 												optionValue="name" /></td>
 									</tr>
-
-
-
 								</tbody>
 							</table>
 							<g:hiddenField name="userId" value="${userId}" />
-
+							<g:hiddenField name="fromReport" value="${true}" />
 							<g:submitToRemote oncomplete="showSpinner(false)"
-								onloading="showSpinner(true)" update="c"
-								onSuccess="closePopup ();"
+								onloading="showSpinner(true)" update="updateDiv3"
+								onSuccess="closePopup()"
 								url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
 						</g:form>
-						<!-- div id="c">${result}</div-->
-						<a class="close" href="#close"></a>
+						<a class="close" id="closeId" href="#close"></a>
 					</div>
-
-
 				</li>
-				<li>
-				
-				
-				    								<div id="dialogPlaceholder"><g:inAndOutResult/></div>		
-				
-				</li>
-
 				<form method="POST">
-				<li style="vertical-align: middle;"><g:actionSubmit
-						value="appliquer" action="modifyTime" class="listButton" /></li>
-				<li><a id="legend"
-					title="
-					<table >
-						<tr>
-							<td ><g:message code='legend.NORMAL_EVENT' default='Régul' /></td>
-						</tr>
-						<tr>
-							<td style='color : red;font-weight: bold;'><g:message code='legend.INITIALE_SALARIE' default='Régul' /></td>
-						</tr>
-						<tr>
-							<td style='color : orange;font-weight: bold;'><g:message code='legend.MODIFIEE_SALARIE' default='Régul' /></td>
-						</tr>
-						<tr>
-							<td style='color : blue;font-weight: bold;'><g:message code='legend.INITIALE_ADMIN' default='Régul' /></td>
-						</tr>
-						<tr>
-							<td style='color : green;font-weight: bold;'><g:message code='legend.MODIFIEE_ADMIN' default='Régul' /></td>
-						</tr>
-						<tr>
-							<td style='font-weight: bold;'><g:message code='legend.SYSTEM_GENERATED' default='Régul' /></td>
-						</tr>
-						
-						</table>"><g:message
-							code='legend.label' default='Régul' /></a> <richui:tooltip
-						id="legend" /></li>
-						
-						
-
-
+				<li style="vertical-align: middle;"><g:actionSubmit value="appliquer" action="modifyTime" class="listButton" /></li>
+				<li>
+					<a id="legend" title="
+					<table>
+						<tr><td ><g:message code='legend.NORMAL_EVENT' default='Régul' /></td></tr>
+						<tr><td style='color : red;font-weight: bold;'><g:message code='legend.INITIALE_SALARIE' default='Régul' /></td></tr>
+						<tr><td style='color : orange;font-weight: bold;'><g:message code='legend.MODIFIEE_SALARIE' default='Régul' /></td></tr>
+						<tr><td style='color : blue;font-weight: bold;'><g:message code='legend.INITIALE_ADMIN' default='Régul' /></td></tr>
+						<tr><td style='color : green;font-weight: bold;'><g:message code='legend.MODIFIEE_ADMIN' default='Régul' /></td></tr>
+						<tr><td style='font-weight: bold;'><g:message code='legend.SYSTEM_GENERATED' default='Régul' /></td></tr>
+						</table>"><g:message code='legend.label' default='Régul' /></a> <richui:tooltip id="legend" />
+				</li>
 			</ul>
 			<BR />
 			<g:if test="${flash.message}">

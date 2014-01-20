@@ -3,13 +3,16 @@ package pointeuse
 import org.springframework.dao.DataIntegrityViolationException
 import grails.plugins.springsecurity.Secured
 import java.text.Normalizer
+import org.apache.commons.logging.LogFactory
+
 
 class SiteController {
 	def authenticateService
 	def springSecurityService
 	def geocoderService
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
-
+	private static final log = LogFactory.getLog(this)
+	
     def index() {
         redirect(action: "list", params: params)
     }

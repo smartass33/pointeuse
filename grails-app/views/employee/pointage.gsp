@@ -45,7 +45,7 @@
 	document.onmousemove=resetTimer;
 	function logout()
 	{
-		location.href='/${grailsApplication.config.pointeuse.context}' 
+		location.href='${grailsApplication.config.serverURL}/${grailsApplication.config.context}' 
 	}
 	function resetTimer()
 	{

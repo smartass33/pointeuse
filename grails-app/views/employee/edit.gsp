@@ -104,15 +104,12 @@ jQuery(function($){
 			</g:form>		
 			<g:vacationEditTable/>	
 			<script type="text/javascript">
-	$(function(){
-		$('#divId').load('${createLink(controller:'employee', action:'getSupplementaryTime',params:[id:employeeInstance?.id])}');
-     });
-
-     
- 
-</script>
-			<div id="divId">
-				Chargement des données..
+				$(function(){
+					$('#paidHSDiv').load('${createLink(controller:'employee', action:'getSupplementaryTime',params:[id:employeeInstance?.id])}');
+			     });
+			</script>
+			<div id="paidHSDiv">
+				<img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requète...
 				<!--g:paidHSEditTable/-->	
 			</div>
 		</div>

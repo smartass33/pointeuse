@@ -1,9 +1,12 @@
 package pointeuse
 
 import java.util.Calendar
+import org.apache.commons.logging.LogFactory
 
 
 class InAndOutCLosingJob {
+	private static final log = LogFactory.getLog(this)
+	
 	static triggers = {
 		// fire trigger every day of the month at 22H
 		cron name: 'myTrigger', cronExpression: "0 0 21 * * ?"
@@ -12,20 +15,7 @@ class InAndOutCLosingJob {
 	}
 	def group = "MyGroup"
 
-	def sendEmail(Employee employee,InAndOut inOrOut){
-		inOrOut
-		int day
-		int month
-		
-		sendMail{
-		to "henri.martin@orange.com"
-		from "henri.martin@gmail.com"
-		subject "Erreur de badgage pour" +employee.firstName+" "+employee.lastName
-		body "L'employ� "+employee.firstName+" "+employee.lastName+" a oubli� de badger sa sortie du "+inOrOut.day+" "+inOrOut.month""
-		}
-	}
-	
-	
+
 	def execute() {
 		log.error "Job run!"
 		

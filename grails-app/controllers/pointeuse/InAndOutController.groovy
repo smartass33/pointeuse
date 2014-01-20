@@ -2,6 +2,7 @@ package pointeuse
 
 import org.codehaus.groovy.grails.web.servlet.mvc.exceptions.CannotRedirectException
 import org.springframework.dao.DataIntegrityViolationException
+import groovy.time.TimeCategory
 
 class InAndOutController {
 
@@ -37,18 +38,19 @@ class InAndOutController {
 		def employee
 		def employeeId
 		def timeDiff
+		def hour
+		def minute
 		def userId = params["userId"]
 		Date date
 		def date_picker =params["date_picker"]
 		if (date_picker != null && date_picker.size()>0){
-			date =  new Date().parse("d/M/yyyy H:m", date_picker)
-			params["myTime_hour"]=date.getAt(Calendar.HOUR)
-			params["myTime_minute"]=date.getAt(Calendar.MINUTE)
+			date =  new Date().parse("d/M/yyyy HH:mm", date_picker)
+			hour = date.getAt(Calendar.HOUR_OF_DAY)
+			minute = date.getAt(Calendar.MINUTE)
+		}else{
+			hour = params.int("myTime_hour")
+			minute = params.int("myTime_minute")
 		}
-		
-		
-		def hour = params.int("myTime_hour")
-		def minute = params.int("myTime_minute")
 		def instanceDate = date!=null?date:params["inOrOutDate"]
 		def second = params["myTime_second"]!=null ? params.int("myTime_second") :0
 		def fromReport = params["fromReport"].equals('true') ? true:false
@@ -154,12 +156,14 @@ class InAndOutController {
 		try {
 			if (fromReport){
 				log.error('entry created from report: '+inAndOutInstance)
-				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])
-				
+				def report = timeManagerService.getReportData(null, employee,  null, calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR))
+				render template: "/employee/template/reportTableTemplate", model: report
+				return
+				//redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])				
 			}else{
-		//		render template: "/common/listDailyTimeTemplate", model:[result:'DONE']
+				log.error('entry created from pointage: '+inAndOutInstance)		
 				redirect(action: "pointage", controller:"employee", id: employeeId)
-				log.error('entry created from pointage: '+inAndOutInstance)			
+				return
 			}
 			return
 		}catch(CannotRedirectException e){

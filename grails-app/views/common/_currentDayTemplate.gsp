@@ -92,7 +92,7 @@
 			<td><g:link class="modalbox" controller="employee"
 					action="reportLight" params="[userId:employee.id]">rapport</g:link>
 			</td>
-			<td><g:link class="modalbox" url="/">
+			<td><g:link class="modalbox" url="${grailsApplication.config.serverURL}/${grailsApplication.config.context}">
 					${message(code: 'employee.disconnect.label', default: 'Sortie')}
 				</g:link></td>
 			<td></td>

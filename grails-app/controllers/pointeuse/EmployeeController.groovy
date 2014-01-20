@@ -101,7 +101,7 @@ class EmployeeController {
 			}
 			dailyMap.put(employee,timeManagerService.computeHumanTime(elapsedSeconds))
 		}
-		render template: "/common/listDailyTimeTemplate", model:[dailyMap: dailyMap,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
+		render template: "/employee/template/listDailyTimeTemplate", model:[dailyMap: dailyMap,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
 		return	
 	}
 	
@@ -161,7 +161,7 @@ class EmployeeController {
 			dailyMap.put(employee,timeManagerService.computeHumanTime(elapsedSeconds))
 		}		
 		if (site!=null){
-			render template: "/common/listDailyTimeTemplate", model:[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
+			render template: "/employee/template/listDailyTimeTemplate", model:[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
 			return	
 		}
 		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
@@ -192,14 +192,14 @@ class EmployeeController {
 		if (site!=null && !back){
 				employeeInstanceList = Employee.findAllBySite(site)
 				employeeInstanceTotal = employeeInstanceList.size()
-				render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+				render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]
 				return
 			
 		}
 		if (params["site"].equals('') && !back){			
 			employeeInstanceList=Employee.list(params)
 			employeeInstanceTotal = employeeInstanceList.totalCount		
-			render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:null,site:null]
+			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:null,site:null]
 			return
 		}
 		
@@ -257,7 +257,7 @@ class EmployeeController {
 				def tmpEmployee = Employee.get(employee.id)
 				employeeList.add(tmpEmployee)
 			}
-			render template: "/common/listEmployeeTemplate", model:[employeeInstanceList: employeeList, employeeInstanceTotal: employeeList.size(),isAdmin:isAdmin]
+			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeList, employeeInstanceTotal: employeeList.size(),isAdmin:isAdmin]
 			return
 		}else{
 			redirect(action: "list")
@@ -281,6 +281,7 @@ class EmployeeController {
 
 	def vacationFollowup(){
 		def year = params["year"]
+		def max = params["max"] != null ? params.int("max") : 20
 		def site
 		def siteId
 		def employeeInstanceList
@@ -323,6 +324,7 @@ class EmployeeController {
 		}
 		
 		def startCalendar = Calendar.instance
+		def currentMonth = startCalendar.get(Calendar.MONTH)
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
 		startCalendar.set(Calendar.HOUR_OF_DAY,00)
@@ -337,17 +339,18 @@ class EmployeeController {
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
 		
-		if (year){
+		if (year != null){
 			period = Period.get(year)
-			startCalendar.set(Calendar.YEAR,period.year)
-			endCalendar.set(Calendar.YEAR,(period.year+1))
 		}else{
-			period = Period.findByYear(startCalendar.getAt(Calendar.YEAR))
-			endCalendar.set(Calendar.YEAR,startCalendar.getAt(Calendar.YEAR)+1)
+			if (currentMonth<5){
+				period = Period.findByYear(startCalendar.get(Calendar.YEAR) - 1)
+			}else{
+				period = Period.findByYear(startCalendar.get(Calendar.YEAR))
+			}
 		}
 	
-		employeeInstanceList = site!=null?Employee.findAllBySite(site,params):Employee.findAll("from Employee",[max:params.int("max")])		
-	
+		employeeInstanceList = (site!=null)?Employee.findAllBySite(site,params):Employee.findAll("from Employee",[max:max])		
+		
 		// for each employee, retrieve absences
 		for (Employee employee: Employee.list(params)){
 			// step 1: fill initial values
@@ -707,12 +710,11 @@ class EmployeeController {
 		def employeeInstance = Employee.get(id)
 		def data
 		//def periodList= Period.findAll("from Period as p order by year asc")
-		def period = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)
-		data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)
+		def period = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)	
+		data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)	
 		def model = [employeeInstance:employeeInstance]
-		model << data 
-			
-		render template: "/common/paidHSEditTemplate", model:model
+		model << data 		
+		render template: "/employee/template/paidHSEditTemplate", model:model
 		return
 	}
 	
@@ -1001,45 +1003,23 @@ class EmployeeController {
 		inOrOut.save(flush:true)
 	}
 	
-	def trash(){	
-		def eventId=params["inOrOutId"] 
+	
+	def trash(){
+		def eventId=params["inOrOutId"]
 		def inOrOut = InAndOut.get(eventId)
-		def criteria = InAndOut.createCriteria()
-		def calendar = Calendar.instance
-		calendar.time=inOrOut.time
+		def month = inOrOut.month
+		def year = inOrOut.year
+		def employee = inOrOut.employee
 		log.error('removing entry '+inOrOut)
 		inOrOut.delete(flush:true)
-		
-		criteria = InAndOut.createCriteria()
-		def inAndOutList = criteria.list {
-			and {
-				eq('employee',inOrOut.employee)
-				eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-				eq('month',calendar.get(Calendar.MONTH)+1)
-				eq('year',calendar.get(Calendar.YEAR))
-				order('time','asc')
-			}
-		}
-		render template: "/common/listInAndOutsTemplate", model: [inAndOutList:inAndOutList,day:calendar.get(Calendar.DAY_OF_MONTH),month:calendar.get(Calendar.MONTH)+1,year:calendar.get(Calendar.YEAR)]		
+		def report = timeManagerService.getReportData(null, employee,  null, month, year)			
+		render template: "/employee/template/reportTableTemplate", model: report
+		return
 	}
 	
-	def showDay(){
-		def day=params.int('day')
-		def month=params.int('month')
-		def year=params.int('year')
-		def employee = Employee.get(params["employeeId"])
-		def criteria = InAndOut.createCriteria()
-		def inAndOutList = criteria.list {
-			and {
-				eq('employee',employee)
-				eq('day',day)
-				eq('month',month)
-				eq('year',year)
-				order('time','asc')
-			}
-		}
-		[inAndOutList:inAndOutList,day:day,month:month,year:year,userId:employee.id]
-	}
+	
+
+	
 	
 	def modifyTime(){
 		def idList=params["inOrOutId"]
@@ -1126,7 +1106,7 @@ class EmployeeController {
 				
 		def model = timeManagerService.getAnnualReportData(year, employee)
 		if (isAjax){
-			render template: "/common/annualReportTemplate", model:	model
+			render template: "/employee/template/annualReportTemplate", model:	model
 			return
 		}
 		else{
@@ -1874,7 +1854,7 @@ class EmployeeController {
 		}
 		def data = supplementaryTimeService.getAllSupAndCompTime(employee)
 		def model = [employeeInstance: employee] << data
-		render template: "/common/paidHSEditTemplate", model: tasks model
+		render template: "/employee/template/paidHSEditTemplate", model: tasks model
 		return
 		
 	}

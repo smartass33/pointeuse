@@ -43,10 +43,12 @@ environments {
         dataSource {
 			pooled = true
 			dbCreate = "update"
-			url = "jdbc:mysql://10.33.6.10:3306/pointeuse?autoReconnect=true"
+			//url = "jdbc:mysql://10.33.6.10:3306/pointeuse?autoReconnect=true"
+			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
+			
 			driverClassName = "com.mysql.jdbc.Driver"
-			username = "pointeuse"
-			password = "pointeuse"
+			username = "root"
+			password = "root"
 			//username = "adminqBgvjC8"
 			//password = "HcaRaTLAyLqr"
 		//	url = "jdbc:mysql://localhost:3306/pointeuse"

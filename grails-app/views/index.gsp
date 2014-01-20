@@ -3,14 +3,9 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	<g:javascript library="jquery" plugin="jquery"/>
 		<meta name="layout" content="main" />
 		<title>Pointeuse BIOLAB33</title>
 		<style type="text/css" media="screen">
-		    <jqui:resources theme="darkness" />
-		
-	<r:require module="jquery-ui"/>
-
 	
 	#td {
 		vertical-alogn: center;
@@ -204,46 +199,31 @@
 .ui-timepicker-div dl dt{ height: 25px; }
 .ui-timepicker-div dl dd{ margin: -25px 0 10px 65px; }
 	</style>
-	
-	 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 
-<link rel="stylesheet" type="text/css" href="css/jquery.timepicker.css" />
 	  
-	  		<script type="text/javascript">
-
-		  jQuery(function($) {
-    $('#basicExample').timepicker();
-});
-		</script>
 	<script type="text/javascript">
-	
-	
-	
-	
-	function updateClock ( )
-	{
-	  var currentTime = new Date ( );
-	
-	  var currentHours = currentTime.getHours ( );
-	  var currentMinutes = currentTime.getMinutes ( );
-	  var currentSeconds = currentTime.getSeconds ( );
-	
-	  // Pad the minutes and seconds with leading zeros, if required
-	  currentMinutes = ( currentMinutes < 10 ? "0" : "" ) + currentMinutes;
-	  currentSeconds = ( currentSeconds < 10 ? "0" : "" ) + currentSeconds;
-	
-	  // Compose the string for display
-	  var currentTimeString = currentHours + ":" + currentMinutes + ":" + currentSeconds  //+ " " + timeOfDay;
-	
-	  // Update the time display
-	   var elem = document.getElementById('clock');
-	   if (null!=elem){
-	     document.getElementById('clock').firstChild.nodeValue = currentTimeString;
-	   }else{
-	   	setInterval('updateClock()', 1000 );
-	   }
-	}
 
+function startTime()
+{
+var today=new Date();
+var h=today.getHours();
+var m=today.getMinutes();
+var s=today.getSeconds();
+// add a zero in front of numbers<10
+m=checkTime(m);
+s=checkTime(s);
+document.getElementById('clock').innerHTML=h+":"+m+":"+s;
+t=setTimeout(function(){startTime()},500);
+}
+
+function checkTime(i)
+{
+if (i<10)
+  {
+  i="0" + i;
+  }
+return i;
+}
 
 
 	</script>
@@ -251,8 +231,7 @@
 	
 	</head>
 	<body>
-	<jqui:resources/>	
-	    <g:javascript>window.onload = updateClock();document.getElementById('mytextfield').focus();</g:javascript>
+	    <g:javascript>window.onload = startTime();document.getElementById('mytextfield').focus();</g:javascript>
 		<a href="#page-body" class="skip"><g:message code="default.link.skip.label" default="Skip to content&hellip;" /></a>
 		<div id="status" role="complementary">
 			<h2><g:message code="admin.menu" default="Last Name" /></h2>
@@ -284,17 +263,7 @@
 			<p><g:message code="explanation.label" default="Welcome"/></p>
 			<g:if test="${flash.message}">
 	        	<div class="message">${flash.message}</div>
-	      	</g:if>
-	      	
-		<!--div class="example">
-
-
-
-		<h3>Basic Example</h3>
-		<p><input id="basicExample" type="text" class="time" /></p>
-
-		<pre class="code" data-language="javascript">$('#basicExample').timepicker();</pre>
-	</div-->
+	      	</g:if>      	
 	  		<form id="myform" method="POST" action="employee/pointage" controller="employee">
 	  			<font size="5">	${message(code: 'employee.id', default: 'Create')}: <g:textField id="mytextfield" name="username" autofocus="true" style="vertical-align: middle;" />  	</font>	  				  						
 				<input type="submit" class="classname" value="${message(code: 'default.button.login.label', default: 'Create')}" style="vertical-align: middle;">

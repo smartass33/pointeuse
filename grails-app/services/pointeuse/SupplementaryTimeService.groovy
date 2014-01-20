@@ -5,8 +5,6 @@ class SupplementaryTimeService {
 	def timeManagerService
 	
 	public getAllSupAndCompTime(Employee employee,Period period){
-		
-		
 		def orderedSupTimeMap = [:]
 		def orderedCompTimeMap = [:]
 		def criteria
