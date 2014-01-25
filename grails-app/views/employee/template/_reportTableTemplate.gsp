@@ -63,7 +63,7 @@
                     <g:if test="${entries == null || entries.value ==null}">           
 	                  	<g:if test="${holidayMap.get(entries.key) != null}">
 	                      <font size="2"> 
-	                      <g:select
+	                      <g:select width="200px"
 	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', 
 								  params:'\'employeeId=' + employee.id 						  
 								  + '&day=' + entries.key.format("dd/MM/yyyy")
@@ -77,7 +77,7 @@
 	
 	                      </font>
 	                    </g:if> <g:else>
-	                      <font size="2"> <g:select
+	                      <font size="2"> <g:select width="200px"
 	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2',		  
 								  params:'\'employeeId=' + employee.id 						  
 								  + '&day=' + entries.key.format("dd/MM/yyyy")
@@ -95,7 +95,7 @@
 				<g:else>
 					<g:if test="${holidayMap.get(entries.key) != null}">
 	                      <font size="2"> 
-	                      <g:select
+	                      <g:select width="200px"
 	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', 
 								  params:'\'employeeId=' + employee.id 						  
 								  + '&day=' + entries.key.format("dd/MM/yyyy")
@@ -109,7 +109,7 @@
 	                      </font>
 	                </g:if> 
 	                <g:else>
-	                      <g:select
+	                      <g:select width="200px"
 	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', 
 								  params:'\'employeeId=' + employee.id 						  
 								  + '&day=' + entries.key.format("dd/MM/yyyy")
