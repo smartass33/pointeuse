@@ -1,11 +1,8 @@
 package pointeuse
 
-import java.text.DateFormat
-import java.util.Calendar;
-import java.util.Date
-import java.text.SimpleDateFormat
 import org.codehaus.groovy.grails.web.servlet.mvc.exceptions.CannotRedirectException
 import org.springframework.dao.DataIntegrityViolationException
+import groovy.time.TimeCategory
 
 class InAndOutController {
 
@@ -25,9 +22,8 @@ class InAndOutController {
     def create(Long id) {
 		def employee
 		def complete = params["complete"] ? true : false
-		def reportRedirect = params["report"] ? true : false
-		def inAndOutInstance = new InAndOut(params)
-		
+		def reportRedirect = params["report"] ? true : false		
+		def inAndOutInstance = new InAndOut(params)	
 		if (id!=null){
 			employee=Employee.get(id)
 			inAndOutInstance.employee=employee
@@ -41,42 +37,96 @@ class InAndOutController {
 		def reasonId=params["reason.id"]
 		def employee
 		def employeeId
+		def timeDiff
+		def hour
+		def minute
 		def userId = params["userId"]
-		def hour = params["myTime_hour"] as int
-		def minute = params["myTime_minute"] as int
-		def second = params["myTime_second"] as int
-		def instanceDate = params["inOrOutDate"]
+		Date date
+		def date_picker =params["date_picker"]
+		if (date_picker != null && date_picker.size()>0){
+			date =  new Date().parse("d/M/yyyy HH:mm", date_picker)
+			hour = date.getAt(Calendar.HOUR_OF_DAY)
+			minute = date.getAt(Calendar.MINUTE)
+		}else{
+			hour = params.int("myTime_hour")
+			minute = params.int("myTime_minute")
+		}
+		def instanceDate = date!=null?date:params["inOrOutDate"]
+		def second = params["myTime_second"]!=null ? params.int("myTime_second") :0
 		def fromReport = params["fromReport"].equals('true') ? true:false
-		if (userId != null && userId != ""){
-			employee=Employee.get(userId)
+		if (userId != null && userId != "" && userId.size()>0){
+			employee=Employee.get(userId[0])
 			employeeId=employee.id
 		}else{
-			flash.message = message(code: 'inAndOut.type.not.null')
-			redirect(action: "pointage", controller:"employee")
+			flash.message = message(code: 'employee.not.null')
+			if (fromReport){
+				redirect(action: "list",controller:"employee")
+			}else{
+				redirect(action: "pointage", controller:"employee")
+			}
 			return
 		}
-		if (type==null && type.equals("")){
-			flash.message = message(code: 'inAndOut.type.not.null')
-			redirect(action: "pointage", controller:"employee")
-			return
-		}
-		
+
 		def calendar = Calendar.instance
-		def currentTime = calendar.time
 		if (instanceDate != null){
 			calendar.time=instanceDate
 		}
 
+		if (type==null || (type != null && type.equals(""))){
+			flash.message = message(code: 'inAndOut.type.not.null')
+			if (fromReport){
+				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])
+			}else{
+				redirect(action: "pointage", controller:"employee", id: employeeId)
+			}
+			return
+		}
+		
+		
+		
 		calendar.set(Calendar.HOUR_OF_DAY,hour)
 		calendar.set(Calendar.MINUTE,minute)
 		calendar.set(Calendar.SECOND,second)	
 		def today = Calendar.instance
 		if(calendar.time>today.time){
 			flash.message = message(code: 'inAndOut.in.futur.error')
-			redirect(action: "pointage", controller:"employee", id: employee.id)
+			if (fromReport){
+				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])
+			}else{
+				redirect(action: "pointage", controller:"employee", id: employee.id)
+			}
 			return
 		}
-		def inAndOutInstance = timeManagerService.initializeTotals(employee, calendar.time,type,null)
+		
+		
+		def criteria = InAndOut.createCriteria()
+		def lastIn = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('day',calendar.get(Calendar.DATE))
+				eq('month',calendar.get(Calendar.MONTH)+1)
+				eq('year',calendar.get(Calendar.YEAR))
+				lt('time',calendar.time)
+				order('time','desc')
+			}
+			maxResults(1)
+		}
+			
+		if (lastIn != null){
+			use (TimeCategory){timeDiff=calendar.time-lastIn.time}
+		}
+		if (timeDiff !=null && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600) < 30 && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)!=0){
+			flash.message = message(code: 'employee.overlogging.error')
+			if (fromReport){
+				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])
+			}else{
+				redirect(action: "pointage", controller:"employee", id: employeeId)
+			}
+			return
+		}
+		
+		
+		def inAndOutInstance = timeManagerService.initializeTotals(employee, calendar.time,type,null,null)
 		inAndOutInstance.regularization=true
 		if (fromReport){
 			inAndOutInstance.regularizationType=InAndOut.INITIALE_ADMIN
@@ -94,36 +144,26 @@ class InAndOutController {
 			log.error("user "+user?.username+" added "+inAndOutInstance)
 		}
 	
-		def criteria = InAndOut.createCriteria()
-		def lastIn = criteria.get {
-			and {
-				eq('employee',inAndOutInstance.employee)
-				eq('day',calendar.get(Calendar.DATE))
-				eq('month',calendar.get(Calendar.MONTH)+1)
-				eq('year',calendar.get(Calendar.YEAR))
-				lt('time',inAndOutInstance.time)
-				order('time','desc')
-			}
-			maxResults(1)
-		}
-			
-		def timeDiff = timeManagerService.regularizeTime(type,userId,inAndOutInstance,calendar)
-		if (timeDiff !=null && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600) < 60 && (timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)!=0){
-			flash.message = message(code: 'employee.overlogging.error')
+
+		
+		timeManagerService.regularizeTime(type,employeeId,inAndOutInstance,calendar)
+		
+		if (inAndOutInstance.type.equals('E')){
+			flash.message = message(code: 'inAndOut.create.label', args: [message(code:'inAndOut.entry.label'), calendar.time])
 		}else{
-			def entryType		
-			if (inAndOutInstance.type.equals('E')){
-				flash.message = message(code: 'inAndOut.create.label', args: [message(code:'inAndOut.entry.label'), calendar.time])
-			}else{
-				flash.message = message(code: 'inAndOut.create.label', args: [message(code:'inAndOut.exit.label'), calendar.time])
-			}
-    	}
+			flash.message = message(code: 'inAndOut.create.label', args: [message(code:'inAndOut.exit.label'), calendar.time])	
+		}
 		try {
 			if (fromReport){
-				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])
-				
+				log.error('entry created from report: '+inAndOutInstance)
+				def report = timeManagerService.getReportData(null, employee,  null, calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR))
+				render template: "/employee/template/reportTableTemplate", model: report
+				return
+				//redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])				
 			}else{
+				log.error('entry created from pointage: '+inAndOutInstance)		
 				redirect(action: "pointage", controller:"employee", id: employeeId)
+				return
 			}
 			return
 		}catch(CannotRedirectException e){
@@ -230,5 +270,6 @@ class InAndOutController {
 			}
 		}
 	}
+	
 	
 }

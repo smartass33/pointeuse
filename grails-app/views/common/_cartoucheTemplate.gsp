@@ -7,13 +7,13 @@
 				<td width="20%">
 					<table width="100%"  cellspacing="1" cellpadding="1">
 						<tr>
-							<td style="font-weight: bold" >${firstName} ${lastName}</td>
+							<td style="font-weight: bold" >${fieldValue(bean: employee, field: "firstName")} ${fieldValue(bean: employee, field: "lastName")}</td>
 						</tr>
 						<tr>
-							<td>Horaire Hebdomadaire: ${weeklyContractTime}</td>
+							<td>${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${fieldValue(bean: employee, field: "weeklyContractTime")}</td>
 						</tr>
 						<tr>
-							<td>matricule: ${matricule}</td>
+							<td>${message(code: 'employee.matricule.label', default: 'report')}: ${fieldValue(bean: employee, field: "matricule")}</td>
 						</tr>
 					</table> 
 				</td>
@@ -21,7 +21,7 @@
 					<table width="100%" valign="center" class="cartouche">						
 						<tbody>		
 							<tr><td style="font-weight: bold" colspan="2" align="center"><g:formatDate format="MMMMM yyyy" date="${period}"/></td>
-							<td style="font-weight: bold">${message(code: 'employee.cumul', default: 'report')} ${yearInf}/${yearSup}</td>
+							<td style="font-weight: bold">${message(code: 'employee.cumul', default: 'report')} ${period2}</td>
 							</tr>			
 							<tr>
 							
@@ -31,8 +31,7 @@
 	 									<thead></thead>
 	 									<tr><td>${holiday as java.lang.Float}</td></tr>
 	        						</table>
-	        					</td>
-	        					
+	        					</td>        					
 	        					<td>
 	        						<table border="1" class="cartoucheValues">
 	        							<thead></thead>
@@ -92,7 +91,7 @@
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
 	        							<tr>
-	        								<g:if test="${monthlyTheoritical!=null}">
+	        								<g:if test="${monthTheoritical!=null}">
 	        									<td>${monthTheoritical.get(0)}H${monthTheoritical.get(1)==0?'00':monthTheoritical.get(1)}</td>
 	        								</g:if>
 	        								<g:else>
@@ -194,7 +193,7 @@
 		        					</td>
 								</tr>
 							</g:if>
-							<g:if test="${payableCompTime!=null}">						
+							<g:if test="${payableCompTime!=null && employee.weeklyContractTime != 35}">						
 								<tr>
 									<td>${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
 									<td>

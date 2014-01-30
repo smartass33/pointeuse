@@ -2,6 +2,8 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<g:javascript library="jquery" plugin="jquery" />
+		<resource:calendarMonthView />
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'bankHoliday.label', default: 'BankHoliday')}" />
 		<title><g:message code="default.create.label" args="[entityName]" /></title>
@@ -27,6 +29,8 @@
 			</ul>
 			</g:hasErrors>
 			<g:form action="save" >
+			<!--richui:calendarMonthView items="${appointments}" createLink="true" 
+constraintDateFields="['startDate-endDate', 'startDate', 'endDate']" displayField="subject" teaser="true" teaserLength="20" weekOfYear="true" weekAction="week" dayAction="day" month="${month}" action="show" /-->
 				<fieldset class="form">
 					<g:render template="form"/>
 				</fieldset>

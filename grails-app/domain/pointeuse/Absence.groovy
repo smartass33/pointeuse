@@ -1,6 +1,5 @@
 package pointeuse
 
-import java.util.Calendar;
 
 class Absence {
 
@@ -11,6 +10,7 @@ class Absence {
 	int year
 	AbsenceType type
 	static belongsTo = [employee:Employee]
+	Period period
 	
 	
     static constraints = {

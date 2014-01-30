@@ -1,18 +1,15 @@
 package pointeuse
 
 import groovy.time.TimeDuration;
-import groovy.time.TimeCategory
-
-
+import groovy.time.TimeCategory;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 class TimeManagerService {
 
 	def springSecurityService
-	
+	def utilService
+	def employeeService
 	def addExtraTime(InAndOut inOrOut,TimeDuration extraTime){
 		if (inOrOut.dailyTotal==null){
 			def totals=initializeTotals(inOrOut.employee,inOrOut.time)
@@ -25,78 +22,60 @@ class TimeManagerService {
 		return inOrOut
 	}
 	
-	def computeSupplementaryTime(DailyTotal dailyTotal){
-		def weeklyTotal = dailyTotal.weeklyTotal
-		if (weeklyTotal.elapsedSeconds > WeeklyTotal.maxWorkingTime){
-			weeklyTotal.supplementarySeconds = weeklyTotal.elapsedSeconds-WeeklyTotal.maxWorkingTime		
-		}else {
-			weeklyTotal.supplementarySeconds = 0
-		}
-		//else 
-		if (dailyTotal.elapsedSeconds > DailyTotal.maxWorkingTime){
-			dailyTotal.supplementarySeconds = dailyTotal.elapsedSeconds-DailyTotal.maxWorkingTime
-		}else {
-			dailyTotal.supplementarySeconds =0
-		}
-	}
-	
-	def computeSupplementaryTimeNew(DailyTotal dailyTotal){
-		// compute dailySupTime
-		if (dailyTotal.elapsedSeconds>DailyTotal.maxWorkingTime){
-			dailyTotal.supplementarySeconds=dailyTotal.elapsedSeconds-DailyTotal.maxWorkingTime
-		}else {
-			dailyTotal.supplementarySeconds=0
-		}
-		
-		// compute corresponding weeklySupTime
-		def weeklyTotal = dailyTotal.weeklyTotal
-		def dailyTotals=weeklyTotal.dailyTotals
+	def computeSupplementaryTime(Employee employee,int week, int year){
+		def dailySupplementarySeconds = 0
+		def weeklySupplementarySeconds = 0
 		def dailyTotalSum=0
+		def criteria
+		def dailyTotals
+		def bankHolidays
+		def calendar = Calendar.instance
+		def bankHolidayCounter = 0
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.WEEK_OF_YEAR,week)
+		
+		criteria = BankHoliday.createCriteria()
+		bankHolidays = criteria.list {
+			and {
+				eq('year',year)
+				eq('month',calendar.get(Calendar.MONTH)+1)
+			}
+		}
+		
+		for (BankHoliday bankHoliday:bankHolidays){
+			if (bankHoliday.calendar.get(Calendar.WEEK_OF_YEAR)==week){
+				bankHolidayCounter+=1
+			}
+		}
+		
+		
+		criteria = DailyTotal.createCriteria()
+		dailyTotals = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('week',week)
+			}
+		}
+		criteria = WeeklyTotal.createCriteria()
 		for (DailyTotal tmpDaily:dailyTotals){
-			dailyTotalSum += tmpDaily.supplementarySeconds
+			def tmpElapsed = getDailyTotal(tmpDaily)
+			dailyTotalSum += tmpElapsed
+			dailySupplementarySeconds += Math.max(tmpElapsed-DailyTotal.maxWorkingTime, 0)
 		}
-		if (weeklyTotal.elapsedSeconds <= WeeklyTotal.maxWorkingTime){
-			weeklyTotal.supplementarySeconds = dailyTotalSum
-	
-		}
-		else {
-			weeklyTotal.supplementarySeconds=Math.max(dailyTotalSum,(weeklyTotal.elapsedSeconds-WeeklyTotal.maxWorkingTime))
-		}
-	}
-	
-	
-	def computeComplementaryTime(DailyTotal dailyTotal){
-		def weeklyTotal = dailyTotal.weeklyTotal
-		def sup = 0
-		def HC = 0
-		def HS = 0
-		// calculer les HS et HC hebdo
-		
-		// ne peuvent pas exceder 1/3 du temps hebdo prévu au contrat:
-		if (weeklyTotal.elapsedSeconds > 3600*dailyTotal.employee.weeklyContractTime){
-			//on est en dessous du seuil des 10%: il n'y a que des HC
-			if (weeklyTotal.elapsedSeconds < 4*3600*dailyTotal.employee.weeklyContractTime/3){
-				HC = weeklyTotal.elapsedSeconds - 3600*dailyTotal.employee.weeklyContractTime
-			}
-			// on est au dessus: il faut comptabiliser HC et HS
-			else{
-				HC = 3600*dailyTotal.employee.weeklyContractTime/3
-				HS = weeklyTotal.elapsedSeconds-4*3600*dailyTotal.employee.weeklyContractTime/3
-			}
-		}
-		weeklyTotal.supplementarySeconds=HS
-		weeklyTotal.complementarySeconds=HC
-		
-		// calculer les HS quotidiennes
-		if (dailyTotal.elapsedSeconds > DailyTotal.maxWorkingTime){
-			dailyTotal.supplementarySeconds = dailyTotal.elapsedSeconds-DailyTotal.maxWorkingTime
+		if (dailyTotalSum<=1.2*3600*(WeeklyTotal.WeeklyLegalTime-bankHolidayCounter*(Employee.legalWeekTime/Employee.WeekOpenedDays))){
+			weeklySupplementarySeconds = dailySupplementarySeconds
 		}else {
-			dailyTotal.supplementarySeconds = 0
+			weeklySupplementarySeconds = Math.max(dailySupplementarySeconds,dailyTotalSum-1.2*3600*(WeeklyTotal.WeeklyLegalTime-bankHolidayCounter*(Employee.legalWeekTime/Employee.WeekOpenedDays)))
 		}
+		return weeklySupplementarySeconds
 	}
+		
+
 	
+
 	
-	def initializeTotals(Employee employee, Date currentDate,String type,def event){
+	def initializeTotals(Employee employee, Date currentDate,String type,def event, Boolean isOutside ){
 		def criteria = MonthlyTotal.createCriteria()
 		def monthlyTotal = criteria.get {
 				and {
@@ -149,7 +128,7 @@ class TimeManagerService {
 		}
 		 
 		if (event==null){
-			def inOrOut = new InAndOut(employee, currentDate,type)
+			def inOrOut = new InAndOut(employee, currentDate,type,isOutside)
 			inOrOut.dailyTotal=dailyTotal
 			dailyTotal.inAndOuts.add(inOrOut)
 			employee.inAndOuts.add(inOrOut)
@@ -217,147 +196,40 @@ class TimeManagerService {
 		return [dailyTotal,weeklyTotal,monthlyTotal]
 	}
 	
-		def regularizeTime(String type,String userId,InAndOut inOrOut,Calendar calendar){
-		def cal = Calendar.instance
-		if (calendar != null){
-			cal = calendar
-		}
-		def dailyTotal
-		def currentDate = cal.time
-		def employeeInstance = Employee.get(userId)
-		def weeklyTotal
-		def monthlyTotal
-		def criteria
-		def lastElement
-		def nextElement
-		def deltaTime
-		def NIT
-		def LIT
-		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).getTime()
 	
-		// liste les entrees de la journée et vérifie que cette valeur n'est pas supérieure à une valeur statique
+	def regularizeTime(String type,Long userId,InAndOut inOrOut,Calendar calendar){
+		if (calendar == null){
+			calendar = Calendar.instance
+		}
+		def employee = Employee.get(userId)
+		def criteria
+	
 		criteria = InAndOut.createCriteria()
 		def todayEmployeeEntries = criteria.list {
 			and {
-				eq('employee',employeeInstance)
-				eq('year',cal.get(Calendar.YEAR))
-				eq('month',cal.get(Calendar.MONTH)+1)
-				eq('day',cal.get(Calendar.DAY_OF_MONTH))
+				eq('employee',employee)
+				eq('year',calendar.get(Calendar.YEAR))
+				eq('month',calendar.get(Calendar.MONTH)+1)
+				eq('day',calendar.get(Calendar.DAY_OF_MONTH))
 				eq('type','E')
 			}
 		}
 		
 		if (todayEmployeeEntries != null && todayEmployeeEntries.size() > Employee.entryPerDay){
 			flash.message = "TROP D'ENTREES DANS LA JOURNEE. POINTAGE NON PRIS EN COMPTE"
-			redirect(action: "show", id: employeeInstance.id)
+			redirect(action: "show", id: employee.id)
 			return
 		}
-		criteria = DailyTotal.createCriteria()
-		dailyTotal = criteria.get {
-			and {
-				eq('employee',employeeInstance)
-				eq('year',cal.get(Calendar.YEAR))
-				eq('month',cal.get(Calendar.MONTH)+1)
-				eq('day',cal.get(Calendar.DAY_OF_MONTH))
-			}
-		}
-
-		// initialisation
-		if (dailyTotal == null) {
-			initializeTotals(employeeInstance , cal.time , type,null)
-		}else{
-			criteria = InAndOut.createCriteria()
-			lastElement = criteria.get {
-				and {
-					eq('employee',employeeInstance)
-					eq('day',today.getAt(Calendar.DATE))
-					eq('month',today.getAt(Calendar.MONTH)+1)
-					eq('year',today.getAt(Calendar.YEAR))
-					lt('time',inOrOut.time)
-					order('time','desc')
-				}
-				maxResults(1)
-			}
-			
-			// check if there is a next out
-			criteria = InAndOut.createCriteria()
-			nextElement = criteria.get {
-				and {
-					eq('employee',employeeInstance)
-					eq('day',today.getAt(Calendar.DATE))
-					eq('month',today.getAt(Calendar.MONTH)+1)
-					eq('year',today.getAt(Calendar.YEAR))
-					gt('time',inOrOut.time)
-					order('time','asc')
-				}
-				maxResults(1)
-			}
-			
-			deltaTime=new TimeDuration( 0, 0, 0, 0) 
+		employee.inAndOuts.add(inOrOut)
+		getDailyTotalWithMonth(inOrOut.dailyTotal)
 		
-			// l'employee effectue une sortie: il faut calculer le temps passé depuis la derniere entrée
-			if (type.equals("S")){
-				if (lastElement != null && lastElement.type.equals('E')){
-					LIT = lastElement.time
-					use (TimeCategory){deltaTime=inOrOut.time-LIT}
-				}
-			}
-			// il y a eu une entrée: il faut vérifier par rapport au temps déjà décompté
-			// c'est un cas spécial qui a lieu lors d'une régularisation
-			else {
-				if (nextElement != null && nextElement.type.equals('S')){
-					if (lastElement!=null){
-						LIT = lastElement.time
-						use (TimeCategory){deltaTime=LIT - inOrOut.time}
-					}else{
-						use (TimeCategory){deltaTime=nextElement.time - inOrOut.time}
-					
-					}
-				}
-			}	
-
-			dailyTotal.elapsedSeconds += deltaTime.seconds+deltaTime.minutes*60+deltaTime.hours*3600
-			
-			if (dailyTotal.weeklyTotal != null){
-				dailyTotal.weeklyTotal.elapsedSeconds += deltaTime.seconds+deltaTime.minutes*60+deltaTime.hours*3600
-				dailyTotal.weeklyTotal.dailyTotals.add(dailyTotal)
-				if (employeeInstance.weeklyContractTime != 35){
-					computeComplementaryTime(dailyTotal)
-				}else{
-					computeSupplementaryTimeNew(dailyTotal)
-				}
-			}
-			if (dailyTotal.weeklyTotal.monthlyTotal != null){
-				dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds += deltaTime.seconds+deltaTime.minutes*60+deltaTime.hours*3600
-				dailyTotal.weeklyTotal.monthlyTotal.weeklyTotals.add(weeklyTotal)
-			}														
-			employeeInstance.inAndOuts.add(inOrOut)
-			//dailyTotal.inAndOuts.add(inOrOut)
-			dailyTotal.exitCount=dailyTotal.exitCount+1
-			// the new input is the last one. return the 
-			if (lastElement != null && nextElement != null){
-				use (TimeCategory){deltaTime=nextElement.time-lastElement.time}
-			}else{
-				if (lastElement != null){
-					use (TimeCategory){deltaTime=inOrOut.time-lastElement.time}
-					
-				}
-				if (nextElement != null){
-					use (TimeCategory){deltaTime=nextElement.time-inOrOut.time}
-				}
-			}
-		}
-		if (type.equals("S")){employeeInstance.status=false}
-		else {employeeInstance.status=true}
-		return deltaTime
+		utilService.removeAbsence( employee, calendar)
+		employee.status=type.equals("S")?false:true
 	}
 		
-		
-	def timeModification(def idList,def timeList,def dayList,def monthList, def yearList,Employee employee,def newTimeList,def fromRegularize) throws PointeuseException{
-		def deltaUp
-		def deltaDown
-		def timeDiff
+	def timeModification(def idList,def dayList,def monthList, def yearList,Employee employee,def newTimeList,def fromRegularize) throws PointeuseException{
 		def criteria
+		def toCompare
 		def calendar = Calendar.instance
 		def user = springSecurityService.currentUser
 
@@ -378,12 +250,9 @@ class TimeManagerService {
 			yearList.add(tmpyearList)
 			newTimeList.add(tmpnewTimeList)
 		}
-		def month=monthList[0]
-		def year=yearList[0]
-		
 		
 		for( int p = 0 ; ( p < idList.size() ) ; p++ ) {
-		// l'idée: comparer time et newTime
+		// l'id√©e: comparer time et newTime
 			def inOrOut = InAndOut.get(idList[p])
 			if (inOrOut==null){
 				log.error("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification")
@@ -399,7 +268,6 @@ class TimeManagerService {
 			newCalendar.set(Calendar.SECOND,oldCalendar.get(Calendar.SECOND))
 			
 			if (newCalendar.time!=oldCalendar.time){
-				
 				// compare initial states:
 				criteria = InAndOut.createCriteria()
 				def inititalPrevious = criteria.get {
@@ -429,13 +297,8 @@ class TimeManagerService {
 					maxResults(1)
 				}
 				
-				
-				def toCompare
-				if (newCalendar.time>oldCalendar.time){
-					toCompare=newCalendar.time
-				}else{
-					toCompare=oldCalendar.time
-				}
+
+				toCompare=(newCalendar.time > oldCalendar.time) ? newCalendar.time : oldCalendar.time
 				toCompare.set(minutes:toCompare.minutes+1)
 					
 				// get next inOrOut for this user
@@ -459,21 +322,16 @@ class TimeManagerService {
 					return
 				}
 				
-				
-				if (newCalendar.time>oldCalendar.time){
-					toCompare=oldCalendar.time
-				}else{
-					toCompare=newCalendar.time
-				}
+				toCompare=(newCalendar.time > oldCalendar.time) ? oldCalendar.time : newCalendar.time
 				toCompare.set(minutes:toCompare.minutes+1)
 				
 				criteria = InAndOut.createCriteria()
 				def previousInOrOut = criteria.get {
 					and {
 						eq('employee',employee)
-						eq('day',calendar.getAt(Calendar.DAY_OF_MONTH))
-						eq('month',calendar.getAt(Calendar.MONTH)+1)
-						eq('year',calendar.getAt(Calendar.YEAR))
+						eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+						eq('month',calendar.get(Calendar.MONTH)+1)
+						eq('year',calendar.get(Calendar.YEAR))
 						lt('time',toCompare)
 						lt('id',inOrOut.id)
 						order('time','desc')
@@ -486,43 +344,10 @@ class TimeManagerService {
 					throw new PointeuseException('inAndOut.updateTime.error')
 					return
 				}
-				
-				if (previousInOrOut != null){
-					use (TimeCategory){deltaDown=newCalendar.time-previousInOrOut.time}
-				}
-
-				
-				if (nextInOrOut != null){
-					use (TimeCategory){deltaUp=nextInOrOut.time-newCalendar.time}
-				}
-
 				inOrOut.time=newCalendar.time
-				
-				// if the time difference
-				if (inOrOut.systemGenerated && previousInOrOut!=null ){
-						use (TimeCategory){timeDiff=newCalendar.time-previousInOrOut.time}
-				}
-				if (inOrOut.regularization && nextInOrOut !=null && nextInOrOut.systemGenerated){
-					use (TimeCategory){timeDiff=nextInOrOut.time - newCalendar.time}
-				}
-				def doNothing=false
-				if (inOrOut.type.equals('E') && nextInOrOut !=null && nextInOrOut.type.equals('E')){
-					doNothing=true
-				}
-				if (inOrOut.type.equals('S') && previousInOrOut !=null && previousInOrOut.type.equals('S')){
-					doNothing=true
-				}
-				if(!doNothing){
-					dailyTotalUpdate(timeDiff,newCalendar.time,oldCalendar.time,inOrOut,employee,dayList[p] as int,month as int)
-				}
-				if (employee.weeklyContractTime != 35){
-					computeComplementaryTime(inOrOut.dailyTotal)
-				}else{
-					computeSupplementaryTimeNew	(inOrOut.dailyTotal)
-				}
+				getDailyTotalWithMonth(inOrOut.dailyTotal)
 				
 				inOrOut.regularizationType=fromRegularize ? InAndOut.MODIFIEE_SALARIE : InAndOut.MODIFIEE_ADMIN
-				
 				inOrOut.systemGenerated=false
 				
 				if (user!=null){
@@ -534,30 +359,7 @@ class TimeManagerService {
 		}
 	}
 	
-	def dailyTotalUpdate(TimeDuration timeDiff,Date newDate ,Date oldDate,InAndOut inOrOut,Employee employee,int day, int month){
-		if (inOrOut.dailyTotal.elapsedSeconds<0){
-			log.error('the daily Total is negative ' + inOrOut.dailyTotal)
-			//dailyTotal.elapsedSeconds=0
-		}
-		if (timeDiff == null){
-			use (TimeCategory){timeDiff=newDate-oldDate}
-			if (inOrOut.type == "E"){
-				inOrOut.dailyTotal.elapsedSeconds-=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
-				inOrOut.dailyTotal.weeklyTotal.elapsedSeconds-=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
-				inOrOut.dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds-=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
-			} else {
-				inOrOut.dailyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
-				inOrOut.dailyTotal.weeklyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
-				inOrOut.dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
-			}
-		}else{
-			inOrOut.dailyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
-			inOrOut.dailyTotal.weeklyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
-			inOrOut.dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds+=(timeDiff.hours*3600+timeDiff.minutes*60+timeDiff.seconds)
-		}
-		return inOrOut.dailyTotal
-	}
-	
+
 	def computeMonthlyHours(int year,int month){
 		def openedDays = 0
 		def calendar = Calendar.instance
@@ -566,12 +368,12 @@ class TimeManagerService {
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		
 		// discard sundays from opened days
-		while(calendar.getAt(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-			if (calendar.getAt(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
+		while(calendar.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			if (calendar.get(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
 				openedDays += 1
 			}
 			
-			if (calendar.getAt(Calendar.DAY_OF_MONTH) == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			if (calendar.get(Calendar.DAY_OF_MONTH) == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 				break
 			}
 			calendar.roll(Calendar.DAY_OF_MONTH, 1)
@@ -593,49 +395,1107 @@ class TimeManagerService {
 		long seconds=TimeUnit.SECONDS.toSeconds(diff);
 		return [hours,minutes,seconds]
 	}
+
+	
+	def computeSecondsFromHumanTime(def table){
+		return table.get(0)*3600+table.get(1)*60+table.get(2)
+	}
+	
+	def recomputeDailyTotals(){
+		def tmpInOrOut
+		def dailyDelta=0
+		def timeDiff
+		def criteria
+		def employeeList = Employee.findAll("from Employee")
+		
+		for (Employee employee:employeeList){
+			criteria = DailyTotal.createCriteria()
+			def dailyTotalList = DailyTotal.findByEmployee(employee)
+			
+			for (DailyTotal dailyTotal: dailyTotalList){
+				tmpInOrOut=null
+				dailyDelta=0
+				criteria=InAndOut.createCriteria()
+				def inOrOutList = criteria.list {
+					and {
+						eq('employee',employee)
+						eq('year',year)
+						eq('month',month)
+						eq('day',dailyTotal.day)
+					}
+					order('time','asc')
+				}
+				
+				for (InAndOut inOrOut:inOrOutList){
+					if (inOrOut.type.equals("E")){
+						tmpInOrOut=inOrOut
+					}else{
+						if (tmpInOrOut!=null){
+							use (TimeCategory){timeDiff=inOrOut.time-tmpInOrOut.time}
+							dailyDelta+=timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600
+						}
+					}
+				}
+				dailyTotal.elapsedSeconds=dailyDelta
+				dailyTotal.weeklyTotal.elapsedSeconds+=dailyDelta
+				dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds+=dailyDelta
+			}
+		}
+		
+	}
+	
+	def recomputeDailyTotals(int userId,int day,int month,int year){
+		Employee employee = Employee.get(userId)
+		
+		def tmpInOrOut
+		def dailyDelta=0
+		def timeDiff
+		def criteria = DailyTotal.createCriteria()
+		def dailyTotal = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',year)
+					eq('month',month)
+					eq('day',day)
+				}
+			}
+		
+	
+		criteria=InAndOut.createCriteria()
+		def inOrOutList = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('day',dailyTotal.day)
+			}
+			order('time','asc')
+		}
+		
+		for (InAndOut inOrOut:inOrOutList){
+			if (inOrOut.type.equals("E")){
+				tmpInOrOut=inOrOut
+			}else{
+				if (tmpInOrOut!=null){
+					use (TimeCategory){timeDiff=inOrOut.time-tmpInOrOut.time}
+					dailyDelta+=timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600
+				}
+			}
+		}
+		dailyTotal.elapsedSeconds=dailyDelta
+		return dailyTotal
+	}
+	def getDailyTotal(DailyTotal dailyTotal){
+		def criteria = InAndOut.createCriteria()
+		def elapsedSeconds = 0
+		def tmpInOrOut
+		def timeDifference
+		def inOrOutList = criteria.list {
+			and {
+				eq('employee',dailyTotal.employee)
+				eq('year',dailyTotal.year)
+				eq('month',dailyTotal.month)
+				eq('day',dailyTotal.day)
+			}
+			order('time','asc')
+		}
+		
+		for (InAndOut inOrOut:inOrOutList){
+			if (inOrOut.type.equals("E")){
+				tmpInOrOut=inOrOut
+			}else{
+				if (tmpInOrOut!=null){
+					use (TimeCategory){timeDifference=inOrOut.time-tmpInOrOut.time}
+					elapsedSeconds+=timeDifference.seconds + timeDifference.minutes*60+timeDifference.hours*3600
+				}
+			}
+		}
+		dailyTotal.elapsedSeconds=elapsedSeconds
+		return elapsedSeconds
+	}
+	
+	def getDailyTotalWithMonth(DailyTotal dailyTotal){
+		def criteria = InAndOut.createCriteria()
+		def elapsedSeconds = 0
+		def tmpInOrOut
+		def timeDifference
+		def deltaTime
+		def inOrOutList = criteria.list {
+			and {
+				eq('employee',dailyTotal.employee)
+				eq('year',dailyTotal.year)
+				eq('month',dailyTotal.month)
+				eq('day',dailyTotal.day)
+			}
+			order('time','asc')
+		}
+		
+		for (InAndOut inOrOut:inOrOutList){
+			if (inOrOut.type.equals("E")){
+				tmpInOrOut=inOrOut
+			}else{
+				if (tmpInOrOut!=null){
+					use (TimeCategory){timeDifference=inOrOut.time-tmpInOrOut.time}
+					elapsedSeconds+=timeDifference.seconds + timeDifference.minutes*60+timeDifference.hours*3600
+				}
+			}
+		}
+		deltaTime=dailyTotal.elapsedSeconds - elapsedSeconds//old-new
+		dailyTotal.elapsedSeconds=elapsedSeconds
+		dailyTotal.weeklyTotal.elapsedSeconds -= deltaTime
+		dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds -= deltaTime
+
+		return elapsedSeconds
+	}
 	
 	
-	def computeSupTime(Calendar calendar,Employee employee){
-		def dailyTotalId = 0
-		def calendarLoop = calendar
-		int month = calendar.getAt(Calendar.MONTH) // starts at 0
-		int year = calendar.getAt(Calendar.YEAR)
-		calendarLoop.getTime().clearTime()
-		def monthlyCompTime = 0
+	def getDailyTotal(def inOrOutList){
+		def elapsedSeconds = 0
+		def tmpInOrOut
+		def timeDifference
+	
+		for (InAndOut inOrOut:inOrOutList){
+			if (inOrOut.type.equals("E")){
+				tmpInOrOut=inOrOut
+			}else{
+				if (tmpInOrOut!=null){
+					use (TimeCategory){timeDifference=inOrOut.time-tmpInOrOut.time}
+					elapsedSeconds+=timeDifference.seconds + timeDifference.minutes*60+timeDifference.hours*3600
+				}
+			}
+		}
+		return elapsedSeconds
+	}
+
+	
+	def getYearlyTotalTime(Employee employee, int year){
+		def criteria
+		def dailyTotal
+		def elapsedSeconds = 0
+		Calendar calendar = Calendar.instance
+		calendar.set(Calendar.YEAR,year)
+		// set the date end of may
+		calendar.set(Calendar.MONTH,4)
+		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		calendar.set(Calendar.YEAR,year-1)
+		calendar.set(Calendar.MONTH,5)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.clearTime()
+		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+			criteria = DailyTotal.createCriteria()
+			dailyTotal = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('year',calendar.get(Calendar.YEAR))
+						eq('month',calendar.get(Calendar.MONTH)+1)
+						eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+					}
+				}
+			if (dailyTotal!=null){
+				elapsedSeconds += dailyTotal.elapsedSeconds
+			}
+			
+			if (calendar.get(Calendar.DAY_OF_YEAR) == calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+				break
+			}
+			calendar.roll(Calendar.DAY_OF_YEAR, 1)
+		}
+		
+		
+		calendar.set(Calendar.DAY_OF_YEAR,1)
+		calendar.set(Calendar.YEAR,year)
+
+		def endPeriodCalendar = Calendar.instance
+		
+		endPeriodCalendar.set(Calendar.MONTH,4)
+		endPeriodCalendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+
+		while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
+			criteria = DailyTotal.createCriteria()
+			dailyTotal = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('year',calendar.get(Calendar.YEAR))
+						eq('month',calendar.get(Calendar.MONTH)+1)
+						eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+					}
+				}
+			if (dailyTotal!=null){
+				elapsedSeconds += dailyTotal.elapsedSeconds
+				//elapsedSeconds += getDailyTotal(dailyTotal)
+			}
+			if (calendar.get(Calendar.DAY_OF_YEAR) == endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
+				break
+			}
+			calendar.roll(Calendar.DAY_OF_YEAR, 1)
+		}
+		
+		
+	return elapsedSeconds
+	}
+	
+	
+	def getYearCartoucheData(Employee employee,int year,int month){
+		def monthNumber=0
+		def yearTheoritical
+		def calendar = Calendar.instance
+		calendar.set(Calendar.YEAR,year)
+		def yearlyCounter = 0
+		def totalTime = 0
+		def bankHolidayCounter=0
+		def bankHolidayList
+		def criteria = Absence.createCriteria()
+		
+		if (month>5){
+			year=year+1
+			monthNumber=month-6+1
+		}else{
+			monthNumber=month+1+6
+		}
+		
+		// set the date end of may
+		calendar.set(Calendar.MONTH,month-1)
+		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		def maxDate = calendar.time
+		calendar.set(Calendar.YEAR,year-1)
+		calendar.set(Calendar.MONTH,5)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.clearTime()
+		def minDate = calendar.time
+		
+		// get cumul holidays
+		def yearlyHolidays = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.VACANCE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def yearlyRtt = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.RTT)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def yearlySickness = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.MALADIE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def pregnancy = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.GROSSESSE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def yearlySansSolde = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.CSS)
+			}
+		}
+				
+		def monthsAggregate
+		if (month>=6){
+			criteria = MonthlyTotal.createCriteria()
+			
+			monthsAggregate = criteria.list{
+				and {
+					eq('employee',employee)
+					ge('month',6)
+					le('month',month)
+					eq('year',year-1)
+				}
+			}	
+		}else{
+			criteria = MonthlyTotal.createCriteria()	
+			monthsAggregate = criteria.list{
+				// year -1
+				or{
+					and {
+						eq('employee',employee)
+						ge('month',6)
+						le('month',12)
+						eq('year',year-1)
+					}
+					and {
+						eq('employee',employee)
+						le('month',month)
+						eq('year',year)
+					}
+				}
+			}
+		}
+
+		for (MonthlyTotal monthIter:monthsAggregate){			
+			totalTime += monthIter.elapsedSeconds
+		}
+
+		
+		yearlyCounter=month>5 ? utilService.getSundaysInYear(year-1,month) : utilService.getSundaysInYear(year,month)
+
+		criteria = BankHoliday.createCriteria()
+		
+		if (month<6){
+			bankHolidayList = criteria.list{
+				or{
+					and {
+						ge('month',1)
+						le('month',month)
+						eq('year',year)
+					}
+					and{
+						ge('month',6)
+						le('month',12)
+						eq('year',year-1)
+					}
+				}
+			}
+		}
+		else{
+			bankHolidayList = criteria.list{
+				and {
+					ge('month',6)
+					le('month',month)
+					eq('year',year-1)
+				}
+			}
+		}
+		
+		for (BankHoliday bankHoliday:bankHolidayList){
+			if (bankHoliday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				bankHolidayCounter ++
+			}
+		}
+		
+		yearlyCounter -= bankHolidayCounter
+		def yearlyPregnancyCredit=30*60*pregnancy.size()
+		yearTheoritical=3600*(
+					yearlyCounter*employee.weeklyContractTime/Employee.WeekOpenedDays
+					+ (Employee.Pentecote*monthNumber)*(employee.weeklyContractTime/Employee.legalWeekTime)
+					-(employee.weeklyContractTime/Employee.WeekOpenedDays)*(yearlySickness.size()+yearlyHolidays.size()+yearlySansSolde.size())
+					-pregnancy.size()
+					) as int
+		
+		return [yearlyActualTotal:yearlyCounter ,yearlyHolidays:yearlyHolidays.size(),yearlyRtt:yearlyRtt.size(),yearlySickness:yearlySickness.size(),yearlyTheoritical:yearTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTotalTime:totalTime,yearlySansSolde:yearlySansSolde.size()]
+	}
+	
+	def getCartoucheData(Employee employeeInstance,int year,int month){
+		def counter = 0
+		def holidayList
+		def holidayCounter = 0
+		def monthTheoritical
+		def criteria
+		def calendar = Calendar.instance
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.MONTH,month-1)
+		
+		// count sundays within given month
+		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+			if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				counter ++
+			}
+			if (calendar.get(Calendar.DAY_OF_MONTH) == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				break
+			}
+			calendar.roll(Calendar.DAY_OF_MONTH, 1)
+		}
+		
+		// count bank holiday
+		holidayList = BankHoliday.findAllByMonthAndYear(month,calendar.get(Calendar.YEAR))
+
+		for (BankHoliday holiday:holidayList){
+			if (holiday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				holidayCounter++
+			}
+		}
+				
+		counter -= holidayCounter
+
+		// get cumul holidays
+		criteria = Absence.createCriteria()
+		def holidays = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.VACANCE)
+			}
+		}
+		
+		// get cumul RTT
+		criteria = Absence.createCriteria()
+		def rtt = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.RTT)
+			}
+		}
+		// get cumul sickness
+		criteria = Absence.createCriteria()
+		def sickness = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.MALADIE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def pregnancy = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.GROSSESSE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def sansSolde = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.CSS)
+			}
+		}
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		calendar.set(Calendar.DATE,1)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.MONTH,month-1)
+	
+		def yearlyCartouche=getYearCartoucheData(employeeInstance,year,month)
+		def pregnancyCredit=30*60*pregnancy.size()
+		// determine monthly theoritical time:
+		
+		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year, counter,  sickness.size(), holidays.size(), sansSolde.size(),  pregnancyCredit)
+
+		def monthTheoriticalHuman=computeHumanTime(monthTheoritical)
+		def cartoucheMap=[employeeInstance:employeeInstance,workingDays:counter ,holidays:holidays.size(),rtt:rtt.size(),sickness:sickness.size(),sansSolde:sansSolde.size(),monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,monthTheoriticalHuman:monthTheoriticalHuman,calendar:calendar]
+		def mergedMap = cartoucheMap << yearlyCartouche
+		return mergedMap
+	}
+	
+	
+	def getReportData(String siteId,Employee employee, Date myDate,int monthPeriod,int yearPeriod){
+		def calendar = Calendar.instance
+		def weekName="semaine "
+		def weeklyTotalTime = [:]
+		def weeklySuppTotalTime = [:]
+		def weeklyTotalTimeByEmployee = [:]
+		def weeklySupTotalTimeByEmployee = [:]
+		def monthlyTotalTimeByEmployee = [:]
+		def weeklyAggregate = [:]
+		def dailyTotalMap = [:]
+		def dailyBankHolidayMap = [:]
+		def dailySupTotalMap = [:]
+		def holidayMap = [:]
+		def mapByDay = [:]
+		def dailyTotalId=0
 		def monthlySupTime = 0
+		def monthlyTotalTime = 0
+		def criteria
+		def dailySeconds = 0
+		def weeklySupTime
+		def currentWeek=0
 
-		while(calendarLoop.getAt(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-			// élimine les dimanches du rapport
+		//get last day of the month
+		if (myDate==null){
+			if (yearPeriod!=0){
+				calendar.set(Calendar.MONTH,monthPeriod-1)
+				calendar.set(Calendar.YEAR,yearPeriod)
+			}
+			calendar.set(Calendar.MONTH,calendar.get(Calendar.MONTH))
+			calendar.set(Calendar.DATE,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		}else{
+			calendar.time=myDate
+		}
 
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		calendar.set(Calendar.DATE,1)
+		
+		
+		def calendarLoop = calendar
+		int month = calendar.get(Calendar.MONTH)+1 // starts at 0
+		int year = calendar.get(Calendar.YEAR)
+			
+		calendarLoop.getTime().clearTime()
+		def lastWeekParam = utilService.getLastWeekOfMonth(month, year)
+		def isSunday=lastWeekParam.get(1)
+		
+		
+		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			// √©limine les dimanches du rapport
+			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
+				mapByDay = [:]
+			}
 			//print calendarLoop.time
-			def criteria = DailyTotal.createCriteria()
+			criteria = DailyTotal.createCriteria()
 			def dailyTotal = criteria.get {
 				and {
 					eq('employee',employee)
-					eq('day',calendarLoop.getAt(Calendar.DAY_OF_MONTH))
-					eq('month',month+1)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+					eq('month',month)
 					eq('year',year)
 				}
 			}
-			// permet de récupérer le total hebdo
-			if (dailyTotal != null && dailyTotal != dailyTotalId && dailyTotal.weeklyTotal.elapsedSeconds > 0){
-				if (dailyTotal.weeklyTotal.elapsedSeconds > WeeklyTotal.maxWorkingTime){
-					monthlySupTime+=dailyTotal.weeklyTotal.supplementarySeconds
-				}else {
-					monthlySupTime+=dailyTotal.supplementarySeconds		
+			// permet de r√©cup√©rer le total hebdo
+			if (dailyTotal != null && dailyTotal != dailyTotalId){
+				dailySeconds = getDailyTotal(dailyTotal)
+				monthlyTotalTime += dailySeconds
+				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
+				if (previousValue!=null){
+					def newValue=previousValue.get(0)*3600+previousValue.get(1)*60+previousValue.get(2)
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), computeHumanTime(dailySeconds+newValue))
+				}else{
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), computeHumanTime(dailySeconds))
 				}
 				
-				if (dailyTotal.weeklyTotal.complementarySeconds > 0){
-					monthlyCompTime+=dailyTotal.weeklyTotal.complementarySeconds					
+				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
+					weeklySupTime = 0
+				}else{
+					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 				}
+				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
+				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
+					monthlySupTime += weeklySupTime
+					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
+				}
+				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
+				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
 				dailyTotalId=dailyTotal.id
 			}
-			if (calendarLoop.getAt(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			// daily total is null. Still, we need to check if supplementary time exists within the week
+			if (dailyTotal==null && calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+				if (calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
+					weeklySupTime = 0
+				}else{
+					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+				}
+					weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
+				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
+					monthlySupTime += weeklySupTime
+					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
+				}
+				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
+			
+			}
+						
+			criteria = InAndOut.createCriteria()
+			def entriesByDay = criteria{
+				and {
+					eq('employee',employee)
+					eq('day',calendarLoop.getAt(Calendar.DATE))
+					eq('month',month)
+					eq('year',year)
+					order('time')
+					}
+			}
+			// put in a map in and outs
+			def tmpDate = calendarLoop.time
+			if 	(entriesByDay.size()>0){
+				if (dailyTotal!=null){
+					dailyTotalMap.put(tmpDate, computeHumanTime(dailySeconds))
+					dailySupTotalMap.put(tmpDate, computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)))
+				}else {
+					dailyTotalMap.put(tmpDate, computeHumanTime(0))
+					dailySupTotalMap.put(tmpDate, computeHumanTime(0))
+				}
+				mapByDay.put(tmpDate, entriesByDay)
+			}
+			else{
+				dailyTotalMap.put(tmpDate, computeHumanTime(0))
+				mapByDay.put(tmpDate, null)
+			}
+			
+			// find out if day is a bank holiday:
+			criteria = BankHoliday.createCriteria()
+			def bankHoliday = criteria.get{
+				and {
+					eq('year',calendarLoop.get(Calendar.YEAR))
+					eq('month',calendarLoop.get(Calendar.MONTH)+1)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			if (bankHoliday!=null){
+				dailyBankHolidayMap.put(tmpDate, true)
+			}else{
+				dailyBankHolidayMap.put(tmpDate, false)
+			}
+			
+			def absenceCriteria = Absence.createCriteria()
+			def dailyAbsence = absenceCriteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',calendarLoop.get(Calendar.YEAR))
+					eq('month',calendarLoop.get(Calendar.MONTH)+1)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			holidayMap.put(tmpDate, dailyAbsence)
+			weeklyAggregate.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), mapByDay)
+			if (calendarLoop.get(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 				break
 			}
 			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
 		}
-		return [monthlySupTime,monthlyCompTime]
+
+		//update monthlyTotal
+		
+		criteria = MonthlyTotal.createCriteria()
+		def monthlyTotalInstance = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+			}
+		}
+		if (monthlyTotalInstance!=null){
+			monthlyTotalInstance.elapsedSeconds=monthlyTotalTime
+		}
+		def cartoucheTable = getCartoucheData(employee,year,month)
+		def workingDays=cartoucheTable.get('workingDays')
+		def holiday=cartoucheTable.get('holidays')
+		def rtt=cartoucheTable.get('rtt')
+		def sickness=cartoucheTable.get('sickness')
+		def sansSolde=cartoucheTable.get('sansSolde')
+		def monthTheoritical = cartoucheTable.get('monthTheoritical')
+		def pregnancyCredit = computeHumanTime(cartoucheTable.get('pregnancyCredit'))
+		def yearlyHoliday=cartoucheTable.get('yearlyHolidays')
+		def yearlyRtt=cartoucheTable.get('yearlyRtt')
+		def yearlySickness=cartoucheTable.get('yearlySickness')
+		def yearlyTheoritical = computeHumanTime(cartoucheTable.get('yearlyTheoritical'))
+		def yearlyPregnancyCredit = computeHumanTime(cartoucheTable.get('yearlyPregnancyCredit'))
+		def yearlyActualTotal = computeHumanTime(cartoucheTable.get('yearlyTotalTime'))
+		def yearlySansSolde=cartoucheTable.get('yearlySansSolde')
+		def payableSupTime = computeHumanTime(Math.round(monthlySupTime))
+		def payableCompTime = computeHumanTime(0)
+		if (employee.weeklyContractTime!=Employee.legalWeekTime && monthlyTotalTime > monthTheoritical){
+			payableCompTime = computeHumanTime(Math.round(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0)))
+			
+		}	
+		monthlyTotalTimeByEmployee.put(employee, computeHumanTime(monthlyTotalTime))
+		def monthlyTotal=computeHumanTime(monthlyTotalTime)
+		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
+		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)	
+		return [period2:period,
+			dailyBankHolidayMap:dailyBankHolidayMap,
+			monthlyTotalRecap:monthlyTotal,
+			payableSupTime:payableSupTime,
+			payableCompTime:payableCompTime,
+			employee:employee,
+			siteId:siteId,
+			userId:employee.id,
+			workingDays:workingDays,
+			holiday:holiday,
+			rtt:rtt,
+			sickness:sickness,
+			sansSolde:sansSolde,
+			yearlyActualTotal:yearlyActualTotal,
+			monthTheoritical:monthTheoritical,
+			pregnancyCredit:pregnancyCredit,
+			yearlyPregnancyCredit:yearlyPregnancyCredit,
+			yearlyHoliday:yearlyHoliday,
+			yearlyRtt:yearlyRtt,
+			yearlySickness:yearlySickness,
+			yearlySansSolde:yearlySansSolde,
+			yearlyTheoritical:yearlyTheoritical,
+			monthlyTotal:monthlyTotalTimeByEmployee,
+			weeklyTotal:weeklyTotalTimeByEmployee,
+			weeklySupTotal:weeklySupTotalTimeByEmployee,
+			dailySupTotalMap:dailySupTotalMap,
+			dailyTotalMap:dailyTotalMap,
+			month:month,
+			year:year,
+			period:calendarLoop.getTime(),
+			holidayMap:holidayMap,
+			weeklyAggregate:weeklyAggregate]
 	}
+	
+	def getEcartData(Site site, def monthList, Period period){
+		def tmpYear
+		def criteria
+		def referenceRTT
+		def takenRTT
+		def data
+		def monthlyTheoriticalMap = [:]
+		def monthlyActualMap = [:]
+		def monthlyTakenRTTMap = [:]
+		def ecartMap = [:]
+		def ecartMinusRTTMap = [:]
+		def monthlyTheoriticalByEmployee = [:]
+		def monthlyActualByEmployee = [:]
+		def ecartMinusRTTByEmployee = [:]
+		def ecartByEmployee = [:]
+		def rttByEmployee = [:]
+		def employeeInstanceList
+		
+		if (site){
+			employeeInstanceList = Employee.findAllBySite(site)
+		}else{
+			employeeInstanceList=Employee.findAll("from Employee")
+		}
+		
+		for (Employee employee:employeeInstanceList){
+			monthlyTheoriticalMap = [:]
+			monthlyActualMap = [:]
+			monthlyTakenRTTMap = [:]
+			ecartMap = [:]
+			ecartMinusRTTMap = [:]
+			for (month in monthList){
+				tmpYear=(month<6)?period.year+1:period.year
+		   
+				criteria = MonthlyTotal.createCriteria()
+				def monthlyTotalInstance = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('year',tmpYear)
+						eq('month',month)
+					}
+				}
+				
+				criteria = Vacation.createCriteria()
+				referenceRTT = criteria.get{
+					and {
+						eq('employee',employee)
+						eq('period',period)
+						eq('type',VacationType.RTT)
+					}
+				}
+				//special case for employees for which vacations were not properly instanciated
+				if (referenceRTT == null && employee.weeklyContractTime == Employee.legalWeekTime){
+						utilService.initiateVacations(employee)
+						criteria = Vacation.createCriteria()
+						referenceRTT = criteria.get{
+							and {
+								eq('employee',employee)
+								eq('period',period)
+								eq('type',VacationType.RTT)
+							}
+						}
+					}
+					
+				criteria = Absence.createCriteria()
+				takenRTT = criteria.list{
+					and {
+						eq('employee',employee)
+						eq('year',tmpYear)
+						eq('month',month)
+						eq('type',VacationType.RTT)
+					}
+				}
+				data = getCartoucheData(employee,tmpYear,month)
+				def theoricalTime2add = 0
+				def actualTime2add = 0
+				def takenRTT2add
+				// initialization month
+				if (month==6){
+					theoricalTime2add = 0
+					actualTime2add = 0
+					takenRTT2add = referenceRTT.counter	
+				}
+				
+				// special case for 1st month of year
+				if (month==1){
+					theoricalTime2add = monthlyTheoriticalMap.get(12)
+					actualTime2add = monthlyActualMap.get(12)
+					takenRTT2add = monthlyTakenRTTMap.get(12)
+				}
+				
+				if (month != 6 && month != 1){
+					theoricalTime2add = monthlyTheoriticalMap.get(month-1)
+					actualTime2add = monthlyActualMap.get(month-1)
+					takenRTT2add = monthlyTakenRTTMap.get(month-1)			
+				}
+				
+				monthlyTheoriticalMap.put(month, data.get('monthTheoritical') + theoricalTime2add)
+				if (monthlyTotalInstance!=null){
+					monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds + actualTime2add)
+				}else{
+					monthlyActualMap.put(month, actualTime2add)
+				}
+				if (employee.weeklyContractTime == Employee.legalWeekTime){
+					if (takenRTT!=null){
+						monthlyTakenRTTMap.put(month,takenRTT2add - takenRTT.size())
+					}else{
+						monthlyTakenRTTMap.put(month,takenRTT2add)
+					}
+				}
+				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))
+				if (employee.weeklyContractTime == Employee.legalWeekTime){		
+					ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(employee.weeklyContractTime/Employee.WeekOpenedDays)) as long)
+				}
+			}
+		
+			monthlyTheoriticalMap.each() {
+				def serviceData=computeHumanTime(it.value)
+				def hours=serviceData.get(0)
+				def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
+				it.value=hours+'H'+minutes
+				}
+			monthlyActualMap.each() {
+				def serviceData=computeHumanTime(it.value)
+				def hours=serviceData.get(0)
+				def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
+				it.value=hours+'H'+minutes
+		   }
+			ecartMap.each() {
+				def serviceData=computeHumanTime(it.value)
+				def hours=serviceData.get(0)
+				def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
+				it.value=hours+'H'+minutes
+		   }
+			ecartMinusRTTMap.each() {
+				def serviceData=computeHumanTime(it.value as long)
+				def hours=serviceData.get(0)
+				def minutes=serviceData.get(1)==0?'00':serviceData.get(1)
+				it.value=hours+'H'+minutes
+		   }
+		   
+			
+			monthlyTheoriticalByEmployee.put(employee,monthlyTheoriticalMap)
+			monthlyActualByEmployee.put(employee,monthlyActualMap)
+			ecartByEmployee.put(employee, ecartMap)
+			if (employee.weeklyContractTime == Employee.legalWeekTime)
+				ecartMinusRTTByEmployee.put(employee,ecartMinusRTTMap)
+			rttByEmployee.put(employee, monthlyTakenRTTMap)
+		}
+		return [period:period,employeeInstanceList:employeeInstanceList,monthlyTheoriticalByEmployee:monthlyTheoriticalByEmployee,monthlyActualByEmployee:monthlyActualByEmployee,ecartByEmployee:ecartByEmployee,rttByEmployee:rttByEmployee,ecartMinusRTTByEmployee:ecartMinusRTTByEmployee]
+	
+	}
+		
+	def getMonthlySupTime(Employee employee,int month, int year){
+		int daysToWithdraw
+		def supTime = 0
+		Calendar calendar = Calendar.instance
+		calendar.set(Calendar.MONTH,month-1)
+		calendar.set(Calendar.YEAR,year)
+		Calendar firstDayOfMonth = calendar.clone()
+		Calendar lastDayOfMonth = calendar.clone()
+		lastDayOfMonth.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		firstDayOfMonth.set(Calendar.DAY_OF_MONTH,1)
+		
+		if (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY){
+			int currentDayInWeek = firstDayOfMonth.get(Calendar.DAY_OF_WEEK)
+			int currentDayInYear = firstDayOfMonth.get(Calendar.DAY_OF_YEAR)
+			if (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
+				daysToWithdraw = 6
+			}else{
+				daysToWithdraw = currentDayInWeek - Calendar.MONDAY
+			}
+			firstDayOfMonth.set(Calendar.DAY_OF_YEAR, currentDayInYear - daysToWithdraw)
+		}
+		Calendar calendarLoop = firstDayOfMonth.clone()
+		// now that we have the first day of the period, iterate over each week of the period to retrieve supplementary time
+		
+		log.debug('calendarLoop before special loop '+calendarLoop.time)
+		
+		// special case if hover 2 years
+		if (calendarLoop.get(Calendar.DAY_OF_YEAR)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
+			supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
+			calendarLoop.set(Calendar.YEAR,year)
+		  //  log.error('calendarLoop after special loop '+calendarLoop.time)
+		}
+		
+		while(calendarLoop.get(Calendar.DAY_OF_YEAR)<=lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
+		//	log.error('calendarLoop : '+calendarLoop.time)
+			
+			if ((calendarLoop.get(Calendar.DAY_OF_YEAR)+7)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
+				break
+			}
+			supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
+		}
+		return supTime
+	}
+	
+	def getAnnualReportData(int year, Employee employee){
+		def criteria
+		def dailySeconds
+		def monthlyTotalTime
+		def monthlySupTotalTime
+		def yearMonthMap = [:]
+		def yearTotalMap = [:]
+		def yearMonthlySupTime = [:]
+		def yearMonthlyCompTime = [:]
+		def yearMap = [:]
+		def cartoucheTable=[]
+		def firstWeekOfMonth
+		def lastWeekOfMonth
+		def payableCompTime
+		def annualTheoritical = 0
+		def annualTotal = 0
+		def annualHoliday = 0
+		def annualRTT = 0
+		def annualCSS = 0
+		def annualSickness = 0
+		def annualPayableSupTime = 0
+		def annualPayableCompTime = 0
+		def annualWorkingDays = 0
+		def annualEmployeeWorkingDays = 0
+		def annualTotalIncludingHS = 0
+		def calendar = Calendar.instance
+		def currentMonth
+		def currentYear=year
+		
+
+		
+				
+		for (int monthLoop = 6 ;monthLoop <18 ; monthLoop++){
+			if (monthLoop>12){
+				currentYear=year+1
+				currentMonth=monthLoop-12
+			}else{
+				currentMonth=monthLoop
+			}
+			
+			log.debug('monthLoop: '+monthLoop)
+			yearMap.put(currentMonth, currentYear)
+			cartoucheTable=getCartoucheData(employee,currentYear,currentMonth)
+			yearMonthMap.put(currentMonth, cartoucheTable)
+			monthlyTotalTime = 0
+			monthlySupTotalTime = 0
+			calendar.set(Calendar.MONTH,currentMonth-1)
+			calendar.set(Calendar.YEAR,year)
+			calendar.set(Calendar.DAY_OF_MONTH,1)
+			firstWeekOfMonth = calendar.get(Calendar.WEEK_OF_YEAR)
+			calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+			lastWeekOfMonth = calendar.get(Calendar.WEEK_OF_YEAR)
+			
+			criteria = DailyTotal.createCriteria()
+			def dailyTotalList = criteria.list {
+				and {
+					eq('employee',employee)
+					eq('month',currentMonth)
+					eq('year',currentYear)
+				}
+			}
+			dailySeconds = 0
+			for (DailyTotal dailyTotal:dailyTotalList){
+				dailySeconds = getDailyTotal(dailyTotal)
+				monthlyTotalTime += dailySeconds
+				annualEmployeeWorkingDays += 1
+			}
+			yearTotalMap.put(currentMonth, computeHumanTime(monthlyTotalTime))
+			monthlySupTotalTime = getMonthlySupTime(employee,currentMonth, currentYear)
+			yearMonthlySupTime.put(currentMonth,computeHumanTime(Math.round(monthlySupTotalTime)))
+			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
+			if (employee.weeklyContractTime!=35){
+				if (monthlyTotalTime > monthTheoritical){
+					payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime,0)
+					yearMonthlyCompTime.put(currentMonth, computeHumanTime(payableCompTime))
+				}else{
+					payableCompTime = 0
+					yearMonthlyCompTime.put(currentMonth, computeHumanTime(0))
+				}
+			}else{
+				payableCompTime = 0	
+			}
+			
+			annualTheoritical += cartoucheTable.getAt('monthTheoritical')
+			annualHoliday += cartoucheTable.getAt('holidays')
+			annualRTT += cartoucheTable.getAt('rtt')
+			annualCSS += cartoucheTable.getAt('sansSolde')
+			annualSickness += cartoucheTable.getAt('sickness')
+			annualWorkingDays += cartoucheTable.getAt('workingDays')
+			annualPayableSupTime += monthlySupTotalTime
+			annualPayableCompTime += payableCompTime
+			annualTotal += monthlyTotalTime
+		}
+		def period = Period.findByYear(year)
+		
+		//def period = (month>=6)?Period.findByYear(year):Period.findByYear(year-1)
+		def remainingCA = employeeService.getRemainingCA(employee,period)
+		def takenCA = employeeService.getTakenCA(employee,period)
+		def initialCA = employeeService.getInitialCA(employee,period)
+		
+		return [takenCA:takenCA,initialCA:initialCA,remainingCA:remainingCA,annualTotalIncludingHS:computeHumanTime(Math.round(annualTotalIncludingHS)),annualEmployeeWorkingDays:annualEmployeeWorkingDays,	annualTheoritical:computeHumanTime(Math.round(annualTheoritical)),annualHoliday:annualHoliday,annualRTT:annualRTT,annualCSS:annualCSS,annualSickness:annualSickness,annualWorkingDays:annualWorkingDays,annualPayableSupTime:computeHumanTime(Math.round(annualPayableSupTime)),annualPayableCompTime:computeHumanTime(Math.round(annualPayableCompTime)),annualTotal:computeHumanTime(Math.round(annualTotal)),
+lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCompTime,yearMonthlySupTime:yearMonthlySupTime,yearTotalMap:yearTotalMap,yearMonthMap:yearMonthMap,userId:employee.id,employee:employee]
+
+	}
+	
+	
+	def getMonthTheoritical(Employee employee, int month,int year, int openDays, int sickness, int holidays, int sansSolde, int pregnancy){
+		def monthTheoritical = 0
+		def weeklyContractTime
+		def contract
+		def criteria
+		def previousContracts
+		criteria = Contract.createCriteria()
+		
+		previousContracts = criteria.list {
+			and {
+				eq('year',year)
+				eq('month',month)
+				eq('employee',employee)
+			}
+		}
+		
+		if (previousContracts!=null){
+		//	log.error('previsouContract not null')
+			criteria = Contract.createCriteria()
+			contract = criteria.get {
+				and {
+					eq('year',year)
+					eq('month',month)
+					eq('employee',employee)
+				}
+			}
+			if (contract != null){
+				weeklyContractTime = contract.weeklyLength
+			}else{
+				weeklyContractTime =employee.weeklyContractTime
+			}
+		}else{
+				weeklyContractTime =employee.weeklyContractTime
+		}
+				
+		monthTheoritical=(
+			3600*(
+					openDays*weeklyContractTime/Employee.WeekOpenedDays
+					+(Employee.Pentecote)*(weeklyContractTime/Employee.legalWeekTime)
+					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness+holidays+sansSolde))
+				- pregnancy) as int
+			
+		return monthTheoritical
+	}
+	
+
+	
 	
 }

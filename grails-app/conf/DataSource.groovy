@@ -43,20 +43,32 @@ environments {
         dataSource {
 			pooled = true
 			dbCreate = "update"
-			url = "jdbc:mysql://10.33.6.10:3306/pointeuse"
+			//url = "jdbc:mysql://10.33.6.10:3306/pointeuse?autoReconnect=true"
+			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
+			
 			driverClassName = "com.mysql.jdbc.Driver"
-			username = "pointeuse"
-			password = "pointeuse"
-			
-			
+			username = "root"
+			password = "root"
+			//username = "adminqBgvjC8"
+			//password = "HcaRaTLAyLqr"
+		//	url = "jdbc:mysql://localhost:3306/pointeuse"
 			properties {
 				maxActive = 50
 				maxIdle = 25
 				minIdle = 5
 				initialSize = 5
-				minEvictableIdleTimeMillis = 60000
-				timeBetweenEvictionRunsMillis = 60000
+				
+				//numTestsPerEvictionRun = 3
 				maxWait = 10000
+				
+				validationQuery = "select 1"
+				
+				testOnBorrow = true
+				testWhileIdle = true
+				testOnReturn = true
+		   
+				//minEvictableIdleTimeMillis = 300000
+				//timeBetweenEvictionRunsMillis = 300000
 			}
 		}
     

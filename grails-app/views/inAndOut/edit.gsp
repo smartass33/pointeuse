@@ -35,7 +35,7 @@
 					<g:datePicker name="time" value="${inAndOutInstance?.time}" precision="minute" />				
 				</div>
 				<div class="fieldcontain ${hasErrors(bean: inAndOutInstance, field: 'timeOut', 'error')} required">
-					<g:select name="event.type" from="${['E','S']}" valueMessagePrefix="entry.name" value="${inAndOutInstance?.type}" noSelection="['':'-Choisissez votre élément-']"/>
+					<g:select name="event" from="${['E','S']}" valueMessagePrefix="entry.name" value="${inAndOutInstance?.type}" noSelection="['':'-Choisissez votre élément-']"/>
 				</div>
 
 				<fieldset class="buttons">

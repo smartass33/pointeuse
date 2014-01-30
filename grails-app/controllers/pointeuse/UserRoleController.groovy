@@ -2,8 +2,6 @@ package pointeuse
 
 import org.springframework.dao.DataIntegrityViolationException
 
-import pointeuse.UserRole;
-
 class UserRoleController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]

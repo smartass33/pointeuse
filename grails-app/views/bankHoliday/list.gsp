@@ -21,30 +21,26 @@
 			<div class="message" role="status">${flash.message}</div>
 			</g:if>
 			<table>
-
-				<tbody>
-				<% def currentYear=maxYear %>
-				<tr>
-					<td>Année: ${currentYear}</td>
-					<td>nombre de jours fériés dans l'année: ${yearlyCounts.get(currentYear)}</td>
-				</tr>
-				<g:each in="${bankHolidayInstanceList}" status="i" var="bankHolidayInstance">
-					<g:if test="${bankHolidayInstance.year != currentYear}">
-						<% currentYear=bankHolidayInstance.year %>
-						<tr>
-							<td>Année: ${currentYear}</td>
-							<td>nombre de jours fériés dans l'année: ${yearlyCounts.get(currentYear)}</td>
-							
-						</tr>
-						
-					</g:if>
-
-					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-						<td><g:link action="show" id="${bankHolidayInstance.id}">${bankHolidayInstance.calendar.getTime().format('dd-MMM-yyyy')}</g:link></td>
-					</tr>
-				</g:each>
-				</tbody>
+				<th style="width:150px">Jour</th>
+				<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">
+					<th style="width:150px;text-align:center">Date de création</th>
+					<th style="width:150px;text-align:center">Administrateur</th>
+				</sec:ifAnyGranted>
 			</table>
+				<g:each in="${yearlyCounts}" status="i" var="days">
+				<table>
+					<th colspan="3" style="text-align:center">${days.key}, jours fériés: ${days.value.size()}</th>
+					<g:each in="${days.value}" status="j" var="bankHoliday">
+						<tr class="${(j % 2) == 0 ? 'even' : 'odd'}">
+							<td style="width:150px;text-align:center"><g:link action="show" id="${bankHoliday.id}">${bankHoliday.calendar.time.format('dd MMMM yyyy')}</g:link></td>
+							<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">
+								<td style="width:150px;text-align:center">${bankHoliday.loggingDate.format('dd/mm/yyyy') }</td>
+								<td style="width:150px;text-align:center">${bankHoliday.user.firstName} ${bankHoliday.user.lastName}</td>
+							</sec:ifAnyGranted>				
+						</tr>
+					</g:each>
+					</table>
+				</g:each>
 			<div class="pagination">
 				<g:paginate total="${bankHolidayInstanceTotal}" />
 			</div>

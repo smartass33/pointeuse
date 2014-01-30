@@ -72,7 +72,7 @@
 				
 				<g:if test="${employeeInstance?.service}">
 					<li class="fieldcontain">
-						<span id="calendar-label" class="property-label"><g:message code="employee.service.label" default="service" /></span>	
+						<span id="calendar-label" class="property-label"><g:message code="service.label" default="service" /></span>	
 							<span class="property-value" aria-labelledby="service-label">${employeeInstance?.service.name}</span>		
 					</li>
 				</g:if>						
@@ -81,7 +81,13 @@
 						<span id="calendar-label" class="property-label"><g:message code="employee.site.label" default="site" /></span>	
 							<span class="property-value" aria-labelledby="site-label">${employeeInstance?.site.name}</span>		
 					</li>
-				</g:if>											
+				</g:if>				
+				<g:if test="${employeeInstance?.function}">
+					<li class="fieldcontain">
+						<span id="calendar-label" class="property-label"><g:message code="function.label" default="function" /></span>	
+							<span class="property-value" aria-labelledby="function-label">${employeeInstance?.function.name}</span>		
+					</li>
+				</g:if>									
 			
 			</ol>
 				

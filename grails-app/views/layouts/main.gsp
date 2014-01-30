@@ -18,7 +18,7 @@
 		<r:layoutResources />			
 	</head>
 	<body>
-		<div id="grailsLogo" role="banner"><a href="${grailsApplication.config.pointeuse.serverURL}/${grailsApplication.config.pointeuse.context}"><img src="${resource(dir: 'images', file: 'biolab3.png')}" alt="Grails"/></a></div>		
+		<div id="grailsLogo" role="banner"><a href="${grailsApplication.config.serverURL}/${grailsApplication.config.context}"><img src="${resource(dir: 'images', file: 'biolab3.png')}" alt="Grails"/></a></div>		
 		<g:layoutBody/>
 		<div class="footer" role="contentinfo" id="footer"></div>
 		<div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>

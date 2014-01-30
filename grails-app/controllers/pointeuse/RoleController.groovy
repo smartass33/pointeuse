@@ -2,7 +2,6 @@ package pointeuse
 
 import org.springframework.dao.DataIntegrityViolationException
 
-import pointeuse.Role;
 
 class RoleController {
 

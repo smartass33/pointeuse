@@ -1,9 +1,6 @@
 <%@ page import="pointeuse.InAndOut" %>
 <%@ page import="pointeuse.Reason" %>
 
-<div class="fieldcontain ${hasErrors(bean: inAndOutInstance, field: 'timeOut', 'error')} required">
-	<joda:timePicker name="myTime" value="${inAndOutInstance?.time}" precision="second" />
-</div>
 
 
 <div class="fieldcontain ${hasErrors(bean: inAndOutInstance, field: 'timeOut', 'error')} required">

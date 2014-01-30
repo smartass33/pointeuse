@@ -1,8 +1,16 @@
 <%@ page import="pointeuse.Employee" %>
 <%@ page import="pointeuse.Service" %>
 <%@ page import="pointeuse.Site" %>
+<%@ page import="pointeuse.Function" %>
 
-
+<script>
+$("#someButtonId").on("click", function(e) {
+  e.preventDefault();
+  $.get("/employee/someAction", function(html) {
+    $("#myTable>tbody").append(html);
+  });
+});
+</script>
 
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'firstName', 'error')} ">
 	<label for="firstName">
@@ -45,6 +53,25 @@
 	<g:textField name="weeklyContractTime" value="${employeeInstance?.weeklyContractTime}"/>
 </div>
 
+
+
+<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'weeklyContractTime', 'error')}">
+	<label for="weeklyContractTime">
+<g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" />
+	</label>
+	<input 	type="number" name="name"          		
+			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
+			params:'\'userId=' + employeeInstance.id 						  
+			+ '&counter=\' + this.value')}"
+	      	value="${employeeInstance?.weeklyContractTime}" 
+			min="0" 
+	/>
+</div>
+
+<div id='contractTable'>
+	<g:employeeContractTable/>
+</div>
+
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'arrivalDate', 'error')} ">
 	<label for="arrivalDate">
 		<g:message code="employee.arrivalDate.label" default="arrivalDate" />
@@ -58,8 +85,6 @@
 	              noSelection="['':'-Choose-']" relativeYears="[-40..30]"/>
 	</g:else>
 </div>
-
-
 
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'service', 'error')} ">
 	<label for="service">
@@ -101,4 +126,26 @@
 	          />
 	</g:else>
 </div>
+
+<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'function', 'error')} ">
+	<label for="function">
+		<g:message code="function.label" default="Site" />
+	</label>
+	
+	<g:if test="${employeeInstance?.function != null}">
+		<g:select name="employee.function.id"
+	          from="${Function.list([sort:'name'])}"
+	          noSelection="${['':employeeInstance?.function.name]}"          
+	          optionKey="id" optionValue="name"
+	          />
+	</g:if>
+	<g:else>
+			<g:select name="employee.function.id"
+	          from="${Function.list([sort:'name'])}"
+	          noSelection="${['':'-']}"          
+	          optionKey="id" optionValue="name"
+	          />
+	</g:else>
+</div>
+
 

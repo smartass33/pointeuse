@@ -1,16 +1,78 @@
 <%@ page import="pointeuse.Employee" %>
+<%@ page import="pointeuse.Vacation" %>
+<%@ page import="pointeuse.Absence" %>
+
 <!doctype html>
 <html>
 	<head>
+		<style type="text/css">
+			body {
+				font-family: Verdana, Arial, sans-serif;
+				font-size: 0.9em;
+			}
+			table {
+				border-collapse: collapse;
+			}
+			thead {
+				background-color: #DDD;
+			}
+			td {
+				padding: 2px 4px 2px 4px;
+				text-align:center;
+			}
+			th {
+				padding: 2px 4px 2px 4px;
+			}
+		</style>
+
+		<g:javascript library="jquery" plugin="jquery" />
+
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>
+		
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+
+<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script> 
+
+
+
+<script>
+
+jQuery(function($){
+   $.datepicker.regional['fr'] = {
+      closeText: 'Fermer',
+      prevText: '<Préc',
+      nextText: 'Suiv>',
+      currentText: 'Courant',
+      monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin',
+      'Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
+      monthNamesShort: ['Jan','Fév','Mar','Avr','Mai','Jun',
+      'Jul','Aoû','Sep','Oct','Nov','Déc'],
+      dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+      dayNamesShort: ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
+      dayNamesMin: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
+      weekHeader: 'Sm',
+      //dateFormat: 'dd/mm/yy',
+                dateFormat: 'dd/mm/yy',
+      firstDay: 1,
+      isRTL: false,
+      showMonthAfterYear: false,
+      yearSuffix: ''};
+   $.datepicker.setDefaults($.datepicker.regional['fr']);
+});
+</script>
 	</head>
 	<body>
 		<a href="#edit-employee" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div class="nav" role="navigation">
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
+				<g:if test='${fromSite}'>
+					<li><g:link class="list" action="map" controller="site" params="${[isAdmin:isAdmin,siteId:siteId]}"><g:message code="default.map.site.label" /></g:link></li>			
+					<li><g:link class="list" action="list" controller="site" params="${[isAdmin:isAdmin,siteId:siteId]}"><g:message code="default.list.site.label"  /></g:link></li>			
+				</g:if>
 				<li><g:link class="list" action="list" params="${[isAdmin:isAdmin,siteId:siteId]}"><g:message code="default.list.label" args="[entityName]" /></g:link></li>			
 				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
 			</ul>
@@ -39,7 +101,17 @@
 					<g:actionSubmit class="save" action="update" value="${message(code: 'default.button.update.label', default: 'Update')}" />
 					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
 				</fieldset>
-			</g:form>
+			</g:form>		
+			<g:vacationEditTable/>	
+			<script type="text/javascript">
+				$(function(){
+					$('#paidHSDiv').load('${createLink(controller:'employee', action:'getSupplementaryTime',params:[id:employeeInstance?.id])}');
+			     });
+			</script>
+			<div id="paidHSDiv">
+				<img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requète...
+				<!--g:paidHSEditTable/-->	
+			</div>
 		</div>
 	</body>
 </html>

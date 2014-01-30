@@ -36,8 +36,6 @@
 					<g:submitButton class="save" name="create" value="${message(code: 'default.button.create.label', default: 'Create')}" onclick="return confirm('${message(code: 'inAndOut.confirmation.button', default: 'Create')}?')"  />		
 				</fieldset>
 			</g:form>
-		</div>
-					<a href="/employee/report/?userId=32" title="Close window" onclick="Modalbox.hide({afterHide: function() { alert('Modalbox is now hidden') } }); return false;">Close</a>
-		
+		</div>		
 	</body>
 </html>

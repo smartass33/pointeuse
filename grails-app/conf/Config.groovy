@@ -1,3 +1,6 @@
+import org.apache.log4j.*;
+import org.apache.log4j.jdbc.JDBCAppender;
+import pointeuse.EventLogAppender
 // locations to search for config files that get merged into the main config;
 // config files can be ConfigSlurper scripts, Java properties files, or classes
 // in the classpath in ConfigSlurper format
@@ -15,7 +18,7 @@
    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
  }
 
-grails.views.javascript.library = "prototype"
+grails.views.javascript.library = "jquery"
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
@@ -72,11 +75,13 @@ environments {
         grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
 		serverURL = "http://localhost:8080"
-		context="pointeuse"		
+		context="pointeuse"
 		log4j = {
 			
 				appenders {
-					rollingFile name:'myAppender',file:"/Users/henri/Documents/workspace/pointeuse/logs/pointeuse.log", layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					appender new EventLogAppender(source:'pointeuse', name: 'eventLogAppender', layout:new EnhancedPatternLayout(conversionPattern: '%d{DATE} %5p %c{1}:%L - %m%n %throwable{500}'), threshold: org.apache.log4j.Level.ERROR)
+					
+					rollingFile name:'myAppender',file:"/Users/henri/Documents/workspace/pointeuse/logs/pointeuse.log", maxFileSize:1024,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
 			
 				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
@@ -91,25 +96,31 @@ environments {
 					   'org.hibernate',
 					   'net.sf.ehcache.hibernate'
 				root {
+					//error 'eventLogAppender'
+					
 					warn 'rollingFile'//,'stdout'
 				}
 			}
+			
 		
     }
 	
     production {
 		pdf.directory='/opt/tomcat/pdf'
-		grails.app.context=
+		grails.app.context=''
         grails.logging.jul.usebridge = false
-        serverURL = "http://pointeuse.biolab33"
-		context=
+        //serverURL = "http://192.168.1.17"
+		serverURL = "http://alrikiki.darktech.org"
+		context=''
 		log4j = {
-			
+				'null' name:'stacktrace'
 				appenders {
-					rollingFile name:'myAppender',file:"/var/log/tomcat6/pointeuse.log", layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					//rollingFile name:'myAppender',file:"/var/log/tomcat6/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					
 				}
 			
-				debug  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
+				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
 				 
 				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
 					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
@@ -133,8 +144,8 @@ grails {
 mail {
 	host = "smtp.gmail.com"
 	port = 465
-	username = "henri.martin@gmail.com"
-	password = "Smartass33*"
+	username = "pointeuse.biolab33@gmail.com"
+	password = "Wichita3*"
 	props = ["mail.smtp.auth":"true",
 			 "mail.smtp.socketFactory.port":"465",
 			 "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
@@ -152,11 +163,36 @@ grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
 
 jquery {
 	sources = 'jquery'
-	version = '1.8.3'
+	version = '1.10.0'
 }
 
 prototype {
 	sources = 'prototype'
-	version = '1.0'	
+	version = '1.0'
 }
 
+
+
+// Uncomment and edit the following lines to start using Grails encoding & escaping improvements
+
+/* remove this line 
+// GSP settings
+grails {
+    views {
+        gsp {
+            encoding = 'UTF-8'
+            htmlcodec = 'xml' // use xml escaping instead of HTML4 escaping
+            codecs {
+                expression = 'html' // escapes values inside null
+                scriptlet = 'none' // escapes output from scriptlets in GSPs
+                taglib = 'none' // escapes output from taglibs
+                staticparts = 'none' // escapes output from static template parts
+            }
+        }
+        // escapes all not-encoded output at final stage of outputting
+        filteringCodecForContentType {
+            //'text/html' = 'html'
+        }
+    }
+}
+remove this line */

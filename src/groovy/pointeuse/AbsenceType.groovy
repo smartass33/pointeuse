@@ -7,9 +7,10 @@ public enum AbsenceType {
 	MALADIE('M'),
 	GROSSESSE('G'),
 	RTT('RTT'),
-	AUTRE('A'),
+	AUTRE('R'),
 	ANNULATION('-'),
-	CSS('CSS')
+	CSS('CSS'),
+	FERIE('F')
 	
 	final String value
     AbsenceType(String value){ this.value = value }

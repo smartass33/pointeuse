@@ -22,10 +22,11 @@ class InAndOut {
 	static final int INITIALE_ADMIN=2
 	static final int MODIFIEE_ADMIN=3
 	static final int MODIFIEE_SALARIE=4
+	Boolean isOutsideSite
 	static belongsTo = [dailyTotal:DailyTotal,employee:Employee]
 		
 	
-	InAndOut(Employee employee,Date currentDate,String type){
+	InAndOut(Employee employee,Date currentDate,String type,Boolean isOutside){
 		this.employee=employee
 		this.time=currentDate
 		this.loggingTime=new Date()
@@ -34,11 +35,16 @@ class InAndOut {
 		this.month=currentDate.getAt(Calendar.MONTH)+1
 		this.year=currentDate.getAt(Calendar.YEAR)
 		this.type=type	
+		if (isOutside!=null){
+			this.isOutsideSite=isOutside
+		}else{
+			this.isOutsideSite=false
+		}
 		this.regularizationType=this.INIT	
 	}
 	
 	String toString(){
-		return 'inAndOut: '+ this.employee.lastName+' '+this.year+'-'+this.month+'-'+this.day+' '+this.time
+		return 'inAndOut: '+ this.employee.lastName+' '+this.year+'-'+this.month+'-'+this.day+' '+this.time + ' '+this.type
 	}
 	
     static constraints = {

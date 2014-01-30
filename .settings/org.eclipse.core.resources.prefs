@@ -1,23 +1,20 @@
 eclipse.preferences.version=1
-encoding//.link_to_grails_plugins/hibernate-2.1.1/grails-app/i18n=UTF-8
-encoding//.link_to_grails_plugins/hibernate-2.1.1/grails-app/i18n/messages.properties=UTF-8
-<<<<<<< HEAD
-=======
-encoding//.link_to_grails_plugins/pdf-0.6/grails-app/i18n=UTF-8
-encoding//.link_to_grails_plugins/pdf-0.6/grails-app/i18n/messages.properties=UTF-8
->>>>>>> 0095940169cefc51b9bedc9af4862b44ffde0bad
+encoding//.link_to_grails_plugins/excel-export-0.1.10/grails-app/i18n=UTF-8
+encoding//.link_to_grails_plugins/excel-export-0.1.10/grails-app/i18n/messages.properties=UTF-8
+encoding//.link_to_grails_plugins/jquery-ui-timepicker-0.9.8.1/grails-app/i18n=UTF-8
+encoding//.link_to_grails_plugins/jquery-ui-timepicker-0.9.8.1/grails-app/i18n/messages.properties=UTF-8
 encoding//.link_to_grails_plugins/plugin-config-0.1.5/grails-app/i18n=UTF-8
 encoding//.link_to_grails_plugins/plugin-config-0.1.5/grails-app/i18n/messages.properties=UTF-8
-encoding//.link_to_grails_plugins/resources-1.0/grails-app/i18n=UTF-8
-encoding//.link_to_grails_plugins/resources-1.0/grails-app/i18n/messages.properties=UTF-8
+encoding//.link_to_grails_plugins/resources-1.2.1/grails-app/i18n=UTF-8
+encoding//.link_to_grails_plugins/resources-1.2.1/grails-app/i18n/messages.properties=UTF-8
 encoding//.link_to_grails_plugins/richui-0.8/grails-app/i18n=UTF-8
 encoding//.link_to_grails_plugins/richui-0.8/grails-app/i18n/messages.properties=UTF-8
-encoding//.link_to_grails_plugins/searchable-0.6.4/grails-app/i18n=UTF-8
-encoding//.link_to_grails_plugins/searchable-0.6.4/grails-app/i18n/messages.properties=UTF-8
 encoding//.link_to_grails_plugins/spring-security-core-1.2.7.3/grails-app/i18n=UTF-8
 encoding//.link_to_grails_plugins/spring-security-core-1.2.7.3/grails-app/i18n/spring-security-core.properties=UTF-8
 encoding//.link_to_grails_plugins/spring-security-core-1.2.7.3/grails-app/i18n/spring-security-core_de.properties=UTF-8
 encoding//.link_to_grails_plugins/spring-security-core-1.2.7.3/grails-app/i18n/spring-security-core_fr.properties=UTF-8
+encoding//grails-app/conf/BuildConfig.groovy=UTF-8
+encoding//grails-app/controllers/pointeuse/EmployeeController.groovy=UTF-8
 encoding//grails-app/i18n=UTF-8
 encoding//grails-app/i18n/messages.properties=UTF-8
 encoding//grails-app/i18n/messages_cs_CZ.properties=UTF-8
@@ -27,6 +24,7 @@ encoding//grails-app/i18n/messages_es.properties=UTF-8
 encoding//grails-app/i18n/messages_fr.properties=UTF-8
 encoding//grails-app/i18n/messages_it.properties=UTF-8
 encoding//grails-app/i18n/messages_ja.properties=UTF-8
+encoding//grails-app/i18n/messages_nb.properties=UTF-8
 encoding//grails-app/i18n/messages_nl.properties=UTF-8
 encoding//grails-app/i18n/messages_pl.properties=UTF-8
 encoding//grails-app/i18n/messages_pt_BR.properties=UTF-8
@@ -35,3 +33,5 @@ encoding//grails-app/i18n/messages_ru.properties=UTF-8
 encoding//grails-app/i18n/messages_sv.properties=UTF-8
 encoding//grails-app/i18n/messages_th.properties=UTF-8
 encoding//grails-app/i18n/messages_zh_CN.properties=UTF-8
+encoding//grails-app/jobs/pointeuse/InAndOutCLosingJob.groovy=UTF-8
+encoding//grails-app/services/pointeuse/TimeManagerService.groovy=UTF-8
