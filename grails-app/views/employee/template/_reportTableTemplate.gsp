@@ -122,74 +122,73 @@
 	                 </g:else>
                   </g:else>
                   </td>
-                  <g:each in="${entries.value}" var="inOrOut">
+                  <g:each in="${entries.value}" var="inOrOut" >
                     <font size="2"> 
                     	<g:if test="${inOrOut.type.equals('E')}">
-                        	<td bgcolor="98FB98" style="height: 1px;text-align:center;">
+                        	<td bgcolor="98FB98" style="height: 1px;text-align:center;" class="eventTD">
                       	</g:if> 
                       	<g:else>
-                        	<td bgcolor="#FFC0CB" style="height: 1px;text-align:center;">                        
+                        	<td bgcolor="#FFC0CB" style="height: 1px;text-align:center;"  class="eventTD">                        
                       	</g:else> 
                       	<table class="reportTable">
-                      	<tr>
-                      	<td style='width:"50px"'>
-                      	<font size="2"> 
-                      	<g:if test="${inOrOut.regularizationType!=InAndOut.INIT || inOrOut.systemGenerated}">
-                        	<g:if test="${inOrOut.systemGenerated}">
-                            	<g:textField id="myinput" name="cell" value="${inOrOut.time.format('HH:mm')}" align="center" style="font-weight: bold" />
-                          	</g:if>
-                          	<g:if test="${inOrOut.regularizationType==InAndOut.INITIALE_SALARIE}">    
-  	          	            	<g:remoteLink action="validate" id="link_${inOrOut.id}"			  				
-	                         		before="if(!confirm('${message(code: 'inAndOut.validate.confirmation', default: 'Create')}')) return false"
-	                         		onComplete="document.getElementById(${inOrOut.id}).style.color='green';"
-	                         		params="[employeeId: employee.id,inOrOutId:inOrOut.id]">
-	                         		<a id="tooltipText" href="#" title="heure de saisie: ${inOrOut.loggingTime.format('HH:mm dd/MM/yyyy')}">
-		                          		<g:textField name="cell" class="myinput" id='${inOrOut.id}'	                          	
-		                            	value="${inOrOut.time.format('HH:mm')}" align="center"
-		                              	style="color : red;font-weight: bold;	border: 0; align: center; width: 45px; margin: -8px;" />
-	                              	</a><richui:tooltip id="logging_time" />      
-	                          </g:remoteLink>
-	                         
-	                          
-                          </g:if>
-                          <g:if test="${inOrOut.regularizationType==InAndOut.INITIALE_ADMIN}">
-                            <g:textField id="myinput" name="cell"
-                              value="${inOrOut.time.format('HH:mm')}" align="center"
-                              style="color : blue;font-weight: bold;" />
-                          </g:if>
-                          <g:if test="${inOrOut.regularizationType==InAndOut.MODIFIEE_ADMIN}">
-                            <g:textField id="myinput" name="cell"
-                              value="${inOrOut.time.format('HH:mm')}" align="center"
-                              style="color : green;font-weight: bold;" />
-                          </g:if>
-                          <g:if test="${inOrOut.regularizationType==InAndOut.MODIFIEE_SALARIE}">
-                            <g:textField id="myinput" name="cell"
-                              value="${inOrOut.time.format('HH:mm')}" align="center"
-                              style="color : orange;font-weight: bold;" />
-
-                          </g:if>
-                        </g:if> <g:else>    
-                          <g:textField id="myinput" name="cell"
-                            value="${inOrOut.time.format('HH:mm')}" align="center" />
-                        </g:else>
-                    </font>
-                    </font>
-                    <g:hiddenField name="inOrOutId" value="${inOrOut.id}" />
-                    <g:hiddenField name="time" value="${inOrOut.time.format('yyyy-M-d H:mm:ss')}" /> 
-                    <g:hiddenField name="day" value="${inOrOut.day}" /> 
-                    <g:hiddenField name="month" value="${inOrOut.month}" /> 
-                    <g:hiddenField name="year" value="${inOrOut.year}" /> 
-                    </td>
-                    <td style='width:"10px"'>
-	                    <g:remoteLink action="trash" controller="employee" id="${entries.value}" params="[inOrOutId:inOrOut.id]"
-	                    update="updateDiv3"
-	                    onLoading="document.getElementById('spinner').style.display = 'inline';"
-	                    onComplete="document.getElementById('spinner').style.display = 'none';"
-	                    before="if(!confirm('${message(code: 'inAndOut.delete.confirmation', default: 'Create')}')) return false">
-	                    	<g:img dir="images" file="skin/trash.png" width="14" height="14"/>
-	                    </g:remoteLink>	
-                    </td>
-                    </tr>
+	                      	<tr>
+	                      	<td>
+	                      	<font size="2"> 
+		                      	<g:if test="${inOrOut.regularizationType!=InAndOut.INIT || inOrOut.systemGenerated}">
+		                        	<g:if test="${inOrOut.systemGenerated}">
+		                            	<g:textField id="myinput" name="cell" value="${inOrOut.time.format('HH:mm')}" align="center" style="font-weight: bold" />
+		                          	</g:if>
+		                          	<g:if test="${inOrOut.regularizationType==InAndOut.INITIALE_SALARIE}">    
+		  	          	            	<g:remoteLink action="validate" id="link_${inOrOut.id}"			  				
+			                         		before="if(!confirm('${message(code: 'inAndOut.validate.confirmation', default: 'Create')}')) return false"
+			                         		onComplete="document.getElementById(${inOrOut.id}).style.color='green';"
+			                         		params="[employeeId: employee.id,inOrOutId:inOrOut.id]">
+			                         		<a id="tooltipText" href="#" title="heure de saisie: ${inOrOut.loggingTime.format('HH:mm dd/MM/yyyy')}">
+				                          		<g:textField name="cell" class="myinput" id='${inOrOut.id}'	                          	
+				                            	value="${inOrOut.time.format('HH:mm')}" align="center"
+				                              	style="color : red;font-weight: bold;	border: 0; align: center; width: 45px; margin: -8px;" />
+			                              	</a><richui:tooltip id="logging_time" />      
+			                          </g:remoteLink>                                               
+		                          </g:if>
+		                          <g:if test="${inOrOut.regularizationType==InAndOut.INITIALE_ADMIN}">
+		                            <g:textField id="myinput" name="cell"
+		                              value="${inOrOut.time.format('HH:mm')}" align="center"
+		                              style="color : blue;font-weight: bold;" />
+		                          </g:if>
+		                          <g:if test="${inOrOut.regularizationType==InAndOut.MODIFIEE_ADMIN}">
+		                            <g:textField id="myinput" name="cell"
+		                              value="${inOrOut.time.format('HH:mm')}" align="center"
+		                              style="color : green;font-weight: bold;" />
+		                          </g:if>
+		                          <g:if test="${inOrOut.regularizationType==InAndOut.MODIFIEE_SALARIE}">
+		                            <g:textField id="myinput" name="cell"
+		                              value="${inOrOut.time.format('HH:mm')}" align="center"
+		                              style="color : orange;font-weight: bold;" />
+		
+		                          </g:if>
+	                        	</g:if> 
+	                        	<g:else>    
+		                          <g:textField id="myinput" name="cell"
+		                            value="${inOrOut.time.format('HH:mm')}" align="center" />
+	                        	</g:else>
+	                    	</font>
+	                    </font>
+	                    <g:hiddenField name="inOrOutId" value="${inOrOut.id}" />
+	                    <g:hiddenField name="time" value="${inOrOut.time.format('yyyy-M-d H:mm:ss')}" /> 
+	                    <g:hiddenField name="day" value="${inOrOut.day}" /> 
+	                    <g:hiddenField name="month" value="${inOrOut.month}" /> 
+	                    <g:hiddenField name="year" value="${inOrOut.year}" /> 
+	                    </td>
+	                    <td>
+		                    <g:remoteLink action="trash" controller="employee" id="${entries.value}" params="[inOrOutId:inOrOut.id]"
+		                    update="report_table_div"
+		                    onLoading="document.getElementById('spinner').style.display = 'inline';"
+		                    onComplete="document.getElementById('spinner').style.display = 'none';"
+		                    before="if(!confirm('${message(code: 'inAndOut.delete.confirmation', default: 'Create')}')) return false">
+		                    	<g:img dir="images" file="skin/trash.png" width="14" height="14"/>
+		                    </g:remoteLink>	
+	                    </td>
+	                    </tr>
                     </table>
                     </td>
                   </g:each>
@@ -218,4 +217,12 @@
         </g:each>
         <g:hiddenField name="employee.id" value="${userId}" />
       </tbody>
+</table>
+
+<table>
+
+    <thead>
+
+      <th align="center" colspan="80">${message(code: 'events.label', default: 'report')}</th>
+    </thead>
 </table>
