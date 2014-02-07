@@ -794,7 +794,7 @@ class EmployeeController {
 		def workingDays=cartoucheTable.getAt('workingDays')
 		def holiday=cartoucheTable.getAt('holidays')
 		def rtt=cartoucheTable.getAt('rtt')
-		def sickness=cartoucheTable.getAt('rtt')
+		def sickness=cartoucheTable.getAt('sickness')
 		def sansSolde=cartoucheTable.getAt('sansSolde')
 		def monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.getAt('monthTheoritical'))
 		def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.getAt('pregnancyCredit'))

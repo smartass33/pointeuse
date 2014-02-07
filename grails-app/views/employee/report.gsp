@@ -9,16 +9,17 @@
 <r:require module="jquery"/>
 <r:require module="jquery-ui"/>
 <resource:tooltip />
-<g:javascript library="application" /> 
+
+<g:javascript library="application"/> 
 <r:layoutResources/>
 <meta name="layout" content="main">
 <g:set var="weeklyRecap" value="0" />
 <title>${message(code: 'employee.report.label', default: 'Report')}</title>
-<link href="${grailsApplication.config.context}/css/main.css" rel="stylesheet" type="text/css">
+<link href="/${grailsApplication.config.context}/css/main.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
 <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<script src="${grailsApplication.config.context}/js/jquery-ui-timepicker-addon.js"></script>
+<script src="/${grailsApplication.config.context}/js/jquery-ui-timepicker-addon.js"></script>
 
 
 <style>
@@ -288,12 +289,325 @@
 	.reportTable tr:first-child td:last-child{
 		border-width:0px 0px 1px 1px;
 	}
+	
+	
+	
+	
+/* Table 1 Style */
+table.table1{
+    font-family: "Trebuchet MS", sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.4em;
+    font-style: normal;
+    border-collapse:separate;
+}
+.table1 thead th{
+    padding:15px;
+    color:#fff;
+    text-shadow:1px 1px 1px #568F23;
+    border:1px solid #93CE37;
+    border-bottom:3px solid #9ED929;
+    background-color:#9DD929;
+    background:-webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.02, rgb(123,192,67)),
+        color-stop(0.51, rgb(139,198,66)),
+        color-stop(0.87, rgb(158,217,41))
+        );
+    background: -moz-linear-gradient(
+        center bottom,
+        rgb(123,192,67) 2%,
+        rgb(139,198,66) 51%,
+        rgb(158,217,41) 87%
+        );
+    -webkit-border-top-left-radius:5px;
+    -webkit-border-top-right-radius:5px;
+    -moz-border-radius:5px 5px 0px 0px;
+    border-top-left-radius:5px;
+    border-top-right-radius:5px;
+}
+.table1 thead th:empty{
+    background:transparent;
+    border:none;
+}
+.table1 tbody th{
+    color:#fff;
+    text-shadow:1px 1px 1px #568F23;
+    background-color:#9DD929;
+    border:1px solid #93CE37;
+    border-right:3px solid #9ED929;
+    padding:0px 10px;
+    background:-webkit-gradient(
+        linear,
+        left bottom,
+        right top,
+        color-stop(0.02, rgb(158,217,41)),
+        color-stop(0.51, rgb(139,198,66)),
+        color-stop(0.87, rgb(123,192,67))
+        );
+    background: -moz-linear-gradient(
+        left bottom,
+        rgb(158,217,41) 2%,
+        rgb(139,198,66) 51%,
+        rgb(123,192,67) 87%
+        );
+    -moz-border-radius:5px 0px 0px 5px;
+    -webkit-border-top-left-radius:5px;
+    -webkit-border-bottom-left-radius:5px;
+    border-top-left-radius:5px;
+    border-bottom-left-radius:5px;
+}
+.table1 tfoot td{
+    color: #9CD009;
+    font-size:32px;
+    text-align:center;
+    padding:10px 0px;
+    text-shadow:1px 1px 1px #444;
+}
+.table1 tfoot th{
+    color:#666;
+}
+.table1 tbody td{
+    padding:10px;
+    text-align:center;
+    background-color:#DEF3CA;
+    border: 2px solid #E7EFE0;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+}
+.table1 tbody span.check::before{
+    content : url(../images/check0.png)
+}
+/* Table 2 Style */
+table.table2{
+    font-family: Georgia, serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: normal;
+    letter-spacing: -1px;
+    line-height: 1.2em;
+    border-collapse:collapse;
+    text-align:center;
+}
+.table2 thead th, .table2 tfoot td{
+    padding:20px 10px 40px 10px;
+    color:#fff;
+    font-size: 26px;
+    background-color:#222;
+    font-weight:normal;
+    border-right:1px dotted #666;
+    border-top:3px solid #666;
+    -moz-box-shadow:0px -1px 4px #000;
+    -webkit-box-shadow:0px -1px 4px #000;
+    box-shadow:0px -1px 4px #000;
+    text-shadow:1px 1px 1px #000;
+}
+.table2 tfoot th{
+    padding:10px;
+    font-size:18px;
+    text-transform:uppercase;
+    color:#888;
+}
+.table2 tfoot td{
+    font-size:36px;
+    color:#EF870E;
+    border-top:none;
+    border-bottom:3px solid #666;
+    -moz-box-shadow:0px 1px 4px #000;
+    -webkit-box-shadow:0px 1px 4px #000;
+    box-shadow:0px 1px 4px #000;
+}
+.table2 thead th:empty{
+    background:transparent;
+    -moz-box-shadow:none;
+    -webkit-box-shadow:none;
+    box-shadow:none;
+}
+.table2 thead :nth-last-child(1){
+    border-right:none;
+}
+.table2 thead :first-child,
+.table2 tbody :nth-last-child(1){
+    border:none;
+}
+.table2 tbody th{
+    text-align:right;
+    padding:10px;
+    color:#333;
+    text-shadow:1px 1px 1px #ccc;
+    background-color:#f9f9f9;
+}
+.table2 tbody td{
+    padding:10px;
+    background-color:#f0f0f0;
+    border-right:1px dotted #999;
+    text-shadow:-1px 1px 1px #fff;
+    text-transform:uppercase;
+    color:#333;
+}
+.table2 tbody span.check::before{
+    content : url(../images/check1.png)
+}
+
+/* Table 3 Style */
+table.table3{
+    font-family:Arial;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    line-height: 1.7em;
+    text-align:center;
+    border-collapse:collapse;
+}
+.table3 thead th{
+    padding:6px 10px;
+    text-transform:uppercase;
+    color:#444;
+    font-weight:bold;
+    text-shadow:1px 1px 1px #fff;
+    border-bottom:5px solid #444;
+}
+.table3 thead th:empty{
+    background:transparent;
+    border:none;
+}
+.table3 thead :nth-child(2),
+.table3 tfoot :nth-child(2){
+    background-color: #7FD2FF;
+}
+.table3 tfoot :nth-child(2){
+    -moz-border-radius:0px 0px 0px 5px;
+    -webkit-border-bottom-left-radius:5px;
+    border-bottom-left-radius:5px;
+}
+.table3 thead :nth-child(2){
+    -moz-border-radius:5px 0px 0px 0px;
+    -webkit-border-top-left-radius:5px;
+    border-top-left-radius:5px;
+}
+.table3 thead :nth-child(3),
+.table3 tfoot :nth-child(3){
+    background-color: #45A8DF;
+}
+.table3 thead :nth-child(4),
+.table3 tfoot :nth-child(4){
+    background-color: #2388BF;
+}
+.table3 thead :nth-child(5),
+.table3 tfoot :nth-child(5){
+    background-color: #096A9F;
+}
+.table3 thead :nth-child(5){
+    -moz-border-radius:0px 5px 0px 0px;
+    -webkit-border-top-right-radius:5px;
+    border-top-right-radius:5px;
+}
+.table3 tfoot :nth-child(5){
+    -moz-border-radius:0px 0px 5px 0px;
+    -webkit-border-bottom-right-radius:5px;
+    border-bottom-right-radius:5px;
+}
+.table3 tfoot td{
+    font-size:38px;
+    font-weight:bold;
+    padding:15px 0px;
+    text-shadow:1px 1px 1px #fff;
+}
+.table3 tbody td{
+    padding:10px;
+}
+.table3 tbody tr:nth-child(4) td{
+    font-size:26px;
+    font-weight:bold;
+}
+.table3 tbody td:nth-child(even){
+    background-color:#444;
+    color:#444;
+    border-bottom:1px solid #444;
+    background:-webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.39, rgb(189,189,189)),
+        color-stop(0.7, rgb(224,224,224))
+        );
+    background:-moz-linear-gradient(
+        center bottom,
+        rgb(189,189,189) 39%,
+        rgb(224,224,224) 70%
+        );
+    text-shadow:1px 1px 1px #fff;
+}
+.table3 tbody td:nth-child(odd){
+    background-color:#555;
+    color:#f0f0f0;
+    border-bottom:1px solid #444;
+    background:-webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.39, rgb(85,85,85)),
+        color-stop(0.7, rgb(105,105,105))
+        );
+    background:-moz-linear-gradient(
+        center bottom,
+        rgb(85,85,85) 39%,
+        rgb(105,105,105) 70%
+        );
+    text-shadow:1px 1px 1px #000;
+}
+.table3 tbody td:nth-last-child(1){
+    border-right:1px solid #222;
+}
+.table3 tbody th{
+    color:#696969;
+    text-align:right;
+    padding:0px 10px;
+    border-right:1px solid #aaa;
+}
+.table3 tbody span.check::before{
+    content : url(../images/check2.png)
+}
+	
+	
+	.eventTD {
+    padding:7px;
+    text-align:center;
+    background-color:#DEF3CA;
+    border: 1px solid #E7EFE0;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    width:80px;
+}
+	
 	</style>
 
 	<script type="text/javascript">
 	function closePopup ( ){
 		window.location = $('#closeId').attr('href');
 	}
+	
+	 $(document).ready(function() {
+   $('#report_table_toggle').click( function() {
+    $('#report_table_div').slideToggle(400);
+   });
+
+   $('#cartouche_toggle').click( function() {
+    $('#cartouche_div').slideToggle(400);
+   });
+
+});
 	</script>
 </head>
 
@@ -403,7 +717,7 @@
 							<g:hiddenField name="userId" value="${userId}" />
 							<g:hiddenField name="fromReport" value="${true}" />
 							<g:submitToRemote oncomplete="showSpinner(false)"
-								onloading="showSpinner(true)" update="updateDiv3"
+								onloading="showSpinner(true)" update="report_table_div"
 								onSuccess="closePopup()"
 								url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
 						</g:form>
@@ -421,7 +735,7 @@
 						<tr><td style='color : blue;font-weight: bold;'><g:message code='legend.INITIALE_ADMIN' default='Régul' /></td></tr>
 						<tr><td style='color : green;font-weight: bold;'><g:message code='legend.MODIFIEE_ADMIN' default='Régul' /></td></tr>
 						<tr><td style='font-weight: bold;'><g:message code='legend.SYSTEM_GENERATED' default='Régul' /></td></tr>
-						</table>"><g:message code='legend.label' default='Régul' /></a> <richui:tooltip id="legend" />
+						</table>">L</a> <richui:tooltip id="legend" />
 				</li>
 			</ul>
 			<BR />
@@ -431,18 +745,21 @@
 				</div>
 			</g:if>
 		</div>
-
-
-
-
-
-
-		<div id="updateDiv2">
-			<g:cartouche />
+		<div id='cartouche_input_image'>
+			<button type='button' id="cartouche_toggle" ><img alt="toggle" src="/${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
+			Récapitulatifs mensuels et annuels
 		</div>
-		<div id="updateDiv3">
+		<div id="cartouche_div">
+			<g:cartouche />
+		</div> 
+		<div id='report_input_image'>
+			<button type='button' id="report_table_toggle" ><img alt="toggle" src="/${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>		
+			Détails mensuels
+		</div>
+		<div id="report_table_div">
 			<g:reportTable />
 		</div>
+
 	</div>
 	</form>
 </body>

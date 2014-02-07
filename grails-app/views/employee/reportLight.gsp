@@ -55,7 +55,7 @@
 				${flash.message}
 			</div>
 		</g:if>
-		<div id="updateDiv2">		
+		<div id="cartouche_div">		
 			<font size="2">
 		<table width="100%" class="cartoucheTable" cellspacing="1" cellpadding="1" >
 		<thead></thead>

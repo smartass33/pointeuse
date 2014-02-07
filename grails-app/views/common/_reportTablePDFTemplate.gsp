@@ -59,14 +59,14 @@
                   </font></td>
                   <td><g:if test="${holidayMap.get(entries.key) != null}">
                       <font size="2"> <g:select
-                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:payableSupTime,payableCompTime:payableCompTime])}"
+                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:payableSupTime,payableCompTime:payableCompTime])}"
                           name="absenceType" from="${AbsenceType.values()}"
                           value="${AbsenceType}" optionKey="key"
                           noSelection="${['-':holidayMap.get(entries.key).type]}" />
                       </font>
                     </g:if> <g:else>
                       <font size="2"> <g:select
-                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2',params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:payableSupTime,payableCompTime:payableCompTime] )}"
+                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div',params:[updatedSelection:new JavascriptValue('this.value'),employeeId:employee.id,day:entries.key.format('dd/MM/yyyy'),payableSupTime:payableSupTime,payableCompTime:payableCompTime] )}"
                           name="absenceType" from="${AbsenceType.values()}"
                           value="${AbsenceType}" optionKey="key"
                           noSelection="${['':'-']}" />
@@ -156,5 +156,4 @@
       </tbody>
     </table>
     </body>
-    
-     </html>
+</html>
