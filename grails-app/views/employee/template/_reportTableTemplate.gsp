@@ -64,7 +64,7 @@
 	                  	<g:if test="${holidayMap.get(entries.key) != null}">
 	                      <font size="2"> 
 	                      <g:select width="200px"
-	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', 
+	                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
 								  params:'\'employeeId=' + employee.id 						  
 								  + '&day=' + entries.key.format("dd/MM/yyyy")
 								  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
@@ -78,7 +78,7 @@
 	                      </font>
 	                    </g:if> <g:else>
 	                      <font size="2"> <g:select width="200px"
-	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2',		  
+	                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div',		  
 								  params:'\'employeeId=' + employee.id 						  
 								  + '&day=' + entries.key.format("dd/MM/yyyy")
 								  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
@@ -96,7 +96,7 @@
 					<g:if test="${holidayMap.get(entries.key) != null}">
 	                      <font size="2"> 
 	                      <g:select width="200px"
-	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', 
+	                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
 								  params:'\'employeeId=' + employee.id 						  
 								  + '&day=' + entries.key.format("dd/MM/yyyy")
 								  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
@@ -110,7 +110,7 @@
 	                </g:if> 
 	                <g:else>
 	                      <g:select width="200px"
-	                          onchange="${remoteFunction(action:'modifyAbsence', update:'updateDiv2', 
+	                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
 								  params:'\'employeeId=' + employee.id 						  
 								  + '&day=' + entries.key.format("dd/MM/yyyy")
 								  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
@@ -218,4 +218,4 @@
         </g:each>
         <g:hiddenField name="employee.id" value="${userId}" />
       </tbody>
-    </table>
+</table>
