@@ -65,7 +65,7 @@
 		padding: 15px;
 		position: fixed;
 		text-align: justify;
-		top: 40%;
+		top: 30%;
 		visibility: hidden;
 		z-index: 10;
 		-webkit-transform: translate(-50%, -50%);
@@ -91,7 +91,7 @@
 	}
 	
 	.overlay:target+.popup {
-		top: 50%;
+		top: 20%;
 		opacity: 1;
 		visibility: visible;
 	}
@@ -197,100 +197,34 @@
 		margin: 0 45% 10px 10px;
 	}
 	
-	.reportTable {
-		margin:0px;padding:0px;
-		width:100%;
-		border:1px solid #ffffff;
-		
-		-moz-border-radius-bottomleft:8px;
-		-webkit-border-bottom-left-radius:8px;
-		border-bottom-left-radius:8px;
-		
-		-moz-border-radius-bottomright:8px;
-		-webkit-border-bottom-right-radius:8px;
-		border-bottom-right-radius:8px;
-		
-		-moz-border-radius-topright:8px;
-		-webkit-border-top-right-radius:8px;
-		border-top-right-radius:8px;
-		
-		-moz-border-radius-topleft:8px;
-		-webkit-border-top-left-radius:8px;
-		border-top-left-radius:8px;
-	}.reportTable table{
-	    border-collapse: collapse;
-	        border-spacing: 0;
-		width:100%;
-		height:100%;
-		margin:0px;padding:0px;
-	}.reportTable tr:last-child td:last-child {
-		-moz-border-radius-bottomright:8px;
-		-webkit-border-bottom-right-radius:8px;
-		border-bottom-right-radius:8px;
-	}
-	.reportTable table tr:first-child td:first-child {
-		-moz-border-radius-topleft:8px;
-		-webkit-border-top-left-radius:8px;
-		border-top-left-radius:8px;
-	}
-	.reportTable table tr:first-child td:last-child {
-		-moz-border-radius-topright:8px;
-		-webkit-border-top-right-radius:8px;
-		border-top-right-radius:8px;
-	}.reportTable tr:last-child td:first-child{
-		-moz-border-radius-bottomleft:8px;
-		-webkit-border-bottom-left-radius:8px;
-		border-bottom-left-radius:8px;
-	}.reportTable tr:hover td{
-		
-	}
-	.reportTable tr:nth-child(odd){ background-color:#ffffff; }
-	.reportTable tr:nth-child(even)    { background-color:#ffffff; }.reportTable td{
-		vertical-align:middle;
-		border:1px solid #ffffff;
-		border-width:0px 1px 1px 0px;
-		text-align:center;
-		padding:0px;
-		font-size:10px;
-		font-family:Arial;
-		font-weight:bold;
-		color:#000000;
-	}.reportTable tr:last-child td{
-		border-width:0px 1px 0px 0px;
-	}.reportTable tr td:last-child{
-		border-width:0px 0px 1px 0px;
-	}.reportTable tr:last-child td:last-child{
-		border-width:0px 0px 0px 0px;
-	}
-	.reportTable tr:first-child td{
-			background:-o-linear-gradient(bottom, #ffffff 5%, #ffffff 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ffffff), color-stop(1, #ffffff) );
-		background:-moz-linear-gradient( center top, #ffffff 5%, #ffffff 100% );
-		filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff", endColorstr="#ffffff");	background: -o-linear-gradient(top,#ffffff,ffffff);
+.CSSTableGenerator2 {
+	margin:0px;padding:0px;
+	width:100%;
+	border:1px solid #000000;
+	float:left;
+	-moz-border-radius-bottomleft:0px;
+	-webkit-border-bottom-left-radius:0px;
+	border-bottom-left-radius:0px;
 	
-		background-color:#ffffff;
-		border:0px solid #ffffff;
-		text-align:center;
-		border-width:0px 0px 1px 1px;
-		font-size:10px;
-		font-family:Arial;
-		font-weight:bold;
-		color:#000000;
-	}
-	.reportTable tr:first-child:hover td{
-		background:-o-linear-gradient(bottom, #ffffff 5%, #ffffff 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ffffff), color-stop(1, #ffffff) );
-		background:-moz-linear-gradient( center top, #ffffff 5%, #ffffff 100% );
-		filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff", endColorstr="#ffffff");	background: -o-linear-gradient(top,#ffffff,ffffff);
+	-moz-border-radius-bottomright:0px;
+	-webkit-border-bottom-right-radius:0px;
+	border-bottom-right-radius:0px;
 	
-		background-color:#ffffff;
-	}
-	.reportTable tr:first-child td:first-child{
-		border-width:0px 0px 1px 0px;
-	}
-	.reportTable tr:first-child td:last-child{
-		border-width:0px 0px 1px 1px;
-	}
+	-moz-border-radius-topright:0px;
+	-webkit-border-top-right-radius:0px;
+	border-top-right-radius:0px;
 	
-	
+	-moz-border-radius-topleft:0px;
+	-webkit-border-top-left-radius:0px;
+	border-top-left-radius:0px;
+}.CSSTableGenerator2 table{
+    border-collapse: collapse;
+        border-spacing: 0;
+	width:100%;
+	height:100%;
+	margin:0px;padding:0px;
+
+	}
 	
 	
 /* Table 1 Style */
@@ -384,202 +318,87 @@ table.table1{
 .table1 tbody span.check::before{
     content : url(../images/check0.png)
 }
-/* Table 2 Style */
-table.table2{
-    font-family: Georgia, serif;
-    font-size: 18px;
-    font-style: normal;
-    font-weight: normal;
-    letter-spacing: -1px;
-    line-height: 1.2em;
-    border-collapse:collapse;
-    text-align:center;
-}
-.table2 thead th, .table2 tfoot td{
-    padding:20px 10px 40px 10px;
-    color:#fff;
-    font-size: 26px;
-    background-color:#222;
-    font-weight:normal;
-    border-right:1px dotted #666;
-    border-top:3px solid #666;
-    -moz-box-shadow:0px -1px 4px #000;
-    -webkit-box-shadow:0px -1px 4px #000;
-    box-shadow:0px -1px 4px #000;
-    text-shadow:1px 1px 1px #000;
-}
-.table2 tfoot th{
-    padding:10px;
-    font-size:18px;
-    text-transform:uppercase;
-    color:#888;
-}
-.table2 tfoot td{
-    font-size:36px;
-    color:#EF870E;
-    border-top:none;
-    border-bottom:3px solid #666;
-    -moz-box-shadow:0px 1px 4px #000;
-    -webkit-box-shadow:0px 1px 4px #000;
-    box-shadow:0px 1px 4px #000;
-}
-.table2 thead th:empty{
-    background:transparent;
-    -moz-box-shadow:none;
-    -webkit-box-shadow:none;
-    box-shadow:none;
-}
-.table2 thead :nth-last-child(1){
-    border-right:none;
-}
-.table2 thead :first-child,
-.table2 tbody :nth-last-child(1){
-    border:none;
-}
-.table2 tbody th{
-    text-align:right;
-    padding:10px;
-    color:#333;
-    text-shadow:1px 1px 1px #ccc;
-    background-color:#f9f9f9;
-}
-.table2 tbody td{
-    padding:10px;
-    background-color:#f0f0f0;
-    border-right:1px dotted #999;
-    text-shadow:-1px 1px 1px #fff;
-    text-transform:uppercase;
-    color:#333;
-}
-.table2 tbody span.check::before{
-    content : url(../images/check1.png)
+
+.cartoucheLeftTD {
+    font:14px Georgia, serif;
+    padding:2px 2px;
+    text-align:left;
+    border: 0px solid white;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+   // border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    width:300px;
 }
 
-/* Table 3 Style */
-table.table3{
-    font-family:Arial;
-    font-size: 18px;
-    font-style: normal;
-    font-weight: normal;
-    text-transform: uppercase;
-    letter-spacing: -1px;
-    line-height: 1.7em;
+
+.cartoucheRightTitleTD {
+    font:14px Georgia, serif;
+    padding:2px 2px;
+    text-align:left;
+    border: 0px solid white;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+   // border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    width:200px;
+}
+
+
+.cartoucheRightFiguresTD {
+    font:14px Georgia, serif;
+    padding:2px 2px;
     text-align:center;
-    border-collapse:collapse;
-}
-.table3 thead th{
-    padding:6px 10px;
-    text-transform:uppercase;
-    color:#444;
-    font-weight:bold;
+    border: 0px solid white;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+   // border-radius:2px;
+    color:#666;
     text-shadow:1px 1px 1px #fff;
-    border-bottom:5px solid #444;
+    width:150px;
 }
-.table3 thead th:empty{
-    background:transparent;
-    border:none;
-}
-.table3 thead :nth-child(2),
-.table3 tfoot :nth-child(2){
-    background-color: #7FD2FF;
-}
-.table3 tfoot :nth-child(2){
-    -moz-border-radius:0px 0px 0px 5px;
-    -webkit-border-bottom-left-radius:5px;
-    border-bottom-left-radius:5px;
-}
-.table3 thead :nth-child(2){
-    -moz-border-radius:5px 0px 0px 0px;
-    -webkit-border-top-left-radius:5px;
-    border-top-left-radius:5px;
-}
-.table3 thead :nth-child(3),
-.table3 tfoot :nth-child(3){
-    background-color: #45A8DF;
-}
-.table3 thead :nth-child(4),
-.table3 tfoot :nth-child(4){
-    background-color: #2388BF;
-}
-.table3 thead :nth-child(5),
-.table3 tfoot :nth-child(5){
-    background-color: #096A9F;
-}
-.table3 thead :nth-child(5){
-    -moz-border-radius:0px 5px 0px 0px;
-    -webkit-border-top-right-radius:5px;
-    border-top-right-radius:5px;
-}
-.table3 tfoot :nth-child(5){
-    -moz-border-radius:0px 0px 5px 0px;
-    -webkit-border-bottom-right-radius:5px;
-    border-bottom-right-radius:5px;
-}
-.table3 tfoot td{
-    font-size:38px;
-    font-weight:bold;
-    padding:15px 0px;
-    text-shadow:1px 1px 1px #fff;
-}
-.table3 tbody td{
-    padding:10px;
-}
-.table3 tbody tr:nth-child(4) td{
-    font-size:26px;
-    font-weight:bold;
-}
-.table3 tbody td:nth-child(even){
-    background-color:#444;
-    color:#444;
-    border-bottom:1px solid #444;
-    background:-webkit-gradient(
-        linear,
-        left bottom,
-        left top,
-        color-stop(0.39, rgb(189,189,189)),
-        color-stop(0.7, rgb(224,224,224))
-        );
-    background:-moz-linear-gradient(
-        center bottom,
-        rgb(189,189,189) 39%,
-        rgb(224,224,224) 70%
-        );
-    text-shadow:1px 1px 1px #fff;
-}
-.table3 tbody td:nth-child(odd){
-    background-color:#555;
-    color:#f0f0f0;
-    border-bottom:1px solid #444;
-    background:-webkit-gradient(
-        linear,
-        left bottom,
-        left top,
-        color-stop(0.39, rgb(85,85,85)),
-        color-stop(0.7, rgb(105,105,105))
-        );
-    background:-moz-linear-gradient(
-        center bottom,
-        rgb(85,85,85) 39%,
-        rgb(105,105,105) 70%
-        );
-    text-shadow:1px 1px 1px #000;
-}
-.table3 tbody td:nth-last-child(1){
-    border-right:1px solid #222;
-}
-.table3 tbody th{
-    color:#696969;
-    text-align:right;
-    padding:0px 10px;
-    border-right:1px solid #aaa;
-}
-.table3 tbody span.check::before{
-    content : url(../images/check2.png)
-}
-	
-	
 	.eventTD {
-    padding:7px;
+    font:14px Georgia, serif;
+    padding:2px 2px;
+    text-align:center;
+   // background-color:#DEF3CA;
+    border: 1px solid #E7EFE0;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    width:80px;
+}
+		.eventTDEntry {
+    font:14px Georgia, serif;
+    padding:2px 2px;
+    padding-right: 2px;     
+    padding-left: 2px;
+    text-align:center;
+    vertical-align:middle;
+    background-color:#DEF3CA;
+    border: 1px solid #E7EFE0;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    width:80px;
+     background-color:#98FB98;
+}
+		.eventTDExit {
+	    font:14px Georgia, serif;
+		
+			border:2px;
+	    vertical-align:middle;
+		
+    padding:2px 2px ;
+    padding-right: 2px;     
+    padding-left: 2px;
+    
     text-align:center;
     background-color:#DEF3CA;
     border: 1px solid #E7EFE0;
@@ -589,8 +408,68 @@ table.table3{
     color:#666;
     text-shadow:1px 1px 1px #fff;
     width:80px;
+    background-color:#FFC0CB;
 }
 	
+	
+	/* TABLE 33*/
+	/*Generated from Designmycss.com*/
+table.table33
+{
+    border-collapse:collapse;
+    border-spacing:0px;
+    border-style:solid;
+    border-width:1px;
+    border-color:#FFC0CB;
+    font:14px Georgia, serif;
+    padding:0px;
+}
+ 
+ th
+{
+    font:15px Georgia, serif;
+
+	color: rgb(102, 102, 102);
+ //   color:#D4D0D0;
+    border-style:solid;
+    border-width:1px;
+    border-color:#E7EFE0;
+    font-weight:bold;
+    padding:0px;
+    text-align:center;
+    vertical-align:top;
+}
+
+th:last-child {
+  //  border: none;
+      border-color:#E7EFE0;
+    
+}
+ 
+tr
+{
+    color:#000000;
+    border-top-style: solid;
+    border-bottom-style: solid;
+    border-width:1px;
+    border-color:#E7EFE0;
+    font-weight:normal;
+}
+
+td
+{
+    border-style:solid;
+    border-width:1px;
+    border-color:#000000;
+    padding:0px;
+    text-align:left;
+    vertical-align:top;
+}
+/*	
+table33.tr > td:last-child, table33.tr > th:last-child {
+	border-color:#E7EFE0;
+}
+	*/
 	</style>
 
 	<script type="text/javascript">
@@ -599,15 +478,66 @@ table.table3{
 	}
 	
 	 $(document).ready(function() {
-   $('#report_table_toggle').click( function() {
-    $('#report_table_div').slideToggle(400);
-   });
+	 
+	  // $('#report_table_toggle').click( function() {
+	  //  $('#report_table_div').slideToggle(400);
+	  // });
 
-   $('#cartouche_toggle').click( function() {
-    $('#cartouche_div').slideToggle(400);
-   });
+	   $('#cartouche_toggle').click( function() {
+	    $('#cartouche_div').slideToggle(400);
+	   });
 
-});
+	});
+	
+	
+	function datePickerLaunch (){
+	
+		$.datepicker.regional['fr'] = {
+					closeText: 'Fermer',
+					prevText: '<Précédent',
+					nextText: 'Suivant>',
+					currentText: 'Сегодня',
+					monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin',
+					'Juillet','Aout','Septembre','Octobre','Novembre','Décembre'],
+					monthNamesShort: ['Jan','Fev','Mar','Avr','Mai','Jun',
+					'Jui','Аou','Sep','Oct','Nov','Dec'],
+					dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+					dayNamesShort: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
+					dayNamesMin: ['D','L','M','M','J','V','S'],
+					weekHeader: 'Semaine',
+					dateFormat: 'dd/mm/yy',
+					firstDay: 1,
+					isRTL: false,
+					showMonthAfterYear: false,
+					yearSuffix: ''
+				};
+										
+				$.timepicker.regional['fr'] = {
+					timeOnlyTitle: 'Horaire',
+					timeText: 'Horaire',
+					hourText: 'Heure',
+					minuteText: 'Minute',
+					secondText: 'Seconde',
+					millisecText: 'Milliseconde',
+					timezoneText: 'Fuseau Horaire',
+					currentText: 'Horaire Actuel',
+					closeText: 'Fermer',
+					timeFormat: 'HH:mm',
+					amNames: ['AM', 'A'],
+					pmNames: ['PM', 'P'],
+					isRTL: false
+				};
+				
+				$.timepicker.setDefaults($.timepicker.regional['fr']);
+				$.datepicker.setDefaults($.datepicker.regional['fr']);		
+				$( "#date_picker" ).datetimepicker({
+					//altField: "#alt_example_1_alt"
+					defaultDate:new Date(${period.getAt(Calendar.YEAR)},${period.getAt(Calendar.MONTH)},1)
+				});					
+	
+
+	}
+	
 	</script>
 </head>
 
@@ -615,7 +545,6 @@ table.table3{
 
 
 <div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requète...</div>
-
 
 	<a href="#list-employee" class="skip" tabindex="-1"><g:message
 			code="default.link.skip.label" default="Skip to content&hellip;" /></a>
@@ -644,7 +573,7 @@ table.table3{
 				<li style="vertical-align: middle;"><g:actionSubmit value="pdf" action="userPDF" class="listButton" /></li>
 			</g:form>
 				<li>
-					<div><a href="#join_form" id="join_pop" class="modalbox">Ajouter un élement</a></div>
+					<a href="#join_form" id="join_pop" class="listButton">Ajouter un élement</a>
 					<a href="#x" class="overlay" id="join_form"></a>
 					<div id="popup" class="popup">
 						<h2>Creer Entrée/Sortie</h2>
@@ -653,70 +582,36 @@ table.table3{
 							<table>
 								<tbody>
 									<tr class="prop">
-										<td class="name" valign="top">choisissez la date:</td>
-										<td class="value" valign="top"><input type="text"
-											name="date_picker" id="date_picker" /> 
-										<script>
-											$.datepicker.regional['fr'] = {
-												closeText: 'Fermer',
-												prevText: '<Précédent',
-												nextText: 'Suivant>',
-												currentText: 'Сегодня',
-												monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin',
-												'Juillet','Aout','Septembre','Octobre','Novembre','Décembre'],
-												monthNamesShort: ['Jan','Fev','Mar','Avr','Mai','Jun',
-												'Jui','Аou','Sep','Oct','Nov','Dec'],
-												dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
-												dayNamesShort: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
-												dayNamesMin: ['D','L','M','M','J','V','S'],
-												weekHeader: 'Semaine',
-												dateFormat: 'dd/mm/yy',
-												firstDay: 1,
-												isRTL: false,
-												showMonthAfterYear: false,
-												yearSuffix: ''
-											};
-																	
-											$.timepicker.regional['fr'] = {
-												timeOnlyTitle: 'Horaire',
-												timeText: 'Horaire',
-												hourText: 'Heure',
-												minuteText: 'Minute',
-												secondText: 'Seconde',
-												millisecText: 'Milliseconde',
-												timezoneText: 'Fuseau Horaire',
-												currentText: 'Horaire Actuel',
-												closeText: 'Fermer',
-												timeFormat: 'HH:mm',
-												amNames: ['AM', 'A'],
-												pmNames: ['PM', 'P'],
-												isRTL: false
-											};
-											$.timepicker.setDefaults($.timepicker.regional['fr']);
-											$.datepicker.setDefaults($.datepicker.regional['fr']);							
-											$("#date_picker").datetimepicker();
-										</script>
+										<td class="eventTD" valign="top">choisissez la date:</td>
+										<td class="eventTD" valign="top"><input type="text" name="date_picker" id="date_picker" /> 
+											<script type="text/javascript">
+												datePickerLaunch();
+											</script>
 										</td>
 									</tr>
 									<tr class="prop">
-										<td class="name" valign="top">Evènement:</td>
-										<td class="value" valign="top"><g:select
+										<td class="eventTD" valign="top">Evènement:</td>
+										<td class="eventTD" valign="top">
+											<g:select
 												name="event.type" from="${['E','S']}"
 												valueMessagePrefix="entry.name"
-												noSelection="['':'-Choisissez votre élément-']" /></td>
+												noSelection="['':'-Choisissez votre élément-']" />
+										</td>
 									</tr>
 									<tr class="prop">
-										<td class="name" valign="top">Raison:</td>
-										<td class="value" valign="top"><g:select name="reason.id"
+										<td class="eventTD" valign="top">Raison:</td>
+										<td class="eventTD" valign="top">
+											<g:select name="reason.id"
 												from="${Reason.list([sort:'name'])}"
 												noSelection="['':'-Ajouter une raison-']" optionKey="id"
-												optionValue="name" /></td>
+												optionValue="name" />
+										</td>
 									</tr>
 								</tbody>
 							</table>
 							<g:hiddenField name="userId" value="${userId}" />
 							<g:hiddenField name="fromReport" value="${true}" />
-							<g:submitToRemote oncomplete="showSpinner(false)"
+							<g:submitToRemote oncomplete="showSpinner(false)" class="listButton"
 								onloading="showSpinner(true)" update="report_table_div"
 								onSuccess="closePopup()"
 								url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
@@ -735,7 +630,7 @@ table.table3{
 						<tr><td style='color : blue;font-weight: bold;'><g:message code='legend.INITIALE_ADMIN' default='Régul' /></td></tr>
 						<tr><td style='color : green;font-weight: bold;'><g:message code='legend.MODIFIEE_ADMIN' default='Régul' /></td></tr>
 						<tr><td style='font-weight: bold;'><g:message code='legend.SYSTEM_GENERATED' default='Régul' /></td></tr>
-						</table>">L</a> <richui:tooltip id="legend" />
+						</table>">Légende</a> <richui:tooltip id="legend" />
 				</li>
 			</ul>
 			<BR />
@@ -752,10 +647,11 @@ table.table3{
 		<div id="cartouche_div">
 			<g:cartouche />
 		</div> 
-		<div id='report_input_image'>
+		<BR>
+		<!--div id='report_input_image'>
 			<button type='button' id="report_table_toggle" ><img alt="toggle" src="/${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>		
 			Détails mensuels
-		</div>
+		</div-->
 		<div id="report_table_div">
 			<g:reportTable />
 		</div>

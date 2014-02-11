@@ -796,14 +796,14 @@ class EmployeeController {
 		def rtt=cartoucheTable.getAt('rtt')
 		def sickness=cartoucheTable.getAt('sickness')
 		def sansSolde=cartoucheTable.getAt('sansSolde')
-		def monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.getAt('monthTheoritical'))
+		def monthTheoritical = timeManagerService.computeHumanTimeAsString(cartoucheTable.getAt('monthTheoritical'))
 		def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.getAt('pregnancyCredit'))
 		def yearlyHoliday=cartoucheTable.getAt('yearlyHolidays')
 		def yearlyRtt=cartoucheTable.getAt('yearlyRtt')
 		def yearlySickness=cartoucheTable.getAt('yearlySickness')
-		def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.getAt('yearlyTheoritical'))
-		def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.getAt('yearlyPregnancyCredit'))
-		def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.getAt('yearlyTotalTime'))
+		def yearlyTheoritical = timeManagerService.computeHumanTimeAsString(cartoucheTable.getAt('yearlyTheoritical'))
+		def yearlyPregnancyCredit = timeManagerService.computeHumanTimeAsString(cartoucheTable.getAt('yearlyPregnancyCredit'))
+		def yearlyActualTotal = timeManagerService.computeHumanTimeAsString(cartoucheTable.getAt('yearlyTotalTime'))
 		def yearlySansSolde=cartoucheTable.getAt('yearlySansSolde')
 		def payableSupTime=timeManagerService.computeHumanTime(supTime)
 		def payableCompTime=timeManagerService.computeHumanTime(compTime)
@@ -817,10 +817,38 @@ class EmployeeController {
 			yearInf=cal.get(Calendar.YEAR)-1
 			yearSup=cal.get(Calendar.YEAR)
 		}
+		def monthlyTotalRecapAsString = timeManagerService.computeHumanTimeAsString(monthlyTotal)
 		monthlyTotal=timeManagerService.computeHumanTime(monthlyTotal)
 		Period period = ((cal.get(Calendar.MONTH)+1)>5)?Period.findByYear(cal.get(Calendar.YEAR)):Period.findByYear(cal.get(Calendar.YEAR)-1)
-		
-		def model=[period2:period,period:cal.time,firstName:employee.firstName,lastName:employee.lastName,weeklyContractTime:employee.weeklyContractTime,matricule:employee.matricule,monthlyTotalRecap:monthlyTotal,yearInf:yearInf,yearSup:yearSup,employee:employee,openedDays:openedDays,workingDays:workingDays,holiday:holiday,rtt:rtt,sickness:sickness,sansSolde:sansSolde,monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,yearlyHoliday:yearlyHoliday,yearlyRtt:yearlyRtt,yearlySickness:yearlySickness,yearlyTheoritical:yearlyTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyActualTotal:yearlyActualTotal,yearlySansSolde:yearlySansSolde,payableSupTime:payableSupTime,payableCompTime:payableCompTime]
+		def model=[
+			period2:period,
+			period:cal.time,
+			firstName:employee.firstName,
+			lastName:employee.lastName,
+			weeklyContractTime:employee.weeklyContractTime,
+			matricule:employee.matricule,
+			monthlyTotalRecap:monthlyTotal,
+			monthlyTotalRecapAsString:monthlyTotalRecapAsString,
+			yearInf:yearInf,
+			yearSup:yearSup,
+			employee:employee,
+			openedDays:openedDays,
+			workingDays:workingDays,
+			holiday:holiday,
+			rtt:rtt,
+			sickness:sickness,
+			sansSolde:sansSolde,
+			monthTheoritical:monthTheoritical,
+			pregnancyCredit:pregnancyCredit,
+			yearlyHoliday:yearlyHoliday,
+			yearlyRtt:yearlyRtt,
+			yearlySickness:yearlySickness,
+			yearlyTheoritical:yearlyTheoritical,
+			yearlyPregnancyCredit:yearlyPregnancyCredit,
+			yearlyActualTotal:yearlyActualTotal,
+			yearlySansSolde:yearlySansSolde,
+			payableSupTime:payableSupTime,
+			payableCompTime:payableCompTime]
 		render template: "/common/cartoucheTemplate", model:model
 		return
 	}
@@ -944,7 +972,7 @@ class EmployeeController {
 		
         employeeInstance.properties = params
 		if (params["weeklyContractTime"] != null){
-			employeeInstance.weeklyContractTime = params["weeklyContractTime"] as float
+			employeeInstance.weeklyContractTime = params["weeklyContractTime"].getAt(0) as float
 		}
 
 		def service = params["employee.service.id"]

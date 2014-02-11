@@ -390,12 +390,33 @@ class TimeManagerService {
 		def diff=inputSeconds
 		long hours=TimeUnit.SECONDS.toHours(diff);
 		diff=diff-(hours*3600);
-		long minutes=TimeUnit.SECONDS.toMinutes(diff);
+		long minutes=TimeUnit.SECONDS.toMinutes(diff);	
 		diff=diff-(minutes*60);
 		long seconds=TimeUnit.SECONDS.toSeconds(diff);
+		//return [hours,minutes,seconds]
 		return [hours,minutes,seconds]
+		
 	}
 
+	def computeHumanTimeAsString(long inputSeconds){
+		def diff=inputSeconds
+		long hours=TimeUnit.SECONDS.toHours(diff);
+		def hoursAsString = hours > 9 ? hours.toString() :'0'+hours.toString()
+		if (hours==0) hoursAsString ='00'
+		diff=diff-(hours*3600);
+		long minutes=TimeUnit.SECONDS.toMinutes(diff);
+		def minutesAsString = minutes > 9 ? minutes.toString() :'0'+minutes.toString()
+		if (minutes==0) minutesAsString ='00'
+		diff=diff-(minutes*60);
+		long seconds=TimeUnit.SECONDS.toSeconds(diff);
+		def secondsAsString = seconds > 9 ? seconds.toString() :'0'+seconds.toString()
+		if (seconds==0) secondsAsString ='00'
+		
+		//return [hours,minutes,seconds]
+		return [hoursAsString,minutesAsString,secondsAsString]
+		
+	}
+	
 	
 	def computeSecondsFromHumanTime(def table){
 		return table.get(0)*3600+table.get(1)*60+table.get(2)
@@ -1094,13 +1115,13 @@ class TimeManagerService {
 		def sickness=cartoucheTable.get('sickness')
 		def sansSolde=cartoucheTable.get('sansSolde')
 		def monthTheoritical = cartoucheTable.get('monthTheoritical')
-		def pregnancyCredit = computeHumanTime(cartoucheTable.get('pregnancyCredit'))
+		def pregnancyCredit = computeHumanTimeAsString(cartoucheTable.get('pregnancyCredit'))
 		def yearlyHoliday=cartoucheTable.get('yearlyHolidays')
 		def yearlyRtt=cartoucheTable.get('yearlyRtt')
 		def yearlySickness=cartoucheTable.get('yearlySickness')
-		def yearlyTheoritical = computeHumanTime(cartoucheTable.get('yearlyTheoritical'))
-		def yearlyPregnancyCredit = computeHumanTime(cartoucheTable.get('yearlyPregnancyCredit'))
-		def yearlyActualTotal = computeHumanTime(cartoucheTable.get('yearlyTotalTime'))
+		def yearlyTheoritical = computeHumanTimeAsString(cartoucheTable.get('yearlyTheoritical'))
+		def yearlyPregnancyCredit = computeHumanTimeAsString(cartoucheTable.get('yearlyPregnancyCredit'))
+		def yearlyActualTotal = computeHumanTimeAsString(cartoucheTable.get('yearlyTotalTime'))
 		def yearlySansSolde=cartoucheTable.get('yearlySansSolde')
 		def payableSupTime = computeHumanTime(Math.round(monthlySupTime))
 		def payableCompTime = computeHumanTime(0)
@@ -1117,6 +1138,7 @@ class TimeManagerService {
 			monthlyTotalRecap:monthlyTotal,
 			payableSupTime:payableSupTime,
 			payableCompTime:payableCompTime,
+			monthlyTotalRecapAsString:computeHumanTimeAsString(monthlyTotalTime),
 			employee:employee,
 			siteId:siteId,
 			userId:employee.id,
