@@ -986,13 +986,11 @@ a.listButton {
 	border-radius:6px;
 	border:1px solid #dcdcdc;
 	display:inline-block;
-	//color:#333233;
-		color:#000000;
-	
+	color:#000000;
 	font-family:arial;
 	font-size:14px;
 	font-weight:bold;
-	padding:8px 10px;
+	padding:0px 0px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #ffffff;
 }a.listButton:hover {
@@ -1004,6 +1002,37 @@ a.listButton {
 	position:relative;
 	top:1px;
 }
+
+a.addTimeButton {
+	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #bdbdbd) );
+	background:-moz-linear-gradient( center top, #ededed 5%, #bdbdbd 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#bdbdbd');
+	background-color:#ededed;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	color:#000000;
+	font-family:arial;
+	font-size:14px;
+	font-weight:bold;
+	padding:8px 10px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #ffffff;
+}a.addTimeButton:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #bdbdbd), color-stop(1, #ededed) );
+	background:-moz-linear-gradient( center top, #bdbdbd 5%, #ededed 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#bdbdbd', endColorstr='#ededed');
+	background-color:#bdbdbd;
+}a.addTimeButton:active {
+	position:relative;
+	top:1px;
+}
+
 
 a.modalbox {
 	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;

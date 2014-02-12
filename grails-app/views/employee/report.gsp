@@ -15,11 +15,11 @@
 <meta name="layout" content="main">
 <g:set var="weeklyRecap" value="0" />
 <title>${message(code: 'employee.report.label', default: 'Report')}</title>
-<link href="/${grailsApplication.config.context}/css/main.css" rel="stylesheet" type="text/css">
+<link href="${grailsApplication.config.context}/css/main.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
 <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<script src="/${grailsApplication.config.context}/js/jquery-ui-timepicker-addon.js"></script>
+<script src="${grailsApplication.config.context}/js/jquery-ui-timepicker-addon.js"></script>
 
 
 <style>
@@ -561,7 +561,7 @@ table33.tr > td:last-child, table33.tr > th:last-child {
 				<li style="vertical-align: middle;"><g:link class="list" action="list" params="${[isAdmin:isAdmin,siteId:siteId,back:true]}">${message(code: 'employee.back.to.list.label', default: 'List')}</g:link></li>
 				<li style="vertical-align: middle;">
 					${message(code: 'default.period.label', default: 'List')}: <g:datePicker
-						name="myDate" value="${period ? period : new Date()}"
+						name="myDate" value="${period ? period : new Date()}" relativeYears="[-3..5]"
 						precision="month" noSelection="['':'-Choose-']"
 						style="vertical-align: middle;" /> <g:hiddenField name="userId"
 						value="${userId}" /> <g:hiddenField name="siteId"
@@ -611,8 +611,10 @@ table33.tr > td:last-child, table33.tr > th:last-child {
 							</table>
 							<g:hiddenField name="userId" value="${userId}" />
 							<g:hiddenField name="fromReport" value="${true}" />
-							<g:submitToRemote oncomplete="showSpinner(false)" class="listButton"
-								onloading="showSpinner(true)" update="report_table_div"
+							<g:submitToRemote class="addTimeButton"
+								onLoading="document.getElementById('spinner').style.display = 'inline';"
+	                    		onComplete="document.getElementById('spinner').style.display = 'none';"						
+								update="report_table_div"
 								onSuccess="closePopup()"
 								url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
 						</g:form>
@@ -641,7 +643,7 @@ table33.tr > td:last-child, table33.tr > th:last-child {
 			</g:if>
 		</div>
 		<div id='cartouche_input_image'>
-			<button type='button' id="cartouche_toggle" ><img alt="toggle" src="/${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
+			<button type='button' id="cartouche_toggle" ><img alt="toggle" src="${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
 			Récapitulatifs mensuels et annuels
 		</div>
 		<div id="cartouche_div">
