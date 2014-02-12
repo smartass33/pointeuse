@@ -75,12 +75,11 @@ environments {
         grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
 		serverURL = "http://localhost:8080"
-		context="pointeuse"
+		context="/pointeuse"
 		log4j = {
 			
 				appenders {
-					appender new EventLogAppender(source:'pointeuse', name: 'eventLogAppender', layout:new EnhancedPatternLayout(conversionPattern: '%d{DATE} %5p %c{1}:%L - %m%n %throwable{500}'), threshold: org.apache.log4j.Level.ERROR)
-					
+					appender new EventLogAppender(source:'pointeuse', name: 'eventLogAppender', layout:new EnhancedPatternLayout(conversionPattern: '%d{DATE} %5p %c{1}:%L - %m%n %throwable{500}'), threshold: org.apache.log4j.Level.ERROR)		
 					rollingFile name:'myAppender',file:"/Users/henri/Documents/workspace/pointeuse/logs/pointeuse.log", maxFileSize:1024,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
 			
@@ -101,22 +100,53 @@ environments {
 					warn 'rollingFile'//,'stdout'
 				}
 			}
-			
-		
     }
+	
+	
+	
+	alrikiki {
+		pdf.directory='/var/lib/pdf'
+		grails.app.context=''
+		grails.logging.jul.usebridge = false
+		serverURL = "http://alrikiki.darktech.org"
+		context=''
+		log4j = {
+				'null' name:'stacktrace'
+				appenders {
+					appender new EventLogAppender(source:'pointeuse', name: 'eventLogAppender', layout:new EnhancedPatternLayout(conversionPattern: '%d{DATE} %5p %c{1}:%L - %m%n %throwable{500}'), threshold: org.apache.log4j.Level.ERROR)
+					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')				
+				}		
+				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers			 
+				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
+					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+					   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
+					   'org.codehaus.groovy.grails.commons',            // core / classloading
+					   'org.codehaus.groovy.grails.plugins',            // plugins
+					   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
+					   'org.springframework',
+					   'org.hibernate',
+					   'net.sf.ehcache.hibernate'			
+				root {
+					error 'eventLogAppender'
+					warn 'rollingFile'//,'stdout'
+				}
+			}
+	}
+	
+	
 	
     production {
 		pdf.directory='/opt/tomcat/pdf'
 		grails.app.context=''
         grails.logging.jul.usebridge = false
         //serverURL = "http://192.168.1.17"
-		serverURL = "http://alrikiki.darktech.org"
+		serverURL = "http://10.33.6.10"
 		context=''
 		log4j = {
 				'null' name:'stacktrace'
 				appenders {
-					//rollingFile name:'myAppender',file:"/var/log/tomcat6/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
-					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					rollingFile name:'myAppender',file:"/var/log/tomcat6/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					//rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 					
 				}
 			

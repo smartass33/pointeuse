@@ -16,13 +16,11 @@ environments {
         dataSource {
 		    pooled = true
 		    dbCreate = "update"
-		    //url = "jdbc:mysql://192.168.1.16:3306/pointeuse"
 			url = "jdbc:mysql://localhost:3306/pointeuse"
 		    driverClassName = "com.mysql.jdbc.Driver"
 		    //username = "pointeuse"
 		    username = "root"
 			password = ""
-			
 			properties {
 				maxActive = 50
 				maxIdle = 25
@@ -33,42 +31,48 @@ environments {
 				maxWait = 10000			}
 		}
     }
-    test {
-        dataSource {
-            dbCreate = "update"
-            url = "jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
-        }
-    }
+	alrikiki {
+		dataSource {
+			pooled = true
+			dbCreate = "update"
+			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
+			driverClassName = "com.mysql.jdbc.Driver"
+			username = "root"
+			password = "root"
+			properties {
+				maxActive = 50
+				maxIdle = 25
+				minIdle = 5
+				initialSize = 5	
+				maxWait = 10000				
+				validationQuery = "select 1"				
+				testOnBorrow = true
+				testWhileIdle = true
+				testOnReturn = true
+			}
+		}
+	
+	}
+
+	
     production {
         dataSource {
 			pooled = true
 			dbCreate = "update"
-			//url = "jdbc:mysql://10.33.6.10:3306/pointeuse?autoReconnect=true"
-			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
-			
+			url = "jdbc:mysql://10.33.6.10:3306/pointeuse?autoReconnect=true"			
 			driverClassName = "com.mysql.jdbc.Driver"
 			username = "root"
 			password = "root"
-			//username = "adminqBgvjC8"
-			//password = "HcaRaTLAyLqr"
-		//	url = "jdbc:mysql://localhost:3306/pointeuse"
 			properties {
 				maxActive = 50
 				maxIdle = 25
 				minIdle = 5
 				initialSize = 5
-				
-				//numTestsPerEvictionRun = 3
-				maxWait = 10000
-				
+				maxWait = 10000		
 				validationQuery = "select 1"
-				
 				testOnBorrow = true
 				testWhileIdle = true
 				testOnReturn = true
-		   
-				//minEvictableIdleTimeMillis = 300000
-				//timeBetweenEvictionRunsMillis = 300000
 			}
 		}
     
