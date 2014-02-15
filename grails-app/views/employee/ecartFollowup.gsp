@@ -25,6 +25,7 @@
 				background-color: #DDD;
 			}
 			td {
+				width:60px;
 				padding: 2px 4px 2px 4px;
 			}
 			th {
@@ -32,6 +33,15 @@
 			}
 		</style>
 <script type="text/javascript">
+
+
+
+
+
+	
+
+
+
 
 $('label').click(function(){
     $(this).children('span').addClass('input-checked');
@@ -72,9 +82,8 @@ $('label').click(function(){
 	</div>
 	<div id="list-employee" class="content scaffold-list">
 		<h1>
-			<g:message code="ecart.followup" /> 			<g:if test="${site}">pour le site ${site.name}</g:if>
-			
-			
+			<g:message code="ecart.followup" /> 			
+			<g:if test="${site}">pour le site ${site.name}</g:if>
 			<br>
 			<br>
 			<g:form method="POST"
@@ -97,10 +106,7 @@ $('label').click(function(){
 					noSelection="${['':(period?period:'-')]}" optionKey="id" 
 					style="vertical-align: middle;" />
 				<g:actionSubmit class='listButton' value="${message(code: 'default.search.label', default: 'List')}"  action="ecartFollowup"/>	
-				<g:actionSubmit class='listButton' value="générer PDF"  action="ecartPDF"/>	
-				
-				
-					
+				<g:actionSubmit class='listButton' value="générer PDF"  action="ecartPDF"/>							
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:if test="${site!=null}">	
 					<g:hiddenField name="site.id" value="${site.id}" />		
