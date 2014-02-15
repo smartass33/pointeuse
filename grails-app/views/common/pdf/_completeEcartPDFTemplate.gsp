@@ -137,32 +137,32 @@
 				</g:each>
 			</tr>
 			<g:if test="${employee.weeklyContractTime == Employee.legalWeekTime}">
-			<tr>
-				<td>RTT restant</td>
-				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
-					<g:if test='${rttByEmployee.get(employee)!=null}'>
-						<g:if test="${monthList.contains(month_rtt)}">				
-							<td>${rttByEmployee.get(employee).get(month_rtt)}</td>
+				<tr>
+					<td>RTT restant</td>
+					<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
+						<g:if test='${rttByEmployee.get(employee)!=null}'>
+							<g:if test="${monthList != null && monthList.contains(month_rtt)}">				
+								<td>${rttByEmployee.get(employee).get(month_rtt)}</td>
+							</g:if>
+							<g:else>
+								<td style="background-color:#CCCCCE"/>
+							</g:else>
 						</g:if>
-						<g:else>
-							<td style="background-color:#CCCCCE"/>
-						</g:else>
-					</g:if>
-				</g:each>
-			</tr>
-			<tr>
-				<td>Ecart corrigé des RTT</td>
-				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
-					<g:if test='${ecartMinusRTTByEmployee.get(employee)!=null}'>
-						<g:if test="${monthList.contains(month_rtt)}">				
-							<td>${ecartMinusRTTByEmployee.get(employee).get(month_rtt)}</td>
+					</g:each>
+				</tr>
+				<tr>
+					<td>Ecart corrigé des RTT</td>
+					<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt_2'>									
+						<g:if test='${ecartMinusRTTByEmployee.get(employee)!=null}'>
+							<g:if test="${monthList != null && monthList.contains(month_rtt_2)}">				
+								<td>${ecartMinusRTTByEmployee.get(employee).get(month_rtt_2)}</td>
+							</g:if>
+							<g:else>
+								<td style="background-color:#CCCCCE"/>
+							</g:else>
 						</g:if>
-						<g:else>
-							<td style="background-color:#CCCCCE"/>
-						</g:else>
-					</g:if>
-				</g:each>
-			</tr>			
+					</g:each>
+				</tr>			
 			</g:if>													
 		</g:each>
 	</tbody>

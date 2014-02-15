@@ -26,43 +26,35 @@
 		</style>
 
 		<g:javascript library="jquery" plugin="jquery" />
-
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
-		<title><g:message code="default.edit.label" args="[entityName]" /></title>
-		
+		<title><g:message code="default.edit.label" args="[entityName]" /></title>		
 		<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
-
-<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
-<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script> 
-
-
-
-<script>
-
-jQuery(function($){
-   $.datepicker.regional['fr'] = {
-      closeText: 'Fermer',
-      prevText: '<Préc',
-      nextText: 'Suiv>',
-      currentText: 'Courant',
-      monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin',
-      'Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
-      monthNamesShort: ['Jan','Fév','Mar','Avr','Mai','Jun',
-      'Jul','Aoû','Sep','Oct','Nov','Déc'],
-      dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
-      dayNamesShort: ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
-      dayNamesMin: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
-      weekHeader: 'Sm',
-      //dateFormat: 'dd/mm/yy',
-                dateFormat: 'dd/mm/yy',
-      firstDay: 1,
-      isRTL: false,
-      showMonthAfterYear: false,
-      yearSuffix: ''};
-   $.datepicker.setDefaults($.datepicker.regional['fr']);
-});
-</script>
+		<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+		<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script> 
+		<script>	
+			jQuery(function($){
+			   $.datepicker.regional['fr'] = {
+			      closeText: 'Fermer',
+			      prevText: '<Préc',
+			      nextText: 'Suiv>',
+			      currentText: 'Courant',
+			      monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin',
+			      'Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
+			      monthNamesShort: ['Jan','Fév','Mar','Avr','Mai','Jun',
+			      'Jul','Aoû','Sep','Oct','Nov','Déc'],
+			      dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+			      dayNamesShort: ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
+			      dayNamesMin: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
+			      weekHeader: 'Sm',
+			      dateFormat: 'dd/mm/yy',
+			      firstDay: 1,
+			      isRTL: false,
+			      showMonthAfterYear: false,
+			      yearSuffix: ''};
+			   $.datepicker.setDefaults($.datepicker.regional['fr']);
+			});
+		</script>
 	</head>
 	<body>
 		<a href="#edit-employee" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>

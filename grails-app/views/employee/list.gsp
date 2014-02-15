@@ -4,64 +4,76 @@
 <!doctype html>
 <html>
 <head>
+
 	<g:javascript library="jquery" plugin="jquery" />
 	<meta name="layout" content="main" id="mainLayout">
 	<g:set var="isNotSelected" value="true" />
-	
-	<g:set var="entityName"
-		value="${message(code: 'employee.label', default: 'Employee')}" />
+	<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 	<title><g:message code="default.list.label" args="[entityName]" /></title>
-		<style type="text/css">
-			body {
-				font-family: Verdana, Arial, sans-serif;
-				font-size: 0.9em;
-			}
-			table {
-				border-collapse: collapse;
-			}
-			thead {
-				background-color: #DDD;
-			}
-			td {
-				padding: 2px 4px 2px 4px;
-			}
-			th {
-				padding: 2px 4px 2px 4px;
-			}
-		</style>
-<script type="text/javascript">
+	
+	<link rel="shortcut icon" href="../favicon.ico"> 
+	<!--link rel="stylesheet" type="text/css" href="${grailsApplication.config.context}/css/default.css" /-->
+	<link rel="stylesheet" type="text/css" href="${grailsApplication.config.context}/css/component.css" />
+	<script src="${grailsApplication.config.context}/js/modernizr.custom.js"></script>
 
-$('label').click(function(){
-    $(this).children('span').addClass('input-checked');
-    $(this).parent('.toggle').siblings('.toggle').children('label').children('span').removeClass('input-checked');
-});
-
-   function showSpinner() {
-      $('spinner').show();
-   }
-   function hideSpinner() {
-      $('spinner').hide();
-   }
-   Ajax.Responders.register({
-      onLoading: function() {
-         showSpinner();
-      },
-      onComplete: function() {     
-         if(!Ajax.activeRequestCount) hideSpinner();
-      }
-   });
-   
-   
-
-</script>
+	
+	
+	
+	<style type="text/css">
+		body {
+			font-family: Verdana, Arial, sans-serif;
+			font-size: 0.9em;
+		}
+		table {
+			border-collapse: collapse;
+		}
+		thead {
+			background-color: #DDD;
+		}
+		td {
+			padding: 2px 4px 2px 4px;
+		}
+		th {
+			padding: 2px 4px 2px 4px;
+		}
+	</style>
+	<script type="text/javascript">
+		$('label').click(function(){
+		    $(this).children('span').addClass('input-checked');
+		    $(this).parent('.toggle').siblings('.toggle').children('label').children('span').removeClass('input-checked');
+		});
+		
+		   function showSpinner() {
+		      $('spinner').show();
+		   }
+		   function hideSpinner() {
+		      $('spinner').hide();
+		   }
+		   Ajax.Responders.register({
+		      onLoading: function() {
+		         showSpinner();
+		      },
+		      onComplete: function() {     
+		         if(!Ajax.activeRequestCount) hideSpinner();
+		      }
+		   });
+	</script>
 
 </head>
 <body>
 
-
-<div id="spinner" style="display: none;">
-   <img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading..." width="16" height="16" />
-</div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script src="${grailsApplication.config.context}/js/jquery.dlmenu.js"></script>
+	<script>
+		$(function() {
+			$( '#dl-menu' ).dlmenu({
+				animationClasses : { classin : 'dl-animate-in-2', classout : 'dl-animate-out-2' }
+			});
+		});
+	</script>
+	<div id="spinner" style="display: none;">
+	   <img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading..." width="16" height="16" />
+	</div>
 	<div class="nav" id="nav">
 		<g:headerMenu />
 	</div>
@@ -79,7 +91,6 @@ $('label').click(function(){
 						noSelection="${['':site.name]}" optionKey="id" optionValue="name"
 						onChange="${remoteFunction(action:'list', params:'\'site=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'divId')}"
 						style="vertical-align: middle;" />
-
 				</g:if>
 				<g:else>
 					<g:select name="site.id" from="${Site.list([sort:'name'])}"
@@ -94,17 +105,13 @@ $('label').click(function(){
 					params="\'q=\'+this.value+\'&isAdmin=\'+\'${isAdmin}+\'"/>
 
 						${message(code: 'default.period.label', default: 'List')}: <g:datePicker
-							name="myDate" value="${period ? period : new Date()}" 
-							precision="month" noSelection="['':'-Choose-']" style="vertical-align: middle;"/>
+							name="myDate" value="${period ? period : new Date()}"  relativeYears="[-3..5]"
+							precision="month" noSelection="['':'-Choisissez-']" style="vertical-align: middle;"/>
 
-						<g:actionSubmit class='listButton' value="pdf"  action="siteMonthlyPDF"/>		
-						<!--g:actionSubmit class='listButton' value="excel"  action="excel"/-->		
-						
+				<g:actionSubmit class='listButton' value="pdf"  action="siteMonthlyPDF"/>		
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:hiddenField name="siteId" value="${siteId}" />
-			</g:form>
-
-			
+			</g:form>		
 		</h1>
 		<g:if test="${flash.message}">
 			<div class="message" id="flash">
@@ -112,11 +119,8 @@ $('label').click(function(){
 			</div>
 		</g:if>
 	</div>
-	
-
 	<br>
 		<div id="divId"><g:listEmployee /></div>
-	
 	<g:if test="${employeeInstanceTotal!=null}">
 	<div class="pagination" id="pagination">
 		<g:hiddenField name="isAdmin" value="${isAdmin}" />

@@ -42,8 +42,10 @@
 				
 				<form> 
 				
-					<li>${message(code: 'default.period.label', default: 'List')}: <g:datePicker name="myDate" value="${period ? period : new Date()}" precision="month" noSelection="['':'-Choose-']"/></li>
-					<li><g:actionSubmit value="afficher" action="reportLight"/></li>
+					<li>${message(code: 'default.period.label', default: 'List')}: <g:datePicker name="myDate" value="${period ? period : new Date()}"
+						relativeYears="[-3..5]"
+						 precision="month" noSelection="['':'-Choisissez-']"/></li>
+					<li><g:actionSubmit class="listButton" value="afficher" action="reportLight"/></li>
 					<g:hiddenField name="userId" value="${userId}" />
 					
 				</form>					

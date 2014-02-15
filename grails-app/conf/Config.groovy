@@ -102,13 +102,12 @@ environments {
 			}
     }
 	
-	
-	
 	alrikiki {
 		pdf.directory='/var/lib/pdf'
 		grails.app.context=''
 		grails.logging.jul.usebridge = false
-		serverURL = "http://alrikiki.darktech.org"
+		//serverURL = "http://alrikiki.darktech.org"
+		serverURL = "http://10.33.6.10"
 		context=''
 		log4j = {
 				'null' name:'stacktrace'
@@ -145,13 +144,10 @@ environments {
 		log4j = {
 				'null' name:'stacktrace'
 				appenders {
-					rollingFile name:'myAppender',file:"/var/log/tomcat6/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
-					//rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
-					
+					rollingFile name:'myAppender',file:"/var/log/tomcat6/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')					
 				}
 			
-				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
-				 
+				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers			 
 				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
 					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
 					   'org.codehaus.groovy.grails.web.mapping',        // URL mapping

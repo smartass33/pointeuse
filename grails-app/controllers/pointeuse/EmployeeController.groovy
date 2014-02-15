@@ -279,7 +279,7 @@ class EmployeeController {
         [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]
     }
 
-	def vacationFollowup(){
+def vacationFollowup(){
 		def year = params["year"]
 		def max = params["max"] != null ? params.int("max") : 20
 		def site
@@ -480,6 +480,7 @@ class EmployeeController {
 		[period:period,employeeInstanceTotal:employeeInstanceTotal,site:site,employeeInstanceList:employeeInstanceList,takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
 		
 	}
+	
 	
 	
 	def vacationDisplay(Long id){		

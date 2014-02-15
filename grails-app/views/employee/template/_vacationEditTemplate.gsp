@@ -20,8 +20,6 @@
 		def iterator = firstYear.get(0) as int
 		def sameLine=false
 		%>
-		
-		
 			<g:each in="${orderedVacationList}" status="i" var="vacationInstance">
 				<% if (iterator==vacationInstance.period.year){
 					iterator=iterator+1
@@ -44,8 +42,7 @@
 									min="0"
 				            	/>
 			        		</div>
-						</td>	
-							
+						</td>								
 						</g:if>	
 						<g:else>
 							<td>				
@@ -61,8 +58,7 @@
 				        		</div>
 							</td>
 					</tr>	
-				</g:else>		
-											
+				</g:else>									
 			</g:each>
 		</tbody>
 	</table>

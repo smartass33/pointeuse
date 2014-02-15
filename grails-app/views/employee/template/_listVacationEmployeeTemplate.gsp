@@ -1,8 +1,5 @@
+<%@ page import="pointeuse.Period"%>
 <%@ page import="pointeuse.Site"%>
-<%@ page import="pointeuse.Employee"%>
-<%@ page import="pointeuse.InAndOut"%>
-<%@ page import="pointeuse.Vacation"%>
-<%@ page import="pointeuse.Absence"%>
 
 <table>
 	<thead>
@@ -34,5 +31,3 @@
 	</g:if>
 	</tbody>
 </table>
-
-

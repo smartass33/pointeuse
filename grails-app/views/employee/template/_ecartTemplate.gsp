@@ -4,26 +4,29 @@
 
 <g:set var="calendar" value="${Calendar.instance}"/>
 
-<table id="employee-table" border="1">
-	<tbody id='body_update' style="border:1px;">
-		<tr>
-			<td/>
+<table border="1" style="table-layout: fixed;" id="reportTable">
+
+	<thead>
+		<th/>
 			<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
 				<g:if test="${month_th>5}">
-					<td>${period.year}</td>
+					<th>${period.year}</th>
 				</g:if>
 				<g:else>
-					<td>${period.year + 1}</td>		
+					<th>${period.year + 1}</th>		
 				</g:else>
 			</g:each>
-		</tr>
+		</thead>
+
+	<tbody id='body_update' style="border:1px;">
+
 		<tr>
 			<td/>
 			
 			<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th_2'>
 			
 				<%= calendar.set(Calendar.MONTH,month_th_2-1) %>
-				<td style="vertical-align: middle;">${calendar.time.format('MMMM') }</td>
+				<td style="vertical-align: middle;">${calendar.time.format('MMM') }</td>
 			</g:each>
 
 		</tr>										
@@ -74,7 +77,7 @@
 				<td>RTT restant</td>
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
 					<g:if test='${rttByEmployee.get(employee)!=null}'>
-						<g:if test="${monthList.contains(month_rtt)}">				
+						<g:if test="${monthList != null && monthList.contains(month_rtt)}">				
 							<td>${rttByEmployee.get(employee).get(month_rtt)}</td>
 						</g:if>
 						<g:else>
@@ -87,7 +90,7 @@
 				<td>Ecart corrigé des RTT</td>
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
 					<g:if test='${ecartMinusRTTByEmployee.get(employee)!=null}'>
-						<g:if test="${monthList.contains(month_rtt)}">				
+						<g:if test="${monthList != null && monthList.contains(month_rtt)}">				
 							<td>${ecartMinusRTTByEmployee.get(employee).get(month_rtt)}</td>
 						</g:if>
 						<g:else>

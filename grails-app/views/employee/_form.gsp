@@ -32,7 +32,6 @@ $("#someButtonId").on("click", function(e) {
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'userName', 'error')} ">
 	<label for="userName">
 		<g:message code="employee.username.label" default="User Name" />
-		
 	</label>
 	<g:textField name="userName" value="${employeeInstance?.userName}"/>
 </div>
@@ -40,7 +39,6 @@ $("#someButtonId").on("click", function(e) {
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'matricule', 'error')} ">
 	<label for="matricule">
 		<g:message code="employee.matricule.label" default="Matricule" />
-		
 	</label>
 	<g:textField name="matricule" value="${employeeInstance?.matricule}"/>
 </div>
@@ -55,7 +53,7 @@ $("#someButtonId").on("click", function(e) {
 
 
 
-<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'weeklyContractTime', 'error')}">
+<!-- div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'weeklyContractTime', 'error')}">
 	<label for="weeklyContractTime">
 <g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" />
 	</label>
@@ -64,9 +62,8 @@ $("#someButtonId").on("click", function(e) {
 			params:'\'userId=' + employeeInstance.id 						  
 			+ '&counter=\' + this.value')}"
 	      	value="${employeeInstance?.weeklyContractTime}" 
-			min="0" 
-	/>
-</div>
+			min="0" />
+</div-->
 
 <div id='contractTable'>
 	<g:employeeContractTable/>

@@ -13,7 +13,7 @@ class Employee{
 	Function function
 	Site site
 	Service service
-	float weeklyContractTime //35H par d�faut. 
+	float weeklyContractTime //35H par défaut. 
 	boolean status //1: in, 0: out
 	boolean hasError
 	Date arrivalDate
@@ -21,6 +21,7 @@ class Employee{
 	static hasMany = [contracts:Contract,vacationsCounters:Vacation,absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
 	static searchable = true	
 	static constraints = {
+		matricule blank: true
 		firstName blank: false
 		lastName blank: false 
 		userName (unique: true,blank: false)

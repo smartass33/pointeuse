@@ -18,20 +18,11 @@ $(document).ready(function(){
 
 <table class="form-table" id="customFields">
 	<g:form method="POST" url="[controller:'employee', action:'someAction']">
-		<tr valign="top">
-		    <th scope="row"><label for="customFieldName"><g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" /></label></th>
-		    <td>
-		    	<richui:dateChooser id="contractDate" name="contractDate format="dd/MM/yyyy" value="${employeeInstance ? employeeInstance.arrivalDate : new Date()}" locale="fr" firstDayOfWeek="Mo"/>
-		        <input type="number" class="code" id="weeklyContractTime" name="weeklyContractTime" value="${employeeInstance ? employeeInstance.weeklyContractTime : 35}" /> &nbsp;
-		    </td>
-		</tr>
 		<g:each in="${previousContracts}"  status="i" var="previousContract">
 			<tr valign="top">
 			    <th scope="row"><label for="previousContract">contrat précédent</label></th>
-			    <td>		    
-			    	<richui:dateChooser id="previousDate" name="previousDate" format="dd/MM/yyyy" value="${previousContract ? previousContract.date : new Date()}" locale="fr" firstDayOfWeek="Mo"/>
-		        	<input type="number" class="code" id="previousContractLength" name="previousContractLength" value="${previousContract ? previousContract.weeklyLength : 35}" /> &nbsp;		    
-				</td>
+			    <td><richui:dateChooser id="previousDate" name="previousDate" format="dd/MM/yyyy" value="${previousContract ? previousContract.date : new Date()}" locale="fr" firstDayOfWeek="Mo"/></td>
+			    <td><input type="number" class="code" id="previousContractLength" name="previousContractLength" value="${previousContract ? previousContract.weeklyLength : 35}" /> &nbsp;</td>
 			</tr>
 		</g:each>
 		<tr>
