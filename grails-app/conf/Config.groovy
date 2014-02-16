@@ -106,6 +106,7 @@ environments {
 		pdf.directory='/var/lib/pdf'
 		grails.app.context=''
 		grails.logging.jul.usebridge = false
+		grails.resources.processing.enabled = false
 		//serverURL = "http://alrikiki.darktech.org"
 		serverURL = "http://10.33.6.10"
 		context=''

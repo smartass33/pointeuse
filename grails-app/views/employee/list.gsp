@@ -4,21 +4,12 @@
 <!doctype html>
 <html>
 <head>
-
 	<g:javascript library="jquery" plugin="jquery" />
 	<meta name="layout" content="main" id="mainLayout">
 	<g:set var="isNotSelected" value="true" />
 	<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 	<title><g:message code="default.list.label" args="[entityName]" /></title>
-	
 	<link rel="shortcut icon" href="../favicon.ico"> 
-	<!--link rel="stylesheet" type="text/css" href="${grailsApplication.config.context}/css/default.css" /-->
-	<link rel="stylesheet" type="text/css" href="${grailsApplication.config.context}/css/component.css" />
-	<script src="${grailsApplication.config.context}/js/modernizr.custom.js"></script>
-
-	
-	
-	
 	<style type="text/css">
 		body {
 			font-family: Verdana, Arial, sans-serif;
@@ -37,40 +28,8 @@
 			padding: 2px 4px 2px 4px;
 		}
 	</style>
-	<script type="text/javascript">
-		$('label').click(function(){
-		    $(this).children('span').addClass('input-checked');
-		    $(this).parent('.toggle').siblings('.toggle').children('label').children('span').removeClass('input-checked');
-		});
-		
-		   function showSpinner() {
-		      $('spinner').show();
-		   }
-		   function hideSpinner() {
-		      $('spinner').hide();
-		   }
-		   Ajax.Responders.register({
-		      onLoading: function() {
-		         showSpinner();
-		      },
-		      onComplete: function() {     
-		         if(!Ajax.activeRequestCount) hideSpinner();
-		      }
-		   });
-	</script>
-
 </head>
 <body>
-
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-	<script src="${grailsApplication.config.context}/js/jquery.dlmenu.js"></script>
-	<script>
-		$(function() {
-			$( '#dl-menu' ).dlmenu({
-				animationClasses : { classin : 'dl-animate-in-2', classout : 'dl-animate-out-2' }
-			});
-		});
-	</script>
 	<div id="spinner" style="display: none;">
 	   <img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading..." width="16" height="16" />
 	</div>

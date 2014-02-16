@@ -4,7 +4,6 @@
 	<head>		
 		<g:javascript library="jquery" plugin="jquery" />
 		<g:javascript src="/jquery/jquery.table.addrow.js" />
-		<modalbox:modalIncludes />	
 		
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'vacation.label', default: 'Vacation')}" />

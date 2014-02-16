@@ -6,21 +6,14 @@
 <%@ page import="pointeuse.Reason"%>
 
 <head>
-<r:require module="jquery"/>
-<r:require module="jquery-ui"/>
-<resource:tooltip />
-
-<g:javascript library="application"/> 
-<r:layoutResources/>
-<meta name="layout" content="main">
-<g:set var="weeklyRecap" value="0" />
-<title>${message(code: 'employee.report.label', default: 'Report')}</title>
-<link href="${grailsApplication.config.context}/css/main.css" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
-<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<script src="${grailsApplication.config.context}/js/jquery-ui-timepicker-addon.js"></script>
-
+	<g:javascript library="application"/> 		
+	<resource:tooltip />
+	<r:require module="report"/>
+	<r:layoutResources/>
+	<meta name="layout" content="main">
+	<g:set var="weeklyRecap" value="0" />
+	<title>${message(code: 'employee.report.label', default: 'Report')}</title>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
 
 <style>
 	 th

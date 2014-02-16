@@ -8,7 +8,6 @@
 <!doctype html>
 <html>
 <head>
-<modalbox:modalIncludes/>
 
 <meta name="layout" content="main">
 <g:set var="weeklyRecap" value="0" />
