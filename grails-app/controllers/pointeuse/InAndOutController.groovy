@@ -55,7 +55,11 @@ class InAndOutController {
 		def second = params["myTime_second"]!=null ? params.int("myTime_second") :0
 		def fromReport = params["fromReport"].equals('true') ? true:false
 		if (userId != null && userId != "" && userId.size()>0){
-			employee=Employee.get(userId[0])
+			if (fromReport){
+				employee=Employee.get(userId)
+			}else{
+				employee=Employee.get(userId[0])
+			}
 			employeeId=employee.id
 		}else{
 			flash.message = message(code: 'employee.not.null')
@@ -81,9 +85,6 @@ class InAndOutController {
 			}
 			return
 		}
-		
-		
-		
 		calendar.set(Calendar.HOUR_OF_DAY,hour)
 		calendar.set(Calendar.MINUTE,minute)
 		calendar.set(Calendar.SECOND,second)	
@@ -97,7 +98,6 @@ class InAndOutController {
 			}
 			return
 		}
-		
 		
 		def criteria = InAndOut.createCriteria()
 		def lastIn = criteria.get {
@@ -125,7 +125,6 @@ class InAndOutController {
 			return
 		}
 		
-		
 		def inAndOutInstance = timeManagerService.initializeTotals(employee, calendar.time,type,null,null)
 		inAndOutInstance.regularization=true
 		if (fromReport){
@@ -144,8 +143,6 @@ class InAndOutController {
 			log.error("user "+user?.username+" added "+inAndOutInstance)
 		}
 	
-
-		
 		timeManagerService.regularizeTime(type,employeeId,inAndOutInstance,calendar)
 		
 		if (inAndOutInstance.type.equals('E')){
@@ -168,8 +165,7 @@ class InAndOutController {
 			return
 		}catch(CannotRedirectException e){
 			log.error(e.toString())
-		}
-		
+		}	
     }
 
     def show(Long id) {
@@ -270,6 +266,4 @@ class InAndOutController {
 			}
 		}
 	}
-	
-	
 }

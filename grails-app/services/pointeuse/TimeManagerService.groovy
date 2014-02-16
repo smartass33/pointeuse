@@ -511,6 +511,8 @@ class TimeManagerService {
 		def elapsedSeconds = 0
 		def tmpInOrOut
 		def timeDifference
+		def currentInOrOut
+		def previousInOrOut
 		def inOrOutList = criteria.list {
 			and {
 				eq('employee',dailyTotal.employee)
@@ -522,13 +524,16 @@ class TimeManagerService {
 		}
 		
 		for (InAndOut inOrOut:inOrOutList){
-			if (inOrOut.type.equals("E")){
-				tmpInOrOut=inOrOut
+			currentInOrOut = inOrOut
+			if (previousInOrOut == null){
+				// it is the first occurence
+				previousInOrOut = inOrOut
 			}else{
-				if (tmpInOrOut!=null){
-					use (TimeCategory){timeDifference=inOrOut.time-tmpInOrOut.time}
-					elapsedSeconds+=timeDifference.seconds + timeDifference.minutes*60+timeDifference.hours*3600
+				if (previousInOrOut.type.equals("E") && currentInOrOut.type.equals("S")){
+					use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+					elapsedSeconds += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
 				}
+				previousInOrOut = inOrOut
 			}
 		}
 		dailyTotal.elapsedSeconds=elapsedSeconds
@@ -541,6 +546,8 @@ class TimeManagerService {
 		def tmpInOrOut
 		def timeDifference
 		def deltaTime
+		def currentInOrOut
+		def previousInOrOut
 		def inOrOutList = criteria.list {
 			and {
 				eq('employee',dailyTotal.employee)
@@ -552,13 +559,16 @@ class TimeManagerService {
 		}
 		
 		for (InAndOut inOrOut:inOrOutList){
-			if (inOrOut.type.equals("E")){
-				tmpInOrOut=inOrOut
+			currentInOrOut = inOrOut
+			if (previousInOrOut == null){
+				// it is the first occurence
+				previousInOrOut = inOrOut
 			}else{
-				if (tmpInOrOut!=null){
-					use (TimeCategory){timeDifference=inOrOut.time-tmpInOrOut.time}
-					elapsedSeconds+=timeDifference.seconds + timeDifference.minutes*60+timeDifference.hours*3600
+				if (previousInOrOut.type.equals("E") && currentInOrOut.type.equals("S")){
+					use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+					elapsedSeconds += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
 				}
+				previousInOrOut = inOrOut
 			}
 		}
 		deltaTime=dailyTotal.elapsedSeconds - elapsedSeconds//old-new
