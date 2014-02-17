@@ -18,4 +18,4 @@ modules = {
 	//	resource url:"css/jquery-ui.css"
 		resource url: "js/jquery-ui-timepicker-addon.js"
 	}
-}
+} 
