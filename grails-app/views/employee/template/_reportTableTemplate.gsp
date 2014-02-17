@@ -5,6 +5,10 @@
 <%@ page import="pointeuse.MonthlyTotal"%>
 <%@ page import="java.util.Calendar"%>
 
+<form method="POST" >
+<g:actionSubmit value="appliquer" action="modifyTime" class="listButton" style="position: absolute; left: -9999px" />
+
+
 <table  border="1" style="table-layout: fixed;" id="reportTable" >
     <thead>
       <th>${message(code: 'report.table.date.label', default: 'report')}</th>
@@ -252,3 +256,5 @@
         <g:hiddenField name="employee.id" value="${userId}" />
       </tbody>
 </table>
+
+</form>

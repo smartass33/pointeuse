@@ -67,7 +67,7 @@
 							name="myDate" value="${period ? period : new Date()}"  relativeYears="[-3..5]"
 							precision="month" noSelection="['':'-Choisissez-']" style="vertical-align: middle;"/>
 
-				<g:actionSubmit class='listButton' value="pdf"  action="siteMonthlyPDF"/>		
+				<g:actionSubmitImage class='listButton' value="pdf"  action="siteMonthlyPDF" src="${resource(dir: 'images', file: 'filetype_pdf.png')}" style="padding:-30px" class="imageButton"/>		
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:hiddenField name="siteId" value="${siteId}" />
 			</g:form>		

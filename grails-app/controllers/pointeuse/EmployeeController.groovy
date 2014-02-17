@@ -1055,8 +1055,7 @@ def vacationFollowup(){
 		def dayList=params["day"]
 		def monthList=params["month"]
 		def yearList=params["year"]
-		def employeeId=params["employee.id"]
-		def employee = Employee.get(employeeId)
+		def employee = Employee.get(params.long("userId"))
 		def newTimeList=params["cell"]
 		def fromRegularize=params["fromRegularize"].equals("true") ? true : false
 
@@ -1350,13 +1349,13 @@ def vacationFollowup(){
 	def report(Long userId,int monthPeriod,int yearPeriod){
 		def siteId=params["siteId"]
 		def myDate = params["myDate"]
+		SimpleDateFormat dateFormat
 		def employee
 
 		if (myDate != null && myDate instanceof String){
-			SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
+			dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 			myDate = dateFormat.parse(myDate)			
 		}
-
 		if (userId==null && params["userId"] != null ){
 			employee = Employee.get(params["userId"])
 		}else{

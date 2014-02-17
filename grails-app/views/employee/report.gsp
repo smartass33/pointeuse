@@ -57,51 +57,7 @@
 </style>
 
 	<script type="text/javascript">
-	
-	
-	(function($) {
-    $.fn.drags = function(opt) {
 
-        opt = $.extend({handle:"",cursor:"move"}, opt);
-
-        if(opt.handle === "") {
-            var $el = this;
-        } else {
-            var $el = this.find(opt.handle);
-        }
-
-        return $el.css('cursor', opt.cursor).on("mousedown", function(e) {
-            if(opt.handle === "") {
-                var $drag = $(this).addClass('draggable');
-            } else {
-                var $drag = $(this).addClass('active-handle').parent().addClass('draggable');
-            }
-            var z_idx = $drag.css('z-index'),
-                drg_h = $drag.outerHeight(),
-                drg_w = $drag.outerWidth(),
-                pos_y = $drag.offset().top + drg_h - e.pageY,
-                pos_x = $drag.offset().left + drg_w - e.pageX;
-            $drag.css('z-index', 1000).parents().on("mousemove", function(e) {
-                $('.draggable').offset({
-                    top:e.pageY + pos_y - drg_h,
-                    left:e.pageX + pos_x - drg_w
-                }).on("mouseup", function() {
-                    $(this).removeClass('draggable').css('z-index', z_idx);
-                });
-            });
-            e.preventDefault(); // disable selection
-        }).on("mouseup", function() {
-            if(opt.handle === "") {
-                $(this).removeClass('draggable');
-            } else {
-                $(this).removeClass('active-handle').parent().removeClass('draggable');
-            }
-        });
-
-    }
-})(jQuery);
-	
-	
 	function closePopup ( ){
 		window.location = $('#closeId').attr('href');
 	}
@@ -120,7 +76,17 @@
 	
 	
 	function datePickerLaunch (){
-	//	$('#popup').drags();
+	
+	options = {
+    pattern: 'mmm yyyy', // Default is 'mm/yyyy' and separator char is not mandatory
+    selectedYear: 2014,
+    startYear: 2008,
+    finalYear: 2020,
+    monthNames: ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'September', 'Octobre', 'Novembre', 'Décembre']
+};
+	
+	
+	$('#month_picker').monthpicker(options);
 		$.datepicker.regional['fr'] = {
 					closeText: 'Fermer',
 					prevText: '<Précédent',
@@ -178,11 +144,6 @@
 	<a href="#list-employee" class="skip" tabindex="-1"><g:message
 			code="default.link.skip.label" default="Skip to content&hellip;" /></a>
 	<div id="list-employee" class="content scaffold-list">
-		<div>
-			<h1>BIOLAB33
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			</h1>
-		</div>
 		<div class="nav" role="navigation" id="nav">
 			<ul>
 				<g:form method="post" >
@@ -199,7 +160,7 @@
 					<g:hiddenField name="currentYear" value='${period ? period.format("yyyy") : (new Date()).format("yyyy")}' />
 				</li>
 				<li style="vertical-align: middle;"><g:actionSubmit value="afficher" action="report" class="listButton" /></li>				
-				<li style="vertical-align: middle;"><g:actionSubmit value="pdf" action="userPDF" class="listButton" /></li>
+				<li style="vertical-align: middle;"><g:actionSubmitImage value="pdf" action="userPDF"  src="${resource(dir: 'images', file: 'filetype_pdf.png')}" class="imageButton"/></li>
 			</g:form>
 				<li>
 					<a href="#join_form" id="join_pop" class="addTimeButton">Ajouter un élement</a>
@@ -250,8 +211,7 @@
 						<a class="close" id="closeId" href="#close"></a>
 					</div>
 				</li>
-				<form method="POST">
-				<li style="vertical-align: middle;"><g:actionSubmit value="appliquer" action="modifyTime" class="listButton" /></li>
+
 				<li>
 					<a id="legend" title="
 					<table>
@@ -279,14 +239,10 @@
 			<g:cartouche />
 		</div> 
 		<BR>
-		<!--div id='report_input_image'>
-			<button type='button' id="report_table_toggle" ><img alt="toggle" src="/${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>		
-			Détails mensuels
-		</div-->
+		
 		<div id="report_table_div">
 			<g:reportTable />
 		</div>
 
 	</div>
-	</form>
 </body>
