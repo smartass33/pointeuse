@@ -1723,7 +1723,15 @@ def vacationFollowup(){
 	 
 	 
 	 def ecartFollowup(){
+		 def fromIndex=params.boolean('fromIndex')//.equals('true')?true:false
+		 
 		 def siteId=params["site.id"]
+		 if (!fromIndex && (siteId == null || siteId.size() == 0)){
+			 flash.message = message(code: 'ecart.site.selection.error')
+			 params["fromIndex"]=true
+			 redirect(action: "ecartFollowup",params:params)
+			 return
+		 }
 		 def year = params["year"]		 
 		 def employeeInstanceList
 		 def employeeInstanceTotal
@@ -1732,7 +1740,6 @@ def vacationFollowup(){
 		 def site
 		 def period
 		 def monthList=[]
-		 def fromIndex=params['fromIndex'].equals('true')?true:false
 		 
 		 if (year!=null && !year.equals("")){
 			 if (year instanceof String[]){

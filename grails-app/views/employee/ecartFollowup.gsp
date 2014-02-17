@@ -6,47 +6,33 @@
 <html>
 <head>
 	<g:javascript library="jquery" plugin="jquery" />
-	<resource:autoComplete skin="default" />
 	<meta name="layout" content="main" id="mainLayout">
 	<g:set var="isNotSelected" value="true" />
 	
 	<g:set var="entityName"
 		value="${message(code: 'employee.label', default: 'Employee')}" />
 	<title><g:message code="default.list.label" args="[entityName]" /></title>
-		<style type="text/css">
-			body {
-				font-family: Verdana, Arial, sans-serif;
-				font-size: 0.9em;
-			}
-			table {
-				border-collapse: collapse;
-			}
-			thead {
-				background-color: #DDD;
-			}
-			td {
-				width:60px;
-				padding: 2px 4px 2px 4px;
-			}
-			th {
-				padding: 2px 4px 2px 4px;
-			}
-		</style>
-<script type="text/javascript">
+	<style type="text/css">
+		body {
+			font-family: Verdana, Arial, sans-serif;
+			font-size: 0.9em;
+		}
+		table {
+			border-collapse: collapse;
+		}
+		thead {
+			background-color: #DDD;
+		}
+		td {
+			width:60px;
+			padding: 2px 4px 2px 4px;
+		}
+		th {
+			padding: 2px 4px 2px 4px;
+		}
+	</style>
+	<script type="text/javascript">
 
-
-
-
-
-	
-
-
-
-
-$('label').click(function(){
-    $(this).children('span').addClass('input-checked');
-    $(this).parent('.toggle').siblings('.toggle').children('label').children('span').removeClass('input-checked');
-});
 
    function showSpinner() {
       $('spinner').show();
@@ -71,7 +57,7 @@ $('label').click(function(){
 <body>
 
 <div id="spinner" class="spinner" style="display:none;">
-<img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Spinner" />
+	<img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Spinner" />
 </div>
 
 <div id="spinner" style="display: none;">
