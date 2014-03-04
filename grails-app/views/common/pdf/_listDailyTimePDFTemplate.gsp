@@ -99,7 +99,7 @@
 					<g:if test='${(dailySupMap.get(entry.key)).get(1)<10}'> 0</g:if>${(dailySupMap.get(entry.key)).get(1)} 
 				</td>
 				<g:each in="${dailyInAndOutMap.get(entry.key)}" var="inOrOut">
-					<g:if test="${inOrOut.type.equals('E')}">
+					<g:if test="${inOrOut != null && inOrOut.type.equals('E')}">
 						<td bgcolor="98FB98">${inOrOut.time.format('HH:mm')}</td>
 					</g:if>
 					<g:else>
