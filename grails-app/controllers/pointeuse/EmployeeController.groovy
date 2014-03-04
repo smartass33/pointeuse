@@ -5,6 +5,8 @@ import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
 
 import java.text.SimpleDateFormat
+import java.util.Date;
+
 import groovy.time.TimeCategory
 
 import grails.converters.JSON
@@ -51,7 +53,7 @@ class EmployeeController {
 		def dailySupMap = [:]
 		def dailyInAndOutMap = [:]
 		def siteId=params["site.id"]
-		def currentDate = params["currentDate"]
+		def currentDate
 		def dailyTotal
 		def inAndOutList
 		def criteria
@@ -59,8 +61,11 @@ class EmployeeController {
 		def elapsedSeconds
 		def employeeInstanceList
 		def calendar = Calendar.instance
-		if (currentDate!=null)
-		calendar.time=currentDate
+		def date_picker =params["date_picker"]
+		if (date_picker != null && date_picker.size()>0){
+			currentDate =  new Date().parse("d/M/yyyy HH:mm", date_picker)
+			calendar.time=currentDate	
+		}
 
 		if (siteId!=null && !siteId.equals("")){
 			 site = Site.get(params.int('site.id'))
@@ -101,7 +106,7 @@ class EmployeeController {
 			}
 			dailyMap.put(employee,timeManagerService.computeHumanTime(elapsedSeconds))
 		}
-		render template: "/employee/template/listDailyTimeTemplate", model:[dailyMap: dailyMap,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
+		render template: "/employee/template/listDailyTimeTemplate", model:[dailyMap: dailyMap,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:calendar.time]
 		return	
 	}
 	
@@ -111,18 +116,22 @@ class EmployeeController {
 		def dailySupMap = [:]
 		def dailyInAndOutMap = [:]
 		def siteId=params["site.id"]
-		def currentDate = params["currentDate"]
+		//def currentDate = params["currentDate"]
 		def dailyTotal
 		def inAndOutList
 		def criteria
 		def site
 		def elapsedSeconds
 		def employeeInstanceList
+		def currentDate
 		def calendar = Calendar.instance
-		if (currentDate!=null)
-		calendar.time=currentDate
-
 		
+		def date_picker =params["date_picker"]
+		if (date_picker != null && date_picker.size()>0){
+			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
+			calendar.time=currentDate
+		}
+			
 		if (siteId!=null && !siteId.equals("")){
 			 site = Site.get(params.int('site.id'))
 			 employeeInstanceList = Employee.findAllBySite(site)
@@ -164,7 +173,7 @@ class EmployeeController {
 			render template: "/employee/template/listDailyTimeTemplate", model:[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
 			return	
 		}
-		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
+		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:calendar.time]
 	}
 	
 	
@@ -605,9 +614,7 @@ def vacationFollowup(){
 				takenSicknessMap.put(period.year, takenSickness.size())				
 			}else{
 				takenSicknessMap.put(period.year, 0)
-			}
-		
-			
+			}		
 			
 			criteria = Absence.createCriteria()
 			takenCSS = criteria.list {
@@ -639,10 +646,7 @@ def vacationFollowup(){
 				takenAutreMap.put(period.year, takenAutre.size())
 			}else{
 				takenAutreMap.put(period.year, 0)
-			}
-
-			
-				
+			}				
 		}
 	[takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,yearMap:yearMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]	
 
@@ -1664,6 +1668,39 @@ def vacationFollowup(){
 		response.outputStream << retour[0]
 	}
 	
+	
+	
+	def dailyTotalPDF(){
+		params.each{i->
+			log.error(i);
+		}
+		def site
+		def siteId
+		Calendar calendar = Calendar.instance
+		def folder = grailsApplication.config.pdf.directory
+		
+		def date_picker =params["date_picker"]
+		if (date_picker != null && date_picker.size()>0){
+			calendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+		}
+
+
+		if (params["site.id"]!=null && !params["site.id"].equals('')){
+			siteId = params["site.id"].toInteger()
+			site = Site.get(params.int("site.id"))
+		}else{
+			flash.message = message(code: 'pdf.site.selection.error')
+			redirect(action: "list")
+			return
+		}
+			
+		def retour = PDFService.generateDailySheet(site,folder,calendar.time)
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.outputStream << retour[0]
+		
+	}
+	
 	def userPDF(){
 		def myDate = params["myDate"]
 		def userId = params.int('userId')
@@ -1711,13 +1748,10 @@ def vacationFollowup(){
 			log.error('userId is null. exiting')
 			return
 		}
-
-		
 		def retour = PDFService.generateUserAnnualTimeSheet(year,month,employee,folder)
 		response.setContentType("application/octet-stream")
 		response.setHeader("Content-disposition", "filename=${retour[1]}")
 		response.outputStream << retour[0]
-
 	}
 	
 	 

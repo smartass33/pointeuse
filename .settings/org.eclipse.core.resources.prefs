@@ -15,6 +15,7 @@ encoding//.link_to_grails_plugins/spring-security-core-1.2.7.3/grails-app/i18n/s
 encoding//.link_to_grails_plugins/spring-security-core-1.2.7.3/grails-app/i18n/spring-security-core_fr.properties=UTF-8
 encoding//grails-app/conf/BuildConfig.groovy=UTF-8
 encoding//grails-app/controllers/pointeuse/EmployeeController.groovy=UTF-8
+encoding//grails-app/domain/pointeuse/Employee.groovy=UTF-8
 encoding//grails-app/i18n=UTF-8
 encoding//grails-app/i18n/messages.properties=UTF-8
 encoding//grails-app/i18n/messages_cs_CZ.properties=UTF-8
@@ -35,3 +36,4 @@ encoding//grails-app/i18n/messages_th.properties=UTF-8
 encoding//grails-app/i18n/messages_zh_CN.properties=UTF-8
 encoding//grails-app/jobs/pointeuse/InAndOutCLosingJob.groovy=UTF-8
 encoding//grails-app/services/pointeuse/TimeManagerService.groovy=UTF-8
+encoding//web-app/index.html=UTF-8

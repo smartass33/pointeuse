@@ -4,8 +4,10 @@
 <!doctype html>
 <html>
 <head>
-	<g:javascript library="jquery" plugin="jquery" />
-	<resource:include components="autoComplete, dateChooser" autoComplete="[skin: 'default']" />
+	<g:javascript library="application"/> 		
+	<r:require module="report"/>		<r:layoutResources/>		
+	
+  	<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 
 	<meta name="layout" content="main" id="mainLayout">
 	<g:set var="isNotSelected" value="true" />
@@ -32,6 +34,32 @@
 			}
 
 		</style>
+		
+		<script>
+			jQuery(function($){
+			   $.datepicker.regional['fr'] = {
+			      closeText: 'Fermer',
+			      prevText: '<Préc',
+			      nextText: 'Suiv>',
+			      currentText: 'Courant',
+			      monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin',
+			      'Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
+			      monthNamesShort: ['Jan','Fév','Mar','Avr','Mai','Jun',
+			      'Jul','Aoû','Sep','Oct','Nov','Déc'],
+			      dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+			      dayNamesShort: ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
+			      dayNamesMin: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
+			      weekHeader: 'Sm',
+			      dateFormat: 'dd/mm/yy',
+			      firstDay: 1,
+			      isRTL: false,
+			      showMonthAfterYear: false,
+			      yearSuffix: ''};
+			   $.datepicker.setDefaults($.datepicker.regional['fr']);			   
+			   $("#date_picker").datepicker({dateFormat: "dd/mm/yy"}).datepicker("setDate", "${currentDate}");
+			});
+		</script>
+		
 </head>
 <body>
 
@@ -57,14 +85,15 @@
 					<g:select name="site.id" from="${Site.list([sort:'name'])}"
 						noSelection="${['':'-']}" optionKey="id" optionValue="name"/>
 				</g:else>	
-				<richui:dateChooser name="currentDate" format="dd/MM/yyyy" value="${period ? period : new Date()}" locale="fr" firstDayOfWeek="Mo"/>					
-				
+				<input type="text" id="date_picker" name="date_picker" />
+
 				<g:submitToRemote class="listButton"
 					value="rapport"
 					update="dailyTable" 
-					url="[controller:'employee', action:'dailyReportAjax']"
+					url="[controller:'employee', action:'dailyReport']"
 					/>
-				<g:actionSubmit class="listButton" value="export PDF" action="dailyTotalPDF"/>
+					
+				<g:actionSubmitImage value="pdf" action="dailyTotalPDF" controller="employee"  src="${resource(dir: 'images', file: 'filetype_pdf.png')}" class="imageButton"/>					
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:hiddenField name="siteId" value="${siteId}" />
 			</g:form>

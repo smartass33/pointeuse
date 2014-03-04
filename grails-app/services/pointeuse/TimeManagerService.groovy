@@ -1527,7 +1527,52 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		return monthTheoritical
 	}
 	
-
+	def getDailyInAndOutsData(Site site,Date currentDate){
+		def dailyMap = [:]
+		def dailySupMap = [:]
+		def dailyInAndOutMap = [:]
+		def dailyTotal
+		def inAndOutList
+		def criteria
+		def elapsedSeconds
+		def employeeInstanceList
+		def calendar = Calendar.instance
+		calendar.time=currentDate
+		
+		employeeInstanceList = Employee.findAllBySite(site)
+		for (Employee employee:employeeInstanceList){
+			criteria = DailyTotal.createCriteria()
+			dailyTotal= criteria.get{
+				and {
+					eq('employee',employee)
+					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
+					eq('year',calendar.get(Calendar.YEAR))
+					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			criteria = InAndOut.createCriteria()
+			inAndOutList= criteria.list{
+				and {
+						eq('employee',employee)
+						eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
+						eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+						eq('month',calendar.get(Calendar.MONTH)+1)
+						eq('year',calendar.get(Calendar.YEAR))
+						order('time')
+					}
+			}
+			
+			dailyInAndOutMap.put(employee, inAndOutList)
+			elapsedSeconds = getDailyTotal(dailyTotal)
+			if (elapsedSeconds > DailyTotal.maxWorkingTime){
+				dailySupMap.put(employee,computeHumanTime(elapsedSeconds-DailyTotal.maxWorkingTime))
+			}else{
+				dailySupMap.put(employee,computeHumanTime(0))
+			}
+			dailyMap.put(employee,computeHumanTime(elapsedSeconds))
+		}	
+		return [dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:currentDate]
+	}
 	
 	
 }

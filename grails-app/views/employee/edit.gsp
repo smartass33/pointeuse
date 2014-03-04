@@ -25,14 +25,14 @@
 			}
 		</style>
 
-		<g:javascript library="jquery" plugin="jquery" />
+		<g:javascript library="application"/> 		
+		<r:require module="report"/>
+		<r:layoutResources/>		
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>		
-		<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
-		<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
-		<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script> 
-		<script>	
+  		<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+		<script>
 			jQuery(function($){
 			   $.datepicker.regional['fr'] = {
 			      closeText: 'Fermer',
@@ -57,6 +57,7 @@
 		</script>
 	</head>
 	<body>
+
 		<a href="#edit-employee" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div class="nav" role="navigation">
 			<ul>
@@ -100,10 +101,9 @@
 					$('#paidHSDiv').load('${createLink(controller:'employee', action:'getSupplementaryTime',params:[id:employeeInstance?.id])}');
 			     });
 			</script>
-			<div id="paidHSDiv">
+			<!--div id="paidHSDiv">
 				<img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requète...
-				<!--g:paidHSEditTable/-->	
-			</div>
+			</div-->
 		</div>
 	</body>
 </html>

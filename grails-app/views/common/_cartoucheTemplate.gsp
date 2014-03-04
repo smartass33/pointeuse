@@ -18,6 +18,7 @@
 					<td class="cartoucheRightFiguresTD" />
 					<td class="cartoucheRightFiguresTD" style="font-weight: bold"  align="center"><g:formatDate format="MMMMM yyyy" date="${period}"/></td>
 					<td style="font-weight: bold" class="cartoucheRightFiguresTD">${message(code: 'employee.cumul', default: 'report')} ${period2}</td>
+					<td style="font-weight: bold" class="cartoucheRightFiguresTD">${message(code: 'employee.remaining', default: 'report')} ${period2}</td>
 				</tr>			
 				<tr>		
 					<td class="cartoucheRightTitleTD" >${message(code: 'employee.vacances.count', default: 'report')} :</td>	

@@ -121,7 +121,7 @@
 			code="default.link.skip.label" default="Skip to content&hellip;" /></a>
 	<div class="nav" id="nav" style="font-family: Verdana,Arial,sans-serif;font-size: 14.4px;">
 		<ul>
-			<g:form method="post" >
+			<g:form method="post" controller="employee">
 				<li style="vertical-align: middle;"><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label" /></a></li>
 				<li style="vertical-align: middle;"><g:link class="list" action="list" params="${[isAdmin:isAdmin,siteId:siteId,back:true]}">${message(code: 'employee.back.to.list.label', default: 'List')}</g:link></li>
 				<li style="vertical-align: middle;">
@@ -130,11 +130,12 @@
 						precision="month" noSelection="['':'-Choose-']"
 						style="vertical-align: middle;" /> 
 				</li>
-				<li style="vertical-align: middle;"><g:actionSubmit value="afficher" action="report" class="listButton" /></li>				
+				<li style="vertical-align: middle;"><g:actionSubmit value="afficher" action="report" class="listButton" /></li>	
+				<li style="vertical-align: middle;"><g:actionSubmitImage value="pdf" action="userPDF" controller="employee"  src="${resource(dir: 'images', file: 'filetype_pdf.png')}" class="imageButton"/></li>
+							
 				<li>
 					<g:inAndOutPopup/>
 				</li>
-				<li style="vertical-align: middle;"><g:actionSubmitImage value="pdf" action="userPDF"  src="${resource(dir: 'images', file: 'filetype_pdf.png')}" class="imageButton"/></li>
 				
 				<g:hiddenField name="userId" value="${userId}" /> 
 				<g:hiddenField name="siteId" value="${siteId}" /> 

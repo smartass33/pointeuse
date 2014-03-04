@@ -1,5 +1,7 @@
 package pointeuse
 
+import java.util.Date;
+
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.PdfCopyFields
 
@@ -105,6 +107,24 @@ class PDFService {
 		return [file.bytes,file.name]
 	}
 	
+	
+	def generateDailySheet(Site site,String folder,Date currentDate){
+		def filename
+		OutputStream outputStream
+		File file
+		def modelDaily=timeManagerService.getDailyInAndOutsData(site,currentDate)
+		modelDaily << [site:site]
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/common/pdf/listDailyTimePDFTemplate', model: modelDaily)
+		filename = (currentDate.format('yyyy-mm-dd')).toString()+'-'+site.name +'-dailyReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
 
 	
 }

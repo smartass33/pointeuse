@@ -35,5 +35,5 @@ org.grails.ide.eclipse.core.source.attachment-grails-scripts-2.3.4.jar=/Applicat
 org.grails.ide.eclipse.core.source.attachment-grails-spring-2.3.4.jar=/Applications/grails-2.3.4/src/grails-spring-2.3.4-sources.jar
 org.grails.ide.eclipse.core.source.attachment-grails-test-2.3.4.jar=/Applications/grails-2.3.4/src/grails-test-2.3.4-sources.jar
 org.grails.ide.eclipse.core.source.attachment-grails-web-2.3.4.jar=/Applications/grails-2.3.4/src/grails-web-2.3.4-sources.jar
-org.grails.ide.eclipse.core.source.attachment-plugin-classes=/pointeuse/.link_to_grails_plugins/modalbox-0.4/web-app
+//org.grails.ide.eclipse.core.source.attachment-plugin-classes=/pointeuse/.link_to_grails_plugins/modalbox-0.4/web-app
 org.grails.ide.eclipse.core.use.default.install=false
