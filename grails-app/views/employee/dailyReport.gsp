@@ -66,6 +66,8 @@
 	<div class="nav" id="nav">
 		<g:headerMenu />
 	</div>
+	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requête...</div>
+	
 	<div id="list-employee" class="content scaffold-list">
 		<h1>
 			<g:message code="daily.recap.label"/>
@@ -90,6 +92,8 @@
 				<g:submitToRemote class="listButton"
 					value="rapport"
 					update="dailyTable" 
+						                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
+	                    	onComplete="document.getElementById('spinner').style.display = 'none';"
 					url="[controller:'employee', action:'dailyReport']"
 					/>
 					
