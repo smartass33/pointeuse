@@ -3,3 +3,9 @@ target
 logs
 .DS_Store
 /.settings
+grailsw
+grailsw.bat
+pointeuse.war
+wrapper/grails-wrapper-runtime-2.3.4.jar
+wrapper/grails-wrapper.properties
+wrapper/springloaded-core-1.1.4.jar
