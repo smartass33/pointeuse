@@ -47,69 +47,7 @@ class EmployeeController {
 		[absenceCount:absenceCount]
 	}
 	
-	@Secured(['ROLE_ADMIN'])
-	def dailyReportAjax(){
-		def dailyMap = [:]
-		def dailySupMap = [:]
-		def dailyInAndOutMap = [:]
-		def siteId=params["site.id"]
-		def currentDate
-		def dailyTotal
-		def inAndOutList
-		def criteria
-		def site
-		def elapsedSeconds
-		def employeeInstanceList
-		def calendar = Calendar.instance
-		def date_picker =params["date_picker"]
-		if (date_picker != null && date_picker.size()>0){
-			currentDate =  new Date().parse("d/M/yyyy HH:mm", date_picker)
-			calendar.time=currentDate	
-		}
 
-		if (siteId!=null && !siteId.equals("")){
-			 site = Site.get(params.int('site.id'))
-			 employeeInstanceList = Employee.findAllBySite(site)
-		}else{
-			employeeInstanceList = Employee.findAll("from Employee as e order by e.site asc")	
-		}
-		for (Employee employee:employeeInstanceList){
-			
-			criteria = DailyTotal.createCriteria()
-			dailyTotal= criteria.get{
-				and {
-					eq('employee',employee)
-					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
-					eq('year',calendar.get(Calendar.YEAR))
-					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-				}				
-			}
-			criteria = InAndOut.createCriteria()
-			
-			inAndOutList= criteria.list{
-				and {
-					eq('employee',employee)
-					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
-					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-					eq('month',calendar.get(Calendar.MONTH)+1)
-					eq('year',calendar.get(Calendar.YEAR))
-					order('time')
-				}			
-			}
-			
-			dailyInAndOutMap.put(employee, inAndOutList)
-			elapsedSeconds = timeManagerService.getDailyTotal(dailyTotal)
-			if (elapsedSeconds > DailyTotal.maxWorkingTime){
-				dailySupMap.put(employee,timeManagerService.computeHumanTime(elapsedSeconds-DailyTotal.maxWorkingTime))
-			}else{
-				dailySupMap.put(employee,timeManagerService.computeHumanTime(0))
-			}
-			dailyMap.put(employee,timeManagerService.computeHumanTime(elapsedSeconds))
-		}
-		render template: "/employee/template/listDailyTimeTemplate", model:[dailyMap: dailyMap,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:calendar.time]
-		return	
-	}
-	
 	@Secured(['ROLE_ADMIN'])
 	def dailyReport(){
 		def dailyMap = [:]
@@ -125,6 +63,16 @@ class EmployeeController {
 		def employeeInstanceList
 		def currentDate
 		def calendar = Calendar.instance
+		
+		def fromIndex=params.boolean('fromIndex')//.equals('true')?true:false
+		
+		if (!fromIndex && (siteId == null || siteId.size() == 0)){
+			flash.message = message(code: 'ecart.site.selection.error')
+			params["fromIndex"]=true
+			redirect(action: "dailyReport",params:params)
+			return
+		}
+		
 		
 		def date_picker =params["date_picker"]
 		if (date_picker != null && date_picker.size()>0){
@@ -158,6 +106,10 @@ class EmployeeController {
 						eq('year',calendar.get(Calendar.YEAR))
 						order('time')				
 					}
+			}
+			
+			if (fromIndex){
+				return [site:site,fromIndex:fromIndex,currentDate:calendar.time]
 			}
 			
 			dailyInAndOutMap.put(employee, inAndOutList)

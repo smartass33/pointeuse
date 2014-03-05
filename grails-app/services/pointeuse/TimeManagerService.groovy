@@ -825,6 +825,32 @@ class TimeManagerService {
 		
 		yearlyCounter -= bankHolidayCounter
 		def yearlyPregnancyCredit=30*60*pregnancy.size()
+		
+		def arrivalDate = employee.arrivalDate
+		
+		Period currentPeriod = (month>5)?Period.findByYear(year):Period.findByYear(year-1)
+		Period arrivalPeriod = (arrivalDate.getAt(Calendar.MONTH)>4)?Period.findByYear(arrivalDate.getAt(Calendar.YEAR)):Period.findByYear(arrivalDate.getAt(Calendar.YEAR) - 1)
+		
+		// employee arrived during the period: we must prorate Pentecote day
+		if (currentPeriod == arrivalPeriod){
+			if ( month > arrivalDate.getAt(Calendar.MONTH)){
+				if (arrivalDate.getAt(Calendar.YEAR) != year){
+					monthNumber = arrivalDate.getAt(Calendar.MONTH) - 7 + month
+				}else{
+					monthNumber = month - arrivalDate.getAt(Calendar.MONTH)
+				}
+			}/*
+			if (arrivalDate.getAt(Calendar.MONTH) <  5){
+				if ( month > arrivalDate.getAt(Calendar.MONTH)){
+					monthNumber = month - arrivalDate.getAt(Calendar.MONTH)
+				}
+			}else{
+				monthNumber = month - arrivalDate.getAt(Calendar.MONTH)
+			}
+			monthNumber = (arrivalDate.getAt(Calendar.MONTH) >= 5) ? 5 - arrivalDate.getAt(Calendar.MONTH)  : arrivalDate.getAt(Calendar.MONTH) + 1 + 7
+			*/
+		}
+		
 		yearTheoritical=3600*(
 					yearlyCounter*employee.weeklyContractTime/Employee.WeekOpenedDays
 					+ (Employee.Pentecote*monthNumber)*(employee.weeklyContractTime/Employee.legalWeekTime)
@@ -1517,12 +1543,19 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 				weeklyContractTime =employee.weeklyContractTime
 		}
 				
+		
+
+		
 		monthTheoritical=(
 			3600*(
 					openDays*weeklyContractTime/Employee.WeekOpenedDays
 					+(Employee.Pentecote)*(weeklyContractTime/Employee.legalWeekTime)
 					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness+holidays+sansSolde))
 				- pregnancy) as int
+			
+			
+		//monthTheoritical += 3600*(Employee.Pentecote)*(weeklyContractTime/Employee.legalWeekTime)
+			
 			
 		return monthTheoritical
 	}
