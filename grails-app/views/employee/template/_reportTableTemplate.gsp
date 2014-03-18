@@ -237,14 +237,29 @@
               <th>${day.key}</th>
               <g:if test="${weeklyTotal.get(employee) != null && weeklyTotal.get(employee).get(day.key) !=null && (weeklyTotal.get(employee).get(day.key).get(2)>0 || weeklyTotal.get(employee).get(day.key).get(1)>0 || weeklyTotal.get(employee).get(day.key).get(0)>0)}">
                 <th colspan="34" scope="colgroup">
-                  ${message(code: 'weekly.total.label', default: 'Report')} ${(weeklyTotal.get(employee).get(day.key)).get(0)}:${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyTotal.get(employee).get(day.key)).get(1)}
+                  ${message(code: 'weekly.total.label', default: 'Report')} 
+                  <g:if test='${(weeklyTotal.get(employee).get(day.key)).get(0)<10}'>
+                  	0${(weeklyTotal.get(employee).get(day.key)).get(0)} :
+                  </g:if>
+                  <g:else>
+                  	${(weeklyTotal.get(employee).get(day.key)).get(0)} :
+                  </g:else>
+                  
+                  <g:if test='${(weeklyTotal.get(employee).get(day.key)).get(1)<10}'>
+                  	   ${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'00':'0'+(weeklyTotal.get(employee).get(day.key)).get(1)}
+                  </g:if>
+                  <g:else>
+                  	${(weeklyTotal.get(employee).get(day.key)).get(1)}
+                  </g:else>
+                  
+                                    
                   <g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null && ((weeklySupTotal.get(employee).get(day.key)).get(0) > 0 || (weeklySupTotal.get(employee).get(day.key)).get(1) >0)}">
                    dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)}:${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}    
                   </g:if>
                 </th>                                                        
               </g:if>
               <g:else>
-                <th colspan="34" scope="colgroup">Total fin de semaine: 00:00
+                <th colspan="34" scope="colgroup"> ${message(code: 'weekly.total.label', default: 'Report')} 00 : 00
                		<g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null  && weeklySupTotal.get(employee).get(day.key) != null && ((weeklySupTotal.get(employee).get(day.key)).get(0) > 0 || (weeklySupTotal.get(employee).get(day.key)).get(1) >0)}">
                    dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)}:${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}  
                   </g:if>

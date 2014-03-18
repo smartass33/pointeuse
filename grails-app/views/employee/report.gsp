@@ -121,7 +121,7 @@
 			code="default.link.skip.label" default="Skip to content&hellip;" /></a>
 	<div class="nav" id="nav" style="font-family: Verdana,Arial,sans-serif;font-size: 14.4px;">
 		<ul>
-			<g:form method="post" controller="employee">
+			<g:form method="post" controller="employee" params="[siteId:siteId]">
 				<li style="vertical-align: middle;"><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label" /></a></li>
 				<li style="vertical-align: middle;"><g:link class="list" action="list" params="${[isAdmin:isAdmin,siteId:siteId,back:true]}">${message(code: 'employee.back.to.list.label', default: 'List')}</g:link></li>
 				<li style="vertical-align: middle;">
@@ -136,13 +136,7 @@
 				<li>
 					<g:inAndOutPopup/>
 				</li>
-				
-				<g:hiddenField name="userId" value="${userId}" /> 
-				<g:hiddenField name="siteId" value="${siteId}" /> 
-				<g:hiddenField name="currentMonth" value='${period ? period.format("M") : (new Date()).format("M")}' />
-				<g:hiddenField name="currentYear" value='${period ? period.format("yyyy") : (new Date()).format("yyyy")}' />
 			</g:form>
-			
 			<li>
 				<a id="legend" title="
 				<table>
@@ -153,14 +147,9 @@
 					<tr><td style='color : green;font-weight: bold;'><g:message code='legend.MODIFIEE_ADMIN' default='Régul' /></td></tr>
 					<tr><td style='font-weight: bold;'><g:message code='legend.SYSTEM_GENERATED' default='Régul' /></td></tr>
 					</table>">Légende</a> <richui:tooltip id="legend" />
-			</li>
-			
+			</li>		
 		</ul>
-		<g:if test="${flash.message}">
-			<div class="message">
-				${flash.message}
-			</div>
-		</g:if>
+		<g:if test="${flash.message}"><div class="message">${flash.message}</div></g:if>
 	</div>
 	<div id='cartouche_input_image'>
 		<button type='button' id="cartouche_toggle" ><img alt="toggle" src="${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
