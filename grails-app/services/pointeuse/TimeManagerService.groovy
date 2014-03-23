@@ -1169,7 +1169,29 @@ class TimeManagerService {
 		def monthlyTotal=computeHumanTime(monthlyTotalTime)
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
 		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)	
-		return [period2:period,
+		
+		
+		criteria = Contract.createCriteria()
+		
+		def currentContract = criteria.get {
+			or{
+				and {
+					lt('year',year)
+					eq('employee',employee)
+				}
+				and {
+					eq('year',year)
+					lt('month',month)
+					eq('employee',employee)
+				}
+			}
+			order('startDate','desc')
+			maxResults(1)
+		}
+		
+		return [
+			currentContract:currentContract,
+			period2:period,
 			dailyBankHolidayMap:dailyBankHolidayMap,
 			monthlyTotalRecap:monthlyTotal,
 			payableSupTime:payableSupTime,
@@ -1513,38 +1535,49 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		def weeklyContractTime
 		def contract
 		def criteria
-		def previousContracts
+		def previousContract
 		criteria = Contract.createCriteria()
 		
-		previousContracts = criteria.list {
-			and {
-				eq('year',year)
-				eq('month',month)
-				eq('employee',employee)
-			}
-		}
-		
-		if (previousContracts!=null){
-		//	log.error('previsouContract not null')
-			criteria = Contract.createCriteria()
-			contract = criteria.get {
+		previousContract = criteria.get {
+			or{
+				and {
+					lt('year',year)
+					eq('employee',employee)
+				}
 				and {
 					eq('year',year)
-					eq('month',month)
+					lt('month',month)
+					eq('employee',employee)
+				}	
+			}
+			order('startDate','desc')
+			maxResults(1)
+		}
+		/*
+		criteria = Contract.createCriteria()
+		def nextContract = criteria.get{
+			or{
+				and {
+					gt('year',year)
+					eq('employee',employee)
+				}
+				and {
+					eq('year',year)
+					gt('month',month)
 					eq('employee',employee)
 				}
 			}
-			if (contract != null){
-				weeklyContractTime = contract.weeklyLength
-			}else{
-				weeklyContractTime =employee.weeklyContractTime
-			}
-		}else{
-				weeklyContractTime =employee.weeklyContractTime
+			order('startDate','asc')
+			maxResults(1)
 		}
-				
-		
-
+		*/
+		if (previousContract != null ){
+			log.error("previousContract: "+previousContract)
+			weeklyContractTime = previousContract.weeklyLength
+		}
+		else{
+			weeklyContractTime =employee.weeklyContractTime
+		}
 		
 		monthTheoritical=(
 			3600*(

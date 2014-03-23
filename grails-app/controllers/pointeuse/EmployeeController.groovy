@@ -648,7 +648,7 @@ def vacationFollowup(){
 		}
 		*/
 		
-		previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'date',order:'desc'])
+		previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'startDate',order:'desc'])
 		
 		def siteId=params["siteId"]
         if (!employeeInstance) {
@@ -908,6 +908,7 @@ def vacationFollowup(){
 	
 
     def update(Long id, Long version) {
+		params.each{i->log.error(i)}
 		def siteId=params["siteId"]
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
         def employeeInstance = Employee.get(id)
@@ -959,6 +960,49 @@ def vacationFollowup(){
         redirect(action: "show", id: employeeInstance.id,params: [isAdmin: isAdmin,siteId:siteId])
     }
 
+	
+	def changeContractParams(){
+		params.each{i->log.error(i)}
+		//def newDate=params["newDate"]
+		def newValue//=params["newValue"]
+		def employee = Employee.get(params["userId"])
+		def contract = Contract.get(params["contractId"])
+		def newDate
+		if (params["newDate"] != null){
+			newDate = new Date().parse("d/M/yyyy",params["newDate"])
+			if (params["type"].contains('startDate')){
+				contract.startDate = newDate
+			}
+			if (params["type"].contains('endDate')){
+				contract.endDate = newDate	
+			}
+		}
+		
+		
+		if (params["newValue"] != null){
+			newValue = params["newValue"].toFloat()
+			contract.weeklyLength = newValue
+		}		
+		def contracts = Contract.findAllByEmployee(employee,[sort:'startDate',order:'desc'])
+		def model = [previousContracts:contracts,employeeInstance: employee]	
+		render template: "/employee/template/contractTable", model: model
+		return
+	}
+	
+	
+	
+	def trashContract(){
+		def contractId=params["contractId"]
+		def contract = Contract.get(params["contractId"])
+		def employee = contract.employee
+		log.error('removing contract '+contract)
+		contract.delete(flush:true)
+		def contracts = Contract.findAllByEmployee(employee,[sort:'startDate',order:'desc'])
+		def model = [previousContracts:contracts,employeeInstance: employee]	
+		render template: "/employee/template/contractTable", model: model
+		return
+	}
+	
     def delete(Long id) {
         def employeeInstance = Employee.get(id)
         if (!employeeInstance) {
@@ -1002,7 +1046,7 @@ def vacationFollowup(){
 		return
 	}
 	
-	
+
 
 	
 	
@@ -1800,35 +1844,33 @@ def vacationFollowup(){
 	 
 	def appendContract(){
 		log.error('appendContract called')
-		params.each{i->log.error(i)}
 	}
 	
-	def someAction = {
-		def DATE_PATTERN = 'date_'
-		def CONTRACT_PATTERN='contract_info'
-		log.error('someAction called')
-		def contractList =[]
-		params.each{i->		
-			if ((i.key).contains(CONTRACT_PATTERN)){
-				log.error('param value: '+i.value)
-				def contractInfos = i.value
-				def length = contractInfos.size()
-				for (int j = 0 ;j <length ; j++){
-					if (j%2==0){
-						Contract contract = new Contract()
-						contract.date = new Date().parse("d/M/yyyy",  contractInfos[j])
-						contract.year=contract.date.getAt(Calendar.YEAR)
-						contract.month=(contract.date.getAt(Calendar.MONTH))+1
-						contract.period=contract.month<6?Period.findByYear(contract.year-1):Period.findByYear(contract.year)
-						contract.weeklyLength = contractInfos[j+1].toFloat()
-						contract.employee = Employee.get(params.id)
-						
-						contract.save()
-						contractList.add(contract)
-					}		
-				}
-			}
+	def addNewContract = {
+		params.each{i-> log.error(i)}
+		log.error('addNewContract called')
+		Contract contract = new Contract()
+		if (params['newStartDate'] != null)
+			contract.startDate = new Date().parse("d/M/yyyy",  params['newStartDate'])
+		if (params['newEndDate'] != null && params['newEndDate'].size() > 0)
+			contract.endDate = new Date().parse("d/M/yyyy",  params['newEndDate'])
+		
+		if (utilService.detectCollidingContract(contract.startDate,contract.endDate)){
+			log.error('contract dates are incomplatible, exiting')
+			flash.message = message(code: 'contract.incompatible.values')
+			redirect(action: "edit", params: [id:params.id,isAdmin:false])
+			
+			return
 		}
+			
+			
+		contract.year=contract.startDate.getAt(Calendar.YEAR)
+		contract.month=(contract.startDate.getAt(Calendar.MONTH))+1
+		contract.period=contract.month<6?Period.findByYear(contract.year-1):Period.findByYear(contract.year)
+		contract.weeklyLength = params.float('newContractValue')
+		contract.employee = Employee.get(params.id)
+		contract.loggingTime = new Date()
+		contract.save()
 		redirect(action: "edit", params: [id:params.id,isAdmin:false])		
 	  }
 	 

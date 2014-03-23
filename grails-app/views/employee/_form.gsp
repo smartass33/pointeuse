@@ -44,26 +44,10 @@ $("#someButtonId").on("click", function(e) {
 </div>
 
 
-<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'weeklyContractTime', 'error')} ">
-	<label for="weeklyContractTime">
-		<g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" />
-	</label>
-	<g:textField name="weeklyContractTime" value="${employeeInstance?.weeklyContractTime}"/>
-</div>
+
+<BR>
 
 
-
-<!-- div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'weeklyContractTime', 'error')}">
-	<label for="weeklyContractTime">
-<g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" />
-	</label>
-	<input 	type="number" name="name"          		
-			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
-			params:'\'userId=' + employeeInstance.id 						  
-			+ '&counter=\' + this.value')}"
-	      	value="${employeeInstance?.weeklyContractTime}" 
-			min="0" />
-</div-->
 
 <div id='contractTable'>
 	<g:employeeContractTable/>

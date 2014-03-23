@@ -4,6 +4,7 @@
 <%@ page import="pointeuse.AbsenceType"%>
 <%@ page import="pointeuse.MonthlyTotal"%>
 <%@ page import="pointeuse.Reason"%>
+<%@ page import="pointeuse.Contract"%>
 
 <head>
 	<g:javascript library="application"/> 		

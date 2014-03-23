@@ -235,4 +235,25 @@ class UtilService {
 		return openDays
 	}
 	
+	def detectCollidingContract(Date startDate,Date endDate){
+		def criteria = Contract.createCriteria()
+		def contractList
+		def retour = false
+		contractList = criteria.list{
+			or{
+				and{
+					le('startDate',startDate)
+					ge('endDate',startDate)
+				}
+				and{
+					le('startDate',endDate)
+					ge('endDate',endDate)
+				}
+			}
+		}
+		
+		if (contractList != null && contractList.size() > 0)
+			retour = true
+		return retour
+	}
 }

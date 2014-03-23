@@ -23,11 +23,17 @@
 			th {
 				padding: 2px 4px 2px 4px;
 			}
+			
+			#newContractForm {
+    display: none;
+}
 		</style>
 
 		<g:javascript library="application"/> 		
 		<r:require module="report"/>
-		<r:layoutResources/>		
+		<r:layoutResources/>	
+		<resource:include components="autoComplete, dateChooser" autoComplete="[skin: 'default']" />
+			
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>		
@@ -53,6 +59,7 @@
 			      showMonthAfterYear: false,
 			      yearSuffix: ''};
 			   $.datepicker.setDefaults($.datepicker.regional['fr']);
+
 			});
 		</script>
 	</head>
@@ -94,8 +101,8 @@
 					<g:actionSubmit class="save" action="update" value="${message(code: 'default.button.update.label', default: 'Update')}" />
 					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
 				</fieldset>
-			</g:form>		
-			<g:vacationEditTable/>	
+			</g:form>	
+				<g:vacationEditTable/>	
 			<script type="text/javascript">
 				$(function(){
 					$('#paidHSDiv').load('${createLink(controller:'employee', action:'getSupplementaryTime',params:[id:employeeInstance?.id])}');
