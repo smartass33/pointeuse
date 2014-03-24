@@ -774,10 +774,13 @@ def vacationFollowup(){
 			yearInf=cal.get(Calendar.YEAR)-1
 			yearSup=cal.get(Calendar.YEAR)
 		}
+		
+		def currentContract = cartoucheTable.getAt('currentContract')
 		def monthlyTotalRecapAsString = timeManagerService.computeHumanTimeAsString(monthlyTotal)
 		monthlyTotal=timeManagerService.computeHumanTime(monthlyTotal)
 		Period period = ((cal.get(Calendar.MONTH)+1)>5)?Period.findByYear(cal.get(Calendar.YEAR)):Period.findByYear(cal.get(Calendar.YEAR)-1)
 		def model=[
+			currentContract:currentContract,
 			period2:period,
 			period:cal.time,
 			firstName:employee.firstName,
@@ -962,22 +965,45 @@ def vacationFollowup(){
 
 	
 	def changeContractParams(){
-		params.each{i->log.error(i)}
-		//def newDate=params["newDate"]
-		def newValue//=params["newValue"]
 		def employee = Employee.get(params["userId"])
 		def contract = Contract.get(params["contractId"])
 		def newDate
+		def newValue
+		
+		if (params["newDate"] != null) {			
+			if (params["newDate"] == ''){
+				if (params["type"].contains('startDate')){
+					// throw error: start date cannot be null
+					flash.message2 = message(code: 'employee.startdate.not.null')
+				}else {
+					contract.endDate = null
+				}
+			}else{
+				newDate = new Date().parse("d/M/yyyy",params["newDate"])		
+				if (params["type"].contains('startDate')){
+					contract.startDate = newDate					
+				}else {
+					contract.endDate = newDate				
+				}
+			}	
+		}
+		
+		/*
 		if (params["newDate"] != null){
-			newDate = new Date().parse("d/M/yyyy",params["newDate"])
 			if (params["type"].contains('startDate')){
+				newDate = new Date().parse("d/M/yyyy",params["newDate"])
 				contract.startDate = newDate
 			}
 			if (params["type"].contains('endDate')){
-				contract.endDate = newDate	
+				if (params["newDate"] != ''){
+					newDate = new Date().parse("d/M/yyyy",params["newDate"])
+					contract.endDate = newDate	
+				}else{
+					contract.endDate = null
+				}
 			}
 		}
-		
+		*/
 		
 		if (params["newValue"] != null){
 			newValue = params["newValue"].toFloat()
@@ -1351,6 +1377,8 @@ def vacationFollowup(){
 		def myDate = params["myDate"]
 		SimpleDateFormat dateFormat
 		def employee
+		def report = [:]
+		def currentContract
 
 		if (myDate != null && myDate instanceof String){
 			dateFormat = new SimpleDateFormat('dd/MM/yyyy');
@@ -1362,8 +1390,18 @@ def vacationFollowup(){
 			employee = Employee.get(userId)
 		}
 		//get last day of the month
-		if (employee)
-			return timeManagerService.getReportData(siteId, employee,  myDate, monthPeriod, yearPeriod)
+		if (employee){
+			
+			report = timeManagerService.getReportData(siteId, employee,  myDate, monthPeriod, yearPeriod)
+			currentContract = report.getAt('currentContract')
+			if (currentContract == null){
+				flash.message = message(code: 'employee.not.arrived.error')
+				report = timeManagerService.getReportData(siteId, employee,  null, employee.arrivalDate.getAt(Calendar.MONTH)+1, employee.arrivalDate.getAt(Calendar.YEAR))
+			}else {
+				return report
+			}
+			
+		}
 	}
 
 	def getUser(){

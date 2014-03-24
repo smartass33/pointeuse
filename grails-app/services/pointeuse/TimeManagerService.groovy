@@ -959,8 +959,31 @@ class TimeManagerService {
 		
 		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year, counter,  sickness.size(), holidays.size(), sansSolde.size(),  pregnancyCredit)
 
+		criteria = Contract.createCriteria()
+		
+		def currentContract = criteria.get {
+			or{
+				and {
+					lt('year',year)
+					eq('employee',employeeInstance)
+				}
+				and {
+					eq('year',year)
+					lt('month',month)
+					eq('employee',employeeInstance)
+				}
+				and {
+					eq('year',year)
+					eq('month',month)
+					eq('employee',employeeInstance)
+				}
+			}
+			order('startDate','desc')
+			maxResults(1)
+		}
+
 		def monthTheoriticalHuman=computeHumanTime(monthTheoritical)
-		def cartoucheMap=[employeeInstance:employeeInstance,workingDays:counter ,holidays:holidays.size(),rtt:rtt.size(),sickness:sickness.size(),sansSolde:sansSolde.size(),monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,monthTheoriticalHuman:monthTheoriticalHuman,calendar:calendar]
+		def cartoucheMap=[currentContract:currentContract,employeeInstance:employeeInstance,workingDays:counter ,holidays:holidays.size(),rtt:rtt.size(),sickness:sickness.size(),sansSolde:sansSolde.size(),monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,monthTheoriticalHuman:monthTheoriticalHuman,calendar:calendar]
 		def mergedMap = cartoucheMap << yearlyCartouche
 		return mergedMap
 	}
@@ -1169,25 +1192,7 @@ class TimeManagerService {
 		def monthlyTotal=computeHumanTime(monthlyTotalTime)
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
 		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)	
-		
-		
-		criteria = Contract.createCriteria()
-		
-		def currentContract = criteria.get {
-			or{
-				and {
-					lt('year',year)
-					eq('employee',employee)
-				}
-				and {
-					eq('year',year)
-					lt('month',month)
-					eq('employee',employee)
-				}
-			}
-			order('startDate','desc')
-			maxResults(1)
-		}
+		def currentContract = cartoucheTable.get('currentContract')
 		
 		return [
 			currentContract:currentContract,
@@ -1549,28 +1554,17 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 					lt('month',month)
 					eq('employee',employee)
 				}	
+				
+				and {
+					eq('year',year)
+					eq('month',month)
+					eq('employee',employee)
+				}
 			}
 			order('startDate','desc')
 			maxResults(1)
 		}
-		/*
-		criteria = Contract.createCriteria()
-		def nextContract = criteria.get{
-			or{
-				and {
-					gt('year',year)
-					eq('employee',employee)
-				}
-				and {
-					eq('year',year)
-					gt('month',month)
-					eq('employee',employee)
-				}
-			}
-			order('startDate','asc')
-			maxResults(1)
-		}
-		*/
+
 		if (previousContract != null ){
 			log.error("previousContract: "+previousContract)
 			weeklyContractTime = previousContract.weeklyLength
@@ -1585,11 +1579,7 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 					+(Employee.Pentecote)*(weeklyContractTime/Employee.legalWeekTime)
 					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness+holidays+sansSolde))
 				- pregnancy) as int
-			
-			
-		//monthTheoritical += 3600*(Employee.Pentecote)*(weeklyContractTime/Employee.legalWeekTime)
-			
-			
+									
 		return monthTheoritical
 	}
 	

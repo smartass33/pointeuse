@@ -20,6 +20,11 @@
     });
 	</script>
 
+			<g:if test="${flash.message2}">
+			<div class="message" role="status">${flash.message2}</div>
+			</g:if>
+
+
 <table class="form-table" id="customFields">
 	<thead>
 		<th>Date de début</th>
