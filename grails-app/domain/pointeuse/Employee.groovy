@@ -14,9 +14,9 @@ class Employee{
 	Site site
 	Service service
 	float weeklyContractTime //35H par défaut. 
-	boolean status //1: in, 0: out
 	boolean hasError
 	Date arrivalDate
+	Status status
 	
 	static hasMany = [contracts:Contract,vacationsCounters:Vacation,absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
 	static searchable = true	

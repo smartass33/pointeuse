@@ -359,7 +359,42 @@ class TimeManagerService {
 		}
 	}
 	
-
+	def openDaysBetweenDates(Date startDate,Date endDate){
+		def openedDays = 0
+		def criteria
+		def calendar = Calendar.instance
+		calendar.setTime(startDate)
+		
+		def startCalendar = Calendar.instance
+		startCalendar.setTime(startDate)
+		
+		def endCalendar = Calendar.instance
+		endCalendar.setTime(endDate)
+		
+		while(calendar.get(Calendar.DAY_OF_YEAR) <= endDate.getAt(Calendar.DAY_OF_YEAR)){
+			if (calendar.get(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
+				openedDays += 1
+			}
+			
+			if (calendar.get(Calendar.DAY_OF_YEAR) == endDate.getAt(Calendar.DAY_OF_YEAR)){
+				break
+			}
+			calendar.roll(Calendar.DAY_OF_YEAR, 1)
+		}
+		//find all bank holiday over the period
+		criteria = BankHoliday.createCriteria()
+		def bankHolidayList = criteria.list {
+			and {
+				ge('calendar',startCalendar)
+				le('calendar',endCalendar)
+			}		
+		}
+		
+		openedDays -= bankHolidayList.size()
+		return openedDays
+	}
+	
+	
 	def computeMonthlyHours(int year,int month){
 		def openedDays = 0
 		def calendar = Calendar.instance
@@ -839,16 +874,11 @@ class TimeManagerService {
 				}else{
 					monthNumber = month - arrivalDate.getAt(Calendar.MONTH)
 				}
-			}/*
-			if (arrivalDate.getAt(Calendar.MONTH) <  5){
-				if ( month > arrivalDate.getAt(Calendar.MONTH)){
-					monthNumber = month - arrivalDate.getAt(Calendar.MONTH)
-				}
-			}else{
-				monthNumber = month - arrivalDate.getAt(Calendar.MONTH)
 			}
-			monthNumber = (arrivalDate.getAt(Calendar.MONTH) >= 5) ? 5 - arrivalDate.getAt(Calendar.MONTH)  : arrivalDate.getAt(Calendar.MONTH) + 1 + 7
-			*/
+			
+			// also, we must remove the days of the first month when the employee did not work
+			def arrivalDay = employee.arrivalDate.getAt(Calendar.DAY_OF_MONTH)
+			yearlyCounter -= (arrivalDay - 1)
 		}
 		
 		yearTheoritical=3600*(
@@ -894,6 +924,36 @@ class TimeManagerService {
 				
 		counter -= holidayCounter
 
+		// treat special case whereby employee enters the company, or leaves...
+		// special case: arrival month
+		if ((employeeInstance.arrivalDate.getAt(Calendar.MONTH) + 1) == month &&  (employeeInstance.arrivalDate.getAt(Calendar.YEAR)) == year){
+			def arrivalDay = employeeInstance.arrivalDate.getAt(Calendar.DAY_OF_MONTH)
+			// we need to count OPEN DAYS between dates and not consecutive days
+			counter -= (arrivalDay - 1)
+		}
+		
+		//special face: departure month
+
+		def currentStatus = employeeInstance.status
+	//	log.error('currentStatus: '+currentStatus)
+	//	log.error('currentStatus.date.getAt(Calendar.MONTH): '+currentStatus.date.getAt(Calendar.MONTH))
+		if ((currentStatus.date.getAt(Calendar.MONTH) + 1) == month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
+			
+	//		log.error('employeeInstance.status: '+employeeInstance.status)
+	//		log.error('StatusType.TERMINE: '+StatusType.TERMINE)
+			if (currentStatus.type != StatusType.ACTIF){
+				log.error('departure month. removing days')
+				def departureDay = currentStatus.date.getAt(Calendar.DAY_OF_MONTH)
+				
+				Calendar calendarMax = Calendar.instance
+				calendarMax.setTime(currentStatus.date)
+				calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+				def remainingDays = openDaysBetweenDates(currentStatus.date,calendar.time)
+				counter -= remainingDays 
+			}			
+		}
+		
+		
 		// get cumul holidays
 		criteria = Absence.createCriteria()
 		def holidays = criteria.list {

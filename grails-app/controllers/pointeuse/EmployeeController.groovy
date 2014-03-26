@@ -1705,9 +1705,6 @@ def vacationFollowup(){
 	
 	
 	def dailyTotalPDF(){
-		params.each{i->
-			log.error(i);
-		}
 		def site
 		def siteId
 		Calendar calendar = Calendar.instance
@@ -1715,6 +1712,8 @@ def vacationFollowup(){
 		
 		def date_picker =params["date_picker"]
 		if (date_picker != null && date_picker.size()>0){
+			
+
 			calendar.time = new Date().parse("dd/MM/yyyy", date_picker)
 		}
 
@@ -1888,12 +1887,15 @@ def vacationFollowup(){
 		params.each{i-> log.error(i)}
 		log.error('addNewContract called')
 		Contract contract = new Contract()
-		if (params['newStartDate'] != null)
-			contract.startDate = new Date().parse("d/M/yyyy",  params['newStartDate'])
-		if (params['newEndDate'] != null && params['newEndDate'].size() > 0)
-			contract.endDate = new Date().parse("d/M/yyyy",  params['newEndDate'])
+		Employee employee = Employee.get(params.id)
 		
-		if (utilService.detectCollidingContract(contract.startDate,contract.endDate)){
+		def dateFormat = new SimpleDateFormat('d/M/yyyy');
+		if (params['newStartDate'] != null)
+			contract.startDate = dateFormat.parse(params['newStartDate'])
+		if (params['newEndDate'] != null && params['newEndDate'].size() > 0)
+			contract.endDate = dateFormat.parse(params['newEndDate'])
+		
+		if (utilService.detectCollidingContract(contract.startDate,contract.endDate,employee)){
 			log.error('contract dates are incomplatible, exiting')
 			flash.message = message(code: 'contract.incompatible.values')
 			redirect(action: "edit", params: [id:params.id,isAdmin:false])
@@ -1963,6 +1965,39 @@ def vacationFollowup(){
 	def trigger (){
 		def result="I HAVE BEEN TRIGGERED!!"
 		render template: "/common/inAndOutResultTemplate", model:[result:result]
+		return
+	}
+	
+	def changeContractStatus (){
+		def employeeId = params['employeeId']
+		def statusId = params['updatedSelection']
+		def employee = Employee.get(employeeId)
+		def status = employee.status
+		SimpleDateFormat dateFormat = new SimpleDateFormat('d/MM/yyyy');
+		
+		 
+		if (params["newDate"] != null && params["newDate"].size() > 0){
+			status.date = dateFormat.parse(params["newDate"])
+		}else{
+			for (StatusType type : StatusType.values()) {
+				log.error('current enum eval': type)
+				if (statusId.equals(type.toString())){
+					log.error('changing contract status to: '+type)
+					status.type = type
+					status.loggingDate = new Date()
+					if (statusId.equals('A')){
+						log.error('setting the date to null')
+						status.date = null
+					}else {
+						log.error('setting the date to new Date()')
+						status.date = new Date()	
+					}
+				}
+			}		
+		}
+		status.save(flush:true)
+		
+		render template: '/employee/template/contractStatus', model:[employeeInstance:employee]
 		return
 	}
 }

@@ -3,14 +3,6 @@
 <%@ page import="pointeuse.Site" %>
 <%@ page import="pointeuse.Function" %>
 
-<script>
-$("#someButtonId").on("click", function(e) {
-  e.preventDefault();
-  $.get("/employee/someAction", function(html) {
-    $("#myTable>tbody").append(html);
-  });
-});
-</script>
 
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'firstName', 'error')} ">
 	<label for="firstName">
@@ -59,11 +51,11 @@ $("#someButtonId").on("click", function(e) {
 	</label>
 	<g:if test="${employeeInstance?.arrivalDate != null}">
 		<g:datePicker name="arrivalDate" value="${employeeInstance?.arrivalDate}" precision="day"
-	              noSelection="['':'-Choose-']" relativeYears="[-40..30]"/>
+	              noSelection="['':'-Choose-']" />
 	</g:if>
 	<g:else>
 		<g:datePicker name="arrivalDate" value="${new Date()}" precision="day"
-	              noSelection="['':'-Choose-']" relativeYears="[-40..30]"/>
+	              noSelection="['':'-Choose-']" />
 	</g:else>
 </div>
 
@@ -129,4 +121,6 @@ $("#someButtonId").on("click", function(e) {
 	</g:else>
 </div>
 
+<g:contractStatus/>
 
+	          

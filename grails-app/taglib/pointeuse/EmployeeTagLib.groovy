@@ -64,4 +64,8 @@ class EmployeeTagLib {
 	}
 	
 	
+	def contractStatus ={attrs,body->
+		out<<render(template:"/employee/template/contractStatus")
+		
+	}	
 }

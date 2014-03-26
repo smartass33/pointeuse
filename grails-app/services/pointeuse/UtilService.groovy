@@ -235,7 +235,7 @@ class UtilService {
 		return openDays
 	}
 	
-	def detectCollidingContract(Date startDate,Date endDate){
+	def detectCollidingContract(Date startDate,Date endDate,Employee employee){
 		def criteria = Contract.createCriteria()
 		def contractList
 		def retour = false
@@ -244,10 +244,12 @@ class UtilService {
 				and{
 					le('startDate',startDate)
 					ge('endDate',startDate)
+					eq('employee',employee)
 				}
 				and{
 					le('startDate',endDate)
 					ge('endDate',endDate)
+					eq('employee',employee)				
 				}
 			}
 		}
