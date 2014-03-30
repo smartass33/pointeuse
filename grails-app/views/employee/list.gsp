@@ -27,9 +27,24 @@
 		th {
 			padding: 2px 4px 2px 4px;
 		}
+		
+		#detailSelector { display: none; }
+		th.admin { display: none; } td.admin { display: none; }
+
+		table.showDetail th.admin { display: table-cell;  } 
+		table.showDetail th.principal { display: none; } 
+		table.showDetail td.admin { display: table-cell;  }
+		table.showDetail td.principal { display: none; }
+		table.hideDetail th.hidePrincipal { display: none; } table.hidePrincipal td.hidePrincipal  { display: none;}
+
+		
 	</style>
+
+
+
 </head>
 <body>
+
 	<div id="spinner" style="display: none;">
 	   <img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading..." width="16" height="16" />
 	</div>
@@ -70,7 +85,13 @@
 				<g:actionSubmitImage class='listButton' value="pdf"  action="siteMonthlyPDF" src="${resource(dir: 'images', file: 'filetype_pdf.png')}" style="padding:-30px" class="imageButton"/>		
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:hiddenField name="siteId" value="${siteId}" />
+	
 			</g:form>		
+			
+			
+		
+
+
 		</h1>
 		<g:if test="${flash.message}">
 			<div class="message" id="flash">
