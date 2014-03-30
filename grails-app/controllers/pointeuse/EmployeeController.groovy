@@ -131,6 +131,7 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
+		params.each{i->log.error(i)}
 		log.error('browser version: '+request.getHeader('User-Agent') )
 		def employeeInstanceList
 		def employeeInstanceTotal
@@ -138,13 +139,15 @@ class EmployeeController {
 		def siteId=params["site"]
 		boolean back = (params["back"] != null && params["back"].equals("true")) ? true : false		
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false				
-		if (params["site"]!=null && !params["site"].equals('')){
+		if (params["site"]!=null && !params["site"].equals('') && !params["site"].equals('[id:]')){
 			site = Site.get(params.int('site'))
-			siteId=site.id			
+			if (site != null)
+				siteId=site.id			
 		}	
 		if (params["siteId"]!=null && !params["siteId"].equals("")){
 			site = Site.get(params.int('siteId'))
-			siteId=site.id
+			if (site != null)
+				siteId=site.id
 		}		
 		
 		def user = springSecurityService.currentUser 
