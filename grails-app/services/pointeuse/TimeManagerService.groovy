@@ -1563,7 +1563,7 @@ class TimeManagerService {
 			if (employee.weeklyContractTime!=35){
 				if (monthlyTotalTime > monthTheoritical){
 					payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime,0)
-					yearMonthlyCompTime.put(currentMonth, computeHumanTime(payableCompTime))
+					yearMonthlyCompTime.put(currentMonth, computeHumanTime(payableCompTime as long))
 				}else{
 					payableCompTime = 0
 					yearMonthlyCompTime.put(currentMonth, computeHumanTime(0))
