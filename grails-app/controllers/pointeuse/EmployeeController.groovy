@@ -898,7 +898,7 @@ def vacationFollowup(){
 		def humanTime = timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(inAndOuts))
 		def dailySupp = timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(inAndOuts)-DailyTotal.maxWorkingTime,0))
 
-		employeeInstance.status = type.equals("S") ? false : true
+		//employeeInstance.status = type.equals("S") ? false : true
 		
 		if (type.equals("E")){
 			if (flashMessage)
@@ -914,7 +914,6 @@ def vacationFollowup(){
 	
 
     def update(Long id, Long version) {
-		params.each{i->log.error(i)}
 		def siteId=params["siteId"]
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
         def employeeInstance = Employee.get(id)
@@ -936,7 +935,7 @@ def vacationFollowup(){
 		
         employeeInstance.properties = params
 		if (params["weeklyContractTime"] != null){
-			employeeInstance.weeklyContractTime = params["weeklyContractTime"].getAt(0) as float
+			employeeInstance.weeklyContractTime = params.float("weeklyContractTime")
 		}
 
 		def service = params["employee.service.id"]
@@ -1407,96 +1406,7 @@ def vacationFollowup(){
 		}
 	}
 
-	def getUser(){
-		def username = params["userName"]
-		def cal = Calendar.instance
-		Employee employeeInstance = Employee.findByUserName(username)
-		def currentDate = cal.time
-		def criteria
-		def inOrOut
-		def entranceStatus=false
-		def timeDiff
-		def flashMessage=true
-		def status="E"
-		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).time
-			
-		
-		// liste les entrees de la journ�e et v�rifie que cette valeur n'est pas sup�rieure � une valeur statique
-		def inAndOutcriteria = InAndOut.createCriteria()
-		def todayEmployeeEntries = inAndOutcriteria.list {
-			and {
-				eq('employee',employeeInstance)
-				eq('type','E')
-				gt('time',today)
-			}
-		}
-		if (todayEmployeeEntries.size() > Employee.entryPerDay){
-			flash.message = "TROP D'ENTREES DANS LA JOURNEE. POINTAGE NON PRIS EN COMPTE"
-			log.error("employee: "+employeeInstance.lastName+" proceeded to too many entries")
-			redirect(action: "show", id: employeeInstance.id)
-			return
-		}
 
-		criteria = InAndOut.createCriteria()
-		def lastIn = criteria.get {
-			and {
-				eq('employee',employeeInstance)
-				eq('pointed',false)
-				eq('day',today.getAt(Calendar.DATE))
-				eq('month',today.getAt(Calendar.MONTH)+1)
-				eq('year',today.getAt(Calendar.YEAR))
-				order('time','desc')
-			}
-			maxResults(1)
-		}
-		
-		if (lastIn != null){
-			def LIT = lastIn.time
-			status = lastIn.type.equals("S") ? "E" : "S"
-			
-			use (TimeCategory){timeDiff=currentDate-LIT}
-			//empecher de represser le bouton pendant 30 seconds
-			if ((timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)<30){
-				flash.message = message(code: 'employee.overlogging.error')
-				flashMessage=false
-			}
-		}
-		
-		// initialisation
-		if (flashMessage){
-			inOrOut = timeManagerService.initializeTotals(employeeInstance,currentDate,status,null,false)
-			log.error('entry created with params: '+inOrOut)
-		}
-		criteria = InAndOut.createCriteria()
-		def inAndOuts = criteria.list {
-			and {
-				eq('employee',employeeInstance)
-				eq('day',today.getAt(Calendar.DATE))
-				eq('month',today.getAt(Calendar.MONTH)+1)
-				eq('year',today.getAt(Calendar.YEAR))
-				order('time','asc')
-			}
-		}
-		
-		if (lastIn!=null){
-			if (flashMessage){
-				entranceStatus = lastIn.type.equals("S") ? true : false
-			}else{
-				entranceStatus = lastIn.type.equals("S") ? false : true
-			}
-		}else{
-			entranceStatus=true
-		}
-		
-		employeeInstance.status = entranceStatus
-		def result = new JSONEmployee()
-		result.firstName=employeeInstance.firstName
-		result.lastName=employeeInstance.lastName
-		result.status=employeeInstance.status
-		
-		render result as JSON
-		}
-	
 	
 	def pointage(Long id){		
 		try {	

@@ -117,7 +117,6 @@ class StatusController {
 				status.employee = employee
 				status.loggingDate = new Date()
 				
-				
 				status.save()
 				employee.status=status
 				employee.save()
