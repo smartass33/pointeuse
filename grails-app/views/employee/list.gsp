@@ -42,8 +42,28 @@
 
 
 
+
 </head>
 <body>
+	<g:hiddenField name="detail" value="0" />
+	
+	<script>
+	function showVal() {
+		if (document.getElementById("detail").value == "1"){
+		    //document.getElementById(i).style.visibility='visible';
+		    document.getElementById('employee-table').className='hideDetail';
+		    document.getElementById('detailSelector').style.display = 'none';
+		    document.getElementById('principalSelector').style.display = 'block';
+		    document.getElementById("detail").value = "0";
+	    }else{
+	    	document.getElementById('employee-table').className='showDetail';
+			document.getElementById('detailSelector').style.display = 'block';
+			document.getElementById('principalSelector').style.display = 'none';
+			document.getElementById("detail").value = "1";
+			
+	    }
+	}
+	</script>
 
 	<div id="spinner" style="display: none;">
 	   <img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading..." width="16" height="16" />
