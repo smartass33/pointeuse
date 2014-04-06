@@ -35,7 +35,7 @@ class InAndOutCLosingJob {
 				inOrOut.dailyTotal=lastIn.dailyTotal
 				inOrOut.systemGenerated=true
 				employee.inAndOuts.add(inOrOut)
-				employee.status=false
+				//employee.status=false
 				employee.hasError=true
 				log.error "creating inOrOut: "+inOrOut
 			}
