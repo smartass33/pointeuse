@@ -224,7 +224,7 @@ class TimeManagerService {
 		getDailyTotalWithMonth(inOrOut.dailyTotal)
 		
 		utilService.removeAbsence( employee, calendar)
-		employee.status=type.equals("S")?false:true
+		//employee.status=type.equals("S")?false:true
 	}
 		
 	def timeModification(def idList,def dayList,def monthList, def yearList,Employee employee,def newTimeList,def fromRegularize) throws PointeuseException{
@@ -937,7 +937,7 @@ class TimeManagerService {
 		def currentStatus = employeeInstance.status
 	//	log.error('currentStatus: '+currentStatus)
 	//	log.error('currentStatus.date.getAt(Calendar.MONTH): '+currentStatus.date.getAt(Calendar.MONTH))
-		if ((currentStatus.date.getAt(Calendar.MONTH) + 1) == month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
+		if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) == month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
 			
 	//		log.error('employeeInstance.status: '+employeeInstance.status)
 	//		log.error('StatusType.TERMINE: '+StatusType.TERMINE)
