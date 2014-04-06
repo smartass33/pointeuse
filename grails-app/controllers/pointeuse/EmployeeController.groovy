@@ -680,17 +680,7 @@ def vacationFollowup(){
 			}
 			
 		}		
-		
-		//Promise p = task {
-		//	data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)	
-		/*}
-		p.onError { Throwable err ->
-				println "An error occured ${err.message}"
-		}
-		p.onComplete { result ->
-				println "Promise returned $result"
-		}
-		*/
+	
 		
 		previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'date',order:'desc'])
 		
@@ -973,7 +963,7 @@ def vacationFollowup(){
 		
         employeeInstance.properties = params
 		if (params["weeklyContractTime"] != null){
-			employeeInstance.weeklyContractTime = params["weeklyContractTime"].getAt(0) as float
+			employeeInstance.weeklyContractTime = params.float("weeklyContractTime")
 		}
 
 		def service = params["employee.service.id"]
