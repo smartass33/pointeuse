@@ -114,7 +114,7 @@ class ContractController {
 				contract.startDate = employee.arrivalDate
 				contract.year=contract.startDate.getAt(Calendar.YEAR)
 				contract.month=(contract.startDate.getAt(Calendar.MONTH))+1
-				contract.period=contract.month<6?Period.findByYear(contract.year-1):Period.findByYear(contract.year)
+				//contract.period=contract.month<6?Period.findByYear(contract.year-1):Period.findByYear(contract.year)
 				contract.weeklyLength = employee.weeklyContractTime
 				contract.employee = employee
 				contract.loggingTime = new Date()

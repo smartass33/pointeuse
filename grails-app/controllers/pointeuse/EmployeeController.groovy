@@ -1819,7 +1819,7 @@ def vacationFollowup(){
 			
 		contract.year=contract.startDate.getAt(Calendar.YEAR)
 		contract.month=(contract.startDate.getAt(Calendar.MONTH))+1
-		contract.period=contract.month<6?Period.findByYear(contract.year-1):Period.findByYear(contract.year)
+	//	contract.period=contract.month<6?Period.findByYear(contract.year-1):Period.findByYear(contract.year)
 		contract.weeklyLength = params.float('newContractValue')
 		contract.employee = Employee.get(params.id)
 		contract.loggingTime = new Date()

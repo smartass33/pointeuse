@@ -3,7 +3,7 @@ package pointeuse
 class Contract {
 
 	Employee employee
-	Period period
+	//Period period
 	Date startDate
 	Date endDate
 	int year
