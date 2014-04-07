@@ -163,7 +163,8 @@ class UtilService {
 		}
 	}
 	
-	def getOpenDays(Period period){
+	
+	def getAllOpenDays(int month,int year){
 		
 		def bankHolidayCounter=0
 		def bankHolidayList
@@ -172,13 +173,34 @@ class UtilService {
 		def startCalendar = Calendar.instance
 		def endCalendar   = Calendar.instance
 		
+		startCalendar.set(Calendar.YEAR,year)
+		startCalendar.set(Calendar.MONTH,month-1)
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.clearTime()
+		log.warn("getting all opened days of: "+startCalendar.time )
+		
+		while(startCalendar.get(Calendar.DAY_OF_MONTH) <= startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			if (startCalendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+				openDays ++
+			}
+			if (startCalendar.get(Calendar.DAY_OF_MONTH) == startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				break
+			}
+			startCalendar.roll(Calendar.DAY_OF_MONTH, 1)
+		}
+		return openDays
+	}
+	
+	
+	
+	def getOpenDays(Period period){
+		def openDays=0
+		def startCalendar = Calendar.instance
+		
 		startCalendar.set(Calendar.YEAR,period.year)
 		startCalendar.set(Calendar.MONTH,5)
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.clearTime()
-		
-		endCalendar.set(Calendar.YEAR,period.year+1)
-		endCalendar.set(Calendar.MONTH,6)
 
 		log.warn("getting opened days from: "+startCalendar.time + " until end of year "+period.year)
 		

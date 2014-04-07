@@ -901,7 +901,7 @@ class TimeManagerService {
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		calendar.set(Calendar.YEAR,year)
 		calendar.set(Calendar.MONTH,month-1)
-		
+		log.error('current date: '+calendar.time)
 		// count sundays within given month
 		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 			if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
@@ -1633,10 +1633,13 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			weeklyContractTime =employee.weeklyContractTime
 		}
 		
+	//	def monthOpenDays = utilService.getAllOpenDays( month, year)
+		
+		
 		monthTheoritical=(
 			3600*(
 					openDays*weeklyContractTime/Employee.WeekOpenedDays
-					+(Employee.Pentecote)*(weeklyContractTime/Employee.legalWeekTime)
+					+(Employee.Pentecote)*((openDays - sansSolde)/openDays)*(weeklyContractTime/Employee.legalWeekTime)
 					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness+holidays+sansSolde))
 				- pregnancy) as int
 									
