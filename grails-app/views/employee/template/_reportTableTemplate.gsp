@@ -22,7 +22,7 @@
           <g:each in="${week}" status="l" var="day">
             <g:each in="${day.value}" status="m" var="entries">
               <g:if test="${entries!=null}">
-                <tr>
+                <tr class="${((departureDate != null && entries.key > departureDate) || employee.arrivalDate > entries.key   ) ? 'outTR' :''}">
                   <g:if test="${dailyBankHolidayMap.get(entries.key) }">
 	                  <td class="eventTD" style="width:120px; padding: 2px 2px; color:red;" ><i><font size="2" style="color:red;"> ${entries.key.format('E dd MMM')}</font></i></td>
                   </g:if>
@@ -64,67 +64,78 @@
                       </g:else>
                   </font></td>             
                   <td class="eventTD">
-                    <g:if test="${entries == null || entries.value ==null}">           
-	                  	<g:if test="${holidayMap.get(entries.key) != null}">
-	                      <font size="2"> 
-	                      <g:select width="50px"
-	                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
-								  params:'\'employeeId=' + employee.id 						  
-								  + '&day=' + entries.key.format("dd/MM/yyyy")
-								  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
-								  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
-								  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
-								  + '&updatedSelection=\' + this.value'								  )}"
-	                          name="absenceType" from="${AbsenceType.values()}"
-	                          value="${AbsenceType}" optionKey="key"
-	                          noSelection="${['-':holidayMap.get(entries.key).type]}" />
-	
-	                      </font>
-	                    </g:if> <g:else>
-	                      <font size="2"> <g:select width="50px"
-	                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div',		  
-								  params:'\'employeeId=' + employee.id 						  
-								  + '&day=' + entries.key.format("dd/MM/yyyy")
-								  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
-								  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
-								  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
-								  + '&updatedSelection=\' + this.value'
-								   )}"
-	                          name="absenceType" from="${AbsenceType.values()}"
-	                          value="${AbsenceType}" optionKey="key"
-	                          noSelection="${['':'-']}" />
-	                      </font>
-	                   </g:else>
-                  </g:if>
-				<g:else>
-					<g:if test="${holidayMap.get(entries.key) != null}">
-	                      <font size="2"> 
-	                      <g:select width="50px"
-	                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
-								  params:'\'employeeId=' + employee.id 						  
-								  + '&day=' + entries.key.format("dd/MM/yyyy")
-								  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
-								  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
-								  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
-								  + '&updatedSelection=\' + this.value'								  )}"
-	                          name="absenceType" from="${AbsenceType.values()}"
-	                          value="${AbsenceType}" optionKey="key"
-	                          noSelection="${['-':holidayMap.get(entries.key).type]}" />	
-	                      </font>
-	                </g:if> 
-	                <g:else>
-	                      <g:select width="50px"
-	                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
-								  params:'\'employeeId=' + employee.id 						  
-								  + '&day=' + entries.key.format("dd/MM/yyyy")
-								  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
-								  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
-								  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
-								  + '&updatedSelection=\' + this.value'								  )}"
-	                          name="absenceType" from="${['-',AbsenceType.GROSSESSE]}"
-	                          noSelection="${['':'-']}" />
-	                 </g:else>
-                  </g:else>
+                  
+                  <g:if test="${departureDate != null && entries.key > departureDate}">
+                  	-
+                  </g:if>     
+                  <g:else>
+	                  	<g:if test="${employee.arrivalDate > entries.key}">
+	                  	-
+	                  	</g:if>
+                  		<g:else>
+	   	                    <g:if test="${entries == null || entries.value ==null}">           
+			                  	<g:if test="${holidayMap.get(entries.key) != null}">
+			                      <font size="2"> 
+			                      <g:select width="50px"
+			                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
+										  params:'\'employeeId=' + employee.id 						  
+										  + '&day=' + entries.key.format("dd/MM/yyyy")
+										  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
+										  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
+										  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
+										  + '&updatedSelection=\' + this.value'								  )}"
+			                          name="absenceType" from="${AbsenceType.values()}"
+			                          value="${AbsenceType}" optionKey="key"
+			                          noSelection="${['-':holidayMap.get(entries.key).type]}" />
+			
+			                      </font>
+			                    </g:if> <g:else>
+			                      <font size="2"> <g:select width="50px"
+			                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div',		  
+										  params:'\'employeeId=' + employee.id 						  
+										  + '&day=' + entries.key.format("dd/MM/yyyy")
+										  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
+										  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
+										  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
+										  + '&updatedSelection=\' + this.value'
+										   )}"
+			                          name="absenceType" from="${AbsenceType.values()}"
+			                          value="${AbsenceType}" optionKey="key"
+			                          noSelection="${['':'-']}" />
+			                      </font>
+			                   </g:else>
+		                  	</g:if>
+							<g:else>
+								<g:if test="${holidayMap.get(entries.key) != null}">
+				                      <font size="2"> 
+				                      <g:select width="50px"
+				                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
+											  params:'\'employeeId=' + employee.id 						  
+											  + '&day=' + entries.key.format("dd/MM/yyyy")
+											  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
+											  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
+											  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
+											  + '&updatedSelection=\' + this.value'								  )}"
+				                          name="absenceType" from="${AbsenceType.values()}"
+				                          value="${AbsenceType}" optionKey="key"
+				                          noSelection="${['-':holidayMap.get(entries.key).type]}" />	
+				                      </font>
+				                </g:if> 
+				                <g:else>
+				                      <g:select width="50px"
+				                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
+											  params:'\'employeeId=' + employee.id 						  
+											  + '&day=' + entries.key.format("dd/MM/yyyy")
+											  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
+											  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
+											  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
+											  + '&updatedSelection=\' + this.value'								  )}"
+				                          name="absenceType" from="${['-',AbsenceType.GROSSESSE]}"
+				                          noSelection="${['':'-']}" />
+				                 </g:else>
+		                  	</g:else>
+	                  	</g:else>
+                  	</g:else>                  	
                   </td>
                   <g:each in="${entries.value}" var="inOrOut" >
                    	<g:if test="${inOrOut.type.equals('E')}">
@@ -227,8 +238,8 @@
 	                    <g:hiddenField name="day" value="${inOrOut.day}" /> 
 	                    <g:hiddenField name="month" value="${inOrOut.month}" /> 
 	                    <g:hiddenField name="year" value="${inOrOut.year}" /> 	
-                       	</td>                  
-                     </g:else>      
+                       	</td>    
+                       	</g:else>             
                   </g:each>
                 </tr>
               </g:if>

@@ -1,8 +1,15 @@
 <body>
 	<BR>
 		<table style="float: left;">
+
+		
 			<tr>
-				<td style="font-weight: bold" class="cartoucheLeftTD" >${fieldValue(bean: employee, field: "firstName")} ${fieldValue(bean: employee, field: "lastName")}</td>
+				<td style="font-weight: bold" class="cartoucheLeftTD" >
+						<g:link action="edit" id="${employee.id}"
+							params="${[isAdmin:isAdmin,siteId:siteId]}">
+							${fieldValue(bean: employee, field: "firstName")} ${fieldValue(bean: employee, field: "lastName")}
+						</g:link>
+				</td>
 			</tr>
 			<tr>
 				<td class="cartoucheLeftTD" >${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${currentContract.weeklyLength}</td>

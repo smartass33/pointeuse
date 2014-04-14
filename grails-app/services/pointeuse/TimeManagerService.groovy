@@ -893,6 +893,7 @@ class TimeManagerService {
 	
 	def getCartoucheData(Employee employeeInstance,int year,int month){
 		def counter = 0
+		def totalNumberOfDays = 0
 		def holidayList
 		def holidayCounter = 0
 		def monthTheoritical
@@ -923,13 +924,18 @@ class TimeManagerService {
 		}
 				
 		counter -= holidayCounter
-
+		totalNumberOfDays = counter
+		
 		// treat special case whereby employee enters the company, or leaves...
 		// special case: arrival month
 		if ((employeeInstance.arrivalDate.getAt(Calendar.MONTH) + 1) == month &&  (employeeInstance.arrivalDate.getAt(Calendar.YEAR)) == year){
-			def arrivalDay = employeeInstance.arrivalDate.getAt(Calendar.DAY_OF_MONTH)
+		//	def arrivalDay = employeeInstance.arrivalDate.getAt(Calendar.DAY_OF_MONTH)
+			def maxCal = Calendar.instance
+			maxCal.setTime(employeeInstance.arrivalDate)
+			maxCal.set(Calendar.DAY_OF_MONTH,maxCal.getActualMaximum(Calendar.DAY_OF_MONTH))
 			// we need to count OPEN DAYS between dates and not consecutive days
-			counter -= (arrivalDay - 1)
+			counter = openDaysBetweenDates(employeeInstance.arrivalDate,maxCal.time)
+			counter -= holidayCounter
 		}
 		
 		//special face: departure month
@@ -1017,7 +1023,7 @@ class TimeManagerService {
 		def pregnancyCredit=30*60*pregnancy.size()
 		// determine monthly theoritical time:
 		
-		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year, counter,  sickness.size(), holidays.size(), sansSolde.size(),  pregnancyCredit)
+		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year, counter,  sickness.size(), holidays.size(), sansSolde.size(),  pregnancyCredit,totalNumberOfDays)
 
 		criteria = Contract.createCriteria()
 		
@@ -1254,7 +1260,17 @@ class TimeManagerService {
 		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)	
 		def currentContract = cartoucheTable.get('currentContract')
 		
+		
+		def departureDate
+		if (employee.status.date != null){
+			if (employee.status.date != null && (employee.status.date.getAt(Calendar.MONTH) + 1) == month && (employee.status.date.getAt(Calendar.YEAR)) == year){
+				departureDate = employee.status.date
+			}
+		}
+		
+		
 		return [
+			departureDate:departureDate,
 			currentContract:currentContract,
 			period2:period,
 			dailyBankHolidayMap:dailyBankHolidayMap,
@@ -1595,12 +1611,16 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 	}
 	
 	
-	def getMonthTheoritical(Employee employee, int month,int year, int openDays, int sickness, int holidays, int sansSolde, int pregnancy){
+	def getMonthTheoritical(Employee employee, int month,int year, int openDays, int sickness, int holidays, int sansSolde, int pregnancy,int totalNumberOfDays){
 		def monthTheoritical = 0
 		def weeklyContractTime
 		def contract
 		def criteria
 		def previousContract
+		def remainingDays
+		def currentStatus = employee.status
+		def realOpenDays
+		def departureDate
 		criteria = Contract.createCriteria()
 		
 		previousContract = criteria.get {
@@ -1636,10 +1656,42 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 	//	def monthOpenDays = utilService.getAllOpenDays( month, year)
 		
 		
+		// special case for entry and exit months:
+		if ((employee.arrivalDate.getAt(Calendar.MONTH) + 1 == month) && (employee.arrivalDate.getAt(Calendar.YEAR) == year)){
+			//remove days prior the entry datex
+			Calendar calendarMax = Calendar.instance
+			calendarMax.setTime(employee.arrivalDate)
+			calendarMax.set(Calendar.DAY_OF_MONTH,calendarMax.getActualMaximum(Calendar.DAY_OF_MONTH))
+			realOpenDays = openDaysBetweenDates(employee.arrivalDate,calendarMax.time)
+			//realOpenDays = openDays - remainingDays
+		}else{
+		//	log.error('currentStatus: '+currentStatus)
+		//	log.error('currentStatus.date.getAt(Calendar.MONTH): '+currentStatus.date.getAt(Calendar.MONTH))
+			if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) == month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
+		//		log.error('employeeInstance.status: '+employeeInstance.status)
+		//		log.error('StatusType.TERMINE: '+StatusType.TERMINE)
+				if (currentStatus.type != StatusType.ACTIF){
+					log.error('departure month. removing days')
+					departureDate = currentStatus.date.getAt(Calendar.DAY_OF_MONTH)
+					Calendar calendarFirst = Calendar.instance
+					calendarFirst.setTime(currentStatus.date)
+					calendarFirst.set(Calendar.DAY_OF_MONTH,1)			
+					realOpenDays = openDaysBetweenDates(calendarFirst.time,currentStatus.date)
+					//realOpenDays = remainingDays - openDays
+					
+					//calendarMax.getActualMaximum(Calendar.DAY_OF_MONTH)
+				}
+			}
+			// default case
+			else{
+				realOpenDays = openDays
+			}
+		}
+		
 		monthTheoritical=(
 			3600*(
 					openDays*weeklyContractTime/Employee.WeekOpenedDays
-					+(Employee.Pentecote)*((openDays - sansSolde)/openDays)*(weeklyContractTime/Employee.legalWeekTime)
+					+(Employee.Pentecote)*((realOpenDays - sansSolde)/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
 					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness+holidays+sansSolde))
 				- pregnancy) as int
 									

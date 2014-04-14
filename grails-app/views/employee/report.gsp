@@ -54,6 +54,10 @@
 	    text-align:left;
 	    vertical-align:top;
 	}
+	
+	.outTR{
+			background-color: #ddd;
+	}
 
 </style>
 
@@ -115,7 +119,6 @@
 	}
 	</script>
 </head>
-
 <body>
 	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requête...</div>
 	<a href="#list-employee" class="skip" tabindex="-1"><g:message
@@ -156,6 +159,7 @@
 		<button type='button' id="cartouche_toggle" ><img alt="toggle" src="${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
 		Récapitulatifs mensuels et annuels
 	</div>
+	
 	<div id="cartouche_div">
 		<g:cartouche />
 	</div> 
