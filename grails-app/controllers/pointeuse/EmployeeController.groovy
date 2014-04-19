@@ -1041,6 +1041,9 @@ def vacationFollowup(){
 	
 	
 	def modifyTime(){
+		params.each{i->
+			log.error('param: '+i)
+		}
 		def idList=params["inOrOutId"]
 		def dayList=params["day"]
 		def monthList=params["month"]
