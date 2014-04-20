@@ -4,8 +4,8 @@
 
 		
 			<tr>
-				<td style="font-weight: bold" class="cartoucheLeftTD" >
-						<g:link action="edit" id="${employee.id}"
+				<td style="font-weight: bold;" class="cartoucheLeftTD" >
+						<g:link action="edit" id="${employee.id}" style="text-decoration: none;"
 							params="${[isAdmin:isAdmin,siteId:siteId]}">
 							${fieldValue(bean: employee, field: "firstName")} ${fieldValue(bean: employee, field: "lastName")}
 						</g:link>
