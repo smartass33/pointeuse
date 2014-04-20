@@ -13,6 +13,7 @@
 	<r:layoutResources/>
 	<meta name="layout" content="main">
 	<g:set var="weeklyRecap" value="0" />
+	
 	<title>${message(code: 'employee.report.label', default: 'Report')}</title>
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
 
@@ -128,21 +129,20 @@
 			<g:form method="post" controller="employee" params="[siteId:siteId]">
 				<li style="vertical-align: middle;"><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label" /></a></li>
 				<li style="vertical-align: middle;"><g:link class="list" action="list" params="${[isAdmin:isAdmin,siteId:siteId,back:true]}">${message(code: 'employee.back.to.list.label', default: 'List')}</g:link></li>
-				<li style="vertical-align: middle;">
-					${message(code: 'default.period.label', default: 'List')}: <g:datePicker
+				<li style="vertical-align: bottom;" class="datePicker">
+					 <g:datePicker 
 						name="myDate" value="${period ? period : new Date()}" relativeYears="[-3..5]"
 						precision="month" noSelection="['':'-Choose-']"
 						style="vertical-align: middle;" /> 
 				</li>
-				<li style="vertical-align: middle;"><g:actionSubmit value="afficher" action="report" class="listButton" /></li>	
-				<li style="vertical-align: middle;"><g:actionSubmitImage value="pdf" action="userPDF" controller="employee"  src="${resource(dir: 'images', file: 'filetype_pdf.png')}" class="imageButton"/></li>
-							
+				<li style="vertical-align: middle;" class="displayButton"><g:actionSubmit value="Afficher" action="report" class="displayButton" /></li>	
+				<li style="vertical-align: middle;"><g:actionSubmit value="PDF" action="userPDF" class="pdfButton" /></li>
 				<li>
 					<g:inAndOutPopup/>
 				</li>
 			</g:form>
 			<li>
-				<a id="legend" title="
+				<a  class='legend' id="legend" title="
 				<table>
 					<tr><td ><g:message code='legend.NORMAL_EVENT' default='Régul' /></td></tr>
 					<tr><td style='color : red;font-weight: bold;'><g:message code='legend.INITIALE_SALARIE' default='Régul' /></td></tr>

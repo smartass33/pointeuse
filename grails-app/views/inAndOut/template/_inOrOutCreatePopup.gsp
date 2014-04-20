@@ -1,6 +1,6 @@
 <%@ page import="pointeuse.Reason"%>
 
-<a href="#join_form" id="join_pop" class="modalbox">Ajouter un élement</a>
+<a href="#join_form" id="join_pop" class="addElementButton">Ajouter un élement</a>
 <a href="#x" class="overlay" id="join_form" style="background: transparent;"></a>
 <div id="popup" class="popup">
 	<h2>Creer Entrée/Sortie</h2>

@@ -203,7 +203,13 @@ img {
 	        border-radius: 0.3em;
 }
 
-#detailSelector {
+#legend {
+		background-image: url(../images/skin/list.png);
+	
+		background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 25px;
+	
 		color: #666666;
 	display: block;
 	padding: 0.25em 0.7em;
@@ -216,7 +222,55 @@ img {
 		background-color: transparent;
 		outline: none;
 			border: none;
-		
+		font-family: Verdana,Arial,sans-serif;
+    font-size: 1em;
+}
+
+#legend:active {
+	color: #666666;
+}
+
+#legend:visited {
+	color: #666666;
+}
+#legend:focus {
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
+	
+#legend:hover {
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	}
+
+
+
+#detailSelector {
+		background-image: url(../images/skin/information_green.png);
+	
+		background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 25px;
+	
+		color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+	   -moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+	        border-radius: 0.3em;
+		background-position: 0.7em center;
+	background-repeat: no-repeat;
+		background-color: transparent;
+		outline: none;
+			border: none;
+		font-family: Verdana,Arial,sans-serif;
+    font-size: 1em;
 }
 
 #detailSelector:active {
@@ -242,6 +296,11 @@ img {
 	}
 
 #principalSelector {
+		background-image: url(../images/skin/information_green.png);
+			background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 25px;
+	
 		color: #666666;
 	display: block;
 	padding: 0.25em 0.7em;
@@ -254,7 +313,8 @@ img {
 		background-color: transparent;
 		outline: none;
 			border: none;
-		
+		font-family: Verdana,Arial,sans-serif;
+    font-size: 1em;
 }
 
 #principalSelector:active {
@@ -295,7 +355,13 @@ img {
 	text-decoration: underline;
 }
 
-.nav a.home, .nav a.list, .nav a.create {
+.nav a.home, .nav a.list, .nav a.create, .nav a.logout{
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 25px;
+}
+
+.nav a.home, .nav a.list, .nav a.create, .nav a.logout{
 	background-position: 0.7em center;
 	background-repeat: no-repeat;
 	text-indent: 25px;
@@ -309,9 +375,24 @@ img {
 	background-image: url(../images/skin/database_table.png);
 }
 
+.nav a.logout {
+	background-image: url(../images/skin/logout.png);
+}
+
 .nav a.create {
 	background-image: url(../images/skin/database_add.png);
 }
+
+.nav information {
+	background-image: url(../images/skin/information_green.png);
+}
+
+.nav information  input{
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 25px;
+}
+
 
 /* CREATE/EDIT FORMS AND SHOW PAGES */
 
@@ -1035,6 +1116,159 @@ a.skip {
 	position:relative;
 	top:1px;
 }
+.datePicker {
+		background-image: url(../images/skin/calendar.png);
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		text-indent: 50px;
+
+		color: #666666;
+		display: block;
+		padding: 0.25em 0.7em;
+		text-decoration: none;
+	   	-moz-border-radius: 0.3em;
+		-webkit-border-radius: 0.3em;
+	    border-radius: 0.3em;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		background-color: transparent;
+		outline: none;
+		border: none;
+		font-family: Verdana,Arial,sans-serif;
+    	font-size: 1em;
+
+}
+
+.datePicker:hover {
+	background-image: url(../images/skin/calendar.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.datePicker:focus {
+		background-image: url(../images/skin/calendar.png);
+	
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
+
+.pdfButton {
+		background-image: url(../images/skin/pdf.png);
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		text-indent: 25px;
+	
+		color: #666666;
+		display: block;
+		padding: 0.25em 0.7em;
+		text-decoration: none;
+	   	-moz-border-radius: 0.3em;
+		-webkit-border-radius: 0.3em;
+	    border-radius: 0.3em;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		background-color: transparent;
+		outline: none;
+		border: none;
+		font-family: Verdana,Arial,sans-serif;
+    	font-size: 1em;
+
+}
+
+.pdfButton:hover {
+	background-image: url(../images/skin/pdf.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.pdfButton:focus {
+		background-image: url(../images/skin/pdf.png);
+	
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
+
+
+.displayButton {
+		background-image: url(../images/skin/search_report.png);
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		text-indent: 25px;
+	
+		color: #666666;
+		display: block;
+		padding: 0.25em 0.7em;
+		text-decoration: none;
+	   	-moz-border-radius: 0.3em;
+		-webkit-border-radius: 0.3em;
+	    border-radius: 0.3em;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		background-color: transparent;
+		outline: none;
+		border: none;
+		font-family: Verdana,Arial,sans-serif;
+    	font-size: 1em;
+
+}
+
+.displayButton:hover {
+	background-image: url(../images/skin/search_report.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.displayButton:focus {
+		background-image: url(../images/skin/search_report.png);
+	
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
+	
+
+
+
+.addElementButton {
+		background-image: url(../images/skin/add_element.png);
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		text-indent: 25px;
+	
+		color: #666666;
+		display: block;
+		padding: 0.25em 0.7em;
+		text-decoration: none;
+	   	-moz-border-radius: 0.3em;
+		-webkit-border-radius: 0.3em;
+	    border-radius: 0.3em;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		background-color: transparent;
+		outline: none;
+		border: none;
+		font-family: Verdana,Arial,sans-serif;
+    	font-size: 1em;
+
+}
+
 
 .listButton {
 	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
