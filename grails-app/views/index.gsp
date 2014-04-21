@@ -237,36 +237,41 @@ return i;
 			<h2><g:message code="admin.menu" default="Last Name" /></h2>
 			<sec:ifLoggedIn>
 			<ul>
-				<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:false,max:20]"><g:message code="employee.list" default="Last Name" /></g:link></li>
-				<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:true,max:20]"><g:message code="employee.admin.list" default="Last Name" /></g:link></li>
-				<li class="controller"><g:link controller="user"><g:message code="admin.list" default="Last Name" /></g:link></li>
-				<li class="controller"><g:link controller="bankHoliday"><g:message code="bank.holiday.list" default="Last Name" /></g:link></li>	
-				<li class="controller"><g:link controller="site"><g:message code="site.list" default="Last Name" /></g:link></li>	
-				<li class="controller"><g:link controller="service"><g:message code="service.list" default="Last Name" /></g:link></li>
-				<li class="controller"><g:link controller="function"><g:message code="function.list" default="Last Name" /></g:link></li>
-				<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20,fromIndex:true]"><g:message code="daily.followup" default="Last Name" /></g:link></li>	
-				<li class="controller"><g:link controller="employee" action='vacationFollowup' params="[isAdmin:false,max:20]"><g:message code="absence.followup" default="Last Name" /></g:link></li>	
-				<li class="controller"><g:link controller="employee" action='ecartFollowup' params="[isAdmin:false,max:20,fromIndex:true]"><g:message code="ecart.followup" default="Last Name" /></g:link></li>	
+				<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="employee.list" default="Last Name" /></g:link></li>
+				<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:true,max:20]" style="text-decoration: none;"><g:message code="employee.admin.list" default="Last Name" /></g:link></li>
+				<li class="controller"><g:link controller="user" style="text-decoration: none;"><g:message code="admin.list" default="Last Name" /></g:link></li>
+				<li class="controller"><g:link controller="bankHoliday" style="text-decoration: none;"><g:message code="bank.holiday.list" default="Last Name" /></g:link></li>	
+				<li class="controller"><g:link controller="site" style="text-decoration: none;"><g:message code="site.list" default="Last Name" /></g:link></li>	
+				<li class="controller"><g:link controller="service" style="text-decoration: none;"><g:message code="service.list" default="Last Name" /></g:link></li>
+				<li class="controller"><g:link controller="function" style="text-decoration: none;"><g:message code="function.list" default="Last Name" /></g:link></li>
+				<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="daily.followup" default="Last Name" /></g:link></li>	
+				<li class="controller"><g:link controller="employee" action='vacationFollowup' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="absence.followup" default="Last Name" /></g:link></li>	
+				<li class="controller"><g:link controller="employee" action='ecartFollowup' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="ecart.followup" default="Last Name" /></g:link></li>	
 
-				<li class="controller"><g:link controller="reason"><g:message code="regularization.reasons" default="Last Name" /></g:link></li>		
+				<li class="controller"><g:link controller="reason" style="text-decoration: none;"><g:message code="regularization.reasons" default="Last Name" /></g:link></li>		
 				<li><BR></li>
-				<li class="controller"><g:link controller="logout"><g:message code="logout.label" default="Last Name" /></g:link></li>							
+				<li class="controller"><g:link controller="logout" class="adminLogout"><g:message code="admin.logout.label" default="Last Name" /></g:link></li>							
 			</ul>
 			</sec:ifLoggedIn>
 			<sec:ifNotLoggedIn>
-				<g:link controller="login"><g:message code="login.label" default="Last Name" /></g:link>
+				<g:link controller="login" class="adminLogin"><g:message code="admin.login.label" default="Last Name" /></g:link>
 			</sec:ifNotLoggedIn>					
 		</div>
-		<div id="page-body" role="main">
+		<div class="standardNav" role="main">
 			<h1><font size="5"><g:message code="welcome.label" default="Welcome"/>, il est: <span id='clock'><g:formatDate format="HH:mm:ss" date="${new Date()}"/></span>
 			</font></h1>
+			<BR>
 			<p><g:message code="explanation.label" default="Welcome"/></p>
+						
+			<BR>
 			<g:if test="${flash.message}">
 	        	<div class="message">${flash.message}</div>
 	      	</g:if>      	
 	  		<form id="myform" method="POST" action="employee/pointage" controller="employee">
-	  			<font size="5">	${message(code: 'employee.id', default: 'Create')}: <g:textField id="mytextfield" name="username" autofocus="true" style="vertical-align: middle;" />  	</font>	  				  						
-				<input type="submit" class="classname" value="${message(code: 'default.button.login.label', default: 'Create')}" style="vertical-align: middle;">
+		  		<ul >
+		  			<li><font size="5">	${message(code: 'employee.id', default: 'Create')}: <g:textField id="mytextfield" name="username" autofocus="true" style="vertical-align: middle;" />  	</font></li>	  				  						
+					<li><g:actionSubmit value="${message(code: 'default.button.login.label', default: 'Create')}" action="pointage" class="indexLoginButton" style="vertical-align: middle;"/></li>
+				</ul>
 			</form>		
 		</div>
 	</body>

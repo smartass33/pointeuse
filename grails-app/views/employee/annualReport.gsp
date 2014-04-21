@@ -43,7 +43,7 @@ function showSpinner() {
 				</g:link></li>
 			<g:if test="${username != null}">
 				<li><g:link class="list" action="" controller="logout">
-						${message(code: 'default.button.logout', default: 'Logout')}
+						${message(code: 'admin.logout.label', default: 'Logout')}
 					</g:link></li>
 			</g:if>
 			<li>

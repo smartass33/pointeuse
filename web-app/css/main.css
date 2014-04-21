@@ -155,9 +155,29 @@ img {
 	display: block;
 	float: left;
 	list-style-type: none;
+	padding: 0;
+}
+
+.standardNav {
+	padding: 0.5em 0.75em;
+	zoom: 1;
+}
+
+.standardNav ul {
+	overflow: hidden;
+	padding-left: 0;
+	zoom: 1;
+}
+
+.standardNav li {
+	display: block;
+	float: left;
+	list-style-type: none;
 	margin-right: 0.5em;
 	padding: 0;
 }
+
+
 
 
 .listButton2{
@@ -208,7 +228,7 @@ img {
 	
 		background-position: 0.7em center;
 	background-repeat: no-repeat;
-	text-indent: 25px;
+	text-indent: 20px;
 	
 		color: #666666;
 	display: block;
@@ -255,7 +275,7 @@ img {
 	
 		background-position: 0.7em center;
 	background-repeat: no-repeat;
-	text-indent: 25px;
+	text-indent: 20px;
 	
 		color: #666666;
 	display: block;
@@ -299,7 +319,7 @@ img {
 		background-image: url(../images/skin/information_green.png);
 			background-position: 0.7em center;
 	background-repeat: no-repeat;
-	text-indent: 25px;
+	text-indent: 20px;
 	
 		color: #666666;
 	display: block;
@@ -358,13 +378,13 @@ img {
 .nav a.home, .nav a.list, .nav a.create, .nav a.logout{
 	background-position: 0.7em center;
 	background-repeat: no-repeat;
-	text-indent: 25px;
+	text-indent: 20px;
 }
 
 .nav a.home, .nav a.list, .nav a.create, .nav a.logout{
 	background-position: 0.7em center;
 	background-repeat: no-repeat;
-	text-indent: 25px;
+	text-indent: 20px;
 }
 
 .nav a.home {
@@ -378,6 +398,8 @@ img {
 .nav a.logout {
 	background-image: url(../images/skin/logout.png);
 }
+
+
 
 .nav a.create {
 	background-image: url(../images/skin/database_add.png);
@@ -1162,7 +1184,7 @@ a.skip {
 		background-image: url(../images/skin/pdf.png);
 		background-position: 0.7em center;
 		background-repeat: no-repeat;
-		text-indent: 25px;
+		text-indent: 20px;
 	
 		color: #666666;
 		display: block;
@@ -1200,12 +1222,136 @@ a.skip {
 
 	}
 
+.adminLogout {
+		background-image: url(../images/skin/logout.png);
+		background-size:16px 16px;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		text-indent: 25px;
+	
+		color: #666666;
+		display: block;
+		padding: 0.6em 0.7em;
+		text-decoration: none;
+	   	-moz-border-radius: 0.3em;
+		-webkit-border-radius: 0.3em;
+	    border-radius: 0.3em;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		background-color: transparent;
+		outline: none;
+		border: none;
+		font-family: Verdana,Arial,sans-serif;
+    	font-size: 0.9em;
+}
+
+.adminLogout:hover {
+	background-image: url(../images/skin/logout.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.adminLogout:focus {
+	background-image: url(../images/skin/logout.png);
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
+
+.adminLogin {
+		background-image: url(../images/skin/login.png);
+		background-size:16px 16px;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		text-indent: 35px;
+	
+		color: #666666;
+		display: block;
+		padding: 0.6em 0.7em;
+		text-decoration: none;
+	   	-moz-border-radius: 0.3em;
+		-webkit-border-radius: 0.3em;
+	    border-radius: 0.3em;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		background-color: transparent;
+		outline: none;
+		border: none;
+		font-family: Verdana,Arial,sans-serif;
+    	font-size: 0.9em;
+}
+
+.adminLogin:hover {
+	background-image: url(../images/skin/login.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.adminLogin:focus {
+		background-image: url(../images/skin/login.png);
+	
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
+
+.indexLoginButton {
+		background-image: url(../images/skin/login.png);
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		text-indent: 35px;
+	
+		color: #666666;
+		display: block;
+		padding: 0.6em 0.7em;
+		text-decoration: none;
+	   	-moz-border-radius: 0.3em;
+		-webkit-border-radius: 0.3em;
+	    border-radius: 0.3em;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		background-color: transparent;
+		outline: none;
+		border: none;
+		font-family: Verdana,Arial,sans-serif;
+    	font-size: 1em;
+
+}
+
+.indexLoginButton:hover {
+	background-image: url(../images/skin/login.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.indexLoginButton:focus {
+		background-image: url(../images/skin/login.png);
+	
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
 
 .displayButton {
 		background-image: url(../images/skin/search_report.png);
 		background-position: 0.7em center;
 		background-repeat: no-repeat;
-		text-indent: 25px;
+		text-indent: 20px;
 	
 		color: #666666;
 		display: block;
@@ -1247,27 +1393,82 @@ a.skip {
 
 
 .addElementButton {
-		background-image: url(../images/skin/add_element.png);
-		background-position: 0.7em center;
-		background-repeat: no-repeat;
-		text-indent: 25px;
-	
-		color: #666666;
-		display: block;
-		padding: 0.25em 0.7em;
-		text-decoration: none;
-	   	-moz-border-radius: 0.3em;
-		-webkit-border-radius: 0.3em;
-	    border-radius: 0.3em;
-		background-position: 0.7em center;
-		background-repeat: no-repeat;
-		background-color: transparent;
-		outline: none;
-		border: none;
-		font-family: Verdana,Arial,sans-serif;
-    	font-size: 1em;
-
+	background-image: url(../images/skin/add_element.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 20px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+   	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+    border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+   	font-size: 1em;
 }
+
+
+.addElementButton:hover {
+	background-image: url(../images/skin/add_element.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.addElementButton:focus {
+	background-image: url(../images/skin/add_element.png);
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	}
+
+.logoutButton {
+	background-image: url(../images/skin/logout.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 20px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+   	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+    border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+   	font-size: 1em;
+}
+
+
+.logoutButton:hover {
+	background-image: url(../images/skin/logout.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.logoutButton:focus {
+	background-image: url(../images/skin/logout.png);
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	}
 
 
 .listButton {

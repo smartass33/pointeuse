@@ -68,7 +68,7 @@
 	</div>
 	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="30" height="30" />Patientez pendant le traitement de la requête...</div>
 	
-	<div id="list-employee" class="nav">
+	<div id="list-employee" class="standardNav">
 		<h1>
 			<g:message code="default.list.label" args="[entityName]" />
 			<br>
@@ -86,7 +86,6 @@
 					<g:else>
 						<g:select name="site.id" from="${Site.list([sort:'name'])}"
 							noSelection="${['':'-']}" optionKey="id" optionValue="name"
-
 							onChange="${remoteFunction(action:'list', params:'\'site=\'+this.value+\'&isAdmin=\'+\'' + isAdmin + '\'',update:'divId',onLoading:"document.getElementById('spinner').style.display = 'inline';",onComplete:"document.getElementById('spinner').style.display = 'none';")}" />
 					</g:else>		
 				</li>
@@ -97,21 +96,16 @@
 					name="q" value="${params.q ?: 'chercher un salarié'}" paramName="q"
 					style="vertical-align: middle;"
 					params="\'q=\'+this.value+\'&isAdmin=\'+\'${isAdmin}+\'"/>
-
-						${message(code: 'default.period.label', default: 'List')}: <g:datePicker
+				</li>
+				<li class="datePicker"><g:datePicker
 							name="myDate" value="${period ? period : new Date()}"  relativeYears="[-3..5]"
-							precision="month" noSelection="['':'-Choisissez-']" style="vertical-align: middle;"/></li>
+							precision="month" noSelection="['':'-Choisissez-']" style="vertical-align: middle;"/>
+				</li>
 				<li><g:actionSubmit value="PDF" action="siteMonthlyPDF" class="pdfButton" /></li>
-
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />
 				<g:hiddenField name="siteId" value="${siteId}" />
 			</ul>
 			</g:form>		
-			
-			
-		
-
-
 		</h1>
 		<g:if test="${flash.message}">
 			<div class="message" id="flash">
@@ -120,10 +114,8 @@
 		</g:if>
 	</div>
 	<br>
-	
-		<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requête...</div>
-	
-		<div id="divId"><g:listEmployee /></div>
+	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requête...</div>
+	<div id="divId"><g:listEmployee /></div>
 	<g:if test="${employeeInstanceTotal!=null}">
 	<div class="pagination" id="pagination">
 		<g:hiddenField name="isAdmin" value="${isAdmin}" />

@@ -151,7 +151,9 @@
 					<tr><td style='color : green;font-weight: bold;'><g:message code='legend.MODIFIEE_ADMIN' default='Régul' /></td></tr>
 					<tr><td style='font-weight: bold;'><g:message code='legend.SYSTEM_GENERATED' default='Régul' /></td></tr>
 					</table>">Légende</a> <richui:tooltip id="legend" />
-			</li>		
+			</li>	
+			<li><g:link class="logout" action="" controller="logout"><g:message code='admin.logout.label' default='Régul' />  </g:link></li>
+				
 		</ul>
 		<g:if test="${flash.message}"><div class="message">${flash.message}</div></g:if>
 	</div>

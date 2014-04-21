@@ -73,9 +73,12 @@
 		<g:hiddenField name="type" value="E" />
 		<%entryName='Entrer'%>
 	</g:else>
-	<table border="0">
-		<tr>
-			<td>
+
+	
+	<BR>
+	<div class="standardNav">
+		<ul>
+			<li>				
 				<g:if test="${entranceStatus}">
 					<g:remoteLink action="addingEventToEmployee" update="currentDay"
 					class="exitbutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
@@ -84,20 +87,16 @@
 					<g:remoteLink action="addingEventToEmployee" update="currentDay"
 					class="entrybutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
 				</g:else>
-			</td>
-
-			<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-			<td><g:link class="modalbox" controller="employee"
-					action="reportLight" params="[userId:employee.id]">rapport</g:link>
-			</td>
-			<td><g:link class="modalbox" url="${grailsApplication.config.serverURL}/${grailsApplication.config.context}">
-					${message(code: 'employee.disconnect.label', default: 'Sortie')}
-				</g:link></td>
-			<td></td>
-			<td>				
-				<div>
-					<g:inAndOutPopup/>
-				</div>		
-		</td>
-		</tr>
-	</table>
+			</li>
+			<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+			<li >
+				<g:link class="displayButton" controller="employee" action="reportLight" params="[userId:employee.id]">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link>
+			</li>
+			<li >
+				<g:inAndOutPopup/>
+			</li>
+			<li>
+				<g:link class="logoutButton"  url="${grailsApplication.config.serverURL}/${grailsApplication.config.context}">${message(code: 'employee.disconnect.label', default: 'Sortie')}</g:link>
+			</li>			
+		</ul>
+	</div>

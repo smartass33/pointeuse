@@ -22,7 +22,6 @@
 			<input type="button" id='principalSelector' value="Afficher les détails" onclick="showVal();" />
 		</g:if>
 	</li>
-	<li><g:link class="logout" action="" controller="logout">     ${message(code: 'default.button.logout', default: 'Logout')}</g:link></li>
-	
+	<li><g:link class="logout" action="" controller="logout">${message(code: 'admin.logout.label', default: 'Logout')}</g:link></li>
 </ul>
 
