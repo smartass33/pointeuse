@@ -29,15 +29,17 @@ class UtilService {
 	}
 	
 	
-	def getSundaysInYear(int year,int month){
+	def getYearlyCounter(int year,int month,Employee employee){
 		def calendar = Calendar.instance
 		def endPeriodCalendar = Calendar.instance
-		boolean twoLoops = month < 6 ? true : false		
+		boolean twoLoops = month < 6 ? true : false
 		calendar.set(Calendar.YEAR,year)		
 		calendar.set(Calendar.MONTH,5)
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		calendar.clearTime()
+		log.debug('initial calendar date: '+calendar.time )
 		
+
 		endPeriodCalendar.set(Calendar.YEAR,year)
 		endPeriodCalendar.set(Calendar.MONTH,month-1)
 		endPeriodCalendar.set(Calendar.DAY_OF_MONTH,endPeriodCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
@@ -46,7 +48,13 @@ class UtilService {
 		
 		if (twoLoops){
 			calendar.set(Calendar.YEAR,year-1)
-			log.debug("getting opened days from: "+calendar.time + " until end of year "+year-1)
+			// special case: employee entered the company within the period: we must start at entry date:
+			if ((calendar.time < employee.arrivalDate) && (employee.arrivalDate.getAt(Calendar.YEAR) == calendar.get(Calendar.YEAR))){
+				calendar.setTime(employee.arrivalDate)
+				calendar.clearTime()
+				log.debug('resetting calendar: '+calendar.time )
+			}
+			log.debug("getting opened days from: "+calendar.time + " until end of year "+calendar.get(Calendar.YEAR))
 			
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 				if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
@@ -73,6 +81,12 @@ class UtilService {
 				calendar.roll(Calendar.DAY_OF_YEAR, 1)
 			}
 		}else{
+			// special case: employee entered the company within the period: we must start at entry date:
+			if ((calendar.time < employee.arrivalDate) && (employee.arrivalDate.getAt(Calendar.YEAR) == calendar.get(Calendar.YEAR))){
+				calendar.setTime(employee.arrivalDate)
+				calendar.clearTime()
+				log.error('resetting calendar: '+calendar.time )
+			}
 			log.debug("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
 				//log.warn("date: "+calendar.time)

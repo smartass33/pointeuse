@@ -1876,8 +1876,15 @@ def vacationFollowup(){
 	}
 	
 	def trigger (){
-		def result="I HAVE BEEN TRIGGERED!!"
-		render template: "/common/inAndOutResultTemplate", model:[result:result]
+		log.error("I HAVE BEEN TRIGGERED!!")
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat('d/MM/yyyy');
+		def startDate= dateFormat.parse('22/05/2013')
+		
+		def endDate= dateFormat.parse('30/06/2014')
+		
+		timeManagerService.openDaysBetweenDates(startDate,endDate)
+		
 		return
 	}
 	

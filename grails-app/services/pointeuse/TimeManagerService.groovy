@@ -360,37 +360,79 @@ class TimeManagerService {
 	}
 	
 	def openDaysBetweenDates(Date startDate,Date endDate){
+		log.error('openDaysBetweenDates between: '+startDate+' and '+endDate)
+		
 		def openedDays = 0
 		def criteria
-		def calendar = Calendar.instance
-		calendar.setTime(startDate)
-		
+		def calendarIter = Calendar.instance
 		def startCalendar = Calendar.instance
-		startCalendar.setTime(startDate)
-		
 		def endCalendar = Calendar.instance
+		def bankHolidayList
+		def holidayCounter = 0
+		
+		if (startDate > endDate){
+			def tmpDate = startDate
+			startDate = endDate
+			endDate = tmpDate
+		}
+		calendarIter.setTime(startDate)		
+		startCalendar.setTime(startDate)		
 		endCalendar.setTime(endDate)
 		
-		while(calendar.get(Calendar.DAY_OF_YEAR) <= endDate.getAt(Calendar.DAY_OF_YEAR)){
-			if (calendar.get(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
-				openedDays += 1
+		
+		
+		//2 cases: start and end dates are contained in the same year. otherwise do it recursively year by year
+		if (startDate.getAt(Calendar.YEAR) == endDate.getAt(Calendar.YEAR)){
+			
+			// retrieve bank holidays
+			// count bank holiday
+	
+			
+			//find all bank holiday over the period
+		
+			criteria = BankHoliday.createCriteria()
+			bankHolidayList = criteria.list {
+				and {
+					ge('calendar',startCalendar)
+					le('calendar',endCalendar)
+				}		
 			}
 			
-			if (calendar.get(Calendar.DAY_OF_YEAR) == endDate.getAt(Calendar.DAY_OF_YEAR)){
-				break
+			
+			for (BankHoliday holiday:bankHolidayList){
+				if (holiday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+					holidayCounter++
+				}
 			}
-			calendar.roll(Calendar.DAY_OF_YEAR, 1)
+			log.error('holidayCounter: '+holidayCounter)		
+			
+			
+			
+			while(calendarIter.get(Calendar.DAY_OF_YEAR) <= endDate.getAt(Calendar.DAY_OF_YEAR)){
+				if (calendarIter.get(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
+					openedDays += 1
+				}
+				if (calendarIter.get(Calendar.DAY_OF_YEAR) == endDate.getAt(Calendar.DAY_OF_YEAR)){
+					openedDays -= holidayCounter
+					break
+				}
+				calendarIter.roll(Calendar.DAY_OF_YEAR, 1)
+			}
 		}
-		//find all bank holiday over the period
-		criteria = BankHoliday.createCriteria()
-		def bankHolidayList = criteria.list {
-			and {
-				ge('calendar',startCalendar)
-				le('calendar',endCalendar)
-			}		
+		// in this case, the year of the startdate is < endDate
+		else{
+			calendarIter.set(Calendar.DAY_OF_YEAR,startCalendar.getActualMaximum(Calendar.DAY_OF_YEAR))
+			openedDays  += openDaysBetweenDates(startDate,calendarIter.time)
+			startCalendar.set(Calendar.YEAR,startCalendar.get(Calendar.YEAR) + 1)
+			startCalendar.set(Calendar.DAY_OF_YEAR,1)
+			startCalendar.clearTime()
+			openedDays += openDaysBetweenDates(startCalendar.time,endCalendar.time)
+			
 		}
 		
-		openedDays -= bankHolidayList.size()
+		log.error('openedDays: '+openedDays)
+
+		
 		return openedDays
 	}
 	
@@ -706,7 +748,7 @@ class TimeManagerService {
 	
 	def getYearCartoucheData(Employee employee,int year,int month){
 		def monthNumber=0
-		def yearTheoritical
+		def yearTheoritical = 0
 		def calendar = Calendar.instance
 		calendar.set(Calendar.YEAR,year)
 		def yearlyCounter = 0
@@ -721,8 +763,8 @@ class TimeManagerService {
 		}else{
 			monthNumber=month+1+6
 		}
-		
-		// set the date end of may
+
+				// set the date end of may
 		calendar.set(Calendar.MONTH,month-1)
 		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
 		calendar.set(Calendar.HOUR_OF_DAY,23)
@@ -734,6 +776,22 @@ class TimeManagerService {
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		calendar.clearTime()
 		def minDate = calendar.time
+		
+		
+		/* create a loop over months and invoke getMonthTheoritical method */
+		// check if employee entered the company or left the company over the period.
+		def arrivalDate = employee.arrivalDate
+		def exitDate =   employee.status == StatusType.TERMINE ? employee.status.date : null
+		
+		// the employee arrived after the period started: resetting the minDate
+		if (arrivalDate > minDate){
+			minDate = arrivalDate
+		}
+		
+		// the employee left before period's end:
+		if ((exitDate != null) && exitDate < maxDate){
+			maxDate = exitDate
+		}
 		
 		// get cumul holidays
 		def yearlyHolidays = criteria.list {
@@ -774,6 +832,8 @@ class TimeManagerService {
 				eq('type',AbsenceType.GROSSESSE)
 			}
 		}
+		def yearlyPregnancyCredit=30*60*pregnancy.size()
+		
 		
 		criteria = Absence.createCriteria()
 		def yearlySansSolde = criteria.list {
@@ -822,7 +882,9 @@ class TimeManagerService {
 		}
 
 		
-		yearlyCounter=month>5 ? utilService.getSundaysInYear(year-1,month) : utilService.getSundaysInYear(year,month)
+		
+		
+		yearlyCounter = month > 5 ? utilService.getYearlyCounter(year-1,month,employee) : utilService.getYearlyCounter(year,month,employee)
 
 		criteria = BankHoliday.createCriteria()
 		
@@ -853,123 +915,108 @@ class TimeManagerService {
 		}
 		
 		for (BankHoliday bankHoliday:bankHolidayList){
-			if (bankHoliday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+			if ((bankHoliday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) && (bankHoliday.calendar.time > employee.arrivalDate) ){
 				bankHolidayCounter ++
 			}
 		}
 		
-		yearlyCounter -= bankHolidayCounter
-		def yearlyPregnancyCredit=30*60*pregnancy.size()
 		
-		def arrivalDate = employee.arrivalDate
-		
-		Period currentPeriod = (month>5)?Period.findByYear(year):Period.findByYear(year-1)
-		Period arrivalPeriod = (arrivalDate.getAt(Calendar.MONTH)>4)?Period.findByYear(arrivalDate.getAt(Calendar.YEAR)):Period.findByYear(arrivalDate.getAt(Calendar.YEAR) - 1)
-		
-		// employee arrived during the period: we must prorate Pentecote day
-		if (currentPeriod == arrivalPeriod){
-			if ( month > arrivalDate.getAt(Calendar.MONTH)){
-				if (arrivalDate.getAt(Calendar.YEAR) != year){
-					monthNumber = arrivalDate.getAt(Calendar.MONTH) - 7 + month
-				}else{
-					monthNumber = month - arrivalDate.getAt(Calendar.MONTH)
+		def calendarIter = Calendar.instance
+		calendarIter.time = minDate
+		def monthTheoritical
+
+		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
+		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
+			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
+				log.error('calendarIter: '+calendarIter.time)
+				monthTheoritical = getMonthTheoritical(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTheoritical += monthTheoritical
+				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					break
 				}
+				calendarIter.roll(Calendar.MONTH, 1)
 			}
+		}else{
+			while(calendarIter.get(Calendar.MONTH) <= 11){
+				log.error('calendarIter: '+calendarIter.time)
+				monthTheoritical = getMonthTheoritical(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTheoritical += monthTheoritical
+				if (calendarIter.get(Calendar.MONTH) == 11){
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+			calendarIter.set(Calendar.MONTH,0)
+			calendarIter.set(Calendar.YEAR,(calendarIter.get(Calendar.YEAR)+1))
 			
-			// also, we must remove the days of the first month when the employee did not work
-			def arrivalDay = employee.arrivalDate.getAt(Calendar.DAY_OF_MONTH)
-			yearlyCounter -= (arrivalDay - 1)
+			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
+				log.error('calendarIter: '+calendarIter.time)
+				monthTheoritical = getMonthTheoritical(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTheoritical += monthTheoritical
+				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}		
 		}
-		
-		yearTheoritical=3600*(
-					yearlyCounter*employee.weeklyContractTime/Employee.WeekOpenedDays
-					+ (Employee.Pentecote*monthNumber)*(employee.weeklyContractTime/Employee.legalWeekTime)
-					-(employee.weeklyContractTime/Employee.WeekOpenedDays)*(yearlySickness.size()+yearlyHolidays.size()+yearlySansSolde.size())
-					-pregnancy.size()
-					) as int
-		
-		return [yearlyActualTotal:yearlyCounter ,yearlyHolidays:yearlyHolidays.size(),yearlyRtt:yearlyRtt.size(),yearlySickness:yearlySickness.size(),yearlyTheoritical:yearTheoritical,yearlyPregnancyCredit:yearlyPregnancyCredit,yearlyTotalTime:totalTime,yearlySansSolde:yearlySansSolde.size()]
+			
+		yearlyCounter = openDaysBetweenDates(minDate,maxDate)
+		return [
+			yearlyActualTotal:yearlyCounter,
+			yearlyHolidays:yearlyHolidays.size(),
+			yearlyRtt:yearlyRtt.size(),
+			yearlySickness:yearlySickness.size(),
+			yearlyTheoritical:yearTheoritical,
+			yearlyPregnancyCredit:yearlyPregnancyCredit,
+			yearlyTotalTime:totalTime,
+			yearlySansSolde:yearlySansSolde.size()
+		]
 	}
 	
 	def getCartoucheData(Employee employeeInstance,int year,int month){
 		def counter = 0
 		def totalNumberOfDays = 0
-		def holidayList
-		def holidayCounter = 0
 		def monthTheoritical
 		def criteria
 		def calendar = Calendar.instance
+		def endCalendar = Calendar.instance
+		
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		calendar.set(Calendar.YEAR,year)
 		calendar.set(Calendar.MONTH,month-1)
+		endCalendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		endCalendar.set(Calendar.YEAR,year)
+		endCalendar.set(Calendar.MONTH,month-1)
+		
 		log.error('current date: '+calendar.time)
 		// count sundays within given month
-		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
-			if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-				counter ++
-			}
-			if (calendar.get(Calendar.DAY_OF_MONTH) == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-				break
-			}
-			calendar.roll(Calendar.DAY_OF_MONTH, 1)
-		}
-		
-		// count bank holiday
-		holidayList = BankHoliday.findAllByMonthAndYear(month,calendar.get(Calendar.YEAR))
-
-		for (BankHoliday holiday:holidayList){
-			if (holiday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-				holidayCounter++
-			}
-		}
-				
-		counter -= holidayCounter
+		counter = openDaysBetweenDates(calendar.time,endCalendar.time)
 		totalNumberOfDays = counter
 		
 		// treat special case whereby employee enters the company, or leaves...
 		// special case: arrival month
 		if ((employeeInstance.arrivalDate.getAt(Calendar.MONTH) + 1) == month &&  (employeeInstance.arrivalDate.getAt(Calendar.YEAR)) == year){
-		//	def arrivalDay = employeeInstance.arrivalDate.getAt(Calendar.DAY_OF_MONTH)
-			def maxCal = Calendar.instance
-			maxCal.setTime(employeeInstance.arrivalDate)
-			maxCal.set(Calendar.DAY_OF_MONTH,maxCal.getActualMaximum(Calendar.DAY_OF_MONTH))
 			// we need to count OPEN DAYS between dates and not consecutive days
-			counter = openDaysBetweenDates(employeeInstance.arrivalDate,maxCal.time)
-			counter -= holidayCounter
+			counter = openDaysBetweenDates(employeeInstance.arrivalDate,endCalendar.time)
 		}
 		
-		//special face: departure month
-
+		//special case: departure month
 		def currentStatus = employeeInstance.status
-	//	log.error('currentStatus: '+currentStatus)
-	//	log.error('currentStatus.date.getAt(Calendar.MONTH): '+currentStatus.date.getAt(Calendar.MONTH))
-		if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) == month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
-			
-	//		log.error('employeeInstance.status: '+employeeInstance.status)
-	//		log.error('StatusType.TERMINE: '+StatusType.TERMINE)
+		//if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) <= month && (currentStatus.date.getAt(Calendar.YEAR)) == year){	
+		if (currentStatus.date != null && currentStatus.date <= endCalendar.time){
 			if (currentStatus.type != StatusType.ACTIF){
-				log.error('departure month. removing days')
-				def departureDay = currentStatus.date.getAt(Calendar.DAY_OF_MONTH)
-				
-				Calendar calendarMax = Calendar.instance
-				calendarMax.setTime(currentStatus.date)
-				calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-				def remainingDays = openDaysBetweenDates(currentStatus.date,calendar.time)
-				counter -= remainingDays 
-			}			
-		}
-		
-		
-		// get cumul holidays
-		criteria = Absence.createCriteria()
-		def holidays = criteria.list {
-			and {
-				eq('employee',employeeInstance)
-				eq('year',year)
-				eq('month',month)
-				eq('type',AbsenceType.VACANCE)
+				if (currentStatus.date.getAt(Calendar.MONTH) == endCalendar.get(Calendar.MONTH) && currentStatus.date.getAt(Calendar.YEAR) == endCalendar.get(Calendar.YEAR) ){				
+					log.error('departure month. recomputing days')
+					Calendar exitCalendar = Calendar.instance
+					exitCalendar.time = currentStatus.date
+					exitCalendar.roll(Calendar.DAY_OF_YEAR, -1)
+					counter = openDaysBetweenDates(calendar.time,exitCalendar.time)
+				}else{
+					counter = 0
+				}
 			}
-		}
+		}	
+		
 		
 		// get cumul RTT
 		criteria = Absence.createCriteria()
@@ -981,6 +1028,18 @@ class TimeManagerService {
 				eq('type',AbsenceType.RTT)
 			}
 		}
+		
+		criteria = Absence.createCriteria()
+		def pregnancy = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.GROSSESSE)
+			}
+		}
+		def pregnancyCredit=30*60*pregnancy.size()
+		
 		// get cumul sickness
 		criteria = Absence.createCriteria()
 		def sickness = criteria.list {
@@ -992,13 +1051,14 @@ class TimeManagerService {
 			}
 		}
 		
+		// get cumul holidays
 		criteria = Absence.createCriteria()
-		def pregnancy = criteria.list {
+		def holidays = criteria.list {
 			and {
 				eq('employee',employeeInstance)
 				eq('year',year)
 				eq('month',month)
-				eq('type',AbsenceType.GROSSESSE)
+				eq('type',AbsenceType.VACANCE)
 			}
 		}
 		
@@ -1020,10 +1080,10 @@ class TimeManagerService {
 		calendar.set(Calendar.MONTH,month-1)
 	
 		def yearlyCartouche=getYearCartoucheData(employeeInstance,year,month)
-		def pregnancyCredit=30*60*pregnancy.size()
+
 		// determine monthly theoritical time:
 		
-		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year, counter,  sickness.size(), holidays.size(), sansSolde.size(),  pregnancyCredit,totalNumberOfDays)
+		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year)
 
 		criteria = Contract.createCriteria()
 		
@@ -1049,7 +1109,19 @@ class TimeManagerService {
 		}
 
 		def monthTheoriticalHuman=computeHumanTime(monthTheoritical)
-		def cartoucheMap=[currentContract:currentContract,employeeInstance:employeeInstance,workingDays:counter ,holidays:holidays.size(),rtt:rtt.size(),sickness:sickness.size(),sansSolde:sansSolde.size(),monthTheoritical:monthTheoritical,pregnancyCredit:pregnancyCredit,monthTheoriticalHuman:monthTheoriticalHuman,calendar:calendar]
+		def cartoucheMap=[
+			currentContract:currentContract,
+			employeeInstance:employeeInstance,
+			workingDays:counter,
+			holidays:holidays.size(),
+			rtt:rtt.size(),
+			sickness:sickness.size(),
+			sansSolde:sansSolde.size(),
+			monthTheoritical:monthTheoritical,
+			pregnancyCredit:pregnancyCredit,
+			monthTheoriticalHuman:monthTheoriticalHuman,
+			calendar:calendar
+		]
 		def mergedMap = cartoucheMap << yearlyCartouche
 		return mergedMap
 	}
@@ -1263,7 +1335,7 @@ class TimeManagerService {
 		
 		def departureDate
 		if (employee.status.date != null){
-			if (employee.status.date != null && (employee.status.date.getAt(Calendar.MONTH) + 1) == month && (employee.status.date.getAt(Calendar.YEAR)) == year){
+			if (employee.status.date != null && employee.status.date <= calendarLoop.time){
 				departureDate = employee.status.date
 			}
 		}
@@ -1611,8 +1683,11 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 	}
 	
 	
-	def getMonthTheoritical(Employee employee, int month,int year, int openDays, int sickness, int holidays, int sansSolde, int pregnancy,int totalNumberOfDays){
+	def getMonthTheoritical(Employee employee, int month,int year){
 		def monthTheoritical = 0
+		def counter = 0
+		def isOut = false
+		def totalNumberOfDays
 		def weeklyContractTime
 		def contract
 		def criteria
@@ -1621,6 +1696,8 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 		def currentStatus = employee.status
 		def realOpenDays
 		def departureDate
+		def startCalendar = Calendar.instance
+		def endCalendar = Calendar.instance
 		criteria = Contract.createCriteria()
 		
 		previousContract = criteria.get {
@@ -1653,48 +1730,109 @@ lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCom
 			weeklyContractTime =employee.weeklyContractTime
 		}
 		
-	//	def monthOpenDays = utilService.getAllOpenDays( month, year)
+
 		
-		
-		// special case for entry and exit months:
-		if ((employee.arrivalDate.getAt(Calendar.MONTH) + 1 == month) && (employee.arrivalDate.getAt(Calendar.YEAR) == year)){
-			//remove days prior the entry datex
-			Calendar calendarMax = Calendar.instance
-			calendarMax.setTime(employee.arrivalDate)
-			calendarMax.set(Calendar.DAY_OF_MONTH,calendarMax.getActualMaximum(Calendar.DAY_OF_MONTH))
-			realOpenDays = openDaysBetweenDates(employee.arrivalDate,calendarMax.time)
-			//realOpenDays = openDays - remainingDays
-		}else{
-		//	log.error('currentStatus: '+currentStatus)
-		//	log.error('currentStatus.date.getAt(Calendar.MONTH): '+currentStatus.date.getAt(Calendar.MONTH))
-			if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) == month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
-		//		log.error('employeeInstance.status: '+employeeInstance.status)
-		//		log.error('StatusType.TERMINE: '+StatusType.TERMINE)
-				if (currentStatus.type != StatusType.ACTIF){
-					log.error('departure month. removing days')
-					departureDate = currentStatus.date.getAt(Calendar.DAY_OF_MONTH)
-					Calendar calendarFirst = Calendar.instance
-					calendarFirst.setTime(currentStatus.date)
-					calendarFirst.set(Calendar.DAY_OF_MONTH,1)			
-					realOpenDays = openDaysBetweenDates(calendarFirst.time,currentStatus.date)
-					//realOpenDays = remainingDays - openDays
-					
-					//calendarMax.getActualMaximum(Calendar.DAY_OF_MONTH)
-				}
-			}
-			// default case
-			else{
-				realOpenDays = openDays
+		// get cumul sickness
+		criteria = Absence.createCriteria()
+		def sickness = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.MALADIE)
 			}
 		}
 		
+		// get cumul holidays
+		criteria = Absence.createCriteria()
+		def holidays = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.VACANCE)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def sansSolde = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.CSS)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
+		def pregnancy = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.GROSSESSE)
+			}
+		}
+		def pregnancyCredit=30*60*pregnancy.size()
+		
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.set(Calendar.YEAR,year)
+		startCalendar.set(Calendar.MONTH,month-1)
+		endCalendar.set(Calendar.DAY_OF_MONTH,startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		endCalendar.set(Calendar.YEAR,year)
+		endCalendar.set(Calendar.MONTH,month-1)
+		
+		log.error('current date: '+startCalendar.time)
+		// count sundays within given month
+		realOpenDays = openDaysBetweenDates(startCalendar.time,endCalendar.time)
+		totalNumberOfDays = realOpenDays
+		
+		// treat special case whereby employee enters the company, or leaves...
+		// special case: arrival month
+		if ((employee.arrivalDate.getAt(Calendar.MONTH) + 1) == month &&  (employee.arrivalDate.getAt(Calendar.YEAR)) == year){
+			// we need to count OPEN DAYS between dates and not consecutive days
+			realOpenDays = openDaysBetweenDates(employee.arrivalDate,endCalendar.time)
+		}
+
+		//special case: departure month
+/*
+		if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) == month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
+			if (currentStatus.type != StatusType.ACTIF){
+				log.error('departure month. recomputing open days')
+				realOpenDays = openDaysBetweenDates(startCalendar.time,currentStatus.date)
+			}
+		}
+	*/	
+		
+		//special case: departure month
+		//if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) <= month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
+		if (currentStatus.date != null && currentStatus.date <= endCalendar.time){
+			if (currentStatus.type != StatusType.ACTIF){
+				if (currentStatus.date.getAt(Calendar.MONTH) == endCalendar.get(Calendar.MONTH) && currentStatus.date.getAt(Calendar.YEAR) == endCalendar.get(Calendar.YEAR) ){
+				log.error('departure month. recomputing open days')
+					Calendar exitCalendar = Calendar.instance
+					exitCalendar.time = currentStatus.date
+					exitCalendar.roll(Calendar.DAY_OF_YEAR, -1)
+					realOpenDays = openDaysBetweenDates(startCalendar.time,exitCalendar.time)
+				}else{
+					realOpenDays = 0
+					isOut = true
+				}
+			}
+		}
+		
+
+		log.error('open days: '+realOpenDays)
+		if (isOut){
+			monthTheoritical = 0
+		}else{
 		monthTheoritical=(
 			3600*(
-					openDays*weeklyContractTime/Employee.WeekOpenedDays
-					+(Employee.Pentecote)*((realOpenDays - sansSolde)/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
-					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness+holidays+sansSolde))
-				- pregnancy) as int
-									
+					realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
+					+(Employee.Pentecote)*((realOpenDays - sansSolde.size())/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
+					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size()))
+				- pregnancyCredit) as int
+		}						
 		return monthTheoritical
 	}
 	
