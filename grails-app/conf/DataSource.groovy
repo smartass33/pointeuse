@@ -31,54 +31,6 @@ environments {
 				maxWait = 10000			}
 		}
     }
-	alrikiki {
-		dataSource {
-			pooled = true
-			dbCreate = "update"
-			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
-			driverClassName = "com.mysql.jdbc.Driver"
-			username = "root"
-			password = "root"
-			properties {
-				maxActive = 50
-				maxIdle = 25
-				minIdle = 5
-				initialSize = 5	
-				maxWait = 10000				
-				validationQuery = "select 1"				
-				testOnBorrow = true
-				testWhileIdle = true
-				testOnReturn = true
-			}
-		}
-	
-	}
-
-	
-    production {
-        dataSource {
-			pooled = true
-			dbCreate = "update"
-			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"			
-			driverClassName = "com.mysql.jdbc.Driver"
-			username = "root"
-			password = "root"
-			properties {
-				maxActive = 50
-				maxIdle = 25
-				minIdle = 5
-				initialSize = 5
-				maxWait = 10000		
-				validationQuery = "select 1"
-				testOnBorrow = true
-				testWhileIdle = true
-				testOnReturn = true
-			}
-		}
-    
-    }
-	
-	
 	
 	dell {
 		dataSource {
