@@ -609,9 +609,16 @@ def vacationFollowup(){
 	
 	
     def edit(Long id) {
+		params.each{i->
+			log.error('param: '+i)
+		}
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
 		def fromSite = (params["fromSite"] != null  && params["fromSite"].equals("true")) ? true : false
+		def back = (params["back"] != null  && params["back"].equals("true")) ? true : false
+		
         def employeeInstance = Employee.get(id)
+		def myDate = params["myDate"] 
+
 		def previousContracts
 		// starting calendar: 1 of June of the period
 		def startCalendar = Calendar.instance		
@@ -660,8 +667,16 @@ def vacationFollowup(){
             return
         }
 		def arrivalDate = employeeInstance.arrivalDate
-		def retour = [previousContracts:previousContracts,arrivalDate:arrivalDate,orderedVacationList:orderedVacationList,orderedVacationListfromSite:fromSite,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]		
-		//retour << data
+		def retour = [
+			back:back,
+			myDateFromEdit:myDate,
+			previousContracts:previousContracts,
+			arrivalDate:arrivalDate,
+			orderedVacationList:orderedVacationList,
+			orderedVacationListfromSite:fromSite,
+			employeeInstance: employeeInstance,
+			isAdmin:isAdmin,siteId:siteId
+		]		
 		return retour
 	}
 	
@@ -1377,6 +1392,7 @@ def vacationFollowup(){
 	def report(Long userId,int monthPeriod,int yearPeriod){
 		def siteId=params["siteId"]
 		def myDate = params["myDate"]
+		def myDateFromEdit = params["myDateFromEdit"]
 		SimpleDateFormat dateFormat
 		def employee
 		def report = [:]
@@ -1386,14 +1402,19 @@ def vacationFollowup(){
 			dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 			myDate = dateFormat.parse(myDate)			
 		}
+		if (myDateFromEdit != null && myDateFromEdit instanceof String){
+			dateFormat = new SimpleDateFormat('MM/yyyy');
+			myDate = dateFormat.parse(myDateFromEdit)
+		}
+		
+		
 		if (userId==null && params["userId"] != null ){
 			employee = Employee.get(params["userId"])
 		}else{
 			employee = Employee.get(userId)
 		}
 		//get last day of the month
-		if (employee){
-			
+		if (employee){			
 			report = timeManagerService.getReportData(siteId, employee,  myDate, monthPeriod, yearPeriod)
 			currentContract = report.getAt('currentContract')
 			if (currentContract == null){

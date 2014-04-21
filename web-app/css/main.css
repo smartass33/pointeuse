@@ -1221,6 +1221,53 @@ a.skip {
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
 
 	}
+	
+	
+.backButton {
+		background-image: url(../images/skin/back.png);
+		background-size:16px 16px;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		text-indent: 25px;
+	
+		color: #666666;
+		display: block;
+		padding: 0.6em 0.7em;
+		text-decoration: none;
+	   	-moz-border-radius: 0.3em;
+		-webkit-border-radius: 0.3em;
+	    border-radius: 0.3em;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		background-color: transparent;
+		outline: none;
+		border: none;
+		font-family: Verdana,Arial,sans-serif;
+    	font-size: 0.9em;
+}
+
+.backButton:hover {
+	background-image: url(../images/skin/back.png);
+	background-size:16px 16px;
+	
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.backButton:focus {
+	background-image: url(../images/skin/back.png);
+	background-size:16px 16px;
+	
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}	
+	
 
 .adminLogout {
 		background-image: url(../images/skin/logout.png);

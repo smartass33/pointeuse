@@ -77,6 +77,9 @@
 				</g:if>
 				<li><g:link class="list" action="list" params="${[isAdmin:isAdmin,siteId:siteId,back:true]}"><g:message code="default.list.label" args="[entityName]" /></g:link></li>			
 				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
+				<g:if test="${back}">
+					<li><g:link controller="employee" action='report' class="backButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId,myDateFromEdit:myDateFromEdit]}">${message(code: 'employee.monthly.report.back.label', default: 'Report')}</g:link></li>
+				</g:if>
 			</ul>
 		</div>
 		<div id="edit-employee" class="content scaffold-edit" role="main">

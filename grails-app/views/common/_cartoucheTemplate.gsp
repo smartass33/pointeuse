@@ -1,12 +1,10 @@
 <body>
 	<BR>
 		<table style="float: left;">
-
-		
 			<tr>
 				<td style="font-weight: bold;" class="cartoucheLeftTD" >
 						<g:link action="edit" id="${employee.id}" style="text-decoration: none;"
-							params="${[isAdmin:isAdmin,siteId:siteId]}">
+							params="${[isAdmin:isAdmin,siteId:siteId,myDate:period.format('MM/yyyy'),back:true]}">
 							${fieldValue(bean: employee, field: "firstName")} ${fieldValue(bean: employee, field: "lastName")}
 						</g:link>
 				</td>
