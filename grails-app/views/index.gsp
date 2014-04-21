@@ -269,7 +269,7 @@ return i;
 	      	</g:if>      	
 	  		<form id="myform" method="POST" action="employee/pointage" controller="employee">
 		  		<ul >
-		  			<li><font size="5">	${message(code: 'employee.id', default: 'Create')}: <g:textField id="mytextfield" name="username" autofocus="true" style="vertical-align: middle;" />  	</font></li>	  				  						
+		  			<li><font size="5">	${message(code: 'employee.id', default: 'Create')}: <g:textField id="mytextfield" name="username" autofocus="true" style="vertical-align: middle;" value="" />  	</font></li>	  				  						
 					<li><g:actionSubmit value="${message(code: 'default.button.login.label', default: 'Create')}" action="pointage" class="indexLoginButton" style="vertical-align: middle;"/></li>
 				</ul>
 			</form>		
