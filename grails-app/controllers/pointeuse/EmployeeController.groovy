@@ -190,23 +190,35 @@ class EmployeeController {
     }
 
     def save() {
+		params.each{i-> log.error('param: '+i)}
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
 		def service = params["employee.service.id"]
 		def site = params["employee.site.id"]
 		def function = params["employee.function.id"]	
+		Status status
 		def employeeInstance =new Employee(params)
 		employeeInstance.service=Service.get(service)
 		employeeInstance.site=Site.get(site)
 		employeeInstance.function=Function.get(function)
-		
-		
+
+		if ( params["updatedSelection"] == null || (params["updatedSelection"] != null && params["updatedSelection"].size() == 0)){
+			status = new Status(null, employeeInstance,StatusType.ACTIF)
+	
+			employeeInstance.status = status		
+		}
+			
         if (!employeeInstance.save(flush: true)) {
             render(view: "create", model: [employeeInstance: employeeInstance])
             return
         }
 
 		utilService.initiateVacations(employeeInstance)
-		
+		Contract contract = new Contract(employeeInstance.arrivalDate,employeeInstance)
+		contract.save(flush: true)
+		if (status != null){
+			status.save(flush: true)
+		}
+
         flash.message = message(code: 'default.created.message', args: [message(code: 'employee.label', default: 'Employee'), employeeInstance.id])
         redirect(action: "show", id: employeeInstance.id,params: [isAdmin: isAdmin])
     }
@@ -1833,7 +1845,6 @@ def vacationFollowup(){
 			log.error('contract dates are incomplatible, exiting')
 			flash.message = message(code: 'contract.incompatible.values')
 			redirect(action: "edit", params: [id:params.id,isAdmin:false])
-			
 			return
 		}
 			

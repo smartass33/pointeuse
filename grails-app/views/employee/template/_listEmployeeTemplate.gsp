@@ -41,12 +41,13 @@
 				<td style="width:120px" >
 				
 				<g:link action="edit" id="${employeeInstance.id}"
-						params="${[isAdmin:isAdmin,siteId:siteId]}">
+						params="${[isAdmin:isAdmin,siteId:siteId]}"
+						style="text-decoration: none;">
 						${fieldValue(bean: employeeInstance, field: "lastName")}
 					</g:link>
 
 					</td>
-				<td style="width:120px" ><g:link action="edit" id="${employeeInstance.id}"
+				<td style="width:120px" ><g:link action="edit" id="${employeeInstance.id}" style="text-decoration: none;"
 						params="${[isAdmin:isAdmin,siteId:siteId]}">
 						${fieldValue(bean: employeeInstance, field: "firstName")}
 					</g:link></td>

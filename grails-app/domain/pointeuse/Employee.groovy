@@ -21,7 +21,7 @@ class Employee{
 	static hasMany = [contracts:Contract,vacationsCounters:Vacation,absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
 	static searchable = true	
 	static constraints = {
-		matricule blank: true
+		matricule (blank: true,nullable:true)
 		firstName blank: false
 		lastName blank: false 
 		userName (unique: true,blank: false)

@@ -35,15 +35,13 @@
 	<g:textField name="matricule" value="${employeeInstance?.matricule}"/>
 </div>
 
-
-
 <BR>
 
-
-
-<div id='contractTable'>
-	<g:employeeContractTable/>
-</div>
+<g:if test="${employeeInstance.id != null }">
+	<div id='contractTable'>
+		<g:employeeContractTable/>
+	</div>
+</g:if>
 
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'arrivalDate', 'error')} ">
 	<label for="arrivalDate">
@@ -58,6 +56,16 @@
 	              noSelection="['':'-Choose-']" />
 	</g:else>
 </div>
+
+<g:if test="${employeeInstance.id == null }">
+	<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'weeklyContractTime', 'error')} ">
+		<label for="weeklyContractTime">
+			<g:message code="employee.weeklyContractTime.label" default="weeklyContractTime" />
+		</label>
+		<g:textField name="weeklyContractTime" value="${employeeInstance?.weeklyContractTime}"/>
+	</div>
+</g:if>
+
 
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'service', 'error')} ">
 	<label for="service">
@@ -120,7 +128,6 @@
 	          />
 	</g:else>
 </div>
-
 <g:contractStatus/>
 
 	          
