@@ -18,6 +18,7 @@
  <link href="main.css" rel="stylesheet" type="text/css">
 	<g:set var="calendar" value="${Calendar.instance}"/>
 
+	<g:set var="weeklyRecap" value="0" />
 
 
 <script type="text/javascript">
@@ -30,6 +31,23 @@ function showSpinner() {
       $('#spinner').hide();
    }
 </script>
+	<g:set var="takenCA" value="0" />
+
+
+<style type="text/css">
+
+.rotate-45{
+  height: 80px;
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  position: relative;
+  vertical-align: bottom;
+  padding: 0;
+  font-size: 12px;
+  line-height: 0.8;
+}
+</style>
 </head>
 <body>
 <body>
@@ -46,11 +64,10 @@ function showSpinner() {
 						${message(code: 'admin.logout.label', default: 'Logout')}
 					</g:link></li>
 			</g:if>
-			<li>
+			<li style="vertical-align: middle;">
 				<g:form method="POST"
 					url="[controller:'employee', action:'annualTotalPDF']">
-	
-					<g:actionSubmit class="listButton" value="export PDF" action="annualTotalPDF"/>
+					<g:actionSubmit value="PDF" action="annualTotalPDF" class="pdfButton" />
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
 					<g:hiddenField name="siteId" value="${siteId}" />
 					<g:hiddenField name="userId" value="${userId}" />

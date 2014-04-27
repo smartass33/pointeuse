@@ -377,8 +377,11 @@ class TimeManagerService {
 		}
 		calendarIter.setTime(startDate)		
 		startCalendar.setTime(startDate)		
-		endCalendar.setTime(endDate)
-		
+		startCalendar.clearTime()
+		endCalendar.setTime(endDate)		
+		endCalendar.set(Calendar.HOUR_OF_DAY,23)
+		endCalendar.set(Calendar.MINUTE,59)
+		endCalendar.set(Calendar.SECOND,59)
 		
 		
 		//2 cases: start and end dates are contained in the same year. otherwise do it recursively year by year
@@ -404,7 +407,7 @@ class TimeManagerService {
 					holidayCounter++
 				}
 			}
-			log.error('holidayCounter: '+holidayCounter)		
+			log.debug('holidayCounter: '+holidayCounter)		
 			
 			
 			
@@ -430,7 +433,7 @@ class TimeManagerService {
 			
 		}
 		
-		log.error('openedDays: '+openedDays)
+		//log.error('openedDays: '+openedDays)
 
 		
 		return openedDays
@@ -980,6 +983,7 @@ class TimeManagerService {
 		def criteria
 		def calendar = Calendar.instance
 		def endCalendar = Calendar.instance
+		def isCurrentMonth = false
 		
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		calendar.set(Calendar.YEAR,year)
@@ -989,10 +993,20 @@ class TimeManagerService {
 		endCalendar.set(Calendar.MONTH,month-1)
 		
 		log.error('current date: '+calendar.time)
-		// count sundays within given month
-		counter = openDaysBetweenDates(calendar.time,endCalendar.time)
-		totalNumberOfDays = counter
+		def currentCalendar = Calendar.instance
 		
+		// special case: the month is not over yet
+		if (currentCalendar.get(Calendar.MONTH) == (month - 1) && currentCalendar.get(Calendar.YEAR) == year){
+			log.error('the month is not over yet')
+			counter = openDaysBetweenDates(calendar.time,currentCalendar.time)
+			totalNumberOfDays = counter
+			isCurrentMonth = true
+		}else{
+			counter = openDaysBetweenDates(calendar.time,endCalendar.time)
+			totalNumberOfDays = counter
+		}
+		// count sundays within given month
+
 		// treat special case whereby employee enters the company, or leaves...
 		// special case: arrival month
 		if ((employeeInstance.arrivalDate.getAt(Calendar.MONTH) + 1) == month &&  (employeeInstance.arrivalDate.getAt(Calendar.YEAR)) == year){
@@ -1110,6 +1124,7 @@ class TimeManagerService {
 
 		def monthTheoriticalHuman=computeHumanTime(monthTheoritical)
 		def cartoucheMap=[
+			isCurrentMonth:isCurrentMonth,
 			currentContract:currentContract,
 			employeeInstance:employeeInstance,
 			workingDays:counter,
@@ -1309,6 +1324,7 @@ class TimeManagerService {
 		def workingDays=cartoucheTable.get('workingDays')
 		def holiday=cartoucheTable.get('holidays')
 		def rtt=cartoucheTable.get('rtt')
+		def isCurrentMonth=cartoucheTable.get('isCurrentMonth')	
 		def sickness=cartoucheTable.get('sickness')
 		def sansSolde=cartoucheTable.get('sansSolde')
 		def monthTheoritical = cartoucheTable.get('monthTheoritical')
@@ -1342,6 +1358,7 @@ class TimeManagerService {
 		
 		
 		return [
+			isCurrentMonth:isCurrentMonth,
 			departureDate:departureDate,
 			currentContract:currentContract,
 			period2:period,
@@ -1605,11 +1622,18 @@ class TimeManagerService {
 		def calendar = Calendar.instance
 		def currentMonth
 		def currentYear=year
+		def monthlyPresentDays = 0
+		def monthlyWorkingDays = [:]
+		def monthlyTakenHolidays = [:]
 		
-
 		
+		def period = Period.findByYear(year)
+		def remainingCA = employeeService.getRemainingCA(employee,period)
+		def takenCA = employeeService.getTakenCA(employee,period)
+		def initialCA = employeeService.getInitialCA(employee,period)
 				
 		for (int monthLoop = 6 ;monthLoop <18 ; monthLoop++){
+			monthlyPresentDays = 0
 			if (monthLoop>12){
 				currentYear=year+1
 				currentMonth=monthLoop-12
@@ -1643,7 +1667,9 @@ class TimeManagerService {
 				dailySeconds = getDailyTotal(dailyTotal)
 				monthlyTotalTime += dailySeconds
 				annualEmployeeWorkingDays += 1
+				monthlyPresentDays += 1
 			}
+			monthlyWorkingDays.put(currentMonth,monthlyPresentDays)
 			yearTotalMap.put(currentMonth, computeHumanTime(monthlyTotalTime))
 			monthlySupTotalTime = getMonthlySupTime(employee,currentMonth, currentYear)
 			yearMonthlySupTime.put(currentMonth,computeHumanTime(Math.round(monthlySupTotalTime)))
@@ -1662,6 +1688,8 @@ class TimeManagerService {
 			
 			annualTheoritical += cartoucheTable.getAt('monthTheoritical')
 			annualHoliday += cartoucheTable.getAt('holidays')
+			monthlyTakenHolidays.put(currentMonth, initialCA - annualHoliday)
+			
 			annualRTT += cartoucheTable.getAt('rtt')
 			annualCSS += cartoucheTable.getAt('sansSolde')
 			annualSickness += cartoucheTable.getAt('sickness')
@@ -1670,15 +1698,35 @@ class TimeManagerService {
 			annualPayableCompTime += payableCompTime
 			annualTotal += monthlyTotalTime
 		}
-		def period = Period.findByYear(year)
+
 		
-		//def period = (month>=6)?Period.findByYear(year):Period.findByYear(year-1)
-		def remainingCA = employeeService.getRemainingCA(employee,period)
-		def takenCA = employeeService.getTakenCA(employee,period)
-		def initialCA = employeeService.getInitialCA(employee,period)
-		
-		return [takenCA:takenCA,initialCA:initialCA,remainingCA:remainingCA,annualTotalIncludingHS:computeHumanTime(Math.round(annualTotalIncludingHS)),annualEmployeeWorkingDays:annualEmployeeWorkingDays,	annualTheoritical:computeHumanTime(Math.round(annualTheoritical)),annualHoliday:annualHoliday,annualRTT:annualRTT,annualCSS:annualCSS,annualSickness:annualSickness,annualWorkingDays:annualWorkingDays,annualPayableSupTime:computeHumanTime(Math.round(annualPayableSupTime)),annualPayableCompTime:computeHumanTime(Math.round(annualPayableCompTime)),annualTotal:computeHumanTime(Math.round(annualTotal)),
-lastYear:year,thisYear:year+1,yearMap:yearMap,yearMonthlyCompTime:yearMonthlyCompTime,yearMonthlySupTime:yearMonthlySupTime,yearTotalMap:yearTotalMap,yearMonthMap:yearMonthMap,userId:employee.id,employee:employee]
+		return [
+			monthlyTakenHolidays:monthlyTakenHolidays,
+			monthlyWorkingDays:monthlyWorkingDays,
+			takenCA:takenCA,
+			initialCA:initialCA,
+			remainingCA:remainingCA,
+			annualTotalIncludingHS:computeHumanTime(Math.round(annualTotalIncludingHS)),
+			annualEmployeeWorkingDays:annualEmployeeWorkingDays,	
+			annualTheoritical:computeHumanTime(Math.round(annualTheoritical)),
+			annualHoliday:annualHoliday,
+			annualRTT:annualRTT,
+			annualCSS:annualCSS,
+			annualSickness:annualSickness,
+			annualWorkingDays:annualWorkingDays,
+			annualPayableSupTime:computeHumanTime(Math.round(annualPayableSupTime)),
+			annualPayableCompTime:computeHumanTime(Math.round(annualPayableCompTime)),
+			annualTotal:computeHumanTime(Math.round(annualTotal)),
+			lastYear:year,
+			thisYear:year+1,
+			yearMap:yearMap,
+			yearMonthlyCompTime:yearMonthlyCompTime,
+			yearMonthlySupTime:yearMonthlySupTime,
+			yearTotalMap:yearTotalMap,
+			yearMonthMap:yearMonthMap,
+			userId:employee.id,
+			employee:employee
+		]
 
 	}
 	

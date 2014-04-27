@@ -92,7 +92,9 @@
 				</tr>
 				<tr>
 					<td class="cartoucheRightTitleTD" >${message(code: 'default.monthly.open.day', default: 'report')} :</td>				
-    					<td style="font-weight:bold" class="cartoucheRightFiguresTD">${workingDays}</td>
+    					<td style="font-weight:bold" class="cartoucheRightFiguresTD">${workingDays}<g:if test="${isCurrentMonth}">(en cours)</g:if>
+    					
+    					</td>
     					<td class="cartoucheRightFiguresTD"/>
 				</tr>
 				<g:if test="${payableSupTime!=null}">
