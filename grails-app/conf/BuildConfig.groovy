@@ -79,5 +79,6 @@ grails.project.dependency.resolution = {
 		compile ":richui:0.8"
 		runtime ":searchable:0.6.6"	
 		compile ":codenarc:0.20"
+		compile ":mail:1.0.4"
     }
 }

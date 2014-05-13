@@ -168,16 +168,16 @@ environments {
 }
 
 grails {
-mail {
-	host = "smtp.gmail.com"
-	port = 465
-	username = "pointeuse.biolab33@gmail.com"
-	password = "Wichita3*"
-	props = ["mail.smtp.auth":"true",
-			 "mail.smtp.socketFactory.port":"465",
-			 "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
-			 "mail.smtp.socketFactory.fallback":"false"]
-  }
+	mail {
+		host = "smtp.fr.oleane.com"
+		port = 587
+		//username = "pointeuse@biol33.fr.fto
+		username = "pointeuse@biol33.fr.fto"
+		
+		password = "SzVFO8KT"
+     props = ["mail.smtp.starttls.enable":"true", 
+                  "mail.smtp.port":"587"]
+	  }
 }
 
 // Added by the Spring Security Core plugin:
