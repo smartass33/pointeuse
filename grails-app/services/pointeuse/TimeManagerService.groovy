@@ -360,7 +360,7 @@ class TimeManagerService {
 	}
 	
 	def openDaysBetweenDates(Date startDate,Date endDate){
-		log.error('openDaysBetweenDates between: '+startDate+' and '+endDate)
+		log.debug('openDaysBetweenDates between: '+startDate+' and '+endDate)
 		
 		def openedDays = 0
 		def criteria
@@ -931,7 +931,7 @@ class TimeManagerService {
 		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
 		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
 			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
-				log.error('calendarIter: '+calendarIter.time)
+				log.debug('calendarIter: '+calendarIter.time)
 				monthTheoritical = getMonthTheoritical(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				yearTheoritical += monthTheoritical
 				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
@@ -941,7 +941,7 @@ class TimeManagerService {
 			}
 		}else{
 			while(calendarIter.get(Calendar.MONTH) <= 11){
-				log.error('calendarIter: '+calendarIter.time)
+				log.debug('calendarIter: '+calendarIter.time)
 				monthTheoritical = getMonthTheoritical(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				yearTheoritical += monthTheoritical
 				if (calendarIter.get(Calendar.MONTH) == 11){
@@ -953,7 +953,7 @@ class TimeManagerService {
 			calendarIter.set(Calendar.YEAR,(calendarIter.get(Calendar.YEAR)+1))
 			
 			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
-				log.error('calendarIter: '+calendarIter.time)
+				log.debug('calendarIter: '+calendarIter.time)
 				monthTheoritical = getMonthTheoritical(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				yearTheoritical += monthTheoritical
 				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
@@ -992,7 +992,7 @@ class TimeManagerService {
 		endCalendar.set(Calendar.YEAR,year)
 		endCalendar.set(Calendar.MONTH,month-1)
 		
-		log.error('current date: '+calendar.time)
+		log.debug('current date: '+calendar.time)
 		def currentCalendar = Calendar.instance
 		
 		// special case: the month is not over yet
@@ -1771,7 +1771,7 @@ class TimeManagerService {
 		}
 
 		if (previousContract != null ){
-			log.error("previousContract: "+previousContract)
+			log.debug("previousContract: "+previousContract)
 			weeklyContractTime = previousContract.weeklyLength
 		}
 		else{
@@ -1830,7 +1830,7 @@ class TimeManagerService {
 		endCalendar.set(Calendar.YEAR,year)
 		endCalendar.set(Calendar.MONTH,month-1)
 		
-		log.error('current date: '+startCalendar.time)
+		log.debug('current date: '+startCalendar.time)
 		// count sundays within given month
 		realOpenDays = openDaysBetweenDates(startCalendar.time,endCalendar.time)
 		totalNumberOfDays = realOpenDays
@@ -1870,7 +1870,7 @@ class TimeManagerService {
 		}
 		
 
-		log.error('open days: '+realOpenDays)
+		log.debug('open days: '+realOpenDays)
 		if (isOut){
 			monthTheoritical = 0
 		}else{

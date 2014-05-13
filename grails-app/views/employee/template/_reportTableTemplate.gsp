@@ -265,7 +265,20 @@
                   
                                     
                   <g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null && ((weeklySupTotal.get(employee).get(day.key)).get(0) > 0 || (weeklySupTotal.get(employee).get(day.key)).get(1) >0)}">
-                   dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)}:${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}    
+                   dont ${message(code: 'which.sup.time', default: 'Report')} 
+                    ${(weeklySupTotal.get(employee).get(day.key)).get(0)} :
+                   <g:if test="${(weeklySupTotal.get(employee).get(day.key)).get(1)==0}">
+                   00
+                   </g:if>
+                   <g:else>
+	                   <g:if test="${(weeklySupTotal.get(employee).get(day.key)).get(1)>9}">
+	                    	${(weeklySupTotal.get(employee).get(day.key)).get(1)}      
+	                   </g:if>
+	                   <g:else>
+	                   	0${(weeklySupTotal.get(employee).get(day.key)).get(1)} 
+	                   </g:else>
+                   </g:else>
+                      
                   </g:if>
                 </th>                                                        
               </g:if>

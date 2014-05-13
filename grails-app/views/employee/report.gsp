@@ -136,8 +136,7 @@
 						style="vertical-align: middle;" /> 
 				</li>
 				<li style="vertical-align: middle;" class="displayButton"><g:actionSubmit value="Afficher" action="report" class="displayButton" /></li>	
-				<g:if test="${!isCurrentMonth}"><li style="vertical-align: middle;"><g:actionSubmit value="PDF" action="userPDF" class="pdfButton" /></li></g:if>
-				
+				<g:if test="${!isCurrentMonth}"><li style="vertical-align: middle;"><g:actionSubmit value="PDF" action="userPDF" class="pdfButton" /></li></g:if>		
 				<li>
 					<g:inAndOutPopup/>
 				</li>

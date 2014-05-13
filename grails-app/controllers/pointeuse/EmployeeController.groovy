@@ -1952,4 +1952,15 @@ def vacationFollowup(){
 		render template: '/employee/template/contractStatus', model:[employeeInstance:employee]
 		return
 	}
+	
+	
+	def sendMail (){	
+		mailService.sendMail {
+			to "henri.martin@gmail.com"
+			from "pointeuse@biolab33.com"
+			subject "Hello Fred"
+			body 'this is some text'
+		 }
+		log.error('mail sent')
+	  }
 }

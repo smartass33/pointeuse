@@ -101,10 +101,10 @@
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
       					<td style="font-weight:bold" class="cartoucheRightFiguresTD">
-      					<g:if test="${payableSupTime.get(0)>9}">${payableSupTime.get(0)}:</g:if>
-      					<g:else>0${payableSupTime.get(0)}:</g:else>
+      					<g:if test="${payableSupTime.get(0)>9}">${payableSupTime.get(0)} :</g:if>
+      					<g:else>0${payableSupTime.get(0)} :</g:else>
       					<g:if test="${payableSupTime.get(1)>9}">${payableSupTime.get(1)}</g:if>
-      					<g:else>${payableSupTime.get(1)}0</g:else>
+      					<g:else>0${payableSupTime.get(1)}</g:else>
       					 ou ${(payableSupTime.get(0)+payableSupTime.get(1)/60).setScale(2,2)}</td>        					
 						<td class="cartoucheRightFiguresTD" />	
 					</tr>
