@@ -9,8 +9,8 @@
 </h1>
 
 
-<h1>SUIVI MENSUEL</h1>
 <table id="table-header-rotated" style="width:100%;"class="table table-striped table-header-rotated" >
+<BR>
 	<thead>
 		<th class='rotate-45' style="width:100px"><div><span><g:message code="annual.report.month.label"/></span></div></th>	
 		<th class='rotate-45'><div><span>Jours ouvrés</span></div></th>	
@@ -36,19 +36,42 @@
 				<td style="vertical-align: middle;text-align:right;">			
 					<g:if
                 		test="${cartouche.value.getAt('monthTheoriticalHuman') !=null && ((cartouche.value.getAt('monthTheoriticalHuman')).get(0)>0 ||(cartouche.value.getAt('monthTheoriticalHuman')).get(1)>0)}">
-                    	${(cartouche.value.getAt('monthTheoriticalHuman')).get(0)}:${(cartouche.value.getAt('monthTheoriticalHuman')).get(1)==0?'':(cartouche.value.getAt('monthTheoriticalHuman')).get(1)} 
+ 	 	               	<g:if test='${(cartouche.value.getAt('monthTheoriticalHuman')).get(0)<10}'>
+		                	0${(cartouche.value.getAt('monthTheoriticalHuman')).get(0)} :
+		                </g:if>	
+		                <g:else>
+		                	${(cartouche.value.getAt('monthTheoriticalHuman')).get(0)} :
+		                </g:else>            
+		                <g:if test='${(cartouche.value.getAt('monthTheoriticalHuman')).get(1)<10}'>
+		                	0${(cartouche.value.getAt('monthTheoriticalHuman')).get(1)}
+		                </g:if>	
+		                <g:else>
+		                	${(cartouche.value.getAt('monthTheoriticalHuman')).get(1)}
+		                </g:else> 
                		</g:if>
                		<g:else>
-           			00:00
+           			00 : 00
                		</g:else>
 				</td>
 				<td style="vertical-align: middle;width:100px;text-align:right;">
 					<g:if
                 		test="${yearTotalMap.get(cartouche.key) !=null && ((yearTotalMap.get(cartouche.key)).get(0)>0 ||(yearTotalMap.get(cartouche.key)).get(1)>0)}">
-                    	${(yearTotalMap.get(cartouche.key)).get(0)}:${(yearTotalMap.get(cartouche.key)).get(1)==0?'':(yearTotalMap.get(cartouche.key)).get(1)} 
+	 	               	<g:if test='${(yearTotalMap.get(cartouche.key)).get(0)<10}'>
+		                	0${(yearTotalMap.get(cartouche.key)).get(0)} :
+		                </g:if>	
+		                <g:else>
+		                	${(yearTotalMap.get(cartouche.key)).get(0)} :
+		                </g:else>            
+		                <g:if test='${(yearTotalMap.get(cartouche.key)).get(1)<10}'>
+		                	0${(yearTotalMap.get(cartouche.key)).get(1)}
+		                </g:if>	
+		                <g:else>
+		                	${(yearTotalMap.get(cartouche.key)).get(1)}
+		                </g:else>  
+
                		</g:if>
                		<g:else>
-           			00:00
+           			00 : 00
                		</g:else>
 				</td>
 				
@@ -63,19 +86,42 @@
 				<td style="vertical-align: middle;text-align:right;">
 					<g:if
                			test="${yearMonthlySupTime.get(cartouche.key) !=null && ((yearMonthlySupTime.get(cartouche.key)).get(0)>0 ||(yearMonthlySupTime.get(cartouche.key)).get(1)>0)}">
-                   		${(yearMonthlySupTime.get(cartouche.key)).get(0)}:${(yearMonthlySupTime.get(cartouche.key)).get(1)==0?'':(yearMonthlySupTime.get(cartouche.key)).get(1)} 
+                   		
+	 	               	<g:if test='${(yearMonthlySupTime.get(cartouche.key)).get(0)<10}'>
+		                	0${(yearMonthlySupTime.get(cartouche.key)).get(0)} :
+		                </g:if>	
+		                <g:else>
+		                	${(yearMonthlySupTime.get(cartouche.key)).get(0)} :
+		                </g:else>            
+		                <g:if test='${(yearMonthlySupTime.get(cartouche.key)).get(1)<10}'>
+		                	0${(yearMonthlySupTime.get(cartouche.key)).get(1)}
+		                </g:if>	
+		                <g:else>
+		                	${(yearMonthlySupTime.get(cartouche.key)).get(1)}
+		                </g:else>                  		                                  		
               		</g:if>
               		<g:else>
-           			00:00
+           			00 : 00
               		</g:else>
 				</td>			
 				<td style="vertical-align: middle;text-align:right;">
 					<g:if
                			test="${yearMonthlyCompTime.get(cartouche.key) !=null && ((yearMonthlyCompTime.get(cartouche.key)).get(0)>0 ||(yearMonthlyCompTime.get(cartouche.key)).get(1)>0)}">
-                   		${(yearMonthlyCompTime.get(cartouche.key)).get(0)}:${(yearMonthlyCompTime.get(cartouche.key)).get(1)==0?'':(yearMonthlyCompTime.get(cartouche.key)).get(1)} 
+	 	               	<g:if test='${(yearMonthlyCompTime.get(cartouche.key)).get(0)<10}'>
+		                	0${(yearMonthlyCompTime.get(cartouche.key)).get(0)} :
+		                </g:if>	
+		                <g:else>
+		                	${(yearMonthlyCompTime.get(cartouche.key)).get(0)} :
+		                </g:else>            
+		                <g:if test='${(yearMonthlyCompTime.get(cartouche.key)).get(1)<10}'>
+		                	0${(yearMonthlyCompTime.get(cartouche.key)).get(1)}
+		                </g:if>	
+		                <g:else>
+		                	${(yearMonthlyCompTime.get(cartouche.key)).get(1)}
+		                </g:else> 
               		</g:if>
               		<g:else>
-           			00:00
+           			00 : 00
               		</g:else>	
 				</td>							
 			</tr>
@@ -88,19 +134,44 @@
 			<td style="vertical-align: middle;text-align:right;">
 				<g:if
                		test="${annualTheoritical !=null && (annualTheoritical.get(0)>0 ||annualTheoritical.get(1)>0)}">
-               		${annualTheoritical.get(0)}:${annualTheoritical.get(1)==0?'':annualTheoritical.get(1)} 
+               		
+	 	               	<g:if test='${annualTheoritical.get(0)<10}'>
+		                	0${annualTheoritical.get(0)} :
+		                </g:if>	
+		                <g:else>
+		                	${annualTheoritical.get(0)} :
+		                </g:else>            
+		                <g:if test='${annualTheoritical.get(1)<10}'>
+		                	0${annualTheoritical.get(1)}
+		                </g:if>	
+		                <g:else>
+		                	${annualTheoritical.get(1)}
+		                </g:else> 
            		</g:if>
            		<g:else>
-           			00:00
+           			00 : 00
            		</g:else>
 			</td>
 			<td style="vertical-align: middle;text-align:right;">
-				<g:if
-               		test="${annualTotal !=null && (annualTotal.get(0)>0 ||annualTotal.get(1)>0)}">
-               		${annualTotal.get(0)}:${annualTotal.get(1)==0?'':annualTotal.get(1)} 
+				<g:if test="${annualTotal !=null && (annualTotal.get(0)>0 ||annualTotal.get(1)>0)}">
+	               	<g:if test='${annualTotal.get(0)<10}'>
+	                	0${annualTotal.get(0)} :
+	                </g:if>	
+	                <g:else>
+	                	${annualTotal.get(0)} :
+	                </g:else>
+	                
+	                <g:if test='${annualTotal.get(1)<10}'>
+	                	0${annualTotal.get(1)}
+	                </g:if>	
+	                <g:else>
+	                	${annualTotal.get(1)}
+	                </g:else>
+               		
+               		
            		</g:if>
            		<g:else>
-           			00:00
+           			00 : 00
            		</g:else>
 		</td>
 		<td style="vertical-align: middle;text-align:center;">${annualHoliday}</td>
@@ -110,19 +181,46 @@
 		<td style="vertical-align: middle;text-align:center;">${annualSickness}</td>
 		<td style="vertical-align: middle;text-align:right;">
 			<g:if test="${annualPayableSupTime !=null && (annualPayableSupTime.get(0)>0 ||annualPayableSupTime.get(1)>0)}">
-            	${annualPayableSupTime.get(0)}:${annualPayableSupTime.get(1)==0?'':annualPayableSupTime.get(1)} 
+				
+				<g:if test='${annualPayableSupTime.get(0)<10}'>
+                	0${annualPayableSupTime.get(0)} :
+                </g:if>	
+                <g:else>
+                	${annualPayableSupTime.get(0)} :
+                </g:else>
+                
+                <g:if test='${annualPayableSupTime.get(1)<10}'>
+                	0${annualPayableSupTime.get(1)}
+                </g:if>	
+                <g:else>
+                	${annualPayableSupTime.get(1)}
+                </g:else>
+			
           	</g:if>
           	<g:else>
-          		00:00
+          		00 : 00
           	</g:else>	
 		</td>
 		
 		<td style="vertical-align: middle;text-align:right;">
 			<g:if test="${annualPayableCompTime !=null && (annualPayableCompTime.get(0)>0 ||annualPayableCompTime.get(1)>0)}">
-            	${annualPayableCompTime.get(0)}:${annualPayableCompTime.get(1)==0?'':annualPayableCompTime.get(1)} 
+            	
+            	<g:if test='${annualPayableCompTime.get(0)<10}'>
+                	0${annualPayableCompTime.get(0)} :
+                </g:if>	
+                <g:else>
+                	${annualPayableCompTime.get(0)} :
+                </g:else>
+                
+                <g:if test='${annualPayableCompTime.get(1)<10}'>
+                	0${annualPayableCompTime.get(1)}
+                </g:if>	
+                <g:else>
+                	${annualPayableCompTime.get(1)}
+                </g:else>	
           	</g:if>
           	<g:else>
-          		00:00
+          		00 : 00
           	</g:else>	
 		</td>		
 		<td></td>
@@ -130,12 +228,4 @@
 	</tbody>
 </table>
 
-<h1>SYNTHESE ANNUELLE</h1>
 
-
-<div id='annualRecap'>
-	<ul>
-		<li>Quota Annuel avec HS et HC: 0</li>
-	
-	</ul>
-</div>

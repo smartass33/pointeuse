@@ -239,12 +239,12 @@
 	</tr>
 </table>
 
-<table style="width:1000px">
+<table style="width:700px">
 <thead></thead>
 <tr>
-	<td style="width:300px;">${message(code: 'report.verification.date.label', default: 'Report')}: ${new Date().format('EEEE dd MMM yyyy')}</td>
-	<td style="width:400px;">${message(code: 'report.employee.signature.label', default: 'Report')}:</td>
-	<td style="width:400px;">${message(code: 'report.employer.signature.label', default: 'Report')}:</td>
+	<td style="width:100px;">${message(code: 'report.verification.date.label', default: 'Report')}: ${new Date().format('EEEE dd MMM yyyy')}</td>
+	<td style="width:100px;">${message(code: 'report.employee.signature.label', default: 'Report')}:</td>
+	<td style="width:100px;">${message(code: 'report.employer.signature.label', default: 'Report')}:</td>
 	
 </tr>
 </table>
