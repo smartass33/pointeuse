@@ -59,7 +59,7 @@ environments {
 		dataSource {
 			pooled = true
 			dbCreate = "update"
-			url = "jdbc:mysql://localhost:3306/pointeuse_test?autoReconnect=true"
+			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
 			driverClassName = "com.mysql.jdbc.Driver"
 			username = "root"
 			password = "root"
