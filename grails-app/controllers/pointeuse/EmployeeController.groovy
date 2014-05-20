@@ -659,17 +659,6 @@ def vacationFollowup(){
 			
 		}		
 		
-		//Promise p = task {
-		//	data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)	
-		/*}
-		p.onError { Throwable err ->
-				println "An error occured ${err.message}"
-		}
-		p.onComplete { result ->
-				println "Promise returned $result"
-		}
-		*/
-		
 		previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'startDate',order:'desc'])
 		
 		def siteId=params["siteId"]
@@ -1106,6 +1095,9 @@ def vacationFollowup(){
 	
 	
 	def modifyTime(){
+		params.each{i->
+			log.error('param: '+i)
+		}
 		def idList=params["inOrOutId"]
 		def dayList=params["day"]
 		def monthList=params["month"]
