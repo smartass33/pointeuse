@@ -266,4 +266,57 @@ class InAndOutController {
 			}
 		}
 	}
+	
+	
+	def generate() {
+		def type=params["event.type"]
+		def reasonId=params["reason.id"]
+		def employee
+		def employeeId
+		def timeDiff
+		def hour
+		def minute
+		def second	
+		def userId = params["userId"]
+		def name = params["name"]
+		employee = Employee.findByLastName(name)
+		userId=employee.id
+		employeeId=employee.id
+		Date date
+		def calendar = Calendar.instance
+		calendar.set(Calendar.MONTH,4)
+		calendar.set(Calendar.DAY_OF_MONTH,19)
+		calendar.set(Calendar.YEAR,2014)
+		date = calendar.time
+		def date_picker =params["date_picker"]
+		date =  new Date().parse("HH:mm:ss", date_picker)
+
+		calendar.set(Calendar.HOUR_OF_DAY,date.getAt(Calendar.HOUR_OF_DAY))
+		calendar.set(Calendar.MINUTE,date.getAt(Calendar.MINUTE))
+		calendar.set(Calendar.SECOND,date.getAt(Calendar.SECOND))
+		
+		def criteria = InAndOut.createCriteria()
+		def lastIn = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('day',calendar.get(Calendar.DATE))
+				eq('month',calendar.get(Calendar.MONTH)+1)
+				eq('year',calendar.get(Calendar.YEAR))
+				lt('time',calendar.time)
+				order('time','desc')
+			}
+			maxResults(1)
+		}
+			
+		if (lastIn != null){
+			use (TimeCategory){timeDiff=calendar.time-lastIn.time}
+		}
+
+		def inAndOutInstance = timeManagerService.initializeTotals(employee, calendar.time,type,null,null)
+		inAndOutInstance.regularization=true
+		inAndOutInstance.regularizationType=InAndOut.INITIALE_SALARIE
+		timeManagerService.regularizeTime(type,employeeId,inAndOutInstance,calendar)
+
+	}
+	
 }

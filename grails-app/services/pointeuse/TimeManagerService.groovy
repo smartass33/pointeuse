@@ -1625,8 +1625,7 @@ class TimeManagerService {
 		def monthlyPresentDays = 0
 		def monthlyWorkingDays = [:]
 		def monthlyTakenHolidays = [:]
-		
-		
+			
 		def period = Period.findByYear(year)
 		def remainingCA = employeeService.getRemainingCA(employee,period)
 		def takenCA = employeeService.getTakenCA(employee,period)

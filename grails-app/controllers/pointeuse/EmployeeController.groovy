@@ -1529,7 +1529,18 @@ def vacationFollowup(){
 				entranceStatus=false
 			}
 			
-			[userId: employee.id,employee: employee,inAndOuts:inAndOuts,dailyTotal:dailyTotal,humanTime:humanTime, dailySupp:dailySupp,mapByDay:mapByDay,entranceStatus:entranceStatus,totalByDay:totalByDay]
+			[
+				userId: employee.id,
+				employee: employee,
+				inAndOuts:inAndOuts,
+				dailyTotal:dailyTotal,
+				humanTime:humanTime, 
+				dailySupp:dailySupp,
+				mapByDay:mapByDay,
+				entranceStatus:entranceStatus,
+				totalByDay:totalByDay,
+				period:tmpCalendar.time
+			]
 		}
 		catch (Exception e){
 			log.error('error with application: '+e.toString())		
