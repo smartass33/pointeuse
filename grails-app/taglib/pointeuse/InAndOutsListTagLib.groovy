@@ -14,7 +14,7 @@ class InAndOutsListTagLib {
 	
 	
 	def inAndOutPopup ={attrs,body->
-		out<<render(template:"/inAndOut/template/inOrOutCreatePopup")
+		out<<render(template:"/inAndOut/template/inOrOutCreatePopup",model:[fromReport:attrs.fromReport])  
 		
 	}
 	

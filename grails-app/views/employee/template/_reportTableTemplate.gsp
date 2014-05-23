@@ -70,7 +70,13 @@
                   </g:if>     
                   <g:else>
 	                  	<g:if test="${employee.arrivalDate > entries.key}">
-	                  	-
+		                  	<g:if test="${holidayMap.get(entries.key) != null }">
+		                  		${holidayMap.get(entries.key).type}
+		                  	</g:if>
+		                  	<g:else>
+		                  		-
+		                  	</g:else>
+	                  	
 	                  	</g:if>
                   		<g:else>
 	   	                    <g:if test="${entries == null || entries.value ==null}">           

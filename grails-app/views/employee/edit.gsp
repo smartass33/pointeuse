@@ -107,7 +107,24 @@
 					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
 				</fieldset>
 			</g:form>	
-				<g:vacationEditTable/>	
+
+			<h1>gestion des contrats et du statut du salarié</H1>		
+			<BR>
+
+
+			<g:form method="post" >
+				<g:hiddenField name="id" value="${employeeInstance?.id}" />
+				<g:hiddenField name="isAdmin" value="${isAdmin}" />	
+				<g:hiddenField name="siteId" value="${siteId}" />			
+				<g:hiddenField name="version" value="${employeeInstance?.version}" />
+				<g:if test="${employeeInstance.id != null }">
+					<div id='contractTable'>
+						<g:employeeContractTable/>
+					</div>
+				</g:if>
+			</g:form>
+			<g:contractStatus/>
+			<g:vacationEditTable/>	
 			<script type="text/javascript">
 				$(function(){
 					$('#paidHSDiv').load('${createLink(controller:'employee', action:'getSupplementaryTime',params:[id:employeeInstance?.id])}');

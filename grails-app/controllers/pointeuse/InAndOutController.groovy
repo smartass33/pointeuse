@@ -51,6 +51,7 @@ class InAndOutController {
 			hour = params.int("myTime_hour")
 			minute = params.int("myTime_minute")
 		}
+		def tott = params["fromReport"]
 		def instanceDate = date!=null?date:params["inOrOutDate"]
 		def second = params["myTime_second"]!=null ? params.int("myTime_second") :0
 		def fromReport = params["fromReport"].equals('true') ? true:false
@@ -159,10 +160,9 @@ class InAndOutController {
 				//redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])				
 			}else{
 				log.error('entry created from pointage: '+inAndOutInstance)		
-				redirect(action: "pointage", controller:"employee", id: employeeId)
+				redirect(action: "pointage", controller:"employee", id: employeeId,params:[username:employee.userName])
 				return
 			}
-			return
 		}catch(CannotRedirectException e){
 			log.error(e.toString())
 		}	

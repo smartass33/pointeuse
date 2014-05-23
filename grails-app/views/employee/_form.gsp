@@ -35,13 +35,7 @@
 	<g:textField name="matricule" value="${employeeInstance?.matricule}"/>
 </div>
 
-<BR>
 
-<g:if test="${employeeInstance.id != null }">
-	<div id='contractTable'>
-		<g:employeeContractTable/>
-	</div>
-</g:if>
 
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'arrivalDate', 'error')} ">
 	<label for="arrivalDate">
@@ -128,6 +122,5 @@
 	          />
 	</g:else>
 </div>
-<g:contractStatus/>
 
 	          

@@ -16,31 +16,32 @@
 <meta name="layout" content="main" />
 <title>Pointeuse Journalière</title>
 
-<script type="text/javascript">		
-	function updateClock ( )
-	{
-	  var currentTime = new Date ( );
-	
-	  var currentHours = currentTime.getHours ( );
-	  var currentMinutes = currentTime.getMinutes ( );
-	  var currentSeconds = currentTime.getSeconds ( );
-	
-	  // Pad the minutes and seconds with leading zeros, if required
-	  currentMinutes = ( currentMinutes < 10 ? "0" : "" ) + currentMinutes;
-	  currentSeconds = ( currentSeconds < 10 ? "0" : "" ) + currentSeconds;
-	
-	  // Compose the string for display
-	  var currentTimeString = currentHours + ":" + currentMinutes + ":" + currentSeconds  //+ " " + timeOfDay;
-	
-	  // Update the time display
-	   var elem = document.getElementById('clock');
-	   if (null!=elem){
-	     document.getElementById('clock').firstChild.nodeValue = currentTimeString;
-	   }else{
-	   	setInterval('updateClock()', 1000 );
-	   }
-	}
-</script>
+	<script type="text/javascript">
+
+function startTime()
+{
+var today=new Date();
+var h=today.getHours();
+var m=today.getMinutes();
+var s=today.getSeconds();
+// add a zero in front of numbers<10
+m=checkTime(m);
+s=checkTime(s);
+document.getElementById('clock').innerHTML=h+":"+m+":"+s;
+t=setTimeout(function(){startTime()},500);
+}
+
+function checkTime(i)
+{
+if (i<10)
+  {
+  i="0" + i;
+  }
+return i;
+}
+
+
+	</script>
 
 	<script type="text/javascript">
 
@@ -110,6 +111,7 @@
 	}
 	function resetTimer()
 	{
+		startTime();
 		clearTimeout(t);
 		t=setTimeout(logout,60000) //logs out in 1 min
 	}
@@ -301,7 +303,7 @@ function closePopup ( ){
 </script>
 </head>
 <body>
-	<g:javascript>window.onload = updateClock();window.onload=resetTimer();</g:javascript>
+	    <g:javascript>window.onload = startTime();</g:javascript>
 	<div class="body">
 		<div id="show-employee" class="content scaffold-show" role="main">
 			<h1>
@@ -309,6 +311,8 @@ function closePopup ( ){
 						default="Last Name" />: <g:fieldValue bean="${employee}"
 						field="firstName" /> <g:fieldValue bean="${employee}"
 						field="lastName" />
+						
+						
 			</h1>
 
 			</font>

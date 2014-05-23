@@ -203,7 +203,6 @@ class EmployeeController {
 
 		if ( params["updatedSelection"] == null || (params["updatedSelection"] != null && params["updatedSelection"].size() == 0)){
 			status = new Status(null, employeeInstance,StatusType.ACTIF)
-	
 			employeeInstance.status = status		
 		}
 			
@@ -219,7 +218,7 @@ class EmployeeController {
 			status.save(flush: true)
 		}
 
-        flash.message = message(code: 'default.created.message', args: [message(code: 'employee.label', default: 'Employee'), employeeInstance.id])
+        flash.message = message(code: 'default.created.message', args: [message(code: 'employee.label', default: 'Employee'), employeeInstance.lastName])
         redirect(action: "show", id: employeeInstance.id,params: [isAdmin: isAdmin])
     }
 
@@ -930,6 +929,10 @@ def vacationFollowup(){
 	
 
     def update(Long id, Long version) {
+		params.each{i->
+			log.error('param for update: '+i)
+		}		
+		
 		def siteId=params["siteId"]
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
         def employeeInstance = Employee.get(id)
@@ -949,7 +952,14 @@ def vacationFollowup(){
             }
         }
 		
+		
+		def employeeStatus = employeeInstance.status
+		
+		log.error('employee status: '+employeeInstance.status)
+		
         employeeInstance.properties = params
+		
+		
 		if (params["weeklyContractTime"] != null){
 			employeeInstance.weeklyContractTime = params.float("weeklyContractTime")
 		}
@@ -972,13 +982,18 @@ def vacationFollowup(){
 			employeeInstance.function=function
 		}
 		
+
+		
+		
+		employeeInstance.status = employeeStatus
+		
         if (!employeeInstance.save(flush: true)) {
             render(view: "edit", model: [employeeInstance: employeeInstance])
             return
         }
 
         flash.message = message(code: 'default.updated.message', args: [message(code: 'employee.label', default: 'Employee'), employeeInstance.userName])
-        redirect(action: "show", id: employeeInstance.id,params: [isAdmin: isAdmin,siteId:siteId])
+        redirect(action: "edit", id: employeeInstance.id,params: [isAdmin: isAdmin,siteId:siteId])
     }
 
 	
@@ -1452,7 +1467,7 @@ def vacationFollowup(){
 			if (employee==null){
 				throw new NullPointerException("unknown employee("+username+")")
 			}else{
-				log.error('employee successfully authenticated='+username)
+				log.error('employee successfully authenticated='+employee)
 			}
 			
 			def calendar = Calendar.instance	
@@ -1530,6 +1545,7 @@ def vacationFollowup(){
 			}
 			
 			[
+				id:id,
 				userId: employee.id,
 				employee: employee,
 				inAndOuts:inAndOuts,
@@ -1541,12 +1557,13 @@ def vacationFollowup(){
 				totalByDay:totalByDay,
 				period:tmpCalendar.time
 			]
+			
 		}
 		catch (Exception e){
 			log.error('error with application: '+e.toString())		
 			flash.message = message(code: 'employee.not.found.label',args:[params["username"]])
 			redirect(uri:'/')
-
+			
 		}
 	}	
 
@@ -1966,4 +1983,38 @@ def vacationFollowup(){
 		 }
 		log.error('mail sent')
 	  }
+	
+	def removeCSS(){
+		def criteria
+		def entryDate
+		 
+		
+		def employeeList = Employee.findAll("from Employee")
+		for (Employee employee: employeeList){
+		//	log.error('employee: '+employee)
+			entryDate = employee.arrivalDate
+			criteria = Absence.createCriteria()
+			
+			log.error('employee entry date: '+entryDate)
+			def sansSoldeList = criteria.list {
+				and {
+					eq('employee',employee)
+					eq('year',entryDate.getAt(Calendar.YEAR))
+					eq('month',entryDate.getAt(Calendar.MONTH)+1)
+					lt('date',entryDate)
+					eq('type',AbsenceType.CSS)
+				}
+			}
+			if (sansSoldeList.size()>0){
+				log.error('sans solde is not null= '+sansSoldeList+ 'for employee: '+employee)
+				for (def sansSolde:sansSoldeList){
+					log.error('removing sansSolde: '+sansSolde.date)
+					sansSolde.delete(flush:true)
+					
+				}
+				
+				 
+			}
+		}
+	}
 }

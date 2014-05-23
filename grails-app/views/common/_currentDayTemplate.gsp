@@ -2,8 +2,7 @@
 
 <h1>
 	<g:formatDate format="E dd MMM yyyy'" date="${Calendar.instance.time}" />
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span
-		id="clock"><g:formatDate format="HH:mm:ss" date="${new Date()}" /></span>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span id='clock'><g:formatDate format="HH:mm:ss" date="${new Date()}"/></span>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<g:message code="employee.daily.time" default="Last Name" />
 	:
@@ -93,7 +92,7 @@
 				<g:link class="displayButton" controller="employee" action="reportLight" params="[userId:employee.id]">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link>
 			</li>
 			<li >
-				<g:inAndOutPopup/>
+				<g:inAndOutPopup fromReport="false"/>
 			</li>
 			<li>
 				<g:link class="logoutButton"  url="${grailsApplication.config.serverURL}/${grailsApplication.config.context}">${message(code: 'employee.disconnect.label', default: 'Sortie')}</g:link>

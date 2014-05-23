@@ -37,7 +37,7 @@
 			</tbody>
 		</table>
 		<g:hiddenField name="userId" value="${userId}" />
-		<g:hiddenField name="fromReport" value="${true}" />
+		<g:hiddenField name="fromReport" value="${fromReport}" />
 		<g:submitToRemote class="listButton"
 			onLoading="document.getElementById('spinner').style.display = 'inline';"
                 		onComplete="document.getElementById('spinner').style.display = 'none';"						
