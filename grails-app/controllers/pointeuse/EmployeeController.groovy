@@ -1167,16 +1167,20 @@ def vacationFollowup(){
 	
 
 	def annualReport(Long userId){
+		params.each{i-> log.error(i)}
 		def year
 		def month
 		def calendar = Calendar.instance
 		boolean isAjax = params["isAjax"].equals("true") ? true : false
+		if (userId == null){
+			userId = params.long('userId')
+		}
 		Employee employee = Employee.get(userId)
 		
 		if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
 			year = params.int('myDate_year')
 		}else{
-			year = calendar.get(Calendar.YEAR)
+			year = calendar.get(Calendar.YEAR) - 1
 		}
 		if (params["myDate_month"] != null && !params["myDate_month"].equals('')){
 			month = params.int('myDate_month')
@@ -1204,6 +1208,42 @@ def vacationFollowup(){
 		}
 			
 	}
+	
+	def annualReportLight(Long userId){
+		def year
+		def month
+		def calendar = Calendar.instance
+		boolean isAjax = params["isAjax"].equals("true") ? true : false
+		Employee employee = Employee.get(userId)
+		
+		if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
+			year = params.int('myDate_year')
+		}else{
+			year = calendar.get(Calendar.YEAR) - 1
+		}
+		if (params["myDate_month"] != null && !params["myDate_month"].equals('')){
+			month = params.int('myDate_month')
+		}else{
+			month = calendar.get(Calendar.MONTH)+1
+		}
+		if (month < 6){
+			year = year - 1
+		}
+		
+		
+		if (userId==null){
+			log.error('userId is null. exiting')
+			return
+		}
+
+		[employee:employee,userId:employee.id]		
+
+			
+	}
+	
+
+	
+	
 
 	def reportLight(Long userId,int monthPeriod,int yearPeriod){
 		def yearInf
@@ -1731,7 +1771,7 @@ def vacationFollowup(){
 		if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
 			year = params.int('myDate_year')
 		}else{
-			year = calendar.get(Calendar.YEAR)
+			year = calendar.get(Calendar.YEAR) - 1
 		}
 		if (params["myDate_month"] != null && !params["myDate_month"].equals('')){
 			month = params.int('myDate_month')

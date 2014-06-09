@@ -2,6 +2,7 @@
 <%@ page import="pointeuse.InAndOut"%>
 <%@ page import="pointeuse.Absence"%>
 <%@ page import="java.util.Calendar"%>
+<%@ page import="pointeuse.Period"%>
 
 
 
@@ -54,6 +55,7 @@ function showSpinner() {
 
 	<div class="nav" id="nav">
 		<ul>
+		<g:form method="POST">
 			<li><a class="home" href="${createLink(uri: '/')}"><g:message
 						code="default.home.label" /></a></li>
 			<li><g:link class="list" action="list"
@@ -64,16 +66,10 @@ function showSpinner() {
 						${message(code: 'admin.logout.label', default: 'Logout')}
 					</g:link></li>
 			</g:if>
-			<li style="vertical-align: middle;">
-				<g:form method="POST"
-					url="[controller:'employee', action:'annualTotalPDF']">
-					<g:actionSubmit value="PDF" action="annualTotalPDF" class="pdfButton" />
-					<g:hiddenField name="isAdmin" value="${isAdmin}" />
-					<g:hiddenField name="siteId" value="${siteId}" />
-					<g:hiddenField name="userId" value="${userId}" />
-					<g:hiddenField name="isAjax" value="true" />			
-				</g:form>
-			</li>
+			
+
+			</g:form>
+			
 		</ul>	
 	</div>
 	<div id="spinner" class="spinner" style="display: none;">
@@ -86,6 +82,9 @@ function showSpinner() {
 			</div>
 		</g:if>
 	</div>	
+
+
+
 
 	<div id="monthlyTable">
 

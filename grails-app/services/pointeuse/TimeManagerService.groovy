@@ -992,7 +992,7 @@ class TimeManagerService {
 		endCalendar.set(Calendar.YEAR,year)
 		endCalendar.set(Calendar.MONTH,month-1)
 		
-		log.debug('current date: '+calendar.time)
+		log.error('current date: '+calendar.time)
 		def currentCalendar = Calendar.instance
 		
 		// special case: the month is not over yet
@@ -1030,6 +1030,13 @@ class TimeManagerService {
 				}
 			}
 		}	
+		
+		
+		// special case: employee has not yet arrived in the company
+		if (employeeInstance.arrivalDate > currentCalendar.time ){
+			counter = 0
+		}
+		
 		
 		
 		// get cumul RTT
@@ -1840,16 +1847,13 @@ class TimeManagerService {
 			// we need to count OPEN DAYS between dates and not consecutive days
 			realOpenDays = openDaysBetweenDates(employee.arrivalDate,endCalendar.time)
 		}
+		
 
-		//special case: departure month
-/*
-		if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) == month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
-			if (currentStatus.type != StatusType.ACTIF){
-				log.error('departure month. recomputing open days')
-				realOpenDays = openDaysBetweenDates(startCalendar.time,currentStatus.date)
-			}
+		
+		// special case: employee has not yet arrived in the company
+		if (employee.arrivalDate > endCalendar.time ){
+			isOut = true
 		}
-	*/	
 		
 		//special case: departure month
 		//if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) <= month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
