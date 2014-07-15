@@ -768,12 +768,14 @@ def vacationFollowup(){
 		def cartoucheTable = timeManagerService.getCartoucheData(employee,cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)	
 		def workingDays=cartoucheTable.getAt('workingDays')
 		def holiday=cartoucheTable.getAt('holidays')
+		def exceptionnel=cartoucheTable.getAt('exceptionnel')		
 		def rtt=cartoucheTable.getAt('rtt')
 		def sickness=cartoucheTable.getAt('sickness')
 		def sansSolde=cartoucheTable.getAt('sansSolde')
 		def monthTheoritical = timeManagerService.computeHumanTimeAsString(cartoucheTable.getAt('monthTheoritical'))
 		def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.getAt('pregnancyCredit'))
 		def yearlyHoliday=cartoucheTable.getAt('yearlyHolidays')
+		def yearlyExceptionnel=cartoucheTable.getAt('yearlyExceptionnel')	
 		def yearlyRtt=cartoucheTable.getAt('yearlyRtt')
 		def yearlySickness=cartoucheTable.getAt('yearlySickness')
 		def yearlyTheoritical = timeManagerService.computeHumanTimeAsString(cartoucheTable.getAt('yearlyTheoritical'))
@@ -813,12 +815,14 @@ def vacationFollowup(){
 			openedDays:openedDays,
 			workingDays:workingDays,
 			holiday:holiday,
+			exceptionnel:exceptionnel,
 			rtt:rtt,
 			sickness:sickness,
 			sansSolde:sansSolde,
 			monthTheoritical:monthTheoritical,
 			pregnancyCredit:pregnancyCredit,
 			yearlyHoliday:yearlyHoliday,
+			yearlyExceptionnel:yearlyExceptionnel,
 			yearlyRtt:yearlyRtt,
 			yearlySickness:yearlySickness,
 			yearlyTheoritical:yearlyTheoritical,

@@ -136,10 +136,10 @@
 						style="vertical-align: middle;" /> 
 				</li>
 				<li style="vertical-align: middle;" class="displayButton"><g:actionSubmit value="Afficher" action="report" class="displayButton" /></li>	
-				<g:if test="${!isCurrentMonth}"><li style="vertical-align: middle;"><g:actionSubmit value="PDF" action="userPDF" class="pdfButton" /></li></g:if>		
-				<li>
-				<g:inAndOutPopup fromReport="true"/>
-				</li>
+				<li style="vertical-align: middle;"><g:actionSubmit disabled="${isCurrentMonth}"  value="PDF" action="userPDF" class="${isCurrentMonth ? 'pdfButtonDisabled':'pdfButton'}" /></li>
+				
+				
+				<li><g:inAndOutPopup fromReport="true"/></li>
 			</g:form>
 			<li>
 				<a  class='legend' id="legend" title="

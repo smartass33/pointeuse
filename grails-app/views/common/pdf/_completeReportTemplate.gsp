@@ -6,6 +6,8 @@
 		<%@ page import="pointeuse.InAndOut"%>
 		<%@ page import="pointeuse.AbsenceType"%>
 		<%@ page import="pointeuse.MonthlyTotal"%>
+		
+		
 	<style  type="text/css">
 				@page {
 				   size: 210mm 297mm;
@@ -72,7 +74,7 @@
 						</tr>
 						<tr/><tr/><tr/><tr/><tr/><tr/><tr/><tr/>						
 						<tr>
-							<td style="text-align:left;">${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${fieldValue(bean: employee, field: "weeklyContractTime")}</td>
+							<td style="text-align:left;">${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${currentContract.weeklyLength}</td>
 						</tr>
 						<tr>
 							<td style="text-align:left;">${message(code: 'employee.matricule.label', default: 'report')}: ${fieldValue(bean: employee, field: "matricule")}</td>
@@ -157,7 +159,26 @@
 	        							<tr><td>${yearlySansSolde as float}</td></tr>
 	        						</table>
 	        					</td>
-							</tr>					
+							</tr>	
+							
+							<tr>
+								<td width="35%" style="text-align:left;" >${message(code: 'employee.exceptionnel.count', default: 'report')} :</td>	
+	 							<td>
+	 								<table border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${exceptionnel as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					
+	        					<td>
+	        						<table border="1" class="cartoucheValues">
+	        							<thead></thead>	        							
+	        							<tr><td>${yearlyExceptionnel as float}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>							
+							
+											
 							<tr>
 								<td style="text-align:left;">${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
 								<td>

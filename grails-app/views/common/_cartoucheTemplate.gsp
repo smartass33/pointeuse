@@ -1,5 +1,6 @@
+
 <body>
-	<BR>
+	<BR/>
 		<table style="float: left;">
 			<tr>
 				<td style="font-weight: bold;" class="cartoucheLeftTD" >
@@ -17,7 +18,7 @@
 			</tr>
 		</table> 
 				
-		<table >						
+		<table style="float: left;">						
 			<tbody>		
 				<tr>
 					<td class="cartoucheRightFiguresTD" />
@@ -35,6 +36,8 @@
 					<td class="cartoucheRightFiguresTD">${rtt as java.lang.Float}</td>
 	     			<td class="cartoucheRightFiguresTD">${yearlyRtt as java.lang.Float}</td>
 				</tr>
+				
+				
 				<tr>
 					<td class="cartoucheRightTitleTD" >${message(code: 'employee.sickness.count', default: 'report')} :</td>
 					<td class="cartoucheRightFiguresTD">${sickness as java.lang.Float}</td>
@@ -44,7 +47,13 @@
 					<td class="cartoucheRightTitleTD" >${message(code: 'employee.sanssolde.count', default: 'report')} :</td>
 					<td class="cartoucheRightFiguresTD">${sansSolde as java.lang.Float}</td>
 	    			<td class="cartoucheRightFiguresTD">${yearlySansSolde as java.lang.Float}</td>
-				</tr>					
+				</tr>
+				<tr>		
+					<td class="cartoucheRightTitleTD" >${message(code: 'employee.exceptionnel.count', default: 'report')} :</td>	
+					<td class="cartoucheRightFiguresTD">${exceptionnel as java.lang.Float}</td>        					
+	     			<td class="cartoucheRightFiguresTD">${yearlyExceptionnel as java.lang.Float}</td>
+				</tr>				
+									
 				<tr>
 					<td class="cartoucheRightTitleTD" >${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
 	    			<g:if test="${monthTheoritical!=null}">

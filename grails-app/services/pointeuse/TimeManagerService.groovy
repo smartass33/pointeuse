@@ -470,7 +470,7 @@ class TimeManagerService {
 		def diff=inputSeconds
 		long hours=TimeUnit.SECONDS.toHours(diff);
 		diff=diff-(hours*3600);
-		long minutes=TimeUnit.SECONDS.toMinutes(diff);	
+		long minutes=TimeUnit.SECONDS.toMinutes(diff);
 		diff=diff-(minutes*60);
 		long seconds=TimeUnit.SECONDS.toSeconds(diff);
 		//return [hours,minutes,seconds]
@@ -807,6 +807,16 @@ class TimeManagerService {
 		}
 		
 		criteria = Absence.createCriteria()
+		def yearlyExceptionnel = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.EXCEPTIONNEL)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
 		def yearlyRtt = criteria.list {
 			and {
 				eq('employee',employee)
@@ -967,6 +977,7 @@ class TimeManagerService {
 		return [
 			yearlyActualTotal:yearlyCounter,
 			yearlyHolidays:yearlyHolidays.size(),
+			yearlyExceptionnel:yearlyExceptionnel.size(),
 			yearlyRtt:yearlyRtt.size(),
 			yearlySickness:yearlySickness.size(),
 			yearlyTheoritical:yearTheoritical,
@@ -1084,6 +1095,16 @@ class TimeManagerService {
 		}
 		
 		criteria = Absence.createCriteria()
+		def exceptionnel = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.EXCEPTIONNEL)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
 		def sansSolde = criteria.list {
 			and {
 				eq('employee',employeeInstance)
@@ -1136,6 +1157,7 @@ class TimeManagerService {
 			employeeInstance:employeeInstance,
 			workingDays:counter,
 			holidays:holidays.size(),
+			exceptionnel:exceptionnel.size(),
 			rtt:rtt.size(),
 			sickness:sickness.size(),
 			sansSolde:sansSolde.size(),
@@ -1330,6 +1352,7 @@ class TimeManagerService {
 		def cartoucheTable = getCartoucheData(employee,year,month)
 		def workingDays=cartoucheTable.get('workingDays')
 		def holiday=cartoucheTable.get('holidays')
+		def exceptionnel=cartoucheTable.get('exceptionnel')
 		def rtt=cartoucheTable.get('rtt')
 		def isCurrentMonth=cartoucheTable.get('isCurrentMonth')	
 		def sickness=cartoucheTable.get('sickness')
@@ -1337,6 +1360,7 @@ class TimeManagerService {
 		def monthTheoritical = cartoucheTable.get('monthTheoritical')
 		def pregnancyCredit = computeHumanTimeAsString(cartoucheTable.get('pregnancyCredit'))
 		def yearlyHoliday=cartoucheTable.get('yearlyHolidays')
+		def yearlyExceptionnel=cartoucheTable.get('yearlyExceptionnel')	
 		def yearlyRtt=cartoucheTable.get('yearlyRtt')
 		def yearlySickness=cartoucheTable.get('yearlySickness')
 		def yearlyTheoritical = computeHumanTimeAsString(cartoucheTable.get('yearlyTheoritical'))
@@ -1390,6 +1414,8 @@ class TimeManagerService {
 			yearlyRtt:yearlyRtt,
 			yearlySickness:yearlySickness,
 			yearlySansSolde:yearlySansSolde,
+			exceptionnel:exceptionnel,
+			yearlyExceptionnel:yearlyExceptionnel,
 			yearlyTheoritical:yearlyTheoritical,
 			monthlyTotal:monthlyTotalTimeByEmployee,
 			weeklyTotal:weeklyTotalTimeByEmployee,
@@ -1808,6 +1834,17 @@ class TimeManagerService {
 			}
 		}
 		
+		
+		criteria = Absence.createCriteria()
+		def exceptionnel = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.EXCEPTIONNEL)
+			}
+		}
+		
 		criteria = Absence.createCriteria()
 		def sansSolde = criteria.list {
 			and {
@@ -1856,7 +1893,6 @@ class TimeManagerService {
 		}
 		
 		//special case: departure month
-		//if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) <= month && (currentStatus.date.getAt(Calendar.YEAR)) == year){
 		if (currentStatus.date != null && currentStatus.date <= endCalendar.time){
 			if (currentStatus.type != StatusType.ACTIF){
 				if (currentStatus.date.getAt(Calendar.MONTH) == endCalendar.get(Calendar.MONTH) && currentStatus.date.getAt(Calendar.YEAR) == endCalendar.get(Calendar.YEAR) ){
@@ -1881,7 +1917,7 @@ class TimeManagerService {
 			3600*(
 					realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
 					+(Employee.Pentecote)*((realOpenDays - sansSolde.size())/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
-					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size()))
+					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size()+exceptionnel.size()))
 				- pregnancyCredit) as int
 		}						
 		return monthTheoritical

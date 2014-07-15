@@ -24,6 +24,8 @@
 		<th class='rotate-45'><div><span><g:message code="annual.report.sickness.label"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.report.supplementary.label"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.report.complementary.label"/></span></div></th>
+		<th class='rotate-45'><div><span>quota annuel avec HS & HC</span></div></th>
+		
 	</thead>
 	<tbody id='body_update' style="border:1px;">
 		<g:each in="${yearMonthMap}"  status="i" var="cartouche">
@@ -123,7 +125,8 @@
               		<g:else>
            			00 : 00
               		</g:else>	
-				</td>							
+				</td>
+											
 			</tr>
 		</g:each>
 		<tr class='even' style='font-weight:bold;'>
@@ -223,7 +226,7 @@
           		00 : 00
           	</g:else>	
 		</td>		
-		<td></td>
+		
 		</tr>
 	</tbody>
 </table>

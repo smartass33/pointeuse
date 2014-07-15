@@ -1,4 +1,3 @@
-
 <%@ page import="pointeuse.BankHoliday" %>
 <!DOCTYPE html>
 <html>
@@ -34,7 +33,7 @@
 						<tr class="${(j % 2) == 0 ? 'even' : 'odd'}">
 							<td style="width:150px;text-align:center"><g:link action="show" id="${bankHoliday.id}">${bankHoliday.calendar.time.format('dd MMMM yyyy')}</g:link></td>
 							<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">
-								<td style="width:150px;text-align:center">${bankHoliday.loggingDate.format('dd/mm/yyyy') }</td>
+								<td style="width:150px;text-align:center">${bankHoliday.loggingDate.format('dd/MM/yyyy') }</td>
 								<td style="width:150px;text-align:center">${bankHoliday.user.firstName} ${bankHoliday.user.lastName}</td>
 							</sec:ifAnyGranted>				
 						</tr>
