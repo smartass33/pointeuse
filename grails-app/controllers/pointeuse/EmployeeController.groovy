@@ -1175,6 +1175,7 @@ def vacationFollowup(){
 		def year
 		def month
 		def calendar = Calendar.instance
+		
 		boolean isAjax = params["isAjax"].equals("true") ? true : false
 		if (userId == null){
 			userId = params.long('userId')
@@ -1195,14 +1196,22 @@ def vacationFollowup(){
 			year = year - 1
 		}
 		
+		def  period = Period.get(params.int('periodId'))
+		if (period != null){
+			year = period.year
+		} else{
+			period = Period.findByYear(year)
+		}
+		
 		
 		if (userId==null){
 			log.error('userId is null. exiting')
 			return
 		}
-
-				
+		
+		 
 		def model = timeManagerService.getAnnualReportData(year, employee)
+		model << [period:period]
 		if (isAjax){
 			render template: "/employee/template/annualReportTemplate", model:	model
 			return

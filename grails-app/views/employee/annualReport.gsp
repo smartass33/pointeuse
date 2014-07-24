@@ -52,7 +52,8 @@ function showSpinner() {
 </head>
 <body>
 <body>
-
+	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requête...</div>
+	
 	<div class="nav" id="nav">
 		<ul>
 		<g:form method="POST">
@@ -68,13 +69,40 @@ function showSpinner() {
 			</g:if>
 			
 
+				
+			<li class="datePicker">
+				<g:select name="year" from="${Period.list([sort:'year'])}"
+					value="${period}"
+					noSelection="${['':(period?period:'-')]}" optionKey="id" 		
+					onchange="${remoteFunction(action: 'annualReport',
+                  		update: 'monthlyTable',
+                  		params: 
+						'\'isAjax=' + true 	
+						+ '&userId=' + userId
+						+ '&periodId=\' + this.value',
+						onLoading: "document.getElementById('spinner').style.display = 'inline';",
+						onComplete: "document.getElementById('spinner').style.display = 'none';"
+						)}"
+					
+					style="vertical-align: middle;" />					
+			</li>
+			
+			<li style="vertical-align: middle;">
+			
+				<g:actionSubmit value="PDF" action="annualTotalPDF" class="pdfButton" />
+						<g:hiddenField name="isAdmin" value="${isAdmin}" />
+						<g:hiddenField name="siteId" value="${siteId}" />
+						<g:hiddenField name="userId" value="${userId}" />
+						<g:hiddenField name="isAjax" value="true" />	
+			</li>
+			
+			<li style="vertical-align: middle;" class="displayButton"><g:actionSubmit value="Afficher" action="annualReport" class="displayButton" /></li>	
+			
 			</g:form>
 			
 		</ul>	
 	</div>
-	<div id="spinner" class="spinner" style="display: none;">
-    <span><g:message code="spinner.loading.label"/></span><img id="img-spinner" src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading"/>
-</div>
+
 	<div id="list-employee" class="content scaffold-list">
 		<g:if test="${flash.message}">
 			<div class="message" id="flash">

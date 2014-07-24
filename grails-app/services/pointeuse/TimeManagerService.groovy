@@ -1969,7 +1969,7 @@ class TimeManagerService {
 		startCalendar.set(Calendar.YEAR,year)
 		startCalendar.set(Calendar.MONTH,month-1)
 		startCalendar.clearTime()
-		log.error('startCalendar: '+startCalendar.time)
+		log.debug('startCalendar: '+startCalendar.time)
 		
 		endCalendar.set(Calendar.YEAR,year)
 		endCalendar.set(Calendar.MONTH,month-1)
@@ -1977,7 +1977,7 @@ class TimeManagerService {
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
 		endCalendar.set(Calendar.DAY_OF_MONTH,startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-		log.error('endCalendar: '+endCalendar.time)
+		log.debug('endCalendar: '+endCalendar.time)
 		
 		
 		
@@ -2006,7 +2006,7 @@ class TimeManagerService {
 		
 		monthTheoritical = 0
 		for (Contract currentContract : previousContracts){
-			log.error("currentContract: "+currentContract)
+			log.debug("currentContract: "+currentContract)
 			weeklyContractTime = currentContract.weeklyLength
 			
 			if (weeklyContractTime == 0){			
@@ -2030,8 +2030,8 @@ class TimeManagerService {
 					endContractCalendar.set(Calendar.DAY_OF_MONTH,endContractCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
 					endDate = endContractCalendar.time				
 				}
-				log.error('startDate: '+startDate)
-				log.error('endDate: '+endDate)
+				log.debug('startDate: '+startDate)
+				log.debug('endDate: '+endDate)
 				
 				def absenceMap = getAbsencesBetweenDates( employee, startDate, endDate)
 				
@@ -2054,7 +2054,7 @@ class TimeManagerService {
 				if (currentStatus.date != null && currentStatus.date <= endCalendar.time){
 					if (currentStatus.type != StatusType.ACTIF){
 						if (currentStatus.date.getAt(Calendar.MONTH) == endCalendar.get(Calendar.MONTH) && currentStatus.date.getAt(Calendar.YEAR) == endCalendar.get(Calendar.YEAR) ){
-						log.error('departure month. recomputing open days')
+						log.debug('departure month. recomputing open days')
 							Calendar exitCalendar = Calendar.instance
 							exitCalendar.time = currentStatus.date
 							exitCalendar.roll(Calendar.DAY_OF_YEAR, -1)
@@ -2078,7 +2078,7 @@ class TimeManagerService {
 						- absenceMap.get(AbsenceType.GROSSESSE)) as int
 				}
 			}
-			log.error('monthTheoritical: '+monthTheoritical)
+			log.debug('monthTheoritical: '+monthTheoritical)
 			
 		}
 		return monthTheoritical
