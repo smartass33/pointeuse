@@ -1763,6 +1763,188 @@ class TimeManagerService {
 	}
 	
 	
+	def computeWeeklyContractTime(Employee employee,int month, int year){
+		
+		def criteria = Contract.createCriteria()
+
+		def	previousContracts = criteria.list {
+				or{
+					and {
+						lt('year',year)
+						eq('employee',employee)
+					}
+					and {
+						eq('year',year)
+						lt('month',month)
+						eq('employee',employee)
+					}
+					
+					and {
+						eq('year',year)
+						eq('month',month)
+						eq('employee',employee)
+					}
+				}
+				order('startDate','desc')
+				//maxResults(1)
+			}
+	
+			if (previousContracts != null && previousContracts.size()>0){
+				log.debug("previousContracts: "+previousContracts)
+				
+				if (previousContracts.size() == 1){
+					weeklyContractTime = previousContracts.get(0).weeklyLength
+				}else{
+					weeklyContractTime = previousContracts.get(0).weeklyLength
+				
+				}
+			}
+			else{
+				weeklyContractTime =employee.weeklyContractTime
+			}
+	}
+	
+	def getAbsencesBetweenDates(Employee employee,Date startDate,Date endDate){
+		def absenceMap = [:]
+		def	criteria = Contract.createCriteria()
+		
+		// get cumul sickness
+		criteria = Absence.createCriteria()
+		def sickness = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',startDate)
+				le('date',endDate)
+				eq('type',AbsenceType.MALADIE)
+			}
+		}
+		absenceMap.put(AbsenceType.MALADIE, sickness.size())
+		
+		// get cumul holidays
+		criteria = Absence.createCriteria()
+		def holidays = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',startDate)
+				le('date',endDate)
+				eq('type',AbsenceType.VACANCE)
+			}
+		}
+		absenceMap.put(AbsenceType.VACANCE, holidays.size())
+		
+		
+		criteria = Absence.createCriteria()
+		def exceptionnel = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',startDate)
+				le('date',endDate)
+				eq('type',AbsenceType.EXCEPTIONNEL)
+			}
+		}
+		absenceMap.put(AbsenceType.EXCEPTIONNEL, exceptionnel.size())
+		
+				
+		criteria = Absence.createCriteria()
+		def sansSolde = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',startDate)
+				le('date',endDate)
+				eq('type',AbsenceType.CSS)
+			}
+		}
+		absenceMap.put(AbsenceType.CSS, sansSolde.size())
+		
+				
+		criteria = Absence.createCriteria()
+		def pregnancy = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',startDate)
+				le('date',endDate)
+				eq('type',AbsenceType.GROSSESSE)
+			}
+		}
+		def pregnancyCredit=30*60*pregnancy.size()
+
+		absenceMap.put(AbsenceType.GROSSESSE, pregnancyCredit)
+		
+		return absenceMap
+	}
+	
+	
+	def getAbsences(Employee employee,int month,int year){
+		def absenceMap = [:]
+		def	criteria = Contract.createCriteria()
+		
+		// get cumul sickness
+		criteria = Absence.createCriteria()
+		def sickness = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.MALADIE)
+			}
+		}
+		absenceMap.put(AbsenceType.MALADIE, sickness.size())
+		
+		// get cumul holidays
+		criteria = Absence.createCriteria()
+		def holidays = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.VACANCE)
+			}
+		}
+		absenceMap.put(AbsenceType.VACANCE, holidays.size())
+		
+		
+		criteria = Absence.createCriteria()
+		def exceptionnel = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.EXCEPTIONNEL)
+			}
+		}
+		absenceMap.put(AbsenceType.EXCEPTIONNEL, exceptionnel.size())
+		
+				
+		criteria = Absence.createCriteria()
+		def sansSolde = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.CSS)
+			}
+		}
+		absenceMap.put(AbsenceType.CSS, sansSolde.size())
+		
+				
+		criteria = Absence.createCriteria()
+		def pregnancy = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.GROSSESSE)
+			}
+		}
+		def pregnancyCredit=30*60*pregnancy.size()
+
+		absenceMap.put(AbsenceType.GROSSESSE, pregnancyCredit)
+		
+		return absenceMap
+	}
+	
+	
+	
 	def getMonthTheoritical(Employee employee, int month,int year){
 		def monthTheoritical = 0
 		def counter = 0
@@ -1771,7 +1953,148 @@ class TimeManagerService {
 		def weeklyContractTime
 		def contract
 		def criteria
-		def previousContract
+		def previousContracts
+		def remainingDays
+		def currentStatus = employee.status
+		def realOpenDays
+		def departureDate
+		def startDate
+		def endDate
+		def startCalendar = Calendar.instance
+		def endCalendar = Calendar.instance
+		
+		def calendarCompute = Calendar.instance
+		
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.set(Calendar.YEAR,year)
+		startCalendar.set(Calendar.MONTH,month-1)
+		startCalendar.clearTime()
+		log.error('startCalendar: '+startCalendar.time)
+		
+		endCalendar.set(Calendar.YEAR,year)
+		endCalendar.set(Calendar.MONTH,month-1)
+		endCalendar.set(Calendar.HOUR_OF_DAY,23)
+		endCalendar.set(Calendar.MINUTE,59)
+		endCalendar.set(Calendar.SECOND,59)
+		endCalendar.set(Calendar.DAY_OF_MONTH,startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.error('endCalendar: '+endCalendar.time)
+		
+		
+		
+		criteria = Contract.createCriteria()
+		
+		previousContracts = criteria.list {
+			or{
+				// all contracts that close during the month
+				and {
+					ge('endDate',startCalendar.time)
+					le('endDate',endCalendar.time)
+					eq('employee',employee)
+				}
+				
+				// add the contract that is not over, unless its startdate is ulterior to the end of the current month
+				and {
+					le('startDate',endCalendar.time)
+					isNull('endDate')
+					eq('employee',employee)
+				}
+				
+			}
+			order('startDate','desc')
+		}
+
+		
+		monthTheoritical = 0
+		for (Contract currentContract : previousContracts){
+			log.error("currentContract: "+currentContract)
+			weeklyContractTime = currentContract.weeklyLength
+			
+			if (weeklyContractTime == 0){			
+				monthTheoritical += 0
+			}else{
+				startDate = currentContract.startDate
+				
+				//the contract was not started during the current month: we will take first day of the month as starting point.
+				if (startDate.getAt(Calendar.MONTH) != (month + 1) ){
+					startDate = startCalendar.time
+				}
+				
+				endDate = currentContract.endDate
+				// if the contract has no end date, set the end the end date to the end of the month.
+				if (currentContract.endDate ==  null){
+					def endContractCalendar = Calendar.instance
+					endContractCalendar.time = startDate
+					endContractCalendar.set(Calendar.HOUR_OF_DAY,23)
+					endContractCalendar.set(Calendar.MINUTE,59)
+					endContractCalendar.set(Calendar.SECOND,59)
+					endContractCalendar.set(Calendar.DAY_OF_MONTH,endContractCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+					endDate = endContractCalendar.time				
+				}
+				log.error('startDate: '+startDate)
+				log.error('endDate: '+endDate)
+				
+				def absenceMap = getAbsencesBetweenDates( employee, startDate, endDate)
+				
+				//initialize day counters:
+				realOpenDays = openDaysBetweenDates(startDate,endDate)
+				totalNumberOfDays = openDaysBetweenDates(startDate,endDate)
+				
+				// special case: arrival month
+				if ((employee.arrivalDate.getAt(Calendar.MONTH) + 1) == month &&  (employee.arrivalDate.getAt(Calendar.YEAR)) == year){
+					// we need to count OPEN DAYS between dates and not consecutive days
+					realOpenDays = openDaysBetweenDates(employee.arrivalDate,endDate)
+				}
+	
+				// special case: employee has not yet arrived in the company
+				if (employee.arrivalDate > endCalendar.time ){
+					isOut = true
+				}
+				
+				//special case: departure month
+				if (currentStatus.date != null && currentStatus.date <= endCalendar.time){
+					if (currentStatus.type != StatusType.ACTIF){
+						if (currentStatus.date.getAt(Calendar.MONTH) == endCalendar.get(Calendar.MONTH) && currentStatus.date.getAt(Calendar.YEAR) == endCalendar.get(Calendar.YEAR) ){
+						log.error('departure month. recomputing open days')
+							Calendar exitCalendar = Calendar.instance
+							exitCalendar.time = currentStatus.date
+							exitCalendar.roll(Calendar.DAY_OF_YEAR, -1)
+							realOpenDays = openDaysBetweenDates(startCalendar.time,exitCalendar.time)
+						}else{
+							realOpenDays = 0
+							isOut = true
+						}
+					}
+				}
+		
+				log.debug('open days: '+realOpenDays)
+				if (isOut){
+					monthTheoritical += 0
+				}else{
+				monthTheoritical += (
+					3600*(
+							realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
+							+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
+							-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)))
+						- absenceMap.get(AbsenceType.GROSSESSE)) as int
+				}
+			}
+			log.error('monthTheoritical: '+monthTheoritical)
+			
+		}
+		return monthTheoritical
+		
+	}
+	
+	/*
+	def getMonthTheoritical(Employee employee, int month,int year){
+		def monthTheoritical = 0
+		def counter = 0
+		def isOut = false
+		def totalNumberOfDays
+		def weeklyContractTime
+		def contract
+		def criteria
+		def previousContracts
 		def remainingDays
 		def currentStatus = employee.status
 		def realOpenDays
@@ -1780,7 +2103,7 @@ class TimeManagerService {
 		def endCalendar = Calendar.instance
 		criteria = Contract.createCriteria()
 		
-		previousContract = criteria.get {
+		previousContracts = criteria.list {
 			or{
 				and {
 					lt('year',year)
@@ -1799,73 +2122,26 @@ class TimeManagerService {
 				}
 			}
 			order('startDate','desc')
-			maxResults(1)
+			//maxResults(1)
 		}
 
-		if (previousContract != null ){
-			log.debug("previousContract: "+previousContract)
-			weeklyContractTime = previousContract.weeklyLength
+		if (previousContracts != null && previousContracts.size()>0){
+			log.debug("previousContracts: "+previousContracts)
+			
+			if (previousContracts.size() == 1){
+				weeklyContractTime = previousContracts.get(0).weeklyLength
+			}else{
+				weeklyContractTime = previousContracts.get(0).weeklyLength
+			
+			}
 		}
 		else{
 			weeklyContractTime =employee.weeklyContractTime
 		}
 		
 
-		
-		// get cumul sickness
-		criteria = Absence.createCriteria()
-		def sickness = criteria.list {
-			and {
-				eq('employee',employee)
-				eq('year',year)
-				eq('month',month)
-				eq('type',AbsenceType.MALADIE)
-			}
-		}
-		
-		// get cumul holidays
-		criteria = Absence.createCriteria()
-		def holidays = criteria.list {
-			and {
-				eq('employee',employee)
-				eq('year',year)
-				eq('month',month)
-				eq('type',AbsenceType.VACANCE)
-			}
-		}
-		
-		
-		criteria = Absence.createCriteria()
-		def exceptionnel = criteria.list {
-			and {
-				eq('employee',employee)
-				eq('year',year)
-				eq('month',month)
-				eq('type',AbsenceType.EXCEPTIONNEL)
-			}
-		}
-		
-		criteria = Absence.createCriteria()
-		def sansSolde = criteria.list {
-			and {
-				eq('employee',employee)
-				eq('year',year)
-				eq('month',month)
-				eq('type',AbsenceType.CSS)
-			}
-		}
-		
-		criteria = Absence.createCriteria()
-		def pregnancy = criteria.list {
-			and {
-				eq('employee',employee)
-				eq('year',year)
-				eq('month',month)
-				eq('type',AbsenceType.GROSSESSE)
-			}
-		}
-		def pregnancyCredit=30*60*pregnancy.size()
-		
+		def absenceMap = getAbsences( employee, month, year)
+	
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.YEAR,year)
 		startCalendar.set(Calendar.MONTH,month-1)
@@ -1907,7 +2183,6 @@ class TimeManagerService {
 				}
 			}
 		}
-		
 
 		log.debug('open days: '+realOpenDays)
 		if (isOut){
@@ -1916,12 +2191,12 @@ class TimeManagerService {
 		monthTheoritical=(
 			3600*(
 					realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
-					+(Employee.Pentecote)*((realOpenDays - sansSolde.size())/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
-					-(weeklyContractTime/Employee.WeekOpenedDays)*(sickness.size()+holidays.size()+sansSolde.size()+exceptionnel.size()))
-				- pregnancyCredit) as int
-		}						
+					+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
+					-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)))
+				- absenceMap.get(AbsenceType.GROSSESSE)) as int
+		}
 		return monthTheoritical
-	}
+	}*/
 	
 	def getDailyInAndOutsData(Site site,Date currentDate){
 		def dailyMap = [:]

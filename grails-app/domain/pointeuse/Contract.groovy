@@ -18,7 +18,7 @@ class Contract {
     }
 	
 	String toString(){
-		return 'contract: '+ this.employee.lastName+' '+this.startDate+' '+this.endDate+' '+this.weeklyLength
+		return 'contract: '+ this.employee.lastName+', startDate: '+this.startDate+', endDate: '+this.endDate+', weeklyLength: '+this.weeklyLength
 	}
 	
 	
