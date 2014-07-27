@@ -23,8 +23,6 @@
 		<th class='rotate-45'><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.report.sickness.label"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.report.supplementary.label"/></span></div></th>
-		<th class='rotate-45'><div><span><g:message code="annual.report.complementary.label"/></span></div></th>
-		<th class='rotate-45'><div><span>quota annuel avec HS & HC</span></div></th>
 		
 	</thead>
 	<tbody id='body_update' style="border:1px;">
@@ -105,47 +103,7 @@
               		<g:else>
            			00 : 00
               		</g:else>
-				</td>			
-				<td style="vertical-align: middle;text-align:right;">
-					<g:if
-               			test="${yearMonthlyCompTime.get(cartouche.key) !=null && ((yearMonthlyCompTime.get(cartouche.key)).get(0)>0 ||(yearMonthlyCompTime.get(cartouche.key)).get(1)>0)}">
-	 	               	<g:if test='${(yearMonthlyCompTime.get(cartouche.key)).get(0)<10}'>
-		                	0${(yearMonthlyCompTime.get(cartouche.key)).get(0)} :
-		                </g:if>	
-		                <g:else>
-		                	${(yearMonthlyCompTime.get(cartouche.key)).get(0)} :
-		                </g:else>            
-		                <g:if test='${(yearMonthlyCompTime.get(cartouche.key)).get(1)<10}'>
-		                	0${(yearMonthlyCompTime.get(cartouche.key)).get(1)}
-		                </g:if>	
-		                <g:else>
-		                	${(yearMonthlyCompTime.get(cartouche.key)).get(1)}
-		                </g:else> 
-              		</g:if>
-              		<g:else>
-           			00 : 00
-              		</g:else>	
-				</td>
-				<td style="vertical-align: middle;text-align:right;">
-					<g:if
-               			test="${monthlyQuotaIncludingExtra.get(cartouche.key) !=null && ((monthlyQuotaIncludingExtra.get(cartouche.key)).get(0)>0 ||(monthlyQuotaIncludingExtra.get(cartouche.key)).get(1)>0)}">
-	 	               	<g:if test='${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(0)<10}'>
-		                	0${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(0)} :
-		                </g:if>	
-		                <g:else>
-		                	${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(0)} :
-		                </g:else>            
-		                <g:if test='${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(1)<10}'>
-		                	0${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(1)}
-		                </g:if>	
-		                <g:else>
-		                	${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(1)}
-		                </g:else> 
-              		</g:if>
-              		<g:else>
-           			00 : 00
-              		</g:else>	
-				</td>						
+				</td>								
 			</tr>
 		</g:each>
 		<tr class='even' style='font-weight:bold;'>
@@ -182,75 +140,32 @@
           		00 : 00
           	</g:else>	
 		</td>
-		
-		<td style="vertical-align: middle;text-align:right;">
-			<g:if test="${annualPayableCompTime !=null}">
-            	${annualPayableCompTime}
-          	</g:if>
-          	<g:else>
-          		00 : 00
-          	</g:else>	
-		</td>		
-		
-		<!--td style="vertical-align: middle;text-align:right;">
-			<g:if test="${annualQuotaIncludingExtra !=null}">
-            	
-            	<g:if test='${annualQuotaIncludingExtra.get(0)<10}'>
-                	0${annualQuotaIncludingExtra.get(0)} :
-                </g:if>	
-                <g:else>
-                	${annualQuotaIncludingExtra.get(0)} :
-                </g:else>
-                
-                <g:if test='${annualQuotaIncludingExtra.get(1)<10}'>
-                	0${annualQuotaIncludingExtra.get(1)}
-                </g:if>	
-                <g:else>
-                	${annualQuotaIncludingExtra.get(1)}
-                </g:else>	
-          	</g:if>
-          	<g:else>
-          		00 : 00
-          	</g:else>	
-		</td-->	
-		
+
 		
 		
 		</tr>
 	</tbody>
 </table>
+<BR>
 
 <div>
-	<ul>
-		<li>
-			<div><span>HS/An (Heures supérieures au quota journalier ou hebdomadaire)</span></div>
-		</li>
-		<li>
-			<div>${annualPayableSupTime}</div>
-		</li>
-		
-		<li>
-			<div><span>Quota annuel avec HS et HC (recalculé) [theorique annuel + heures sup]</span></div>
-		</li>
-		<li>
-			<div>${annualTheoriticalIncludingExtra}</div>
-		</li>
-		
-		
-		<li>
-			<div><span>HS annuelle [réalisé annuel - theorique annuel - HS annuel]  (hors heures supplémentaires supérieures aux quotas journaliers ou hebdo)</span></div>
-		</li>
-		<li>
-			<div>${annualSupTimeAboveTheoritical}</div>
-		</li>	
-		
-		<li>
-			<div><span>Heures supplémentaires à payer</span></div>
-		</li>
-		<li>
-			<div>${annualGlobalSupTimeToPay}</div>
-		</li>		
-	</ul>
+	<table style="width:70%">
+		<tr>
+			<td style="witdh: 450px;" class="cartoucheRightTitleTD">HS/An (Heures supérieures aux quotas journalier ou hebdomadaire): </td>
+			<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD">${annualPayableSupTime}</td>
+		</tr>
+		<tr>
+			<td style="witdh: 450px;" class="cartoucheRightTitleTD"><a id="annualQuota" href="#" style="text-decoration: none;color:#666;" title="[theorique annuel + heures sup]">Quota annuel avec HS et HC (recalculé): </a><richui:tooltip id="annualQuota" /></td>
+			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualTheoriticalIncludingExtra}</td>
+		</tr>
+		<tr>
+			<td style="witdh: 450px;" class="cartoucheRightTitleTD"><a id="annualHS" href="#" style="text-decoration: none;color:#666;" title="[réalisé annuel - theorique annuel - HS annuel]">HS annuelle (hors heures supplémentaires supérieures aux quotas journaliers ou hebdo): </a><richui:tooltip id="annualHS" /></td>
+			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualSupTimeAboveTheoritical}</td>
+		</tr>
+		<tr>
+			<td style="witdh: 450px;" class="cartoucheRightTitleTD">Heures supplémentaires à payer: </td>
+			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualGlobalSupTimeToPay}</td>
+		</tr>				
+	</table>
+
 </div>
-
-

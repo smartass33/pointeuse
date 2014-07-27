@@ -12,6 +12,7 @@
 <meta name="layout" content="main">
 	<resource:include components="autoComplete, dateChooser" autoComplete="[skin: 'default']" />
 	<g:javascript library="jquery" plugin="jquery" />
+	<resource:tooltip />
 
 <title>
 	${message(code: 'employee.report.label', default: 'Report')}
