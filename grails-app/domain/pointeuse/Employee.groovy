@@ -27,4 +27,8 @@ class Employee{
 		userName (unique: true,blank: false)
 	}
 
+	String toString(){
+		return 'employee: '+ this.lastName+' '+this.firstName
+	}
+	
 }
