@@ -72,7 +72,6 @@
 					</g:if>
 				</g:each>
 			</tr>
-			<g:if test="${employee.weeklyContractTime == Employee.legalWeekTime}">
 			<tr>
 				<td>RTT restant</td>
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
@@ -84,6 +83,9 @@
 							<td style="background-color:#CCCCCE"/>
 						</g:else>
 					</g:if>
+					<g:else>
+						<td style="background-color:#CCCCCE"/>
+					</g:else>
 				</g:each>
 			</tr>
 			<tr>
@@ -97,9 +99,11 @@
 							<td style="background-color:#CCCCCE"/>
 						</g:else>
 					</g:if>
+					<g:else>
+						<td style="background-color:#CCCCCE"/>
+					</g:else>
 				</g:each>
 			</tr>			
-			</g:if>														
 		</g:each>
 	</tbody>
 </table>

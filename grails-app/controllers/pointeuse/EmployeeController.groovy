@@ -1774,7 +1774,8 @@ def vacationFollowup(){
 
 	
 	
-	def annualTotalPDF(Long userId){		
+	def annualTotalPDF(Long userId){	
+		params.each{i-> log.error(i)}
 		def year
 		def month
 		def calendar = Calendar.instance
@@ -1795,6 +1796,10 @@ def vacationFollowup(){
 			year = year - 1
 		}
 		
+		Period period = Period.get(params.int("year"))
+		if (period != null){
+			year = period.year
+		}
 		
 		if (userId==null){
 			log.error('userId is null. exiting')

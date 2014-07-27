@@ -1470,7 +1470,6 @@ class TimeManagerService {
 						eq('month',month)
 					}
 				}
-				
 				criteria = Vacation.createCriteria()
 				referenceRTT = criteria.get{
 					and {
@@ -1491,7 +1490,6 @@ class TimeManagerService {
 							}
 						}
 					}
-					
 				criteria = Absence.createCriteria()
 				takenRTT = criteria.list{
 					and {
@@ -1511,7 +1509,7 @@ class TimeManagerService {
 					actualTime2add = 0
 					takenRTT2add = referenceRTT.counter	
 				}
-				
+
 				// special case for 1st month of year
 				if (month==1){
 					theoricalTime2add = monthlyTheoriticalMap.get(12)
@@ -1531,17 +1529,16 @@ class TimeManagerService {
 				}else{
 					monthlyActualMap.put(month, actualTime2add)
 				}
-				if (employee.weeklyContractTime == Employee.legalWeekTime){
-					if (takenRTT!=null){
-						monthlyTakenRTTMap.put(month,takenRTT2add - takenRTT.size())
-					}else{
-						monthlyTakenRTTMap.put(month,takenRTT2add)
-					}
+				if (takenRTT!=null){
+					monthlyTakenRTTMap.put(month,takenRTT2add - takenRTT.size())
+				}else{
+					monthlyTakenRTTMap.put(month,takenRTT2add)
 				}
+				
 				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))
-				if (employee.weeklyContractTime == Employee.legalWeekTime){		
-					ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(employee.weeklyContractTime/Employee.WeekOpenedDays)) as long)
-				}
+				
+				ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(employee.weeklyContractTime/Employee.WeekOpenedDays)) as long)
+				
 			}
 		
 			monthlyTheoriticalMap.each() {
@@ -1569,7 +1566,6 @@ class TimeManagerService {
 				it.value=hours+'H'+minutes
 		   }
 		   
-			
 			monthlyTheoriticalByEmployee.put(employee,monthlyTheoriticalMap)
 			monthlyActualByEmployee.put(employee,monthlyActualMap)
 			ecartByEmployee.put(employee, ecartMap)
@@ -1706,7 +1702,12 @@ class TimeManagerService {
 			monthlySupTotalTime = getMonthlySupTime(employee,currentMonth, currentYear)
 			yearMonthlySupTime.put(currentMonth,computeHumanTime(Math.round(monthlySupTotalTime)))
 			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
-			if (employee.weeklyContractTime!=35){
+			
+			// in order to compute complementary time, we are going to look for employees whose contract equal 35h over a sub-period of time during the month
+		///d = 		
+
+			if (utilService.getActiveFullTimeContract( currentMonth,  currentYear, employee)){
+		//	if (employee.weeklyContractTime!=35){
 				if (monthlyTotalTime > monthTheoritical){
 					payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime,0)
 					yearMonthlyCompTime.put(currentMonth, computeHumanTime(payableCompTime as long))
@@ -2015,7 +2016,7 @@ class TimeManagerService {
 				startDate = currentContract.startDate
 				
 				//the contract was not started during the current month: we will take first day of the month as starting point.
-				if (startDate.getAt(Calendar.MONTH) != (month + 1) ){
+				if (startDate < startCalendar.time){
 					startDate = startCalendar.time
 				}
 				
@@ -2245,5 +2246,5 @@ class TimeManagerService {
 		return [dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:currentDate]
 	}
 	
-	
+
 }

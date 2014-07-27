@@ -93,10 +93,11 @@ function showSpinner() {
 						<g:hiddenField name="isAdmin" value="${isAdmin}" />
 						<g:hiddenField name="siteId" value="${siteId}" />
 						<g:hiddenField name="userId" value="${userId}" />
+						<g:hiddenField name="periodId" value="${period}" />
+						
 						<g:hiddenField name="isAjax" value="true" />	
 			</li>
 			
-			<li style="vertical-align: middle;" class="displayButton"><g:actionSubmit value="Afficher" action="annualReport" class="displayButton" /></li>	
 			
 			</g:form>
 			

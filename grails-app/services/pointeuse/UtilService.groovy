@@ -294,4 +294,50 @@ class UtilService {
 			retour = true
 		return retour
 	}
+	
+	boolean getActiveFullTimeContract(int month, int year,Employee employee){
+		
+		def criteria = Contract.createCriteria()
+		
+		def startCalendar = Calendar.instance
+		def endCalendar = Calendar.instance
+		
+		startCalendar.set(Calendar.YEAR,year)
+		startCalendar.set(Calendar.MONTH,month - 1)
+		startCalendar.clearTime()
+		
+		endCalendar.set(Calendar.DAY_OF_MONTH,startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		endCalendar.set(Calendar.HOUR_OF_DAY,23)
+		endCalendar.set(Calendar.MINUTE,59)
+		endCalendar.set(Calendar.SECOND,59)
+		
+		def montlyContracts = criteria.list {
+			or{
+				// all contracts that close during the month
+				and {
+					ge('endDate',startCalendar.time)
+					le('endDate',endCalendar.time)
+					eq('employee',employee)
+					eq('weeklyLength',35 as float)
+				}
+				
+				// add the contract that is not over, unless its startdate is ulterior to the end of the current month
+				and {
+					le('startDate',endCalendar.time)
+					isNull('endDate')
+					eq('employee',employee)
+					eq('weeklyLength',35 as float)
+					
+				}
+				
+			}
+			order('startDate','desc')
+		}
+		
+		if (montlyContracts != null && montlyContracts.size() > 0){
+			return true
+		}else {
+			return false
+		}
+	}
 }
