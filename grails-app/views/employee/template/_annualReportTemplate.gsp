@@ -126,7 +126,26 @@
            			00 : 00
               		</g:else>	
 				</td>
-											
+				<td style="vertical-align: middle;text-align:right;">
+					<g:if
+               			test="${monthlyQuotaIncludingExtra.get(cartouche.key) !=null && ((monthlyQuotaIncludingExtra.get(cartouche.key)).get(0)>0 ||(monthlyQuotaIncludingExtra.get(cartouche.key)).get(1)>0)}">
+	 	               	<g:if test='${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(0)<10}'>
+		                	0${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(0)} :
+		                </g:if>	
+		                <g:else>
+		                	${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(0)} :
+		                </g:else>            
+		                <g:if test='${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(1)<10}'>
+		                	0${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(1)}
+		                </g:if>	
+		                <g:else>
+		                	${(monthlyQuotaIncludingExtra.get(cartouche.key)).get(1)}
+		                </g:else> 
+              		</g:if>
+              		<g:else>
+           			00 : 00
+              		</g:else>	
+				</td>						
 			</tr>
 		</g:each>
 		<tr class='even' style='font-weight:bold;'>
@@ -135,43 +154,16 @@
 			<td style="text-align:center;">${annualEmployeeWorkingDays}</td>
 					
 			<td style="vertical-align: middle;text-align:right;">
-				<g:if
-               		test="${annualTheoritical !=null && (annualTheoritical.get(0)>0 ||annualTheoritical.get(1)>0)}">
-               		
-	 	               	<g:if test='${annualTheoritical.get(0)<10}'>
-		                	0${annualTheoritical.get(0)} :
-		                </g:if>	
-		                <g:else>
-		                	${annualTheoritical.get(0)} :
-		                </g:else>            
-		                <g:if test='${annualTheoritical.get(1)<10}'>
-		                	0${annualTheoritical.get(1)}
-		                </g:if>	
-		                <g:else>
-		                	${annualTheoritical.get(1)}
-		                </g:else> 
+				<g:if test="${annualTheoritical !=null}">
+               		${annualTheoritical}
            		</g:if>
            		<g:else>
            			00 : 00
            		</g:else>
 			</td>
 			<td style="vertical-align: middle;text-align:right;">
-				<g:if test="${annualTotal !=null && (annualTotal.get(0)>0 ||annualTotal.get(1)>0)}">
-	               	<g:if test='${annualTotal.get(0)<10}'>
-	                	0${annualTotal.get(0)} :
-	                </g:if>	
-	                <g:else>
-	                	${annualTotal.get(0)} :
-	                </g:else>
-	                
-	                <g:if test='${annualTotal.get(1)<10}'>
-	                	0${annualTotal.get(1)}
-	                </g:if>	
-	                <g:else>
-	                	${annualTotal.get(1)}
-	                </g:else>
-               		
-               		
+				<g:if test="${annualTotal !=null}">
+					${annualTotal}    		
            		</g:if>
            		<g:else>
            			00 : 00
@@ -183,22 +175,8 @@
 		<td style="vertical-align: middle;text-align:center;">${annualCSS}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualSickness}</td>
 		<td style="vertical-align: middle;text-align:right;">
-			<g:if test="${annualPayableSupTime !=null && (annualPayableSupTime.get(0)>0 ||annualPayableSupTime.get(1)>0)}">
-				
-				<g:if test='${annualPayableSupTime.get(0)<10}'>
-                	0${annualPayableSupTime.get(0)} :
-                </g:if>	
-                <g:else>
-                	${annualPayableSupTime.get(0)} :
-                </g:else>
-                
-                <g:if test='${annualPayableSupTime.get(1)<10}'>
-                	0${annualPayableSupTime.get(1)}
-                </g:if>	
-                <g:else>
-                	${annualPayableSupTime.get(1)}
-                </g:else>
-			
+			<g:if test="${annualPayableSupTime !=null}">
+				${annualPayableSupTime}
           	</g:if>
           	<g:else>
           		00 : 00
@@ -206,29 +184,73 @@
 		</td>
 		
 		<td style="vertical-align: middle;text-align:right;">
-			<g:if test="${annualPayableCompTime !=null && (annualPayableCompTime.get(0)>0 ||annualPayableCompTime.get(1)>0)}">
-            	
-            	<g:if test='${annualPayableCompTime.get(0)<10}'>
-                	0${annualPayableCompTime.get(0)} :
-                </g:if>	
-                <g:else>
-                	${annualPayableCompTime.get(0)} :
-                </g:else>
-                
-                <g:if test='${annualPayableCompTime.get(1)<10}'>
-                	0${annualPayableCompTime.get(1)}
-                </g:if>	
-                <g:else>
-                	${annualPayableCompTime.get(1)}
-                </g:else>	
+			<g:if test="${annualPayableCompTime !=null}">
+            	${annualPayableCompTime}
           	</g:if>
           	<g:else>
           		00 : 00
           	</g:else>	
 		</td>		
 		
+		<!--td style="vertical-align: middle;text-align:right;">
+			<g:if test="${annualQuotaIncludingExtra !=null}">
+            	
+            	<g:if test='${annualQuotaIncludingExtra.get(0)<10}'>
+                	0${annualQuotaIncludingExtra.get(0)} :
+                </g:if>	
+                <g:else>
+                	${annualQuotaIncludingExtra.get(0)} :
+                </g:else>
+                
+                <g:if test='${annualQuotaIncludingExtra.get(1)<10}'>
+                	0${annualQuotaIncludingExtra.get(1)}
+                </g:if>	
+                <g:else>
+                	${annualQuotaIncludingExtra.get(1)}
+                </g:else>	
+          	</g:if>
+          	<g:else>
+          		00 : 00
+          	</g:else>	
+		</td-->	
+		
+		
+		
 		</tr>
 	</tbody>
 </table>
+
+<div>
+	<ul>
+		<li>
+			<div><span>HS/An (Heures supérieures au quota journalier ou hebdomadaire)</span></div>
+		</li>
+		<li>
+			<div>${annualPayableSupTime}</div>
+		</li>
+		
+		<li>
+			<div><span>Quota annuel avec HS et HC (recalculé) [theorique annuel + heures sup]</span></div>
+		</li>
+		<li>
+			<div>${annualTheoriticalIncludingExtra}</div>
+		</li>
+		
+		
+		<li>
+			<div><span>HS annuelle [réalisé annuel - theorique annuel - HS annuel]  (hors heures supplémentaires supérieures aux quotas journaliers ou hebdo)</span></div>
+		</li>
+		<li>
+			<div>${annualSupTimeAboveTheoritical}</div>
+		</li>	
+		
+		<li>
+			<div><span>Heures supplémentaires à payer</span></div>
+		</li>
+		<li>
+			<div>${annualGlobalSupTimeToPay}</div>
+		</li>		
+	</ul>
+</div>
 
 

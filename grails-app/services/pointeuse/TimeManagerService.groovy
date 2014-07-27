@@ -477,6 +477,20 @@ class TimeManagerService {
 		return [hours,minutes,seconds]
 		
 	}
+	
+	def getTimeAsText(def table){
+		
+		def outputString = ''
+		
+		if (table.get(0)<10)
+			outputString += '0'
+		outputString += table.get(0)
+		outputString += ' : '
+		if (table.get(1)<10)
+			outputString += '0'
+		outputString += table.get(1)
+		return outputString
+	}
 
 	def computeHumanTimeAsString(long inputSeconds){
 		def diff=inputSeconds
@@ -1179,6 +1193,7 @@ class TimeManagerService {
 		def weeklyTotalTimeByEmployee = [:]
 		def weeklySupTotalTimeByEmployee = [:]
 		def monthlyTotalTimeByEmployee = [:]
+		def monthlyCorrectedQuotaByEmployee = [:]
 		def weeklyAggregate = [:]
 		def dailyTotalMap = [:]
 		def dailyBankHolidayMap = [:]
@@ -1246,7 +1261,7 @@ class TimeManagerService {
 				}else{
 					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), computeHumanTime(dailySeconds))
 				}
-				
+
 				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
 					weeklySupTime = 0
 				}else{
@@ -1648,12 +1663,17 @@ class TimeManagerService {
 		def annualWorkingDays = 0
 		def annualEmployeeWorkingDays = 0
 		def annualTotalIncludingHS = 0
+		def annualQuotaIncludingExtra = 0
+		def annualTheoriticalIncludingExtra = 0
+		def annualSupTimeAboveTheoritical = 0
+		def annualGlobalSupTimeToPay = 0
 		def calendar = Calendar.instance
 		def currentMonth
 		def currentYear=year
 		def monthlyPresentDays = 0
 		def monthlyWorkingDays = [:]
 		def monthlyTakenHolidays = [:]
+		def monthlyQuotaIncludingExtra = [:]
 			
 		def period = Period.findByYear(year)
 		def remainingCA = employeeService.getRemainingCA(employee,period)
@@ -1699,7 +1719,9 @@ class TimeManagerService {
 			}
 			monthlyWorkingDays.put(currentMonth,monthlyPresentDays)
 			yearTotalMap.put(currentMonth, computeHumanTime(monthlyTotalTime))
+			annualSupTimeAboveTheoritical += monthlyTotalTime
 			monthlySupTotalTime = getMonthlySupTime(employee,currentMonth, currentYear)
+			
 			yearMonthlySupTime.put(currentMonth,computeHumanTime(Math.round(monthlySupTotalTime)))
 			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
 			
@@ -1719,6 +1741,10 @@ class TimeManagerService {
 				payableCompTime = 0	
 			}
 			
+			def tmpQuota = monthlyTotalTime+monthlySupTotalTime+payableCompTime
+			monthlyQuotaIncludingExtra.put(currentMonth, computeHumanTime(Math.round(tmpQuota) as long))
+			
+			
 			annualTheoritical += cartoucheTable.getAt('monthTheoritical')
 			annualHoliday += cartoucheTable.getAt('holidays')
 			monthlyTakenHolidays.put(currentMonth, initialCA - annualHoliday)
@@ -1730,26 +1756,41 @@ class TimeManagerService {
 			annualPayableSupTime += monthlySupTotalTime
 			annualPayableCompTime += payableCompTime
 			annualTotal += monthlyTotalTime
+			annualQuotaIncludingExtra += tmpQuota
 		}
-
+		
+		annualTheoriticalIncludingExtra = annualTheoritical + annualPayableSupTime
+		annualSupTimeAboveTheoritical = annualSupTimeAboveTheoritical - annualTheoriticalIncludingExtra
+		annualGlobalSupTimeToPay = annualSupTimeAboveTheoritical + annualPayableSupTime
+		
+		
+		annualTheoriticalIncludingExtra = getTimeAsText(computeHumanTime(Math.round(annualTheoriticalIncludingExtra) as long))
+		annualSupTimeAboveTheoritical = getTimeAsText(computeHumanTime(Math.round(annualSupTimeAboveTheoritical) as long))
+		annualGlobalSupTimeToPay = getTimeAsText(computeHumanTime(Math.round(annualGlobalSupTimeToPay) as long))
 		
 		return [
+			monthlyQuotaIncludingExtra:monthlyQuotaIncludingExtra,
 			monthlyTakenHolidays:monthlyTakenHolidays,
 			monthlyWorkingDays:monthlyWorkingDays,
 			takenCA:takenCA,
 			initialCA:initialCA,
 			remainingCA:remainingCA,
-			annualTotalIncludingHS:computeHumanTime(Math.round(annualTotalIncludingHS)),
+		//	annualTotalIncludingHS:computeHumanTime(Math.round(annualTotalIncludingHS)),
 			annualEmployeeWorkingDays:annualEmployeeWorkingDays,	
-			annualTheoritical:computeHumanTime(Math.round(annualTheoritical)),
+			annualTheoritical:getTimeAsText(computeHumanTime(Math.round(annualTheoritical) as long)),			
+			annualTheoriticalIncludingExtra:annualTheoriticalIncludingExtra,
+			annualSupTimeAboveTheoritical:annualSupTimeAboveTheoritical,
+			annualGlobalSupTimeToPay:annualGlobalSupTimeToPay,
 			annualHoliday:annualHoliday,
 			annualRTT:annualRTT,
 			annualCSS:annualCSS,
 			annualSickness:annualSickness,
 			annualWorkingDays:annualWorkingDays,
-			annualPayableSupTime:computeHumanTime(Math.round(annualPayableSupTime)),
-			annualPayableCompTime:computeHumanTime(Math.round(annualPayableCompTime)),
-			annualTotal:computeHumanTime(Math.round(annualTotal)),
+			annualPayableSupTime:getTimeAsText(computeHumanTime(Math.round(annualPayableSupTime) as long)),
+			annualPayableCompTime:getTimeAsText(computeHumanTime(Math.round(annualPayableCompTime) as long)),
+			annualTotal:getTimeAsText(computeHumanTime(Math.round(annualTotal) as long)),
+			
+		//	annualQuotaIncludingExtra:computeHumanTime(Math.round(annualQuotaIncludingExtra) as long),
 			lastYear:year,
 			thisYear:year+1,
 			yearMap:yearMap,
