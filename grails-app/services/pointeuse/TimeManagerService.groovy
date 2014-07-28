@@ -757,12 +757,12 @@ class TimeManagerService {
 			}
 			calendar.roll(Calendar.DAY_OF_YEAR, 1)
 		}
-		
-		
+
+
 	return elapsedSeconds
 	}
-	
-	
+
+
 	def getYearCartoucheData(Employee employee,int year,int month){
 		def monthNumber=0
 		def yearTheoritical = 0
@@ -773,7 +773,7 @@ class TimeManagerService {
 		def bankHolidayCounter=0
 		def bankHolidayList
 		def criteria = Absence.createCriteria()
-		
+	
 		if (month>5){
 			year=year+1
 			monthNumber=month-6+1
@@ -781,7 +781,7 @@ class TimeManagerService {
 			monthNumber=month+1+6
 		}
 
-				// set the date end of may
+		// set the date end of may
 		calendar.set(Calendar.MONTH,month-1)
 		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
 		calendar.set(Calendar.HOUR_OF_DAY,23)
@@ -793,23 +793,22 @@ class TimeManagerService {
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		calendar.clearTime()
 		def minDate = calendar.time
-		
-		
+
 		/* create a loop over months and invoke getMonthTheoritical method */
 		// check if employee entered the company or left the company over the period.
 		def arrivalDate = employee.arrivalDate
 		def exitDate =   employee.status == StatusType.TERMINE ? employee.status.date : null
-		
+
 		// the employee arrived after the period started: resetting the minDate
 		if (arrivalDate > minDate){
 			minDate = arrivalDate
 		}
-		
+
 		// the employee left before period's end:
 		if ((exitDate != null) && exitDate < maxDate){
 			maxDate = exitDate
 		}
-		
+
 		// get cumul holidays
 		def yearlyHolidays = criteria.list {
 			and {
@@ -819,7 +818,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.VACANCE)
 			}
 		}
-		
+
 		criteria = Absence.createCriteria()
 		def yearlyExceptionnel = criteria.list {
 			and {
@@ -829,7 +828,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.EXCEPTIONNEL)
 			}
 		}
-		
+
 		criteria = Absence.createCriteria()
 		def yearlyRtt = criteria.list {
 			and {
@@ -1164,7 +1163,7 @@ class TimeManagerService {
 			maxResults(1)
 		}
 
-		def monthTheoriticalHuman=computeHumanTime(monthTheoritical)
+		def monthTheoriticalHuman=getTimeAsText(computeHumanTime(monthTheoritical))
 		def cartoucheMap=[
 			isCurrentMonth:isCurrentMonth,
 			currentContract:currentContract,
@@ -1637,7 +1636,7 @@ class TimeManagerService {
 		}
 		return supTime
 	}
-	
+
 	def getAnnualReportData(int year, Employee employee){
 		def criteria
 		def dailySeconds
@@ -1718,29 +1717,26 @@ class TimeManagerService {
 				monthlyPresentDays += 1
 			}
 			monthlyWorkingDays.put(currentMonth,monthlyPresentDays)
-			yearTotalMap.put(currentMonth, computeHumanTime(monthlyTotalTime))
+			yearTotalMap.put(currentMonth, getTimeAsText(computeHumanTime(monthlyTotalTime)))
 			annualSupTimeAboveTheoritical += monthlyTotalTime
 			monthlySupTotalTime = getMonthlySupTime(employee,currentMonth, currentYear)
 			
-			yearMonthlySupTime.put(currentMonth,computeHumanTime(Math.round(monthlySupTotalTime)))
+			yearMonthlySupTime.put(currentMonth,getTimeAsText(computeHumanTime(Math.round(monthlySupTotalTime) as long)))
 			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
 			
 			// in order to compute complementary time, we are going to look for employees whose contract equal 35h over a sub-period of time during the month
-		///d = 		
-
 			if (utilService.getActiveFullTimeContract( currentMonth,  currentYear, employee)){
-		//	if (employee.weeklyContractTime!=35){
 				if (monthlyTotalTime > monthTheoritical){
 					payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime,0)
-					yearMonthlyCompTime.put(currentMonth, computeHumanTime(payableCompTime as long))
+					yearMonthlyCompTime.put(currentMonth, getTimeAsText(computeHumanTime(payableCompTime as long)))
 				}else{
 					payableCompTime = 0
-					yearMonthlyCompTime.put(currentMonth, computeHumanTime(0))
+					yearMonthlyCompTime.put(currentMonth, getTimeAsText(computeHumanTime(0)))
 				}
 			}else{
 				payableCompTime = 0	
 			}
-			
+
 			def tmpQuota = monthlyTotalTime+monthlySupTotalTime+payableCompTime
 			monthlyQuotaIncludingExtra.put(currentMonth, computeHumanTime(Math.round(tmpQuota) as long))
 			
@@ -1748,7 +1744,6 @@ class TimeManagerService {
 			annualTheoritical += cartoucheTable.getAt('monthTheoritical')
 			annualHoliday += cartoucheTable.getAt('holidays')
 			monthlyTakenHolidays.put(currentMonth, initialCA - annualHoliday)
-			
 			annualRTT += cartoucheTable.getAt('rtt')
 			annualCSS += cartoucheTable.getAt('sansSolde')
 			annualSickness += cartoucheTable.getAt('sickness')
@@ -1775,7 +1770,6 @@ class TimeManagerService {
 			takenCA:takenCA,
 			initialCA:initialCA,
 			remainingCA:remainingCA,
-		//	annualTotalIncludingHS:computeHumanTime(Math.round(annualTotalIncludingHS)),
 			annualEmployeeWorkingDays:annualEmployeeWorkingDays,	
 			annualTheoritical:getTimeAsText(computeHumanTime(Math.round(annualTheoritical) as long)),			
 			annualTheoriticalIncludingExtra:annualTheoriticalIncludingExtra,
@@ -1789,8 +1783,6 @@ class TimeManagerService {
 			annualPayableSupTime:getTimeAsText(computeHumanTime(Math.round(annualPayableSupTime) as long)),
 			annualPayableCompTime:getTimeAsText(computeHumanTime(Math.round(annualPayableCompTime) as long)),
 			annualTotal:getTimeAsText(computeHumanTime(Math.round(annualTotal) as long)),
-			
-		//	annualQuotaIncludingExtra:computeHumanTime(Math.round(annualQuotaIncludingExtra) as long),
 			lastYear:year,
 			thisYear:year+1,
 			yearMap:yearMap,

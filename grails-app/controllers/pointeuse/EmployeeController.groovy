@@ -1171,7 +1171,6 @@ def vacationFollowup(){
 	
 
 	def annualReport(Long userId){
-		params.each{i-> log.error(i)}
 		def year
 		def month
 		def calendar = Calendar.instance
@@ -1209,7 +1208,6 @@ def vacationFollowup(){
 			return
 		}
 		
-		 
 		def model = timeManagerService.getAnnualReportData(year, employee)
 		model << [period:period]
 		if (isAjax){
@@ -1219,7 +1217,6 @@ def vacationFollowup(){
 		else{
 			model
 		}
-			
 	}
 	
 	def annualReportLight(Long userId){
@@ -1440,7 +1437,7 @@ def vacationFollowup(){
 			}
 			
 			monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotalTime))
-			monthTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical'))			
+			monthTheoritical = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical')))		
 
 			if (month>5){
 				yearInf=year
