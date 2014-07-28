@@ -1437,7 +1437,7 @@ def vacationFollowup(){
 			}
 			
 			monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotalTime))
-			monthTheoritical = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical')))		
+			monthTheoritical = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical')),true)		
 
 			if (month>5){
 				yearInf=year
@@ -1895,8 +1895,18 @@ def vacationFollowup(){
 		 }
 		 
 		def ecartData = timeManagerService.getEcartData(site, monthList, period)
-		def retour = [site:site,fromIndex:fromIndex,period:period,employeeInstanceTotal:employeeInstanceTotal,monthList:monthList,employeeInstanceList:employeeInstanceList]
+		def retour = [
+			site:site,
+			fromIndex:fromIndex,
+			period:period,
+			employeeInstanceTotal:employeeInstanceTotal,
+			monthList:monthList,
+			employeeInstanceList:employeeInstanceList
+		]
 	 	retour << ecartData
+		 
+		render template: "/employee/template/ecartTemplate", model: retour
+
 		return retour
 	}
 	 

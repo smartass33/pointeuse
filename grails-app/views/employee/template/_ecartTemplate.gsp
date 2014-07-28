@@ -4,10 +4,9 @@
 
 <g:set var="calendar" value="${Calendar.instance}"/>
 
-<table border="1" style="table-layout: fixed;" id="reportTable">
-
+<table border="1" style="table-layout: fixed;padding:15px;width:100%;" id="reportTable">
 	<thead>
-		<th/>
+		<th style='width:125px;'/>
 			<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
 				<g:if test="${month_th>5}">
 					<th>${period.year}</th>
@@ -31,9 +30,9 @@
 
 		</tr>										
 		<g:each in="${employeeInstanceList}" status="i" var="employee">
-			<th colspan='14'>${employee.firstName} ${employee.lastName}</th>
+			<th colspan='13'>${employee.firstName} ${employee.lastName}</th>
 			<tr>
-				<td>Total H Théorique</td>	
+				<td style="padding-left: 0em;padding: 2px 2px;">&Sigma; théorique</td>	
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_theoritical'>	
 					<g:if test="${monthlyTheoriticalByEmployee.get(employee)!=null}">
 						<g:if test="${monthList.contains(month_theoritical)}">
@@ -47,7 +46,7 @@
 				</g:each>		
 			</tr>
 			<tr>
-				<td>Total H réalisées</td>
+				<td>&Sigma; réalisées</td>
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_actual'>						
 					<g:if test='${monthlyActualByEmployee.get(employee)!=null}'>
 						<g:if test="${monthList.contains(month_actual)}">
@@ -60,7 +59,7 @@
 				</g:each>
 			</tr>		
 			<tr>
-				<td>Ecart HR - HT</td>
+				<td>&Delta; HR - HT</td>
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_ecart'>									
 					<g:if test='${ecartByEmployee.get(employee)!=null}'>
 						<g:if test="${monthList.contains(month_ecart)}">
@@ -89,7 +88,7 @@
 				</g:each>
 			</tr>
 			<tr>
-				<td>Ecart corrigé des RTT</td>
+				<td>&Delta; corrigé des RTT</td>
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
 					<g:if test='${ecartMinusRTTByEmployee.get(employee)!=null}'>
 						<g:if test="${monthList != null && monthList.contains(month_rtt)}">				

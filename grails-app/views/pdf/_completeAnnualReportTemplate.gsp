@@ -187,19 +187,19 @@
 	</table>
 	<table style="width:75%;">
 		<tr>
-			<td style="witdh: 200px;font-weight:bold;"><g:message code="annual.HS.above.quota"/></td>
+			<td style="witdh: 200px;font-weight:bold;"><g:message code="annual.HS.above.quota"/>:</td>
 			<td style="witdh: 50px;text-align:right;font-weight:bold;" >${annualPayableSupTime}</td>
 		</tr>
 		<tr>
-			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.computed.quota"/></td>
+			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.computed.quota"/>:</td>
 			<td style="witdh: 60px;text-align:right;font-weight:bold;" >${annualTheoriticalIncludingExtra}</td>
 		</tr>
 		<tr>
-			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.other.HS.quota"/></td>
+			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.other.HS.quota"/>:</td>
 			<td style="witdh: 60px;text-align:right;font-weight:bold;" >${annualSupTimeAboveTheoritical}</td>
 		</tr>
 		<tr>
-			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.total.HS.to.pay"/></td>
+			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.total.HS.to.pay"/>:</td>
 			<td style="witdh: 60px;text-align:right;font-weight:bold;">${annualGlobalSupTimeToPay}</td>
 		</tr>				
 	</table>	

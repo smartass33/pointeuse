@@ -55,10 +55,8 @@
 
 </head>
 <body>
+	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requête...</div>
 
-<div id="spinner" class="spinner" style="display:none;">
-	<img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Spinner" />
-</div>
 
 <div id="spinner" style="display: none;">
    <img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading..." width="16" height="16" />
@@ -92,7 +90,13 @@
 						noSelection="${['':(period?period:'-')]}" optionKey="id" 
 						style="vertical-align: middle;" />
 				</li>
-				<li>	<g:actionSubmit class='displayButton' value="${message(code: 'default.search.label', default: 'List')}"  action="ecartFollowup"/>	</li>
+				<li>	
+					<g:submitToRemote class='displayButton' 
+						update="ecartTableDiv"
+						onLoading="document.getElementById('spinner').style.display = 'inline';"  
+						onComplete="document.getElementById('spinner').style.display = 'none';"
+						url="[controller:'employee', action:'ecartFollowup']" value="${message(code: 'default.search.label', default: 'List')}">
+					</g:submitToRemote>
 				<li>	<g:actionSubmit class='pdfButton' value="PDF"  action="ecartPDF"/>				</li>			
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
 					<g:if test="${site!=null}">	
@@ -111,10 +115,8 @@
 			</div>
 		</g:if>  
 	</div>
-	
-
 	<br>
-	<div id="divId"><g:ecart/></div>
+	<div id="ecartTableDiv"><g:ecart/></div>
 
 </body>
 </html>

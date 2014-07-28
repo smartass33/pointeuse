@@ -105,19 +105,19 @@
 <div>
 	<table style="width:75%;">
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><g:message code="annual.HS.above.quota"/></td>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><g:message code="annual.HS.above.quota"/>:</td>
 			<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD">${annualPayableSupTime}</td>
 		</tr>
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="annualQuota" href="#" style="text-decoration: none;color:#666;" title="[theorique annuel + heures sup]"><g:message code="annual.computed.quota"/></a><richui:tooltip id="annualQuota" /></td>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="annualQuota" href="#" style="text-decoration: none;color:#666;" title="[theorique annuel + heures sup]"><g:message code="annual.computed.quota"/>:</a><richui:tooltip id="annualQuota" /></td>
 			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualTheoriticalIncludingExtra}</td>
 		</tr>
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="annualHS" href="#" style="text-decoration: none;color:#666;" title="[réalisé annuel - theorique annuel - HS annuel]"><g:message code="annual.other.HS.quota"/></a><richui:tooltip id="annualHS" /></td>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="annualHS" href="#" style="text-decoration: none;color:#666;" title="[réalisé annuel - theorique annuel - HS annuel]"><g:message code="annual.other.HS.quota"/>:</a><richui:tooltip id="annualHS" /></td>
 			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualSupTimeAboveTheoritical}</td>
 		</tr>
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><g:message code="annual.total.HS.to.pay"/></td>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><g:message code="annual.total.HS.to.pay"/>:</td>
 			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualGlobalSupTimeToPay}</td>
 		</tr>				
 	</table>
