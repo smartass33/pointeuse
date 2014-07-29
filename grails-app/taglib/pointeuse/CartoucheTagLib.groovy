@@ -2,17 +2,8 @@ package pointeuse
 
 class CartoucheTagLib {
 
-
-	
 	def cartouche ={attrs,body->
-		out<<render(template:"/common/cartoucheTemplate")
-		
+		out<<render(template:"/employee/template/cartoucheTemplate")
 	}
-	
-	def completeReport ={attrs,body->
-		out<<render(template:"/common/completeReportTemplate")
-		
-	}
-	
-	
+
 }

@@ -831,7 +831,7 @@ def vacationFollowup(){
 			yearlySansSolde:yearlySansSolde,
 			payableSupTime:payableSupTime,
 			payableCompTime:payableCompTime]
-		render template: "/common/cartoucheTemplate", model:model
+		render template: "/employee/template/cartoucheTemplate", model:model
 		return
 	}
 	

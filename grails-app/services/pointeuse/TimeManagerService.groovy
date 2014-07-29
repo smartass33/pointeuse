@@ -1575,12 +1575,9 @@ class TimeManagerService {
 					monthlyTakenRTTMap.put(month,takenRTT2add - takenRTT.size())
 				}else{
 					monthlyTakenRTTMap.put(month,takenRTT2add)
-				}
-				
-				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))
-				
-				ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(employee.weeklyContractTime/Employee.WeekOpenedDays)) as long)
-				
+				}				
+				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))				
+				ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(employee.weeklyContractTime/Employee.WeekOpenedDays)) as long)			
 			}
 		
 			monthlyTheoriticalMap.each() {
@@ -1599,8 +1596,8 @@ class TimeManagerService {
 			monthlyTheoriticalByEmployee.put(employee,monthlyTheoriticalMap)
 			monthlyActualByEmployee.put(employee,monthlyActualMap)
 			ecartByEmployee.put(employee, ecartMap)
-			if (employee.weeklyContractTime == Employee.legalWeekTime)
-				ecartMinusRTTByEmployee.put(employee,ecartMinusRTTMap)
+			//if (employee.weeklyContractTime == Employee.legalWeekTime)
+			ecartMinusRTTByEmployee.put(employee,ecartMinusRTTMap)
 			rttByEmployee.put(employee, monthlyTakenRTTMap)
 		}
 		return [
@@ -1610,7 +1607,8 @@ class TimeManagerService {
 			monthlyActualByEmployee:monthlyActualByEmployee,
 			ecartByEmployee:ecartByEmployee,
 			rttByEmployee:rttByEmployee,
-			ecartMinusRTTByEmployee:ecartMinusRTTByEmployee
+			ecartMinusRTTByEmployee:ecartMinusRTTByEmployee,
+			monthList:monthList
 		]
 	
 	}

@@ -85,7 +85,7 @@ class UtilService {
 			if ((calendar.time < employee.arrivalDate) && (employee.arrivalDate.getAt(Calendar.YEAR) == calendar.get(Calendar.YEAR))){
 				calendar.setTime(employee.arrivalDate)
 				calendar.clearTime()
-				log.error('resetting calendar: '+calendar.time )
+				log.debug('resetting calendar: '+calendar.time )
 			}
 			log.debug("getting opened days from: "+calendar.time + " until "+endPeriodCalendar.time)
 			while(calendar.get(Calendar.DAY_OF_YEAR) <= endPeriodCalendar.get(Calendar.DAY_OF_YEAR)){
