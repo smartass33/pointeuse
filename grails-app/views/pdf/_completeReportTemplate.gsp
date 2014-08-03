@@ -6,61 +6,56 @@
 		<%@ page import="pointeuse.InAndOut"%>
 		<%@ page import="pointeuse.AbsenceType"%>
 		<%@ page import="pointeuse.MonthlyTotal"%>
-		
-		
-	<style  type="text/css">
-				@page {
-				   size: 210mm 297mm;
-				   margin: 0px 0px 13px 0px;
-				 }
-				table {
-				  font: normal 11px verdana, arial, helvetica, sans-serif;
-				  color: #363636;
-				  background: #f6f6f6;
-				  text-align:left;
-				  }
-				caption {
-				  text-align: center;
-				  font: bold 16px arial, helvetica, sans-serif;
-				  background: transparent;
-				  padding:6px 4px 8px 0px;
-				  color: #CC00FF;
-				  text-transform: uppercase;
-				}
-				thead, tfoot {
-					background:url(bg1.png) repeat-x;
-					text-align:left;
-					height:30px;
-				}
-				thead th, tfoot th {
-					padding:5px;
-				}
-				table a {
-					color: #333333;
-					text-decoration:none;
-				}
-				table a:hover {
-					text-decoration:underline;
-				}
-				tr.odd {
-					background: #f1f1f1;
-				}
-				tbody td {
-				 	text-align:center;
-				 	height:5px;
-				 	width:90px;
-				 	font-size:95%;
-				}
-				
-				tbody th{
-				 	text-align:center;
-				 	height:5px;
-				 	width:250px;
-				}
-				
-
-				
-			</style>
+		<style  type="text/css">
+			@page {
+			   size: 210mm 297mm;
+			   margin: 5px 10px 10px 10px;
+			 }
+			table {
+			  font: normal 11px verdana, arial, helvetica, sans-serif;
+			  color: #363636;
+			  background: #f6f6f6;
+			  background-color: white;
+			  text-align:left;
+			  }
+			caption {
+			  text-align: center;
+			  font: bold 16px arial, helvetica, sans-serif;
+			  background: transparent;
+			  padding:6px 4px 8px 0px;
+			  color: #CC00FF;
+			  text-transform: uppercase;
+			}
+			thead, tfoot {
+				background:url(bg1.png) repeat-x;
+				text-align:left;
+				height:30px;
+			}
+			thead th, tfoot th {
+				padding:5px;
+			}
+			table a {
+				color: #333333;
+				text-decoration:none;
+			}
+			table a:hover {
+				text-decoration:underline;
+			}
+			tr.odd {
+				background: #f1f1f1;
+			}
+			tbody td {
+			 	text-align:center;
+			 	height:5px;
+			 	width:90px;
+			 	font-size:95%;
+			}			
+			tbody th{
+			 	text-align:center;
+			 	height:5px;
+			 	width:250px;
+			}			
+		</style>
 	</head>
 	<body>
 	<table>
@@ -295,12 +290,9 @@
 				                <g:if test="${entries.key.getAt(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY}"><td style="border:1px;width:100px;font-weight:bold;text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td></g:if>
 				                <g:else><td style="border:1px;width:100px;text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td></g:else>		                
 				          	</g:else>          		
-			                <g:if test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0)}">		
+			                <g:if test="${dailyTotalMap.get(entries.key) !=null}">		
 				                <td style="border:1px;width:70px">          
-				                    	<g:if test='${(dailyTotalMap.get(entries.key)).get(0)<10}'>0${(dailyTotalMap.get(entries.key)).get(0)}</g:if>
-						                <g:else>${(dailyTotalMap.get(entries.key)).get(0)}</g:else>
-						                <g:if test='${(dailyTotalMap.get(entries.key)).get(1)<10}'> : 0${(dailyTotalMap.get(entries.key)).get(1)}</g:if>
-						                <g:else>: ${(dailyTotalMap.get(entries.key)).get(1)}</g:else>	                  	
+									${dailyTotalMap.get(entries.key)}                  	
 						         </td>
 			                </g:if>
 		                	<g:else><td style="border:1px;width:70px">00 : 00</td></g:else>
@@ -375,11 +367,8 @@
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-						<td>${message(code: 'report.employer.signature.label', default: 'Report')}:</td>
-					
+						<td>${message(code: 'report.employer.signature.label', default: 'Report')}:</td>				
 					</tr>
-				</table>
-		        
-
+				</table>	    
 	</body>
 </html>

@@ -2025,27 +2025,27 @@ a.modalbox {
 		margin-bottom: 0.6em;
 		padding: 0;
 	}
-	
-	#indexLeftMenu li {
-		line-height: 1.3;
+	#indexLeftMenu li:hover { 
+		transform: scale(1.2);		 
+		list-style-type: none;
+		margin-bottom: 0.6em;
+		font-weight:bold;
 	}
-	
+		
 	#indexLeftMenu h1 {
 		text-transform: uppercase;
 		font-size: 1.1em;
 		margin: 0 0 0.3em;
 	}
 	
-	
-		#login {
+	#login {
 		text-align: center;
 		margin-left: auto;
- 		margin-right: auto;
-  		width:300px;
+		margin-right: auto;
+ 		width:300px;
 	}
 
-#login .inner {
-
+	#login .inner {
 		background-color: #eee;
 		border: .2em solid #fff;
 		margin: 2em 2em 1em;

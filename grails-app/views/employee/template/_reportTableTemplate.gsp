@@ -35,13 +35,8 @@
 	                   </g:else>
                   </g:else>
                   <g:if
-                    test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0)}">
-                    <td class="eventTD"><font size="2">
-                       	<g:if test='${(dailyTotalMap.get(entries.key)).get(0)<10}'>0${(dailyTotalMap.get(entries.key)).get(0)}</g:if>
-		                <g:else> ${(dailyTotalMap.get(entries.key)).get(0)}</g:else>
-		                <g:if test='${(dailyTotalMap.get(entries.key)).get(1)<10}'>:0${(dailyTotalMap.get(entries.key)).get(1)}</g:if>
-		                <g:else>: ${(dailyTotalMap.get(entries.key)).get(1)}</g:else>
-                    </font></td>
+                    test="${dailyTotalMap.get(entries.key) !=null}">
+                    <td class="eventTD"><font size="2">${dailyTotalMap.get(entries.key)}</font></td>
                   </g:if>
                   <g:else>
                     <td class="eventTD"><font size="2">00:00</font></td>

@@ -1333,16 +1333,16 @@ class TimeManagerService {
 			def tmpDate = calendarLoop.time
 			if 	(entriesByDay.size()>0){
 				if (dailyTotal!=null){
-					dailyTotalMap.put(tmpDate, computeHumanTime(dailySeconds))
+					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(dailySeconds),false))
 					dailySupTotalMap.put(tmpDate, computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)))
 				}else {
-					dailyTotalMap.put(tmpDate, computeHumanTime(0))
-					dailySupTotalMap.put(tmpDate, computeHumanTime(0))
+					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
+					dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
 				}
 				mapByDay.put(tmpDate, entriesByDay)
 			}
 			else{
-				dailyTotalMap.put(tmpDate, computeHumanTime(0))
+				dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
 				mapByDay.put(tmpDate, null)
 			}
 			
