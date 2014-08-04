@@ -52,11 +52,6 @@ class EmployeeTagLib {
 		
 	}
 	
-	def displayDay ={attrs,body->
-		out<<render(template:"/employee/template/displayDay")
-		
-	}
-	
 	
 	def reportTable ={attrs,body->
 		out<<render(template:"/employee/template/reportTableTemplate")
@@ -68,4 +63,14 @@ class EmployeeTagLib {
 		out<<render(template:"/employee/template/contractStatus")
 		
 	}	
+	
+	def currentDay ={attrs,body->
+		out<<render(template:"/employee/template/currentDayTemplate")
+		
+	}
+	
+	def last5days = {attrs,body->
+		out<<render(template:"/employee/template/last5DaysTemplate")
+		
+	}
 }

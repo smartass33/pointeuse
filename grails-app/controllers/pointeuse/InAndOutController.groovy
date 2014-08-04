@@ -95,7 +95,11 @@ class InAndOutController {
 			if (fromReport){
 				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])
 			}else{
-				redirect(action: "pointage", controller:"employee", id: employee.id)
+				def report = timeManagerService.getPointageData(employee)
+				report << [userId: employee.id,employee: employee]
+				render template: "/employee/template/last5DaysTemplate", model: report
+			
+				//redirect(action: "pointage", controller:"employee", id: employee.id)
 			}
 			return
 		}
@@ -160,7 +164,9 @@ class InAndOutController {
 				//redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])				
 			}else{
 				log.error('entry created from pointage: '+inAndOutInstance)		
-				redirect(action: "pointage", controller:"employee", id: employeeId,params:[username:employee.userName])
+				def report = timeManagerService.getPointageData(employee)
+				report << [userId: employee.id,employee: employee]
+				render template: "/employee/template/last5DaysTemplate", model: report
 				return
 			}
 		}catch(CannotRedirectException e){

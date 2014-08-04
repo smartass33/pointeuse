@@ -66,7 +66,7 @@
 	<div class="nav" id="nav">
 		<g:headerMenu />
 	</div>
-	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="30" height="30" />Patientez pendant le traitement de la requête...</div>
+	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
 	
 	<div id="list-employee" class="standardNav">
 		<h1>
@@ -114,7 +114,7 @@
 		</g:if>
 	</div>
 	<br>
-	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requête...</div>
+	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
 	<div id="divId"><g:listEmployee /></div>
 	<g:if test="${employeeInstanceTotal!=null}">
 	<div class="pagination" id="pagination">

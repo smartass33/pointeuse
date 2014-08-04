@@ -32,14 +32,7 @@
 	</style>
 </head>
 <body>
-
-<div id="spinner" class="spinner" style="display:none;">
-<img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Spinner" />
-</div>
-
-<div id="spinner" style="display: none;">
-   <img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Loading..." width="16" height="16" />
-</div>
+	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
 	<div class="nav" id="nav">
 		<g:headerMenu />
 	</div>

@@ -928,7 +928,7 @@ def vacationFollowup(){
 		}
 
 		def model=[employee: employeeInstance,humanTime:humanTime, dailySupp:dailySupp,entranceStatus:entranceStatus,inAndOuts:inAndOuts]
-		render template: "/common/currentDayTemplate", model:model
+		render template: "/employee/template/currentDayTemplate", model:model
 	}
 	
 
@@ -1286,9 +1286,12 @@ def vacationFollowup(){
 			SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 			myDate = dateFormat.parse(myDate)			
 		}
-			
+		
+		
+		def pppp = params["userId"]	
 		if (userId==null){
-			userId = params["userId"]
+			if (params["userId"] instanceof String)
+				userId = params["userId"]
 		}
 		employee = Employee.get(userId)
 	
@@ -1536,77 +1539,10 @@ def vacationFollowup(){
 				render(view: "regularize", model: [systemGeneratedEvents: systemGeneratedEvents,employee:employee])
 				return
 			}
-			
-			inAndOutsCriteria = InAndOut.createCriteria()
-			def inAndOuts = inAndOutsCriteria.list {
-				and {
-					eq('employee',employee)
-					eq('year',calendar.get(Calendar.YEAR))
-					eq('month',calendar.get(Calendar.MONTH)+1)
-					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-					order('time','asc')
-				}
-			}
-			 
-			def tmpCalendar = Calendar.instance
-			tmpCalendar.set(Calendar.DAY_OF_YEAR,tmpCalendar.get(Calendar.DAY_OF_YEAR)-4)
-			// iterate over tmpCalendar
-			while(tmpCalendar.get(Calendar.DAY_OF_YEAR) < (calendar.get(Calendar.DAY_OF_YEAR) -1)){
-				tmpCalendar.roll(Calendar.DAY_OF_YEAR, 1)
-				inAndOutsCriteria = InAndOut.createCriteria()
-				def lastInAndOuts = inAndOutsCriteria.list {
-					and {
-						eq('employee',employee)
-						eq('year',calendar.get(Calendar.YEAR))
-						eq('month',tmpCalendar.get(Calendar.MONTH)+1)
-						eq('day',tmpCalendar.get(Calendar.DAY_OF_MONTH))
-						order('time','asc')
-					}
-				}
-				mapByDay.put(tmpCalendar.time,lastInAndOuts)
-				elapsedSeconds = timeManagerService.getDailyTotal(lastInAndOuts)
-				totalByDay.put(tmpCalendar.time, timeManagerService.computeHumanTime(elapsedSeconds))
-			}				
-			
-			dailyCriteria = DailyTotal.createCriteria()
-			def dailyTotal = dailyCriteria.get {
-				and {
-					eq('employee',employee)
-					eq('year',calendar.get(Calendar.YEAR))
-					eq('month',calendar.get(Calendar.MONTH)+1)
-					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-				}
-			}
-			def humanTime = timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(dailyTotal))
-			def dailySupp = timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(dailyTotal)-DailyTotal.maxWorkingTime,0))
-			
-			
-			if (inAndOuts!=null){
-				def max = inAndOuts.size()
-				if (max>0){
-				def  lastEvent = inAndOuts.get(max-1)
-				entranceStatus = lastEvent.type.equals("S") ? false : true
-				}else{
-				entranceStatus=false
 				
-				}
-			}else{
-				entranceStatus=false
-			}
-			
-			[
-				id:id,
-				userId: employee.id,
-				employee: employee,
-				inAndOuts:inAndOuts,
-				dailyTotal:dailyTotal,
-				humanTime:humanTime, 
-				dailySupp:dailySupp,
-				mapByDay:mapByDay,
-				entranceStatus:entranceStatus,
-				totalByDay:totalByDay,
-				period:tmpCalendar.time
-			]
+			def model = timeManagerService.getPointageData(employee)
+			model << [userId: employee.id,employee: employee]
+			return model
 			
 		}
 		catch (Exception e){

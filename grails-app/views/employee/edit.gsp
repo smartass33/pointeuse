@@ -130,9 +130,6 @@
 					$('#paidHSDiv').load('${createLink(controller:'employee', action:'getSupplementaryTime',params:[id:employeeInstance?.id])}');
 			     });
 			</script>
-			<!--div id="paidHSDiv">
-				<img src="${createLinkTo(dir:'images',file:'spinner.gif')}" alt="Patientez pendant le traitement de la requète..." width="16" height="16" />Patientez pendant le traitement de la requète...
-			</div-->
 		</div>
 	</body>
 </html>

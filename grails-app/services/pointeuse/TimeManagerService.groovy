@@ -2141,119 +2141,6 @@ class TimeManagerService {
 		
 	}
 	
-	/*
-	def getMonthTheoritical(Employee employee, int month,int year){
-		def monthTheoritical = 0
-		def counter = 0
-		def isOut = false
-		def totalNumberOfDays
-		def weeklyContractTime
-		def contract
-		def criteria
-		def previousContracts
-		def remainingDays
-		def currentStatus = employee.status
-		def realOpenDays
-		def departureDate
-		def startCalendar = Calendar.instance
-		def endCalendar = Calendar.instance
-		criteria = Contract.createCriteria()
-		
-		previousContracts = criteria.list {
-			or{
-				and {
-					lt('year',year)
-					eq('employee',employee)
-				}
-				and {
-					eq('year',year)
-					lt('month',month)
-					eq('employee',employee)
-				}	
-				
-				and {
-					eq('year',year)
-					eq('month',month)
-					eq('employee',employee)
-				}
-			}
-			order('startDate','desc')
-			//maxResults(1)
-		}
-
-		if (previousContracts != null && previousContracts.size()>0){
-			log.debug("previousContracts: "+previousContracts)
-			
-			if (previousContracts.size() == 1){
-				weeklyContractTime = previousContracts.get(0).weeklyLength
-			}else{
-				weeklyContractTime = previousContracts.get(0).weeklyLength
-			
-			}
-		}
-		else{
-			weeklyContractTime =employee.weeklyContractTime
-		}
-		
-
-		def absenceMap = getAbsences( employee, month, year)
-	
-		startCalendar.set(Calendar.DAY_OF_MONTH,1)
-		startCalendar.set(Calendar.YEAR,year)
-		startCalendar.set(Calendar.MONTH,month-1)
-		endCalendar.set(Calendar.DAY_OF_MONTH,startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-		endCalendar.set(Calendar.YEAR,year)
-		endCalendar.set(Calendar.MONTH,month-1)
-		
-		log.debug('current date: '+startCalendar.time)
-		// count sundays within given month
-		realOpenDays = openDaysBetweenDates(startCalendar.time,endCalendar.time)
-		totalNumberOfDays = realOpenDays
-		
-		// treat special case whereby employee enters the company, or leaves...
-		// special case: arrival month
-		if ((employee.arrivalDate.getAt(Calendar.MONTH) + 1) == month &&  (employee.arrivalDate.getAt(Calendar.YEAR)) == year){
-			// we need to count OPEN DAYS between dates and not consecutive days
-			realOpenDays = openDaysBetweenDates(employee.arrivalDate,endCalendar.time)
-		}
-		
-
-		
-		// special case: employee has not yet arrived in the company
-		if (employee.arrivalDate > endCalendar.time ){
-			isOut = true
-		}
-		
-		//special case: departure month
-		if (currentStatus.date != null && currentStatus.date <= endCalendar.time){
-			if (currentStatus.type != StatusType.ACTIF){
-				if (currentStatus.date.getAt(Calendar.MONTH) == endCalendar.get(Calendar.MONTH) && currentStatus.date.getAt(Calendar.YEAR) == endCalendar.get(Calendar.YEAR) ){
-				log.error('departure month. recomputing open days')
-					Calendar exitCalendar = Calendar.instance
-					exitCalendar.time = currentStatus.date
-					exitCalendar.roll(Calendar.DAY_OF_YEAR, -1)
-					realOpenDays = openDaysBetweenDates(startCalendar.time,exitCalendar.time)
-				}else{
-					realOpenDays = 0
-					isOut = true
-				}
-			}
-		}
-
-		log.debug('open days: '+realOpenDays)
-		if (isOut){
-			monthTheoritical = 0
-		}else{
-		monthTheoritical=(
-			3600*(
-					realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
-					+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
-					-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)))
-				- absenceMap.get(AbsenceType.GROSSESSE)) as int
-		}
-		return monthTheoritical
-	}*/
-	
 	def getDailyInAndOutsData(Site site,Date currentDate){
 		def dailyMap = [:]
 		def dailySupMap = [:]
@@ -2301,5 +2188,82 @@ class TimeManagerService {
 		return [dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:currentDate]
 	}
 	
+	
+	def getPointageData(Employee employee){
+		def entranceStatus
+		def mapByDay=[:]
+		def totalByDay=[:]
+		def dailyCriteria
+		def elapsedSeconds=0
+		def calendar = Calendar.instance
+		def inAndOutsCriteria = InAndOut.createCriteria()
+		def tmpCalendar = Calendar.instance
+		tmpCalendar.set(Calendar.DAY_OF_YEAR,tmpCalendar.get(Calendar.DAY_OF_YEAR)-4)
+		
+		def inAndOuts = inAndOutsCriteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',calendar.get(Calendar.YEAR))
+				eq('month',calendar.get(Calendar.MONTH)+1)
+				eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+				order('time','asc')
+			}
+		}
+		 
+
+		// iterate over tmpCalendar
+		while(tmpCalendar.get(Calendar.DAY_OF_YEAR) < (calendar.get(Calendar.DAY_OF_YEAR) -1)){
+			tmpCalendar.roll(Calendar.DAY_OF_YEAR, 1)
+			inAndOutsCriteria = InAndOut.createCriteria()
+			def lastInAndOuts = inAndOutsCriteria.list {
+				and {
+					eq('employee',employee)
+					eq('year',calendar.get(Calendar.YEAR))
+					eq('month',tmpCalendar.get(Calendar.MONTH)+1)
+					eq('day',tmpCalendar.get(Calendar.DAY_OF_MONTH))
+					order('time','asc')
+				}
+			}
+			mapByDay.put(tmpCalendar.time,lastInAndOuts)
+			elapsedSeconds = getDailyTotal(lastInAndOuts)
+			totalByDay.put(tmpCalendar.time, getTimeAsText(computeHumanTime(elapsedSeconds),false))
+		}
+		
+		dailyCriteria = DailyTotal.createCriteria()
+		def dailyTotal = dailyCriteria.get {
+			and {
+				eq('employee',employee)
+				eq('year',calendar.get(Calendar.YEAR))
+				eq('month',calendar.get(Calendar.MONTH)+1)
+				eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+			}
+		}
+		def humanTime = getTimeAsText(computeHumanTime(getDailyTotal(dailyTotal)),false)
+		def dailySupp = getTimeAsText(computeHumanTime(Math.max(getDailyTotal(dailyTotal)-DailyTotal.maxWorkingTime,0)),false)
+		
+		
+		if (inAndOuts!=null){
+			def max = inAndOuts.size()
+			if (max>0){
+			def  lastEvent = inAndOuts.get(max-1)
+			entranceStatus = lastEvent.type.equals("S") ? false : true
+			}else{
+				entranceStatus=false	
+			}
+		}else{
+			entranceStatus=false
+		}
+
+		return [
+			inAndOuts:inAndOuts,
+			dailyTotal:dailyTotal,
+			humanTime:humanTime,
+			dailySupp:dailySupp,
+			mapByDay:mapByDay,
+			entranceStatus:entranceStatus,
+			totalByDay:totalByDay,
+			period:tmpCalendar.time
+		]
+	}
 
 }

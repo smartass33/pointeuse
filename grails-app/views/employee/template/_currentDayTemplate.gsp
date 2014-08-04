@@ -6,11 +6,11 @@
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<g:message code="employee.daily.time" default="Last Name" />
 	:
-	${humanTime.get(0)}H${humanTime.get(1)}
+	${humanTime}
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<g:message code="employee.sup.time" default="Last Name" />
 	:
-	${dailySupp.get(0)}H${dailySupp.get(1)}
+	${dailySupp}
 </h1>
 <g:if test="${flash.message}">
 	<div class="message" role="status">
@@ -92,7 +92,54 @@
 				<g:link class="displayButton" controller="employee" action="reportLight" params="[userId:employee.id]">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link>
 			</li>
 			<li >
-				<g:inAndOutPopup fromReport="false"/>
+				<a href="#join_form" id="join_pop" class="addElementButton">Ajouter un élement</a>
+				<a href="#x" class="overlay" id="join_form" style="background: transparent;"></a>
+				<div id="popup" class="popup">
+					<h2>Creer Entrée/Sortie</h2>
+					<p>Renseignez les informations pour créer un nouvel évènement</p>
+					<g:form action="create">
+						<table>
+							<tbody>
+								<tr class="prop">
+									<td class="eventTD" valign="top">choisissez la date:</td>
+									<td class="eventTD" valign="top"><input type="text" name="date_picker" id="date_picker" /> 
+										<script type="text/javascript">
+											datePickerLaunch();
+										</script>
+									</td>
+								</tr>
+								<tr class="prop">
+									<td class="eventTD" valign="top">Evènement:</td>
+									<td class="eventTD" valign="top">
+										<g:select
+											name="event.type" from="${['E','S']}"
+											valueMessagePrefix="entry.name"
+											noSelection="['':'-Choisissez votre élément-']" />
+									</td>
+								</tr>
+								<tr class="prop">
+									<td class="eventTD" valign="top">Raison:</td>
+									<td class="eventTD" valign="top">
+										<g:select name="reason.id"
+											from="${Reason.list([sort:'name'])}"
+											noSelection="['':'-Ajouter une raison-']" optionKey="id"
+											optionValue="name" />
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<g:hiddenField name="userId" value="${userId}" />
+						<g:hiddenField name="fromReport" value="${fromReport}" />
+						<g:submitToRemote class="listButton"
+							onLoading="document.getElementById('spinner').style.display = 'inline';"
+				                		onComplete="document.getElementById('spinner').style.display = 'none';"						
+							update="currentDay"
+							onSuccess="closePopup()"
+							url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
+					</g:form>
+					<a class="close" id="closeId" href="#close"></a>
+				</div>
+
 			</li>
 			<li>
 				<g:link class="logoutButton"  url="${grailsApplication.config.serverURL}/${grailsApplication.config.context}">${message(code: 'employee.disconnect.label', default: 'Sortie')}</g:link>
