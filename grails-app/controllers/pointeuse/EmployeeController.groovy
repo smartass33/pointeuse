@@ -914,8 +914,8 @@ def vacationFollowup(){
 			entranceStatus=true
 		}
 		
-		def humanTime = timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(inAndOuts))
-		def dailySupp = timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(inAndOuts)-DailyTotal.maxWorkingTime,0))
+		//def humanTime = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(inAndOuts)),false)
+		//def dailySupp = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(inAndOuts)-DailyTotal.maxWorkingTime,0)),false)
 
 		//employeeInstance.status = type.equals("S") ? false : true
 		
@@ -926,9 +926,10 @@ def vacationFollowup(){
 			if (flashMessage)		
 				flash.message = message(code: 'inAndOut.create.label', args: [message(code: 'inAndOut.exit.label', default: 'exit'), cal.time])
 		}
-
-		def model=[employee: employeeInstance,humanTime:humanTime, dailySupp:dailySupp,entranceStatus:entranceStatus,inAndOuts:inAndOuts]
-		render template: "/employee/template/currentDayTemplate", model:model
+		
+		def model = timeManagerService.getPointageData( employeeInstance)
+		model << [userId: employeeInstance.id,employee: employeeInstance]
+		render template: "/employee/template/last5DaysTemplate", model:model
 	}
 	
 

@@ -38,12 +38,7 @@
 				return i;
 			}
 		
-			 $(document).ready(function() {
-			   $('#cartouche_toggle').click( function() {
-			    $('#cartouche_div').slideToggle(400);
-			   });
-		
-			});
+
 		
 			function datePickerLaunch (){
 				$.datepicker.regional['fr'] = {
@@ -96,13 +91,11 @@
 			{
 				location.href='${grailsApplication.config.serverURL}/${grailsApplication.config.context}' 
 			}
-			function resetTimer()
-			{
+			function resetTimer(){
 				startTime();
 				clearTimeout(t);
 				t=setTimeout(logout,60000) //logs out in 1 min
 			}
-
 		</script>
 		<style>
 	
@@ -110,9 +103,8 @@
 	</head>
 	<body>
 		<g:javascript>window.onload = startTime();</g:javascript>
-					<g:form>
-		
-		<div class="body">
+		<g:form>	
+			<div id='title' style='padding:10px;'>
 				<h1>
 					<font size="5"> 
 						<g:message code="employee.label" default="Last Name" />: 
@@ -120,15 +112,12 @@
 						<g:fieldValue bean="${employee}" field="lastName" />	
 					</font>
 				</h1>			
-				<div id="last5days">
-						<g:last5days />
-		
-				</div>
-
-	</div>
-		
-							<g:hiddenField name="userId" value="${userId}" />
-					<g:hiddenField name="fromReport" value="${false}" />
-						</g:form>
-			</body>
+			</div>
+			<div id="last5days" style='padding:10px;'>
+				<g:last5days />
+			</div>					
+			<g:hiddenField name="userId" value="${userId}" />
+			<g:hiddenField name="fromReport" value="${false}" />
+		</g:form>
+	</body>
 </html>
