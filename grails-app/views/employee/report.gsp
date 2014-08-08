@@ -13,54 +13,52 @@
 	<r:layoutResources/>
 	<meta name="layout" content="main">
 	<g:set var="weeklyRecap" value="0" />
-	
 	<title>${message(code: 'employee.report.label', default: 'Report')}</title>
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+	<style>
+		 th
+		{
+		    font:15px Georgia, serif;
+		
+			color: rgb(102, 102, 102);
+		    border-style:solid;
+		    border-width:1px;
+		    border-color:#E7EFE0;
+		    font-weight:bold;
+		    padding:0px;
+		    text-align:center;
+		    vertical-align:top;
+		}
+		
+		th:last-child {
+		      border-color:#E7EFE0;
+		}
+		 
+		tr
+		{
+		    color:#000000;
+		    border-top-style: solid;
+		    border-bottom-style: solid;
+		    border-width:1px;
+		    border-color:#E7EFE0;
+		    font-weight:normal;
+		}
+		
+		td
+		{
+		    border-style:solid;
+		    border-width:1px;
+		    border-color:#000000;
+		    padding:0px;
+		    text-align:left;
+		    vertical-align:top;
+		}
+		
+		.outTR{
+				background-color: #ddd;
+		}
 
-<style>
-	 th
-	{
-	    font:15px Georgia, serif;
-	
-		color: rgb(102, 102, 102);
-	    border-style:solid;
-	    border-width:1px;
-	    border-color:#E7EFE0;
-	    font-weight:bold;
-	    padding:0px;
-	    text-align:center;
-	    vertical-align:top;
-	}
-	
-	th:last-child {
-	      border-color:#E7EFE0;
-	}
-	 
-	tr
-	{
-	    color:#000000;
-	    border-top-style: solid;
-	    border-bottom-style: solid;
-	    border-width:1px;
-	    border-color:#E7EFE0;
-	    font-weight:normal;
-	}
-	
-	td
-	{
-	    border-style:solid;
-	    border-width:1px;
-	    border-color:#000000;
-	    padding:0px;
-	    text-align:left;
-	    vertical-align:top;
-	}
-	
-	.outTR{
-			background-color: #ddd;
-	}
-
-</style>
+	</style>
 
 	<script type="text/javascript">
 

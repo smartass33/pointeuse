@@ -69,7 +69,7 @@ class EmployeeService {
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
 		endCalendar.set(Calendar.DAY_OF_MONTH,31)
-		endCalendar.set(Calendar.MONTH,6)
+		endCalendar.set(Calendar.MONTH,4)
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
@@ -84,8 +84,7 @@ class EmployeeService {
 				eq('period',period)
 				eq('type',VacationType.CA)
 			}
-		}
-		
+		}		
 		
 		//CA
 		criteria = Absence.createCriteria()
@@ -96,7 +95,7 @@ class EmployeeService {
 				lt('date',endCalendar.time)
 				eq('type',AbsenceType.VACANCE)
 			}
-		}
+		}		
 		return remainingCA=takenCA!=null?(initialCA.counter - takenCA.size()):initialCA.counter
 	}
 	

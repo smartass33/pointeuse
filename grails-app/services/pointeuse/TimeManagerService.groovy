@@ -1488,6 +1488,7 @@ class TimeManagerService {
 		def ecartByEmployee = [:]
 		def rttByEmployee = [:]
 		def employeeInstanceList
+		Contract currentContract
 		
 		if (site){
 			employeeInstanceList = Employee.findAllBySite(site)
@@ -1503,7 +1504,7 @@ class TimeManagerService {
 			ecartMinusRTTMap = [:]
 			for (month in monthList){
 				tmpYear=(month<6)?period.year+1:period.year
-		   
+	   
 				criteria = MonthlyTotal.createCriteria()
 				def monthlyTotalInstance = criteria.get {
 					and {
@@ -1576,8 +1577,9 @@ class TimeManagerService {
 				}else{
 					monthlyTakenRTTMap.put(month,takenRTT2add)
 				}				
-				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))				
-				ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(employee.weeklyContractTime/Employee.WeekOpenedDays)) as long)			
+				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))	
+				currentContract = data.get('currentContract')			
+				ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(currentContract.weeklyLength/Employee.WeekOpenedDays)) as long)			
 			}
 		
 			monthlyTheoriticalMap.each() {
@@ -1596,7 +1598,6 @@ class TimeManagerService {
 			monthlyTheoriticalByEmployee.put(employee,monthlyTheoriticalMap)
 			monthlyActualByEmployee.put(employee,monthlyActualMap)
 			ecartByEmployee.put(employee, ecartMap)
-			//if (employee.weeklyContractTime == Employee.legalWeekTime)
 			ecartMinusRTTByEmployee.put(employee,ecartMinusRTTMap)
 			rttByEmployee.put(employee, monthlyTakenRTTMap)
 		}
