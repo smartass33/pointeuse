@@ -836,6 +836,12 @@ class TimeManagerService {
 		if ((exitDate != null) && exitDate < maxDate){
 			maxDate = exitDate
 		}
+		
+		// get initial vacation
+		
+		// get initial RTT
+		
+
 
 		// get cumul holidays
 		def yearlyHolidays = criteria.list {
@@ -935,9 +941,6 @@ class TimeManagerService {
 			totalTime += monthIter.elapsedSeconds
 		}
 
-		
-		
-		
 		yearlyCounter = month > 5 ? utilService.getYearlyCounter(year-1,month,employee) : utilService.getYearlyCounter(year,month,employee)
 
 		criteria = BankHoliday.createCriteria()
@@ -1046,6 +1049,8 @@ class TimeManagerService {
 		
 		log.debug('current date: '+calendar.time)
 		def currentCalendar = Calendar.instance
+		
+		
 		
 		// special case: the month is not over yet
 		if (currentCalendar.get(Calendar.MONTH) == (month - 1) && currentCalendar.get(Calendar.YEAR) == year){
@@ -1412,14 +1417,17 @@ class TimeManagerService {
 		def payableSupTime = computeHumanTime(Math.round(monthlySupTime))
 		def payableCompTime = computeHumanTime(0)
 		if (employee.weeklyContractTime!=Employee.legalWeekTime && monthlyTotalTime > monthTheoritical){
-			payableCompTime = computeHumanTime(Math.round(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0)))
-			
+			payableCompTime = computeHumanTime(Math.round(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0)))	
 		}	
 		monthlyTotalTimeByEmployee.put(employee, computeHumanTime(monthlyTotalTime))
 		def monthlyTotal=computeHumanTime(monthlyTotalTime)
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
 		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)	
 		def currentContract = cartoucheTable.get('currentContract')
+		
+		def initialCA = employeeService.getInitialCA(employee,period)
+		def initialRTT = employeeService.getInitialRTT(employee,period)
+		
 		
 		
 		def departureDate
@@ -1431,6 +1439,8 @@ class TimeManagerService {
 		
 		
 		return [
+			initialCA:initialCA,
+			initialRTT:initialRTT,	
 			isCurrentMonth:isCurrentMonth,
 			departureDate:departureDate,
 			currentContract:currentContract,
@@ -1680,6 +1690,7 @@ class TimeManagerService {
 		def annualRTT = 0
 		def annualCSS = 0
 		def annualSickness = 0
+		def annualExceptionnel = 0	
 		def annualPayableSupTime = 0
 		def annualPayableCompTime = 0
 		def annualWorkingDays = 0
@@ -1770,6 +1781,7 @@ class TimeManagerService {
 			annualRTT += cartoucheTable.getAt('rtt')
 			annualCSS += cartoucheTable.getAt('sansSolde')
 			annualSickness += cartoucheTable.getAt('sickness')
+			annualExceptionnel += cartoucheTable.getAt('exceptionnel')
 			annualWorkingDays += cartoucheTable.getAt('workingDays')
 			annualPayableSupTime += monthlySupTotalTime
 			annualPayableCompTime += payableCompTime
@@ -1803,6 +1815,7 @@ class TimeManagerService {
 			annualRTT:annualRTT,
 			annualCSS:annualCSS,
 			annualSickness:annualSickness,
+			annualExceptionnel:annualExceptionnel,
 			annualWorkingDays:annualWorkingDays,
 			annualPayableSupTime:getTimeAsText(computeHumanTime(Math.round(annualPayableSupTime) as long),true),
 			annualPayableCompTime:getTimeAsText(computeHumanTime(Math.round(annualPayableCompTime) as long),true),

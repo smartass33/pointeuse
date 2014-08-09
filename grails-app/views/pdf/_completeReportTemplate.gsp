@@ -109,6 +109,12 @@
 	        							<tr><td>${yearlyHoliday as float}</td></tr>
 	        						</table>
 	        					</td>
+	        					<td>
+	        						<table border="1" class="cartoucheValues">
+	        							<thead></thead>	        							
+	        							<tr><td>${(initialCA - yearlyHoliday) as float}</td></tr>
+	        						</table>
+	        					</td>
 							</tr>
 							<tr>
 								<td style="text-align:left;">${message(code: 'employee.rtt.count', default: 'report')} :</td>
@@ -118,6 +124,12 @@
 	 									<tr><td>${rtt as float}</td></tr>
 	        						</table>
 	        					</td>
+	        					<td>
+	        						<table border="1" class="cartoucheValues">
+	        							<thead></thead>	        							
+	        							<tr><td>${(initialRTT - yearlyRtt) as float}</td></tr>
+	        						</table>
+	        					</td>	        					
 	        					<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>

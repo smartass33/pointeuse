@@ -73,6 +73,7 @@
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.RTT.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.CSS.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.sickness.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="employee.exceptionnel.count"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.supplementary.label"/></th>
 			<!--th><g:message code="annual.report.complementary.label"/></th-->
 		</thead>
@@ -101,6 +102,7 @@
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('rtt')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('sansSolde')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('sickness')}</td>
+					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('exceptionnel')}</td>
 					<td style="vertical-align: middle;text-align:right;">
 						<g:if test="${yearMonthlySupTime.get(cartouche.key) !=null}">
 	                   		${yearMonthlySupTime.get(cartouche.key)} 
@@ -141,6 +143,7 @@
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualRTT}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualCSS}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualSickness}</td>
+				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualExceptionnel}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">
 					<g:if test="${annualPayableSupTime !=null}">
 	               		${annualPayableSupTime} 

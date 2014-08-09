@@ -54,6 +54,21 @@ class EmployeeService {
 		return initialCA!=null?initialCA.counter:0
 	}
 	
+	
+	public int getInitialRTT(Employee employee,Period period){
+		def criteria
+		def initialRTT
+		criteria = Vacation.createCriteria()
+		initialRTT = criteria.get{
+			and {
+				eq('employee',employee)
+				eq('period',period)
+				eq('type',VacationType.RTT)
+			}
+		}
+		return initialRTT!=null?initialRTT.counter:0
+	}
+	
 	public int getRemainingCA(Employee employee,Period period){
 		def remainingCA = 0
 		def criteria
