@@ -6,64 +6,60 @@
 		<meta name="layout" content="main" />
 		<title>Pointeuse BIOLAB33</title>
 		<style type="text/css" media="screen">
-
-
-	#page-body {
-		margin: 2em 1em 1.25em 18em;
-	}
-	
-	h2 {
-		margin-top: 1em;
-		margin-bottom: 0.3em;
-		font-size: 1em;
-	}
-	
-	p {
-		line-height: 1.5;
-		margin: 0.25em 0;
-	}
-	
-
-	
-	@media screen and (max-width: 480px) {
-		#status {
-			display: none;
-		}
-		#page-body {
-			margin: 0 1em 1em;
-		}
-		#page-body h1 {
-			margin-top: 0;
-		}
-	}
-	</style>
-
-	  
-	<script type="text/javascript">
-		function startTime()
-			{
-			var today=new Date();
-			var h=today.getHours();
-			var m=today.getMinutes();
-			var s=today.getSeconds();
-			// add a zero in front of numbers<10
-			m=checkTime(m);
-			s=checkTime(s);
-			document.getElementById('clock').innerHTML=h+":"+m+":"+s;
-			t=setTimeout(function(){startTime()},500);
+			#page-body {
+				margin: 2em 1em 1.25em 18em;
 			}
 			
-			function checkTime(i)
-			{
-			if (i<10)
-			  {
-			  i="0" + i;
-			  }
-			return i;
-		}
-	</script>
-
-	
+			h2 {
+				margin-top: 1em;
+				margin-bottom: 0.3em;
+				font-size: 1em;
+			}
+			
+			p {
+				line-height: 1.5;
+				margin: 0.25em 0;
+			}
+			
+		
+			
+			@media screen and (max-width: 480px) {
+				#status {
+					display: none;
+				}
+				#page-body {
+					margin: 0 1em 1em;
+				}
+				#page-body h1 {
+					margin-top: 0;
+				}
+			}
+		</style>
+		
+			  
+		<script type="text/javascript">
+			function startTime()
+				{
+				var today=new Date();
+				var h=today.getHours();
+				var m=today.getMinutes();
+				var s=today.getSeconds();
+				// add a zero in front of numbers<10
+				m=checkTime(m);
+				s=checkTime(s);
+				document.getElementById('clock').innerHTML=h+":"+m+":"+s;
+				t=setTimeout(function(){startTime()},500);
+				}
+				
+				function checkTime(i)
+				{
+				if (i<10)
+				  {
+				  i="0" + i;
+				  }
+				return i;
+			}
+		</script>
 	</head>
 	<body>
 	    <g:javascript>window.onload = startTime();document.getElementById('mytextfield').focus();</g:javascript>
@@ -102,7 +98,7 @@
 	      	</g:if>      	
 	  		<form id="myform" method="POST" action="employee/pointage" controller="employee">
 		  		<ul >
-		  			<li><font size="5">	${message(code: 'employee.id', default: 'Create')}: <g:textField id="mytextfield" name="username" autofocus="true" style="vertical-align: middle;" value="" />  	</font></li>	  				  						
+		  			<li><font size="5">	${message(code: 'employee.id', default: 'Create')}: <g:textField id="mytextfield" name="username" autofocus="true" style="vertical-align: middle;" value="" /></font></li>	  				  						
 					<li><g:actionSubmit value="${message(code: 'default.button.login.label', default: 'Create')}" action="pointage" class="indexLoginButton" style="vertical-align: middle;"/></li>
 				</ul>
 			</form>		

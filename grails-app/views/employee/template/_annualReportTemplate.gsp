@@ -108,9 +108,8 @@
 <div>
 	<table style="width:75%;">
 		<tr>
-				<td style="witdh: 200px;" class="cartoucheRightTitleTD"><font color="red" style='font-weight:bold;'><g:message code="annual.theoritical.intial"/>:</font></td>
-				<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD"><font color="red" style='font-weight:bold;'>${annualTheoritical}</font></td>
-			
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><font color="red" style='font-weight:bold;'><g:message code="annual.theoritical.intial"/>:</font></td>
+			<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD"><font color="red" style='font-weight:bold;'>${annualTheoritical}</font></td>		
 		</tr>	
 		<tr>
 			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><g:message code="annual.HS.above.quota"/>:</td>

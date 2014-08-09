@@ -1,5 +1,4 @@
 <%@ page import="pointeuse.Employee"%>
-<%@ page import="pointeuse.InAndOut"%>
 <%@ page import="pointeuse.Site"%>
 <%@ page import="pointeuse.Vacation"%>
 <%@ page import="pointeuse.Period"%>
@@ -83,5 +82,11 @@
 	</div>
 	<br>
 	<div id="vacationList"><g:listVacationEmployee/></div>
+	<g:if test="${employeeInstanceTotal!=null}">
+		<div class="pagination" id="pagination">
+			<g:hiddenField name="isAdmin" value="${isAdmin}" />
+			<g:paginate total="${employeeInstanceTotal}" params="${[isAdmin:isAdmin,siteId:siteId]}" />
+		</div>
+	</g:if>
 </body>
 </html>

@@ -50,7 +50,6 @@
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.exceptionnel.count', default: 'report')} :</td>	
 				<td class="cartoucheRightFiguresTD">${exceptionnel as java.lang.Float}</td>        					
      			<td class="cartoucheRightFiguresTD">${yearlyExceptionnel as java.lang.Float}</td>
-
 			</tr>												
 			<tr>
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							

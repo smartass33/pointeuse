@@ -131,14 +131,20 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
-		params.each{i->log.error(i)}
-		log.error('browser version: '+request.getHeader('User-Agent') )
+		params.each{i->log.debug('parameter of list: '+i)}
+		params.sort='site'
+		params.max = Math.min(max ?: 20, 100)
+		log.debug('browser version: '+request.getHeader('User-Agent') )
 		def employeeInstanceList
 		def employeeInstanceTotal
 		def site
 		def siteId=params["site"]
 		boolean back = (params["back"] != null && params["back"].equals("true")) ? true : false		
-		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false				
+		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false	
+		
+		def user = springSecurityService.currentUser
+		def username = user?.getUsername()
+					
 		if (params["site"]!=null && !params["site"].equals('') && !params["site"].equals('[id:]')){
 			site = Site.get(params.int('site'))
 			if (site != null)
@@ -149,35 +155,27 @@ class EmployeeController {
 			if (site != null)
 				siteId=site.id
 		}		
-		
-		def user = springSecurityService.currentUser 
-		def username = user?.getUsername()
-        params.max = Math.min(max ?: 20, 100)
-		if (site!=null && !back){
+		if (back){
+			if (site!=null){
+				employeeInstanceList=Employee.findAllBySite(site)
+				employeeInstanceTotal = employeeInstanceList.size()
+				employeeInstanceList=Employee.findAllBySite(site,[max:  20,offset: 0,sort:'site'])
+				
+			}else {
+				employeeInstanceList=Employee.findAll("from Employee")	
+				employeeInstanceTotal = employeeInstanceList.size()		
+				employeeInstanceList=Employee.findAll("from Employee order by site",[max:  20,offset: 0])
+			}
+		}else{
+			if (site!=null){
 				employeeInstanceList = Employee.findAllBySite(site)
 				employeeInstanceTotal = employeeInstanceList.size()
 				render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]
 				return
-			
-		}
-		if (params["site"].equals('') && !back){			
-			employeeInstanceList=Employee.list(params)
-			employeeInstanceTotal = employeeInstanceList.totalCount		
-			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:null,site:null]
-			return
-		}
-		
-		
-		if (back){
-			if (site!=null){
-				employeeInstanceList=Employee.findAllBySite(site)
-			}else {
-				employeeInstanceList=Employee.findAll("from Employee")	
-				employeeInstanceTotal = employeeInstanceList.size()
+			}else{
+				employeeInstanceList=Employee.list(params)
+				employeeInstanceTotal = employeeInstanceList.totalCount
 			}
-		}else{
-			employeeInstanceList=Employee.list(params)
-			employeeInstanceTotal = employeeInstanceList.totalCount
 		}
 		[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
     }
@@ -190,7 +188,7 @@ class EmployeeController {
     }
 
     def save() {
-		params.each{i-> log.error('param: '+i)}
+		params.each{i-> log.debug('param: '+i)}
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
 		def service = params["employee.service.id"]
 		def site = params["employee.site.id"]
@@ -255,8 +253,13 @@ class EmployeeController {
     }
 
 def vacationFollowup(){
+		params.each {
+			i-> log.error('parameter= '+i)
+		}
 		def year = params["year"]
 		def max = params["max"] != null ? params.int("max") : 20
+		def offset = params["offset"] != null ? params.int("offset") : 0
+		
 		def site
 		def siteId
 		def employeeInstanceList
@@ -271,28 +274,38 @@ def vacationFollowup(){
 		def takenSicknessMap=[:]
 		def takenCSSMap=[:]
 		def takenAutreMap=[:]
+		def takenExceptionnelMap=[:]
 		def takenSickness
 		def takenRTT
 		def takenCA
 		def takenCSS
 		def takenAutre
+		def takenExceptionnel
 		def employeeInstanceTotal
 
-		if (params["site.id"]!=null && !params["site.id"].equals("")){
-			def tmpSite = params["site.id"]
-			if (tmpSite instanceof String[]){
-				if (tmpSite[0]!=""){
-					tmpSite=tmpSite[0]!=""?tmpSite[0].toInteger():tmpSite[1].toInteger()
+		
+		if (params["siteId"]!=null && !params["siteId"].equals("")){
+			site = Site.get(params["siteId"])
+			siteId=site.id	
+		}else{
+			if (params["site.id"]!=null && !params["site.id"].equals("")){
+				def tmpSite = params["site.id"]
+				if (tmpSite instanceof String[]){
+					if (tmpSite[0]!=""){
+						tmpSite=tmpSite[0]!=""?tmpSite[0].toInteger():tmpSite[1].toInteger()
+					}
+				}else {
+					tmpSite=tmpSite.toInteger()
 				}
-			}else {
-				tmpSite=tmpSite.toInteger()
+				site = Site.get(tmpSite)						
+				siteId=site.id			
 			}
-			site = Site.get(tmpSite)						
-			siteId=site.id			
 		}
+		
 		if (year!=null && !year.equals("")){
+			
 			if (year instanceof String[]){
-				year=year[0]!=""?year[0].toInteger():year[1].toInteger()					
+				year= (year[0] != "") ? year[0].toInteger():year[1].toInteger()					
 			}else {
 				year=year.toInteger()	
 			}
@@ -302,14 +315,12 @@ def vacationFollowup(){
 		def currentMonth = startCalendar.get(Calendar.MONTH)
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
-		startCalendar.set(Calendar.HOUR_OF_DAY,00)
-		startCalendar.set(Calendar.MINUTE,00)
-		startCalendar.set(Calendar.SECOND,00)
+		startCalendar.clearTime()
 		
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
 		endCalendar.set(Calendar.DAY_OF_MONTH,31)
-		endCalendar.set(Calendar.MONTH,6)
+		endCalendar.set(Calendar.MONTH,4)
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
@@ -317,17 +328,24 @@ def vacationFollowup(){
 		if (year != null){
 			period = Period.get(year)
 		}else{
-			if (currentMonth<5){
-				period = Period.findByYear(startCalendar.get(Calendar.YEAR) - 1)
-			}else{
-				period = Period.findByYear(startCalendar.get(Calendar.YEAR))
-			}
+			period = (currentMonth < 5) ? Period.findByYear(startCalendar.get(Calendar.YEAR) - 1) : Period.findByYear(startCalendar.get(Calendar.YEAR))
 		}
 	
-		employeeInstanceList = (site!=null)?Employee.findAllBySite(site,params):Employee.findAll("from Employee",[max:max])		
+		
+		if (site != null){
+			employeeInstanceList = Employee.findAllBySite(site)
+			employeeInstanceTotal = employeeInstanceList.size()		
+			employeeInstanceList = Employee.findAllBySite(site,[max:max,offset:offset])
+			
+		}else{
+			employeeInstanceList = Employee.findAll("from Employee")
+			employeeInstanceTotal = employeeInstanceList.size()
+			employeeInstanceList = Employee.findAll("from Employee",[max:max,offset:offset])	
+		}
+		
 		
 		// for each employee, retrieve absences
-		for (Employee employee: Employee.list(params)){
+		for (Employee employee: employeeInstanceList){
 			// step 1: fill initial values
 			//CA
 			criteria = Vacation.createCriteria()
@@ -342,8 +360,7 @@ def vacationFollowup(){
 			if (initialCA != null){
 				initialCAMap.put(employee, initialCA.counter)
 			}else{
-				initialCAMap.put(employee, 0)
-			
+				initialCAMap.put(employee, 0)		
 			}
 			//RTT
 			criteria = Vacation.createCriteria()
@@ -408,15 +425,12 @@ def vacationFollowup(){
 					lt('date',endCalendar.time)
 					eq('type',AbsenceType.MALADIE)
 				}
-			}
-			
+			}			
 			if (takenSickness!=null){
 				takenSicknessMap.put(employee, takenSickness.size())
 			}else{
 				takenSicknessMap.put(employee, 0)
-			}
-		
-			
+			}					
 			
 			criteria = Absence.createCriteria()
 			takenCSS = criteria.list {
@@ -426,8 +440,7 @@ def vacationFollowup(){
 					lt('date',endCalendar.time)
 					eq('type',AbsenceType.CSS)
 				}
-			}
-			
+			}			
 			if (takenCSS!=null){
 				takenCSSMap.put(employee, takenCSS.size())
 			}else{
@@ -443,19 +456,47 @@ def vacationFollowup(){
 					eq('type',AbsenceType.AUTRE)
 				}
 			}
-			
 			if (takenAutre!=null){
 				takenAutreMap.put(employee, takenAutre.size())
 			}else{
 				takenAutreMap.put(employee, 0)
 			}
+			
+			criteria = Absence.createCriteria()
+			takenExceptionnel = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.EXCEPTIONNEL)
+				}
+			}
+			if (takenExceptionnel!=null){
+				takenExceptionnelMap.put(employee, takenExceptionnel.size())
+			}else{
+				takenExceptionnelMap.put(employee, 0)
+			}		
 		}
-		employeeInstanceTotal=employeeInstanceList.size()
-		log.error("done")
-		[period:period,employeeInstanceTotal:employeeInstanceTotal,site:site,employeeInstanceList:employeeInstanceList,takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]
-		
+		log.debug("done")
+		[
+			employeeInstanceTotal:employeeInstanceTotal,
+			takenExceptionnelMap:takenExceptionnelMap,
+			period:period,
+			employeeInstanceTotal:employeeInstanceTotal,
+			site:site,
+			siteId:siteId,
+			employeeInstanceList:employeeInstanceList,
+			takenCSSMap:takenCSSMap,
+			takenAutreMap:takenAutreMap,
+			takenSicknessMap:takenSicknessMap,
+			takenRTTMap:takenRTTMap,
+			takenCAMap:takenCAMap,
+			initialCAMap:initialCAMap,
+			initialRTTMap:initialRTTMap,
+			remainingRTTMap:remainingRTTMap,
+			remainingCAMap:remainingCAMap
+		]	
 	}
-	
 	
 	
 	def vacationDisplay(Long id){		
@@ -482,14 +523,12 @@ def vacationFollowup(){
 		def startCalendar = Calendar.instance
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
-		startCalendar.set(Calendar.HOUR_OF_DAY,00)
-		startCalendar.set(Calendar.MINUTE,00)
-		startCalendar.set(Calendar.SECOND,00)
+		startCalendar.clearTime()
 		
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
 		endCalendar.set(Calendar.DAY_OF_MONTH,31)
-		endCalendar.set(Calendar.MONTH,6)
+		endCalendar.set(Calendar.MONTH,4)
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
@@ -635,14 +674,12 @@ def vacationFollowup(){
 		def startCalendar = Calendar.instance		
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
-		startCalendar.set(Calendar.HOUR_OF_DAY,00)
-		startCalendar.set(Calendar.MINUTE,00)
-		startCalendar.set(Calendar.SECOND,00)
+		startCalendar.clearTime()
 		
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
 		endCalendar.set(Calendar.DAY_OF_MONTH,31)
-		endCalendar.set(Calendar.MONTH,6)
+		endCalendar.set(Calendar.MONTH,4)
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)

@@ -1,17 +1,17 @@
 <%@ page import="pointeuse.Period"%>
 <%@ page import="pointeuse.Site"%>
 
-<table>
+<table id="table-header-rotated" style="width:100%;"class="table table-striped table-header-rotated" >
 	<thead>
-		<tr>			
-			<g:sortableColumn property="last_name" title="${message(code: 'employee.lastName.label', default: 'Type')}" />						
-			<g:sortableColumn property="reference_vacation" title="${message(code: 'vacation.reference.label', default: 'Type')}" />					
-			<g:sortableColumn property="taken_vacation" title="${message(code: 'vacation.taken.label', default: 'Type')}" />					
-			<g:sortableColumn property="remainder_vacation" title="${message(code: 'vacation.remainder.label', default: 'Counter')}" />					
-			<g:sortableColumn property="reference_rtt" title="${message(code: 'rtt.reference.label', default: 'Type')}" />					
-			<g:sortableColumn property="taken_rtt" title="${message(code: 'rtt.taken.label', default: 'Type')}" />					
-			<g:sortableColumn property="remainder_rtt" title="${message(code: 'rtt.remainder.label', default: 'Counter')}" />	
-		</tr>
+			<th class='rotate-45' ><div><span><g:message code="employee.lastName.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="vacation.reference.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="vacation.taken.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="vacation.remainder.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="rtt.reference.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="rtt.taken.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="rtt.remainder.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="other.vacation.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="exceptionnal.vacation.label"/></span></div></th>
 	</thead>
 	<tbody>
 	<g:if test="${employeeInstanceList!=null}">
@@ -24,7 +24,9 @@
 					<td>${remainingCAMap.get(employee)}</td>
 					<td>${initialRTTMap.get(employee)}</td>
 					<td>${takenRTTMap.get(employee)}</td>
-					<td>${remainingRTTMap.get(employee)}</td>				
+					<td>${remainingRTTMap.get(employee)}</td>		
+					<td>${takenAutreMap.get(employee)}</td>			
+					<td>${takenExceptionnelMap.get(employee)}</td>	
 				</g:if>
 			</tr>
 		</g:each>

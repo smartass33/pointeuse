@@ -42,7 +42,7 @@
 			tbody td {
 			 	text-align:left;
 			 	height:5px;
-			 	width:180px;
+			 	width:180px;-
 			 	font-size:95%;
 			}
 			
@@ -58,10 +58,10 @@
 		</style>
 	
 	</head>
-	<h1>
+		
+	<h1 style="text-align:center;font-size:150%">
 		<g:message code="yearly.recap.label"/> ${lastYear} / ${thisYear} : <g:if test="${employee != null }">${employee.firstName} ${employee.lastName}</g:if>
 		<g:set var="calendar" value="${Calendar.instance}"/>
-		
 	</h1>
 	<h1 style="text-transform:uppercase;"><g:message code="annual.monthly.report.part"/></h1>
 	<table id="annual-report-table" >
@@ -189,6 +189,10 @@
 			</tr>
 	</table>
 	<table style="width:75%;">
+		<tr>
+			<td style="witdh: 200px;font-weight:bold;" class="cartoucheRightTitleTD"><g:message code="annual.theoritical.intial"/>:</td>
+			<td style="witdh: 50px;text-align:right;font-weight:bold;" class="cartoucheRightFiguresTD">${annualTheoritical}</td>		
+		</tr>		
 		<tr>
 			<td style="witdh: 200px;font-weight:bold;"><g:message code="annual.HS.above.quota"/>:</td>
 			<td style="witdh: 50px;text-align:right;font-weight:bold;" >${annualPayableSupTime}</td>

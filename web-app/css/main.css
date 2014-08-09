@@ -1947,7 +1947,6 @@ a.modalbox {
   width: 40px;
   font-size: 14px;
   vertical-align: middle;  
-  text-align: center;
 }
 
 .table-header-rotated th.rotate-45{
@@ -1960,7 +1959,6 @@ a.modalbox {
   padding: 0;
   font-size: 12px;
   line-height: 0.8;
-   text-align: center;
   
 }
 
@@ -1977,8 +1975,7 @@ a.modalbox {
   overflow: hidden;
   text-align: center;
   border-left: 1px solid #dddddd;
-  vertical-align: middle;  
-
+  vertical-align: middle; 
 
 }
 

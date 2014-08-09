@@ -1423,21 +1423,15 @@ class TimeManagerService {
 		def monthlyTotal=computeHumanTime(monthlyTotalTime)
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
 		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)	
-		def currentContract = cartoucheTable.get('currentContract')
-		
+		def currentContract = cartoucheTable.get('currentContract')		
 		def initialCA = employeeService.getInitialCA(employee,period)
 		def initialRTT = employeeService.getInitialRTT(employee,period)
-		
-		
-		
 		def departureDate
 		if (employee.status.date != null){
 			if (employee.status.date != null && employee.status.date <= calendarLoop.time){
 				departureDate = employee.status.date
 			}
-		}
-		
-		
+		}	
 		return [
 			initialCA:initialCA,
 			initialRTT:initialRTT,	
