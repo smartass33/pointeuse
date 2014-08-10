@@ -3,12 +3,15 @@ package pointeuse
 import org.springframework.dao.DataIntegrityViolationException
 import grails.plugins.springsecurity.Secured
 import java.text.Normalizer
+import java.util.Date;
+
 import org.apache.commons.logging.LogFactory
 
 
 class SiteController {
 	def authenticateService
 	def springSecurityService
+	def timeManagerService
 	def geocoderService
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 	private static final log = LogFactory.getLog(this)
@@ -117,7 +120,6 @@ class SiteController {
                 return
             }
         }
-
         siteInstance.properties = params	
 		result = geocoderService.geocodeAddress(params["address"],params["town"])
 		siteInstance.latitude = result.lat
@@ -129,7 +131,6 @@ class SiteController {
             render(view: "edit", model: [siteInstance: siteInstance])
             return
         }
-
         flash.message = message(code: 'default.updated.message', args: [message(code: 'site.label', default: 'Site'), siteInstance.name])
         redirect(action: "show", id: siteInstance.id)
     }
@@ -141,7 +142,6 @@ class SiteController {
             redirect(action: "list")
             return
         }
-
         try {
 			def siteName = siteInstance.name
             siteInstance.delete(flush: true)
@@ -155,14 +155,80 @@ class SiteController {
     }
 	
 	def geocode = {
-		params.each{i->
-			log.error(i);
-}
 		def address = params["address"]
+		def result
 		address = Normalizer.normalize(address, Normalizer.Form.NFKD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-		
-		def result = geocoderService.geocodeAddress(address)
+		result = geocoderService.geocodeAddress(address)
 		render result as String
 	  }
+	
+	def siteTotalTime = {
+		params.each ={ i-> log.error('param: '+i)}
+		
+		return
+		
+	}
+	
+	def monthlyTotalTime = {
+		params.each ={ i-> log.error('param: '+i)}
+		def site = params["site.id"]
+		def myDate = params["myDate"]
+		def siteId = params["siteId"]
+		def criteria = Employee.createCriteria()
+		def employeeList
+		def siteMonthlyTotal = [:]
+		def siteMonthlyTheoriticalTotal = [:]
+		def tmpTotal = 0
+		def tmpTheoriticalTotal = 0
+		def data
+		def month = myDate.getAt(Calendar.MONTH) + 1
+		def year = myDate.getAt(Calendar.YEAR)
+		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)
+
+		
+		
+		if (params["siteId"]!=null && !params["siteId"].equals("")){
+			site = Site.get(params["siteId"])
+			siteId=site.id
+		}else{
+			if (params["site.id"]!=null && !params["site.id"].equals("")){
+				def tmpSite = params["site.id"]
+				if (tmpSite instanceof String[]){
+					if (tmpSite[0]!=""){
+						tmpSite=tmpSite[0]!=""?tmpSite[0].toInteger():tmpSite[1].toInteger()
+					}
+				}else {
+					tmpSite=tmpSite.toInteger()
+				}
+				site = Site.get(tmpSite)
+				siteId=site.id
+			}
+		}
+		
+		employeeList = (site != null) ? Employee.findAllBySite(site) :Employee.findAll("from Employee")
+		
+		
+		for (Employee employee:employeeList){
+			//data = timeManagerService.getCartoucheData(employee,year,month)
+			
+			
+			data = timeManagerService.getMonthlyTotalTime( employee, month, year)
+		//	tmpTheoriticalTotal += data.get('monthTheoritical')
+			if ( siteMonthlyTotal.get(site) != null ){
+				siteMonthlyTotal.put(site, data.get('monthlyTotalTime') + siteMonthlyTotal.get(site))
+			}else{
+				siteMonthlyTotal.put(site, data.get('monthlyTotalTime'))
+			}
+			
+			//siteMonthlyTheoriticalTotal.put(site, tmpTheoriticalTotal + siteMonthlyTheoriticalTotal.get(site))
+			
+		}
+
+		log.error('siteMonthlyTheoriticalTotal: ' +siteMonthlyTheoriticalTotal)
+		log.error('siteMonthlyTotal: ' +siteMonthlyTotal)
+		
+		log.error('executed')
+		return
+	}
 	
 }

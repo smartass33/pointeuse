@@ -20,9 +20,7 @@
 				line-height: 1.5;
 				margin: 0.25em 0;
 			}
-			
-		
-			
+
 			@media screen and (max-width: 480px) {
 				#status {
 					display: none;
@@ -72,8 +70,11 @@
 				<li class="controller"><g:link controller="user" style="text-decoration: none;"><g:message code="admin.list" default="Last Name" /></g:link></li>
 				<li class="controller"><g:link controller="bankHoliday" style="text-decoration: none;"><g:message code="bank.holiday.list" default="Last Name" /></g:link></li>	
 				<li class="controller"><g:link controller="site" style="text-decoration: none;"><g:message code="site.list" default="Last Name" /></g:link></li>	
+
 				<li class="controller"><g:link controller="service" style="text-decoration: none;"><g:message code="service.list" default="Last Name" /></g:link></li>
 				<li class="controller"><g:link controller="function" style="text-decoration: none;"><g:message code="function.list" default="Last Name" /></g:link></li>
+				<li class="controller"><g:link controller="site" action='siteTotalTime' style="text-decoration: none;">Suivi des sites</g:link></li>	
+
 				<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="daily.followup" default="Last Name" /></g:link></li>	
 				<li class="controller"><g:link controller="employee" action='vacationFollowup' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="absence.followup" default="Last Name" /></g:link></li>	
 				<li class="controller"><g:link controller="employee" action='ecartFollowup' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="ecart.followup" default="Last Name" /></g:link></li>	

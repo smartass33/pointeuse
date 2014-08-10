@@ -340,4 +340,41 @@ class UtilService {
 			return false
 		}
 	}
+	
+	
+	def getCurrentActiveContract(Employee employee,int month,int year){
+		def previousContracts
+		def startCalendar = Calendar.instance
+		def endCalendar = Calendar.instance
+		def criteria = Contract.createCriteria()
+		startCalendar.set(Calendar.MONTH,month - 1)
+		startCalendar.set(Calendar.YEAR,year)
+		startCalendar.clearTime()
+		
+		endCalendar.set(Calendar.MONTH,month - 1)
+		endCalendar.set(Calendar.YEAR,year)
+		endCalendar.set(Calendar.HOUR,23)
+		endCalendar.set(Calendar.MINUTE,59)
+		endCalendar.set(Calendar.SECOND,59)
+				
+		previousContracts = criteria.list {
+			or{
+				// all contracts that close during the month
+				and {
+					ge('endDate',startCalendar.time)
+					le('endDate',endCalendar.time)
+					eq('employee',employee)
+				}
+				
+				// add the contract that is not over, unless its startdate is ulterior to the end of the current month
+				and {
+					le('startDate',endCalendar.time)
+					isNull('endDate')
+					eq('employee',employee)
+				}
+				
+			}
+			order('startDate','desc')
+		}
+	}
 }

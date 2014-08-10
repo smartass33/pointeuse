@@ -1063,23 +1063,6 @@ def vacationFollowup(){
 			}	
 		}
 		
-		/*
-		if (params["newDate"] != null){
-			if (params["type"].contains('startDate')){
-				newDate = new Date().parse("d/M/yyyy",params["newDate"])
-				contract.startDate = newDate
-			}
-			if (params["type"].contains('endDate')){
-				if (params["newDate"] != ''){
-					newDate = new Date().parse("d/M/yyyy",params["newDate"])
-					contract.endDate = newDate	
-				}else{
-					contract.endDate = null
-				}
-			}
-		}
-		*/
-		
 		if (params["newValue"] != null){
 			newValue = params["newValue"].toFloat()
 			contract.weeklyLength = newValue
@@ -1785,7 +1768,7 @@ def vacationFollowup(){
 	 
 	 
 	 def ecartFollowup(){
-		 def fromIndex=params.boolean('fromIndex')//.equals('true')?true:false
+		 def fromIndex=params.boolean('fromIndex')
 		 
 		 def siteId=params["site.id"]
 		 if (!fromIndex && (siteId == null || siteId.size() == 0)){

@@ -785,8 +785,6 @@ class TimeManagerService {
 			}
 			calendar.roll(Calendar.DAY_OF_YEAR, 1)
 		}
-
-
 	return elapsedSeconds
 	}
 
@@ -1037,21 +1035,25 @@ class TimeManagerService {
 		def monthTheoritical
 		def criteria
 		def calendar = Calendar.instance
+		def startCalendar = Calendar.instance
 		def endCalendar = Calendar.instance
 		def isCurrentMonth = false
 		
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		calendar.set(Calendar.YEAR,year)
 		calendar.set(Calendar.MONTH,month-1)
+		calendar.clearTime()
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.set(Calendar.YEAR,year)
+		startCalendar.set(Calendar.MONTH,month-1)
+		startCalendar.clearTime()
 		endCalendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
 		endCalendar.set(Calendar.YEAR,year)
 		endCalendar.set(Calendar.MONTH,month-1)
 		
 		log.debug('current date: '+calendar.time)
 		def currentCalendar = Calendar.instance
-		
-		
-		
+
 		// special case: the month is not over yet
 		if (currentCalendar.get(Calendar.MONTH) == (month - 1) && currentCalendar.get(Calendar.YEAR) == year){
 			log.debug('the month is not over yet')
@@ -1191,10 +1193,15 @@ class TimeManagerService {
 					eq('month',month)
 					eq('employee',employeeInstance)
 				}
+				and {
+					isNull('endDate')
+					eq('employee',employeeInstance)
+				}
 			}
 			order('startDate','desc')
 			maxResults(1)
 		}
+		
 
 		def monthTheoriticalHuman=getTimeAsText(computeHumanTime(monthTheoritical),true)
 		def cartoucheMap=[
@@ -1582,8 +1589,16 @@ class TimeManagerService {
 					monthlyTakenRTTMap.put(month,takenRTT2add)
 				}				
 				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))	
-				currentContract = data.get('currentContract')			
-				ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(currentContract.weeklyLength/Employee.WeekOpenedDays)) as long)			
+				currentContract = data.get('currentContract')	
+			//	log.error('currentContract: '+currentContract)	
+			//	log.error('employee: '+employee)
+				if (currentContract != null){
+					ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(currentContract.weeklyLength/Employee.WeekOpenedDays)) as long)
+				}else{
+					log.error('currentContract is null for employee  '+employee+ ' and month= '+month)
+					ecartMinusRTTMap.put(month, ecartMap.get(month) as long)
+					
+				}			
 			}
 		
 			monthlyTheoriticalMap.each() {
@@ -1829,6 +1844,14 @@ class TimeManagerService {
 	
 	
 	def computeWeeklyContractTime(Employee employee,int month, int year){
+		
+		
+		def startCalendar = Calendar.instance
+		startCalendar.set(Calendar.MONTH,month - 1)
+		startCalendar.set(Calendar.YEAR,year)
+		startCalendar.clearTime()
+		
+		
 		
 		def criteria = Contract.createCriteria()
 
@@ -2272,6 +2295,170 @@ class TimeManagerService {
 			totalByDay:totalByDay,
 			period:tmpCalendar.time
 		]
+	}
+	
+	def getMonthlyTotalTime(Employee employee,int month, int year){
+		
+		def calendarLoop = Calendar.instance
+		def calendar = Calendar.instance
+		def mapByDay = [:]
+		def criteria
+		def dailyTotalId=0
+		def dailySeconds = 0
+		
+		
+		def weeklyTotalTime = [:]
+		def weeklySuppTotalTime = [:]
+		def weeklyTotalTimeByEmployee = [:]
+		def weeklySupTotalTimeByEmployee = [:]
+		def monthlyTotalTimeByEmployee = [:]
+		def weeklyAggregate = [:]
+		def dailyTotalMap = [:]
+		def dailyBankHolidayMap = [:]
+		def dailySupTotalMap = [:]
+		def holidayMap = [:]
+		
+		def monthlySupTime = 0
+		def monthlyTotalTime = 0
+		def weekName="semaine "
+		def weeklySupTime
+		def currentWeek=0
+		def lastWeekParam = utilService.getLastWeekOfMonth(month, year)
+		def isSunday=lastWeekParam.get(1)
+		
+		calendarLoop.set(Calendar.YEAR,year)
+		calendarLoop.set(Calendar.MONTH,month + 1)
+		calendarLoop.clearTime()
+		calendarLoop.set(Calendar.DAY_OF_MONTH,calendarLoop.getActualMinimum(Calendar.DAY_OF_MONTH))
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.MONTH,month + 1)
+		calendar.set(Calendar.HOUR,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.DAY_OF_MONTH,calendarLoop.getActualMaximum(Calendar.DAY_OF_MONTH))
+		
+		
+		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			// élimine les dimanches du rapport
+			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
+				mapByDay = [:]
+			}
+			//print calendarLoop.time
+			criteria = DailyTotal.createCriteria()
+			def dailyTotal = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+					eq('month',month)
+					eq('year',year)
+				}
+			}
+			// permet de récupérer le total hebdo
+			if (dailyTotal != null && dailyTotal != dailyTotalId){
+				dailySeconds = getDailyTotal(dailyTotal)
+				monthlyTotalTime += dailySeconds
+				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
+				if (previousValue!=null){
+					def newValue=previousValue.get(0)*3600+previousValue.get(1)*60+previousValue.get(2)
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), computeHumanTime(dailySeconds+newValue))
+				}else{
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), computeHumanTime(dailySeconds))
+				}
+
+				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
+					weeklySupTime = 0
+				}else{
+					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+				}
+				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
+				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
+					monthlySupTime += weeklySupTime
+					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
+				}
+				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
+				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
+				dailyTotalId=dailyTotal.id
+			}
+			// daily total is null. Still, we need to check if supplementary time exists within the week
+			if (dailyTotal==null && calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+				if (calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
+					weeklySupTime = 0
+				}else{
+					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+				}
+					weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
+				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
+					monthlySupTime += weeklySupTime
+					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
+				}
+				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
+			
+			}
+						
+			criteria = InAndOut.createCriteria()
+			def entriesByDay = criteria{
+				and {
+					eq('employee',employee)
+					eq('day',calendarLoop.getAt(Calendar.DATE))
+					eq('month',month)
+					eq('year',year)
+					order('time')
+					}
+			}
+			// put in a map in and outs
+			def tmpDate = calendarLoop.time
+			if 	(entriesByDay.size()>0){
+				if (dailyTotal!=null){
+					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(dailySeconds),false))
+					dailySupTotalMap.put(tmpDate, computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)))
+				}else {
+					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
+					dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
+				}
+				mapByDay.put(tmpDate, entriesByDay)
+			}
+			else{
+				dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
+				mapByDay.put(tmpDate, null)
+			}
+			
+			// find out if day is a bank holiday:
+			criteria = BankHoliday.createCriteria()
+			def bankHoliday = criteria.get{
+				and {
+					eq('year',calendarLoop.get(Calendar.YEAR))
+					eq('month',calendarLoop.get(Calendar.MONTH)+1)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			if (bankHoliday!=null){
+				dailyBankHolidayMap.put(tmpDate, true)
+			}else{
+				dailyBankHolidayMap.put(tmpDate, false)
+			}
+			
+			def absenceCriteria = Absence.createCriteria()
+			def dailyAbsence = absenceCriteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',calendarLoop.get(Calendar.YEAR))
+					eq('month',calendarLoop.get(Calendar.MONTH)+1)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			holidayMap.put(tmpDate, dailyAbsence)
+			weeklyAggregate.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), mapByDay)
+			if (calendarLoop.get(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				break
+			}
+			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
+		}
+		
+		return [
+				monthlyTotalTime:monthlyTotalTime
+			
+			]
+		
+
 	}
 
 }
