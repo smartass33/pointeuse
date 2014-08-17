@@ -886,7 +886,7 @@ def vacationFollowup(){
 			
 		
 		log.error('trying to add event to employee '+employeeInstance.firstName+' '+employeeInstance.lastName+' with type: '+type)
-		// liste les entrees de la journ�e et v�rifie que cette valeur n'est pas sup�rieure � une valeur statique
+		// liste les entrees de la journée et vérifie que cette valeur n'est pas supérieure à une valeur statique
 		def inAndOutcriteria = InAndOut.createCriteria()
 		def todayEmployeeEntries = inAndOutcriteria.list {
 			and {
@@ -2009,14 +2009,11 @@ def vacationFollowup(){
 	def removeCSS(){
 		def criteria
 		def entryDate
-		 
-		
 		def employeeList = Employee.findAll("from Employee")
 		for (Employee employee: employeeList){
 		//	log.error('employee: '+employee)
 			entryDate = employee.arrivalDate
-			criteria = Absence.createCriteria()
-			
+			criteria = Absence.createCriteria()			
 			log.error('employee entry date: '+entryDate)
 			def sansSoldeList = criteria.list {
 				and {
@@ -2032,11 +2029,51 @@ def vacationFollowup(){
 				for (def sansSolde:sansSoldeList){
 					log.error('removing sansSolde: '+sansSolde.date)
 					sansSolde.delete(flush:true)
-					
 				}
-				
-				 
 			}
 		}
+	}
+	
+	def getUser(){
+		def cal = Calendar.instance
+		def currentDate = cal.time
+		def userName = params['username']
+		def isOutSideSite=params["isOutSideSite"].equals("true") ? true : false
+		def employee = Employee.findByUserName(userName)
+		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).time
+		def timeDiff
+		def entranceStatus = false
+		def type = "E"
+		def criteria = InAndOut.createCriteria()
+		def lastIn = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('pointed',false)
+				eq('day',today.getAt(Calendar.DATE))
+				eq('month',today.getAt(Calendar.MONTH)+1)
+				eq('year',today.getAt(Calendar.YEAR))
+				order('time','desc')
+			}
+			maxResults(1)
+		}
+		
+		if (lastIn != null){
+			def LIT = lastIn.time
+			use (TimeCategory){timeDiff=currentDate-LIT}
+			//empecher de represser le bouton pendant 30 seconds
+			if ((timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)<30){
+				response.status = 504;
+				return
+			}
+			type=lastIn.type.equals("S") ? "E" :"S"
+			entranceStatus = lastIn.type.equals("S") ? true : false
+		}
+		def inOrOut = timeManagerService.initializeTotals(employee,currentDate,type,null,isOutSideSite)
+		def jsonEmployee = new JSONEmployee(employee,entranceStatus)
+		def jsonInAndOut = new JSONInAndOut(inOrOut,jsonEmployee)
+		jsonEmployee.inOrOuts.add(jsonInAndOut)
+		response.contentType = "application/json"
+		render jsonEmployee as JSON
+		//return 'OK'
 	}
 }

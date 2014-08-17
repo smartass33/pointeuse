@@ -164,12 +164,17 @@ class SiteController {
 	
 	def siteTotalTime = {
 		params.each ={ i-> log.error('param: '+i)}
+		Date currentDate = new Date()
+		def month = currentDate.getAt(Calendar.MONTH) + 1
+		def year = currentDate.getAt(Calendar.YEAR)
+		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)
 		
-		return
+		[period2:period,year:year,month:month]
 		
 	}
 	
 	def monthlyTotalTime = {
+		log.error('entering monthlyTotalTime method')
 		params.each ={ i-> log.error('param: '+i)}
 		def site = params["site.id"]
 		def myDate = params["myDate"]
@@ -207,28 +212,46 @@ class SiteController {
 		
 		employeeList = (site != null) ? Employee.findAllBySite(site) :Employee.findAll("from Employee")
 		
-		
+		// need to iterate over months. from start till end of period
+		// it would be better to work with  monthList
 		for (Employee employee:employeeList){
 			//data = timeManagerService.getCartoucheData(employee,year,month)
 			
+			log.error("current employee: "+employee)
 			
 			data = timeManagerService.getMonthlyTotalTime( employee, month, year)
+			
+			tmpTheoriticalTotal = timeManagerService.getMonthTheoritical(employee,  month, year)
 		//	tmpTheoriticalTotal += data.get('monthTheoritical')
-			if ( siteMonthlyTotal.get(site) != null ){
-				siteMonthlyTotal.put(site, data.get('monthlyTotalTime') + siteMonthlyTotal.get(site))
+			if ( siteMonthlyTotal.get(month) != null ){
+				siteMonthlyTotal.put(month, data.get('monthlyTotalTime') + siteMonthlyTotal.get(month))
 			}else{
-				siteMonthlyTotal.put(site, data.get('monthlyTotalTime'))
+				siteMonthlyTotal.put(month, data.get('monthlyTotalTime'))
 			}
 			
-			//siteMonthlyTheoriticalTotal.put(site, tmpTheoriticalTotal + siteMonthlyTheoriticalTotal.get(site))
-			
+			if ( siteMonthlyTheoriticalTotal.get(month) != null ){
+				siteMonthlyTheoriticalTotal.put(month, tmpTheoriticalTotal + siteMonthlyTheoriticalTotal.get(month))
+			}else{
+				siteMonthlyTheoriticalTotal.put(month, tmpTheoriticalTotal)
+			}			
 		}
 
 		log.error('siteMonthlyTheoriticalTotal: ' +siteMonthlyTheoriticalTotal)
 		log.error('siteMonthlyTotal: ' +siteMonthlyTotal)
 		
 		log.error('executed')
+		render template: "/site/template/siteMonthlyTemplate", model:[siteMonthlyTotal:siteMonthlyTotal,siteMonthlyTheoriticalTotal:siteMonthlyTheoriticalTotal,site:site,siteId:siteId,period2:period]
 		return
+		/*
+		return [
+			siteMonthlyTotal:siteMonthlyTotal,
+			siteMonthlyTheoriticalTotal:siteMonthlyTheoriticalTotal,
+			site:site,
+			siteId:siteId,
+			period:period
+		]
+		*/
+		
 	}
 	
 }

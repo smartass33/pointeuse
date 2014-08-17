@@ -1089,15 +1089,12 @@ class TimeManagerService {
 				}
 			}
 		}	
-		
-		
+			
 		// special case: employee has not yet arrived in the company
 		if (employeeInstance.arrivalDate > currentCalendar.time ){
 			counter = 0
 		}
-		
-		
-		
+
 		// get cumul RTT
 		criteria = Absence.createCriteria()
 		def rtt = criteria.list {
@@ -1404,6 +1401,7 @@ class TimeManagerService {
 			monthlyTotalInstance.elapsedSeconds=monthlyTotalTime
 		}
 		def cartoucheTable = getCartoucheData(employee,year,month)
+		def currentContract = cartoucheTable.get('currentContract')
 		def workingDays=cartoucheTable.get('workingDays')
 		def holiday=cartoucheTable.get('holidays')
 		def exceptionnel=cartoucheTable.get('exceptionnel')
@@ -1423,14 +1421,15 @@ class TimeManagerService {
 		def yearlySansSolde=cartoucheTable.get('yearlySansSolde')
 		def payableSupTime = computeHumanTime(Math.round(monthlySupTime))
 		def payableCompTime = computeHumanTime(0)
-		if (employee.weeklyContractTime!=Employee.legalWeekTime && monthlyTotalTime > monthTheoritical){
+		
+		if (currentContract.weeklyLength != Employee.legalWeekTime && monthlyTotalTime > monthTheoritical){
 			payableCompTime = computeHumanTime(Math.round(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0)))	
-		}	
+		}
+		
 		monthlyTotalTimeByEmployee.put(employee, computeHumanTime(monthlyTotalTime))
 		def monthlyTotal=computeHumanTime(monthlyTotalTime)
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
 		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)	
-		def currentContract = cartoucheTable.get('currentContract')		
 		def initialCA = employeeService.getInitialCA(employee,period)
 		def initialRTT = employeeService.getInitialRTT(employee,period)
 		def departureDate
@@ -2327,17 +2326,21 @@ class TimeManagerService {
 		def isSunday=lastWeekParam.get(1)
 		
 		calendarLoop.set(Calendar.YEAR,year)
-		calendarLoop.set(Calendar.MONTH,month + 1)
+		calendarLoop.set(Calendar.MONTH,month - 1)
 		calendarLoop.clearTime()
-		calendarLoop.set(Calendar.DAY_OF_MONTH,calendarLoop.getActualMinimum(Calendar.DAY_OF_MONTH))
+		calendarLoop.set(Calendar.DAY_OF_MONTH,1)
+		log.debug('calendarLoop: '+calendarLoop.time)
 		calendar.set(Calendar.YEAR,year)
-		calendar.set(Calendar.MONTH,month + 1)
-		calendar.set(Calendar.HOUR,23)
-		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.MONTH,month - 1)
+		log.debug('calendar: '+calendar.time)
+		
 		calendar.set(Calendar.DAY_OF_MONTH,calendarLoop.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug('calendar: '+calendar.time)
 		
 		
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			log.debug('calendarLoop: '+calendarLoop.time)
+			
 			// élimine les dimanches du rapport
 			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
 				mapByDay = [:]
@@ -2455,10 +2458,6 @@ class TimeManagerService {
 		
 		return [
 				monthlyTotalTime:monthlyTotalTime
-			
 			]
-		
-
 	}
-
 }
