@@ -1,7 +1,11 @@
 package pointeuse
 
 import org.springframework.dao.DataIntegrityViolationException
+
 import grails.plugins.springsecurity.Secured
+import groovy.time.TimeDuration;
+import groovy.time.TimeCategory;
+
 import java.text.Normalizer
 import java.util.Date;
 
@@ -10,6 +14,7 @@ import org.apache.commons.logging.LogFactory
 
 class SiteController {
 	def authenticateService
+	def PDFService
 	def springSecurityService
 	def timeManagerService
 	def geocoderService
@@ -163,34 +168,34 @@ class SiteController {
 	  }
 	
 	def siteTotalTime = {
-		params.each ={ i-> log.error('param: '+i)}
 		Date currentDate = new Date()
 		def month = currentDate.getAt(Calendar.MONTH) + 1
 		def year = currentDate.getAt(Calendar.YEAR)
-		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)
-		
+		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)		
 		[period2:period,year:year,month:month]
-		
 	}
 	
-	def monthlyTotalTime = {
+	
+	def completeSiteReport(){
 		log.error('entering monthlyTotalTime method')
-		params.each ={ i-> log.error('param: '+i)}
-		def site = params["site.id"]
-		def myDate = params["myDate"]
-		def siteId = params["siteId"]
-		def criteria = Employee.createCriteria()
-		def employeeList
-		def siteMonthlyTotal = [:]
-		def siteMonthlyTheoriticalTotal = [:]
-		def tmpTotal = 0
-		def tmpTheoriticalTotal = 0
+		params.each{i->log.error('parameter of list: '+i)}
+		def site 
+		def executionTime
 		def data
-		def month = myDate.getAt(Calendar.MONTH) + 1
-		def year = myDate.getAt(Calendar.YEAR)
-		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)
-
+		def employeeList
+		def siteId=params["site.id"]
+		def periodId = params.int('periodId')
+		def period = Period.get(params.int('periodId'))
+		def calendar = Calendar.instance
+		def year = calendar.get(Calendar.YEAR)
+		def annualReportMap =[:]
+		def model = [:]
 		
+		if (period != null){
+			year = period.year
+		} else{
+			period = Period.findByYear(year)
+		}
 		
 		if (params["siteId"]!=null && !params["siteId"].equals("")){
 			site = Site.get(params["siteId"])
@@ -210,47 +215,75 @@ class SiteController {
 			}
 		}
 		
-		employeeList = (site != null) ? Employee.findAllBySite(site) :Employee.findAll("from Employee")
-		
-		// need to iterate over months. from start till end of period
-		// it would be better to work with  monthList
-		for (Employee employee:employeeList){
-			//data = timeManagerService.getCartoucheData(employee,year,month)
-			
-			log.error("current employee: "+employee)
-			
-			data = timeManagerService.getMonthlyTotalTime( employee, month, year)
-			
-			tmpTheoriticalTotal = timeManagerService.getMonthTheoritical(employee,  month, year)
-		//	tmpTheoriticalTotal += data.get('monthTheoritical')
-			if ( siteMonthlyTotal.get(month) != null ){
-				siteMonthlyTotal.put(month, data.get('monthlyTotalTime') + siteMonthlyTotal.get(month))
-			}else{
-				siteMonthlyTotal.put(month, data.get('monthlyTotalTime'))
-			}
-			
-			if ( siteMonthlyTheoriticalTotal.get(month) != null ){
-				siteMonthlyTheoriticalTotal.put(month, tmpTheoriticalTotal + siteMonthlyTheoriticalTotal.get(month))
-			}else{
-				siteMonthlyTheoriticalTotal.put(month, tmpTheoriticalTotal)
-			}			
+		if (site == null){
+			flash.message = message(code: 'site.selection.error')
+			render template: "/site/template/siteMonthlyTemplate", model:[period2:period,annualReportMap:null,employeeList:null,site:site,siteId:siteId,flash:flash]
+			return
+		}else{
+			flash.message = null
 		}
-
-		log.error('siteMonthlyTheoriticalTotal: ' +siteMonthlyTheoriticalTotal)
-		log.error('siteMonthlyTotal: ' +siteMonthlyTotal)
-		
-		log.error('executed')
-		render template: "/site/template/siteMonthlyTemplate", model:[siteMonthlyTotal:siteMonthlyTotal,siteMonthlyTheoriticalTotal:siteMonthlyTheoriticalTotal,site:site,siteId:siteId,period2:period]
+		def startDate = new Date()		
+		data = timeManagerService.getSiteData(site,period)
+		def endDate = new Date()
+		use (TimeCategory){executionTime=endDate-startDate}
+		log.error('execution time: '+executionTime)
+		model << data
+		model << [flash:flash]
+		model << [period2:period,site:site,siteId:siteId]
+		render template: "/site/template/siteMonthlyTemplate", model:model
 		return
-		/*
-		return [
-			siteMonthlyTotal:siteMonthlyTotal,
-			siteMonthlyTheoriticalTotal:siteMonthlyTheoriticalTotal,
-			site:site,
-			siteId:siteId,
-			period:period
-		]
-		*/
+	}
+	
+	
+	def completeSiteReportPDF(){
+		log.error('entering completeSiteReportPDF method')
+		def site 
+		def employeeList
+		def siteId=params["site.id"]
+		def periodId = params.int('periodId')
+		def period = Period.get(params.int('periodId'))
+		def folder = grailsApplication.config.pdf.directory
+		def calendar = Calendar.instance
+		def year = calendar.get(Calendar.YEAR)
+		def annualReportMap =[:]
+		
+		if (period != null){
+			year = period.year
+		} else{
+			period = Period.findByYear(year)
+		}
+		
+		if (params["siteId"]!=null && !params["siteId"].equals("")){
+			site = Site.get(params["siteId"])
+			siteId=site.id
+		}else{
+			if (params["site.id"]!=null && !params["site.id"].equals("")){
+				def tmpSite = params["site.id"]
+				if (tmpSite instanceof String[]){
+					if (tmpSite[0]!=""){
+						tmpSite=tmpSite[0]!=""?tmpSite[0].toInteger():tmpSite[1].toInteger()
+					}
+				}else {
+					tmpSite=tmpSite.toInteger()
+				}
+				site = Site.get(tmpSite)
+				siteId=site.id
+			}
+		}
+			
+		
+		if (site == null){
+			flash.message = message(code: 'pdf.site.selection.error')
+			redirect(action: "siteTotalTime")
+			
+			//render template: "/site/template/siteMonthlyTemplate", model:[period2:period,annualReportMap:null,employeeList:null,site:site,siteId:siteId,flash:flash]			
+			return
+		}
+		
+		def retour = PDFService.generateSiteTotalSheet(site, folder, period)
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.outputStream << retour[0]
 		
 	}
 	

@@ -2460,4 +2460,14 @@ class TimeManagerService {
 				monthlyTotalTime:monthlyTotalTime
 			]
 	}
+	
+	def getSiteData(Site site,Period period){
+		def annualReportMap = [:]
+		def employeeList = (site != null) ? Employee.findAllBySite(site) :Employee.findAll("from Employee")
+		for (Employee employee:employeeList){
+			log.error("current employee: "+employee)
+			annualReportMap.put(employee,getAnnualReportData(period.year, employee))
+		}
+		return [annualReportMap:annualReportMap,employeeList:employeeList]
+	}
 }

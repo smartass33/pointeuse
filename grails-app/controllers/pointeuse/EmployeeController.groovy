@@ -17,7 +17,6 @@ class EmployeeController {
 	def PDFService
 	def utilService
 	def mailService
-	def pdfRenderingService
 	def searchableService
 	def authenticateService
 	def springSecurityService
@@ -2062,6 +2061,7 @@ def vacationFollowup(){
 			use (TimeCategory){timeDiff=currentDate-LIT}
 			//empecher de represser le bouton pendant 30 seconds
 			if ((timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)<30){
+				log.error('time between logs is not sufficient')
 				response.status = 504;
 				return
 			}

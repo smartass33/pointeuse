@@ -29,20 +29,14 @@
 			thead th, tfoot th {
 				padding:5px;
 			}
-			table a {
-				color: #333333;
-				text-decoration:none;
-			}
-			table a:hover {
-				text-decoration:underline;
-			}
+
 			tr.odd {
 				background: #f1f1f1;
 			}
 			tbody td {
 			 	text-align:left;
 			 	height:5px;
-			 	width:180px;-
+			 	width:180px;
 			 	font-size:95%;
 			}
 			

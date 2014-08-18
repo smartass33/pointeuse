@@ -143,17 +143,17 @@
 	        						</table>
 	        					</td>
 	        					<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td>${yearlyRtt as float}</td></tr>
+	        						</table>
+	        					</td>	        					
+	        					<td>
 	        						<table border="1" class="cartoucheValues">
 	        							<thead></thead>	        							
 	        							<tr><td>${(initialRTT - yearlyRtt) as float}</td></tr>
 	        						</table>
 	        					</td>	        					
-	        					<td>
-	        						<table border="1" class="cartoucheValues" >
-	        							<thead></thead>
-	        							<tr><td>${yearlyRtt as float}</td></tr>
-	        						</table>
-	        					</td>
 							</tr>
 							<tr>
 								<td style="text-align:left;">${message(code: 'employee.sickness.count', default: 'report')} :</td>

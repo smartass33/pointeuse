@@ -94,8 +94,9 @@ class PDFService {
 		File file
 		def modelEcart=timeManagerService.getEcartData(site, monthList, period)
 		modelEcart << [site:site]
+		def siteName = (site.name).replaceAll("\\s","").trim()
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeEcartPDFTemplate', model: modelEcart)
-		filename = period.year.toString()+'-'+site.name +'-ecartReport' +'.pdf'
+		filename = period.year.toString()+'-'+siteName +'-ecartReport' +'.pdf'
 		outputStream = new FileOutputStream (folder+'/'+filename);
 		bytes.writeTo(outputStream)
 		if(bytes)
@@ -113,7 +114,27 @@ class PDFService {
 		def modelDaily=timeManagerService.getDailyInAndOutsData(site,currentDate)
 		modelDaily << [site:site]
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/listDailyTimePDFTemplate', model: modelDaily)
-		filename = (currentDate.format('yyyy-mm-dd')).toString()+'-'+site.name +'-dailyReport' +'.pdf'
+		def siteName = (site.name).replaceAll("\\s","").trim()
+		filename = (currentDate.format('yyyy-mm-dd')).toString()+'-'+siteName +'-dailyReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
+	def generateSiteTotalSheet(Site site,String folder,Period period){
+		def filename
+		OutputStream outputStream
+		File file
+		def modelSiteTotal=timeManagerService.getSiteData(site,period)
+		modelSiteTotal << [site:site,period2:period]
+		def siteName = (site.name).replaceAll("\\s","").trim()
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeSiteTotalPDFTemplate', model: modelSiteTotal)
+		filename = siteName+'-'+period.year+'-'+(period.year+1)+'-report' +'.pdf'
 		outputStream = new FileOutputStream (folder+'/'+filename);
 		bytes.writeTo(outputStream)
 		if(bytes)
