@@ -1675,6 +1675,18 @@ def vacationFollowup(){
 	}
 	
 	
+	def allSiteMonthlyPDF(){
+		def myDate = params["myDate"]
+
+		Calendar calendar = Calendar.instance
+		def folder = grailsApplication.config.pdf.directory
+			
+		def retour = PDFService.generateAllSitesMonthlyTimeSheet(calendar.time=myDate,folder)
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.outputStream << retour[0]
+	}
+	
 	
 	def dailyTotalPDF(){
 		def site
@@ -1887,12 +1899,9 @@ def vacationFollowup(){
 			flash.message = message(code: 'contract.incompatible.values')
 			redirect(action: "edit", params: [id:params.id,isAdmin:false])
 			return
-		}
-			
-			
+		}			
 		contract.year=contract.startDate.getAt(Calendar.YEAR)
 		contract.month=(contract.startDate.getAt(Calendar.MONTH))+1
-	//	contract.period=contract.month<6?Period.findByYear(contract.year-1):Period.findByYear(contract.year)
 		contract.weeklyLength = params.float('newContractValue')
 		contract.employee = Employee.get(params.id)
 		contract.loggingTime = new Date()
@@ -2075,5 +2084,59 @@ def vacationFollowup(){
 		response.contentType = "application/json"
 		render jsonEmployee as JSON
 		//return 'OK'
+	}
+	
+	def logEmployee(){
+		def cal = Calendar.instance
+		def currentDate = cal.time
+		def userName = params['username']
+		def isOutSideSite=params["isOutSideSite"].equals("true") ? true : false
+		def employee = Employee.findByUserName(userName)
+		def timeDiff
+		def type = "E"
+		
+		if (employee == null){
+			flash.message = message(code: 'employee.not.found.label', args:[userName])
+			render template: "/employee/template/entryValidation", model: [employee: null,inOrOut:null,flash:flash]
+			return
+		}
+		
+		def criteria = InAndOut.createCriteria()
+		def lastIn = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('pointed',false)
+				eq('day',cal.get(Calendar.DATE))
+				eq('month',cal.get(Calendar.MONTH)+1)
+				eq('year',cal.get(Calendar.YEAR))
+				order('time','desc')
+			}
+			maxResults(1)
+		}
+		
+		if (lastIn != null){
+			def LIT = lastIn.time
+			use (TimeCategory){timeDiff=currentDate-LIT}
+			//empecher de represser le bouton pendant 30 seconds
+			if ((timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)<30){
+				flash.message = message(code: 'employee.overlogging.error')
+				log.error('time between logs is not sufficient')
+				render template: "/employee/template/entryValidation", model: [employee: employee,inOrOut:null,flash:flash]
+				return
+			}
+			type=lastIn.type.equals("S") ? "E" :"S"
+		}
+		def inOrOut = timeManagerService.initializeTotals(employee,currentDate,type,null,isOutSideSite)
+		render template: "/employee/template/entryValidation", model: [employee: employee,inOrOut:inOrOut,flash:null]
+		return
+	}
+	
+	def dummy(){
+		def text = '11 : 22'
+		def values = text.split(' : ')
+		def time = (values[0] as long)*3600 + (values[1] as long)*60
+		log.error('time: '+time);
+				
+		
 	}
 }

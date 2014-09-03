@@ -201,10 +201,10 @@ grails {
 		host = "smtp.fr.oleane.com"
 		port = 587
 		//username = "pointeuse@biol33.fr.fto
-		username = "pointeuse@biol33.fr.fto"
+		username = "pointeuse@biolab33.com"
 		
 		password = "SzVFO8KT"
-     props = ["mail.smtp.starttls.enable":"true", 
+		props = ["mail.smtp.starttls.enable":"true", 
                   "mail.smtp.port":"587"]
 	  }
 }

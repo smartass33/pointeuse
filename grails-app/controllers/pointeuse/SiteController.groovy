@@ -269,14 +269,11 @@ class SiteController {
 				site = Site.get(tmpSite)
 				siteId=site.id
 			}
-		}
-			
+		}	
 		
 		if (site == null){
 			flash.message = message(code: 'pdf.site.selection.error')
-			redirect(action: "siteTotalTime")
-			
-			//render template: "/site/template/siteMonthlyTemplate", model:[period2:period,annualReportMap:null,employeeList:null,site:site,siteId:siteId,flash:flash]			
+			redirect(action: "siteTotalTime")	
 			return
 		}
 		

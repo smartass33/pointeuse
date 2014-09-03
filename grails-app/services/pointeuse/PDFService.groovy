@@ -144,4 +144,45 @@ class PDFService {
 		file = new File(folder+'/'+filename)
 		return [file.bytes,file.name]
 	}
+	
+	def generateAllSiteTotalSheet(String folder,Period period){
+		def filename
+		def fileNameList=[]
+		PdfCopyFields finalCopy
+		OutputStream outputStream
+		File file
+		
+		def sites = Site.findAll();
+		
+		for (Site site:sites){
+			def modelSiteTotal=timeManagerService.getSiteData(site,period)
+			modelSiteTotal << [site:site,period2:period]
+			def siteName = (site.name).replaceAll("\\s","").trim()
+			
+			
+			
+			// Get the bytes
+			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeSiteTotalPDFTemplate', model: modelSiteTotal)
+			filename = siteName+'-'+period.year+'-'+(period.year+1)+'-report' +'.pdf'
+			fileNameList.add(filename)
+			outputStream = new FileOutputStream (folder+'/'+filename);
+			bytes.writeTo(outputStream)
+			if(bytes)
+				bytes.close()
+			if(outputStream)
+				outputStream.close()
+		}
+		
+
+		finalCopy = new PdfCopyFields(new FileOutputStream(folder+'/'+period.year+'-'+(period.year+1) +'-allSites'+'.pdf'));
+		finalCopy.open()
+		for (String tmpFile:fileNameList){
+			PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
+			finalCopy.addDocument(pdfReader)	
+		}
+		finalCopy.close();		
+		file = new File(folder+'/'+period.year+'-'+(period.year+1) +'-allSites'+'.pdf')		
+		return [file.bytes,file.name]
+	}
+	
 }

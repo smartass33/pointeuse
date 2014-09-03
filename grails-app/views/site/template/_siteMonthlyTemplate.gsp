@@ -55,6 +55,26 @@
 					<td style="text-align:right;">${(annualReportMap.get(employee)).get('annualGlobalSupTimeToPay')}</td>
 				</tr>
 			</g:each>
+			<g:if test="${site !=null}">
+				<tr style='font-weight: bold;'>
+					<td><g:message code="annual.total"/></td>
+					<td></td>
+					<td>n/a</td>
+					<td style="width:50px;">${siteAnnualEmployeeWorkingDays}</td>
+					<td style="text-align:right;">${siteAnnualTheoritical}</td>
+					<td style="text-align:right;">${siteAnnualTotal}</td>
+					<td style="width:50px;">${siteAnnualHoliday}</td>
+					<td style="width:50px;">${siteRemainingCA}</td>
+					<td style="width:50px;">${siteAnnualRTT}</td>
+					<td style="width:50px;">${siteAnnualCSS}</td>
+					<td style="width:50px;">${siteAnnualSickness}</td>
+					<td style="width:50px;">${siteAnnualExceptionnel}</td>
+					<td style="text-align:right;">${siteAnnualPayableSupTime}</td>
+					<td style="text-align:right;">${siteAnnualTheoriticalIncludingExtra}</td>
+					<td style="text-align:right;">${siteAnnualSupTimeAboveTheoritical}</td>
+					<td style="text-align:right;">${siteAnnualGlobalSupTimeToPay}</td>
+				</tr>	
+			</g:if>				
 		</g:if>
 	</tbody>
 </table>

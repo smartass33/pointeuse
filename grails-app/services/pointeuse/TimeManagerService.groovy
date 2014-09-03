@@ -480,7 +480,13 @@ class TimeManagerService {
 		long seconds=TimeUnit.SECONDS.toSeconds(diff);
 		//return [hours,minutes,seconds]
 		return [hours,minutes,seconds,isNegative]
-
+	}
+	
+	
+	def getTimeFromText(String text){
+		def values = text.split(' : ')
+		def time = (values[0] as long)*3600 + (values[1] as long)*60
+		return time;
 	}
 	
 	def getTimeAsText(def table,hasSpace){
@@ -2463,11 +2469,53 @@ class TimeManagerService {
 	
 	def getSiteData(Site site,Period period){
 		def annualReportMap = [:]
+		def siteAnnualEmployeeWorkingDays = 0
+		def siteAnnualTheoritical = 0
+		def siteAnnualTotal = 0
+		def siteAnnualHoliday = 0
+		def siteRemainingCA = 0
+		def siteAnnualRTT = 0
+		def siteAnnualCSS = 0
+		def siteAnnualSickness = 0
+		def siteAnnualExceptionnel = 0
+		def siteAnnualPayableSupTime = 0
+		def siteAnnualTheoriticalIncludingExtra = 0
+		def siteAnnualSupTimeAboveTheoritical = 0
+		def siteAnnualGlobalSupTimeToPay = 0
 		def employeeList = (site != null) ? Employee.findAllBySite(site) :Employee.findAll("from Employee")
 		for (Employee employee:employeeList){
 			log.error("current employee: "+employee)
-			annualReportMap.put(employee,getAnnualReportData(period.year, employee))
+			annualReportMap.put(employee,getAnnualReportData(period.year, employee))		
+			siteAnnualEmployeeWorkingDays += ((annualReportMap.get(employee)).get('annualEmployeeWorkingDays'))
+			siteAnnualTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualTheoritical'))
+			siteAnnualTotal += getTimeFromText((annualReportMap.get(employee)).get('annualTotal'))
+			siteAnnualHoliday += ((annualReportMap.get(employee)).get('annualHoliday'))
+			siteRemainingCA += ((annualReportMap.get(employee)).get('remainingCA'))
+			siteAnnualRTT += ((annualReportMap.get(employee)).get('annualRTT'))
+			siteAnnualCSS += ((annualReportMap.get(employee)).get('annualCSS'))
+			siteAnnualSickness += ((annualReportMap.get(employee)).get('annualSickness'))
+			siteAnnualExceptionnel += ((annualReportMap.get(employee)).get('annualExceptionnel'))
+			siteAnnualPayableSupTime += getTimeFromText((annualReportMap.get(employee)).get('annualPayableSupTime'))
+			siteAnnualTheoriticalIncludingExtra += getTimeFromText((annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra'))
+			siteAnnualSupTimeAboveTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical'))
+			siteAnnualGlobalSupTimeToPay += getTimeFromText((annualReportMap.get(employee)).get('annualGlobalSupTimeToPay'))
 		}
-		return [annualReportMap:annualReportMap,employeeList:employeeList]
+		return [
+			annualReportMap:annualReportMap,
+			siteAnnualEmployeeWorkingDays:siteAnnualEmployeeWorkingDays,
+			siteAnnualTheoritical:getTimeAsText(computeHumanTime(siteAnnualTheoritical),true),
+			siteAnnualTotal:getTimeAsText(computeHumanTime(siteAnnualTotal),true),
+			siteAnnualHoliday:siteAnnualHoliday,
+			siteRemainingCA:siteRemainingCA,
+			siteAnnualRTT:siteAnnualRTT,
+			siteAnnualCSS:siteAnnualCSS,
+			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualExceptionnel:siteAnnualExceptionnel,
+			siteAnnualPayableSupTime:getTimeAsText(computeHumanTime(siteAnnualPayableSupTime),true),
+			siteAnnualTheoriticalIncludingExtra:getTimeAsText(computeHumanTime(siteAnnualTheoriticalIncludingExtra),true),
+			siteAnnualSupTimeAboveTheoritical:getTimeAsText(computeHumanTime(siteAnnualSupTimeAboveTheoritical),true),
+			siteAnnualGlobalSupTimeToPay:getTimeAsText(computeHumanTime(siteAnnualGlobalSupTimeToPay),true),
+			employeeList:employeeList		
+			]
 	}
 }
