@@ -15,6 +15,9 @@
 		<tr>
 			<td class="cartoucheLeftTD" >${message(code: 'employee.matricule.label', default: 'report')}: ${fieldValue(bean: employee, field: "matricule")}</td>
 		</tr>
+		<tr>
+			<td class="cartoucheLeftTD" >${message(code: 'employee.arrivalDate.short.label', default: 'report')}: <g:formatDate format="dd/MM/yyyy" date="${employee.arrivalDate}"/></td>
+		</tr>
 	</table> 				
 	<table style="float: left;">						
 		<tbody>		

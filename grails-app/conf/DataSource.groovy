@@ -32,6 +32,30 @@ environments {
 		}
     }
 	
+	alrikiki {
+		dataSource {
+			pooled = true
+			dbCreate = "update"
+			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
+			driverClassName = "com.mysql.jdbc.Driver"
+			username = "root"
+			password = "root"
+			properties {
+				maxActive = 100
+				maxIdle = 25
+				minIdle = 20
+				initialSize = 20
+				maxWait = 10000
+				validationQuery = "select 1"
+				testOnBorrow = true
+				testWhileIdle = true
+				testOnReturn = true
+			}
+		}
+	
+	}
+	
+	
 	dell {
 		dataSource {
 			pooled = true

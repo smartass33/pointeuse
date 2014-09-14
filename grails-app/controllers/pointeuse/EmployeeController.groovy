@@ -4,6 +4,7 @@ import grails.plugins.springsecurity.Secured
 
 import org.springframework.dao.DataIntegrityViolationException
 
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date;
 
@@ -2137,6 +2138,95 @@ def vacationFollowup(){
 		def time = (values[0] as long)*3600 + (values[1] as long)*60
 		log.error('time: '+time);
 				
+		
+	}
+	
+	
+	
+	def getEmployees() {
+		params.each{i->log.debug('parameter of list: '+i)}
+		params.sort='site'
+		def username=params["username"]
+		def password=params["password"]
+		def employeeInstanceList
+		def site
+		def siteId=params["site"]
+		byte[] hash
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		def hashAsString
+		def user
+		
+		
+		if (username == null){
+			log.error('authentication failed!')
+			response.status = 401;
+			return
+		}
+		else{
+			user = User.findByUsername(username)
+		}
+		
+		if (password == null){
+			log.error('authentication failed!')
+			response.status = 401;
+			return
+		}
+		else{
+			hash = digest.digest(password.getBytes("UTF-8"));
+			hashAsString = hash.encodeHex()
+		}
+		
+		if (user != null && !user.password.equals(hashAsString.toString())){
+			log.error('authentication failed!')
+			response.status = 401;
+			return
+		}
+		
+		if (params["site"]!=null && !params["site"].equals('') && !params["site"].equals('[id:]')){
+			site = Site.get(params.int('site'))
+			if (site != null)
+				siteId=site.id
+		}
+		if (params["siteId"]!=null && !params["siteId"].equals("")){
+			site = Site.get(params.int('siteId'))
+			if (site != null)
+				siteId=site.id
+		}
+
+		if (site!=null){
+			employeeInstanceList = Employee.findAllBySite(site)
+		}else{
+			employeeInstanceList=Employee.list(params)
+		}
+	//	response.contentType = "application/json"
+		render employeeInstanceList// as JSON
+	}
+	
+	def updateUsername(Long id, Long version) {
+
+		
+		def employeeInstance = Employee.get(id)
+		if (!employeeInstance) {
+			return
+		}
+
+
+		
+		
+		def employeeStatus = employeeInstance.status
+		
+		log.error('employee status: '+employeeInstance.status)
+		
+		employeeInstance.userName = params['username']
+		
+		
+		employeeInstance.save(flush: true)
+		
+		render employeeInstance
+		
+		
+		
+		
 		
 	}
 }

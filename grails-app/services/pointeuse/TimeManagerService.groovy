@@ -75,7 +75,7 @@ class TimeManagerService {
 	
 
 	
-	def initializeTotals(Employee employee, Date currentDate,String type,def event, Boolean isOutside ){
+	def initializeTotals(Employee employee, Date currentDate,String type,def event, Boolean isOutside){
 		def criteria = MonthlyTotal.createCriteria()
 		def monthlyTotal = criteria.get {
 				and {
@@ -86,6 +86,9 @@ class TimeManagerService {
 			}
 		
 		if (monthlyTotal==null){
+			log.error("employee: "+employee)
+			log.error("currentDate: "+currentDate)
+			
 			monthlyTotal = new MonthlyTotal(employee,currentDate)
 			employee.monthlyTotals.add(monthlyTotal)
 			monthlyTotal.save(flush:true)

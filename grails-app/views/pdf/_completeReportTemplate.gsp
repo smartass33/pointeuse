@@ -72,7 +72,7 @@
 	<h1 style="text-align:center;font-size:150%">${message(code: 'employee.monthly.report.label')} <g:formatDate format="MMMM yyyy" date="${period}"/></h1>
 	<table>
 		<thead></thead>
-		<tbody>
+		<tbody>  
 			<tr>
 				<td width="20%">
 					<table width="100%" >
@@ -86,13 +86,16 @@
 						<tr>
 							<td style="text-align:left;">${message(code: 'employee.matricule.label', default: 'report')}: ${fieldValue(bean: employee, field: "matricule")}</td>
 						</tr>
+						<tr>
+							<td class="cartoucheLeftTD" >${message(code: 'employee.arrivalDate.short.label', default: 'report')}: <g:formatDate format="dd/MM/yyyy" date="${employee.arrivalDate}"/></td>
+						</tr>						
 					</table> 
 				</td>
 				<td width="80%">
 					<table width="100%" >						
 						<tbody>		
 							<tr>					
-								<td width="35%" style="text-align:left;" ></td>	
+								<td width="35%" pstyle="text-align:left;" ></td>	
 	 							<td>
 	 								<table>
 	 									<thead></thead>

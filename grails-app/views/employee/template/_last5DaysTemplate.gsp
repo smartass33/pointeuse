@@ -53,27 +53,42 @@
 	<table border="1">
 		<thead>
 			<g:each in="${inAndOuts}" var="inAndOut">
-				<th>
-					${inAndOut.type}
-				</th>
+				<g:if test="${inAndOut.regularization|| inAndOut.systemGenerated==true}">
+					<th class="eventTD">
+						<g:if test="${inAndOut.type.equals('E') }">
+							<font color="red">${message(code: 'inAndOut.in.label')}</font>
+						</g:if>
+						<g:else>
+							<font color="red">${message(code: 'inAndOut.out.label')}</font>
+						</g:else>
+					</th>
+				</g:if>
+				<g:else>				
+					<th class="eventTD">
+						<g:if test="${inAndOut.type.equals('E') }">
+							${message(code: 'inAndOut.in.label')}
+						</g:if>
+						<g:else>
+							${message(code: 'inAndOut.out.label')}
+						</g:else>
+					</th>			
+				</g:else>
+			
+
 			</g:each>
 		</thead>
 		<tbody>
 			<tr>
 				<g:each in="${inAndOuts}" var="inAndOut">
-					<g:if
-						test="${inAndOut.regularization|| inAndOut.systemGenerated==true}">
-						<td bgcolor="#cccccc"><font color="red"><g:formatDate
-									format="H:mm:s'" date="${inAndOut.time}" /></font></td>
+					<g:if test="${inAndOut.regularization|| inAndOut.systemGenerated==true}">					
+						<td bgcolor="#cccccc" class="eventTD"><font color="red"><g:formatDate format="H:mm:s'" date="${inAndOut.time}" /></font></td>
 					</g:if>
 					<g:else>
 						<g:if test="${inAndOut.type.equals('E')}">
-							<td bgcolor="98FB98"><g:formatDate format="H:mm:s'"
-									date="${inAndOut.time}" /></td>
+							<td bgcolor="98FB98"  class="eventTDEntry" ><g:formatDate format="H:mm:s'" date="${inAndOut.time}" /></td>
 						</g:if>
 						<g:else>
-							<td bgcolor="#FFC0CB"><g:formatDate format="H:mm:s'"
-									date="${inAndOut.time}" /></td>
+							<td bgcolor="#FFC0CB"  class="eventTDExit" ><g:formatDate format="H:mm:s'" date="${inAndOut.time}" /></td>
 						</g:else>
 					</g:else>
 				</g:each>

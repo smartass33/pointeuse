@@ -103,12 +103,12 @@ environments {
 			}
     }
 
-	dell {
+	alrikiki {
 		pdf.directory='/opt/tomcat/pdf'
 		grails.app.context=''
 		grails.logging.jul.usebridge = false
 		//serverURL = "http://192.168.1.17"
-		serverURL = "http://10.33.6.10"
+		serverURL = "http://192.168.1.31"
 		context=''
 		log4j = {
 				'null' name:'stacktrace'

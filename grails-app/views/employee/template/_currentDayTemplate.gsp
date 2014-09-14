@@ -31,7 +31,7 @@
 				<g:each in="${inAndOuts}" var="inAndOut">
 					<g:if
 						test="${inAndOut.regularization|| inAndOut.systemGenerated==true}">
-						<td bgcolor="#cccccc"><font color="red"><g:formatDate
+						<td bgcolor="#cccccc" ><font color="red" ><g:formatDate
 									format="H:mm:s'" date="${inAndOut.time}" /></font></td>
 					</g:if>
 					<g:else>

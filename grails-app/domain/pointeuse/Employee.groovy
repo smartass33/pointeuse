@@ -28,7 +28,7 @@ class Employee{
 	}
 
 	String toString(){
-		return 'employee: '+ this.lastName+' '+this.firstName
+		return 'employee: lastname:'+ this.lastName+' firstname:'+this.firstName + ' username:'+ this.userName+' id:'+ this.id
 	}
 	
 }
