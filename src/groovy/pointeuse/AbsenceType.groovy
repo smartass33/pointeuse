@@ -11,7 +11,8 @@ public enum AbsenceType {
 	ANNULATION('-'),
 	CSS('CSS'),
 	FERIE('F'),
-	EXCEPTIONNEL('CE')
+	EXCEPTIONNEL('CE'),
+	DIF('DIF')
 	
 	final String value
     AbsenceType(String value){ this.value = value }

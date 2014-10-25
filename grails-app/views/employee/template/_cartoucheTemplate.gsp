@@ -31,13 +31,13 @@
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.vacances.count', default: 'report')} :</td>	
 				<td class="cartoucheRightFiguresTD">${holiday as java.lang.Float}</td>        					
      			<td class="cartoucheRightFiguresTD">${yearlyHoliday as java.lang.Float}</td>
-     			<td class="cartoucheRightFiguresTD">${(initialCA - yearlyHoliday) as java.lang.Float}</td>
+     			<td class="cartoucheRightFiguresTD">${(initialCA - yearlyHoliday)  as Float}</td>
 			</tr>
 			<tr>
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.rtt.count', default: 'report')} :</td>
 				<td class="cartoucheRightFiguresTD">${rtt as java.lang.Float}</td>
      			<td class="cartoucheRightFiguresTD">${yearlyRtt as java.lang.Float}</td>	
-     			<td class="cartoucheRightFiguresTD">${(initialRTT - yearlyRtt) as java.lang.Float}</td>		
+     			<td class="cartoucheRightFiguresTD">${(initialRTT  - yearlyRtt) as Float }</td>		
 			</tr>		
 			<tr>
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.sickness.count', default: 'report')} :</td>
@@ -106,25 +106,7 @@
    					</td>
    					<td class="cartoucheRightFiguresTD"/>
 			</tr>
-			<g:if test="${payableSupTime!=null}">
-				<tr>
-					<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
-     					<td style="font-weight:bold" class="cartoucheRightFiguresTD">
-     					<g:if test="${payableSupTime.get(0)>9}">${payableSupTime.get(0)} :</g:if>
-     					<g:else>0${payableSupTime.get(0)} :</g:else>
-     					<g:if test="${payableSupTime.get(1)>9}">${payableSupTime.get(1)}</g:if>
-     					<g:else>0${payableSupTime.get(1)}</g:else>
-     					 ou ${(payableSupTime.get(0)+payableSupTime.get(1)/60).setScale(2,2)}</td>        					
-					<td class="cartoucheRightFiguresTD" />	
-				</tr>
-			</g:if>
-			<g:if test="${payableCompTime!=null && employee.weeklyContractTime != 35}">						
-				<tr>
-					<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
-					<td class="cartoucheRightFiguresTD">${payableCompTime.get(0)}:${payableCompTime.get(1)} ou ${(payableCompTime.get(0)+payableCompTime.get(1)/60).setScale(2,2)}</td>
-					<td class="cartoucheRightFiguresTD"/>
-				</tr>
-			</g:if>							
+					
 		</tbody>
 	</table>
 </body>	

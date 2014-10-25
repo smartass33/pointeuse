@@ -11,6 +11,7 @@ class Site {
 	String address
 	String town
 	int postCode
+	CardTerminal cardTerminal
 	
 	
 	static hasMany = [employees: Employee]
@@ -18,6 +19,7 @@ class Site {
 	//static searchable = true//{ only: ['name'] } 
 	
     static constraints = {
+		cardTerminal blank:true
 		name blank: false
 		name unique:true
 		//latitude blank: true

@@ -869,6 +869,16 @@ class TimeManagerService {
 				eq('type',AbsenceType.EXCEPTIONNEL)
 			}
 		}
+		
+		criteria = Absence.createCriteria()
+		def yearlyDif = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.DIF)
+			}
+		}
 
 		criteria = Absence.createCriteria()
 		def yearlyRtt = criteria.list {
@@ -1029,6 +1039,7 @@ class TimeManagerService {
 			yearlyActualTotal:yearlyCounter,
 			yearlyHolidays:yearlyHolidays.size(),
 			yearlyExceptionnel:yearlyExceptionnel.size(),
+			yearlyDif:yearlyDif.size(),	
 			yearlyRtt:yearlyRtt.size(),
 			yearlySickness:yearlySickness.size(),
 			yearlyTheoritical:yearTheoritical,
@@ -1159,6 +1170,16 @@ class TimeManagerService {
 		}
 		
 		criteria = Absence.createCriteria()
+		def dif = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.DIF)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
 		def sansSolde = criteria.list {
 			and {
 				eq('employee',employeeInstance)
@@ -1217,6 +1238,7 @@ class TimeManagerService {
 			workingDays:counter,
 			holidays:holidays.size(),
 			exceptionnel:exceptionnel.size(),
+			dif:dif.size(),
 			rtt:rtt.size(),
 			sickness:sickness.size(),
 			sansSolde:sansSolde.size(),
@@ -1352,15 +1374,16 @@ class TimeManagerService {
 			if 	(entriesByDay.size()>0){
 				if (dailyTotal!=null){
 					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(dailySeconds),false))
-					dailySupTotalMap.put(tmpDate, computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)))
+					dailySupTotalMap.put(tmpDate, computeHumanTimeAsString(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)))
 				}else {
 					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
-					dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
+					dailySupTotalMap.put(tmpDate, computeHumanTimeAsString(0))
 				}
 				mapByDay.put(tmpDate, entriesByDay)
 			}
 			else{
 				dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
+				dailySupTotalMap.put(tmpDate, computeHumanTimeAsString(0))	
 				mapByDay.put(tmpDate, null)
 			}
 			
@@ -1413,6 +1436,7 @@ class TimeManagerService {
 		def currentContract = cartoucheTable.get('currentContract')
 		def workingDays=cartoucheTable.get('workingDays')
 		def holiday=cartoucheTable.get('holidays')
+		def dif=cartoucheTable.get('dif')	
 		def exceptionnel=cartoucheTable.get('exceptionnel')
 		def rtt=cartoucheTable.get('rtt')
 		def isCurrentMonth=cartoucheTable.get('isCurrentMonth')	
@@ -1421,6 +1445,7 @@ class TimeManagerService {
 		def monthTheoritical = cartoucheTable.get('monthTheoritical')
 		def pregnancyCredit = computeHumanTimeAsString(cartoucheTable.get('pregnancyCredit'))
 		def yearlyHoliday=cartoucheTable.get('yearlyHolidays')
+		def yearlyDif=cartoucheTable.get('yearlyDif')
 		def yearlyExceptionnel=cartoucheTable.get('yearlyExceptionnel')	
 		def yearlyRtt=cartoucheTable.get('yearlyRtt')
 		def yearlySickness=cartoucheTable.get('yearlySickness')
@@ -1475,6 +1500,8 @@ class TimeManagerService {
 			yearlyRtt:yearlyRtt,
 			yearlySickness:yearlySickness,
 			yearlySansSolde:yearlySansSolde,
+			dif:dif,
+			yearlyDif:yearlyDif,	
 			exceptionnel:exceptionnel,
 			yearlyExceptionnel:yearlyExceptionnel,
 			yearlyTheoritical:yearlyTheoritical,
@@ -1808,7 +1835,12 @@ class TimeManagerService {
 		
 		annualTheoriticalIncludingExtra = annualTheoritical + annualPayableSupTime
 		annualSupTimeAboveTheoritical = annualSupTimeAboveTheoritical - annualTheoriticalIncludingExtra
-		annualGlobalSupTimeToPay = annualSupTimeAboveTheoritical + annualPayableSupTime
+		
+		if (annualSupTimeAboveTheoritical > 0){
+			annualGlobalSupTimeToPay = annualSupTimeAboveTheoritical + annualPayableSupTime
+		}else{
+			annualGlobalSupTimeToPay = annualPayableSupTime
+		}	
 			
 		annualTheoriticalIncludingExtra = getTimeAsText(computeHumanTime(Math.round(annualTheoriticalIncludingExtra) as long),true)
 		// if the total is less than 0, consider only above daily and weekly threshold HS
@@ -1939,6 +1971,17 @@ class TimeManagerService {
 		}
 		absenceMap.put(AbsenceType.EXCEPTIONNEL, exceptionnel.size())
 		
+		
+		criteria = Absence.createCriteria()
+		def dif = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',startDate)
+				le('date',endDate)
+				eq('type',AbsenceType.DIF)
+			}
+		}
+		absenceMap.put(AbsenceType.DIF, dif.size())
 				
 		criteria = Absence.createCriteria()
 		def sansSolde = criteria.list {
@@ -2169,7 +2212,7 @@ class TimeManagerService {
 					3600*(
 							realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
 							+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
-							-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)))
+							-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)))
 						- absenceMap.get(AbsenceType.GROSSESSE)) as int
 				}
 			}
@@ -2481,6 +2524,7 @@ class TimeManagerService {
 		def siteAnnualCSS = 0
 		def siteAnnualSickness = 0
 		def siteAnnualExceptionnel = 0
+		def siteAnnualDIF = 0
 		def siteAnnualPayableSupTime = 0
 		def siteAnnualTheoriticalIncludingExtra = 0
 		def siteAnnualSupTimeAboveTheoritical = 0
@@ -2497,6 +2541,7 @@ class TimeManagerService {
 			siteAnnualRTT += ((annualReportMap.get(employee)).get('annualRTT'))
 			siteAnnualCSS += ((annualReportMap.get(employee)).get('annualCSS'))
 			siteAnnualSickness += ((annualReportMap.get(employee)).get('annualSickness'))
+			siteAnnualDIF += ((annualReportMap.get(employee)).get('annualDIF'))
 			siteAnnualExceptionnel += ((annualReportMap.get(employee)).get('annualExceptionnel'))
 			siteAnnualPayableSupTime += getTimeFromText((annualReportMap.get(employee)).get('annualPayableSupTime'))
 			siteAnnualTheoriticalIncludingExtra += getTimeFromText((annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra'))
@@ -2513,6 +2558,7 @@ class TimeManagerService {
 			siteAnnualRTT:siteAnnualRTT,
 			siteAnnualCSS:siteAnnualCSS,
 			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPayableSupTime:getTimeAsText(computeHumanTime(siteAnnualPayableSupTime),true),
 			siteAnnualTheoriticalIncludingExtra:getTimeAsText(computeHumanTime(siteAnnualTheoriticalIncludingExtra),true),

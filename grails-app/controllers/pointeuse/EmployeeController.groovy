@@ -274,13 +274,16 @@ def vacationFollowup(){
 		def takenSicknessMap=[:]
 		def takenCSSMap=[:]
 		def takenAutreMap=[:]
-		def takenExceptionnelMap=[:]
+		def takenExceptionnelMap=[:]		
+		def takenDifMap=[:]
 		def takenSickness
 		def takenRTT
 		def takenCA
 		def takenCSS
 		def takenAutre
 		def takenExceptionnel
+		def takenDIF
+		
 		def employeeInstanceTotal
 
 		
@@ -417,6 +420,7 @@ def vacationFollowup(){
 				takenRTTMap.put(employee, 0)
 			}
 			
+			// SICKNESS
 			criteria = Absence.createCriteria()
 			takenSickness = criteria.list {
 				and {
@@ -430,8 +434,9 @@ def vacationFollowup(){
 				takenSicknessMap.put(employee, takenSickness.size())
 			}else{
 				takenSicknessMap.put(employee, 0)
-			}					
-			
+			}	
+							
+			//CSS
 			criteria = Absence.createCriteria()
 			takenCSS = criteria.list {
 				and {
@@ -447,6 +452,7 @@ def vacationFollowup(){
 				takenCSSMap.put(employee, 0)
 			}
 
+			//AUTRE
 			criteria = Absence.createCriteria()
 			takenAutre = criteria.list {
 				and {
@@ -462,6 +468,7 @@ def vacationFollowup(){
 				takenAutreMap.put(employee, 0)
 			}
 			
+			//EXCEPTIONNEL
 			criteria = Absence.createCriteria()
 			takenExceptionnel = criteria.list {
 				and {
@@ -475,12 +482,29 @@ def vacationFollowup(){
 				takenExceptionnelMap.put(employee, takenExceptionnel.size())
 			}else{
 				takenExceptionnelMap.put(employee, 0)
-			}		
+			}
+			
+			//DIF
+			criteria = Absence.createCriteria()
+			takenDIF = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.DIF)
+				}
+			}
+			if (takenDIF!=null){
+				takenDifMap.put(employee, takenDIF.size())
+			}else{
+				takenDifMap.put(employee, 0)
+			}
 		}
 		log.debug("done")
 		[
 			employeeInstanceTotal:employeeInstanceTotal,
 			takenExceptionnelMap:takenExceptionnelMap,
+			takenDifMap:takenDifMap,
 			period:period,
 			employeeInstanceTotal:employeeInstanceTotal,
 			site:site,
@@ -740,9 +764,9 @@ def vacationFollowup(){
 	def modifyAbsence(){
 		def employee = Employee.get(params.int('employeeId'))
 		def day = params["day"]
-		def supTime=params.int('payableSupTime')
-		def compTime=params.int('payableCompTime')
-		def monthlyTotal=params.int('monthlyTotalRecap')
+		def supTime=params['payableSupTime']
+		//def compTime=params.int('payableCompTime')
+		//def monthlyTotal=params.int('monthlyTotalRecap')
 		def updatedSelection = params["updatedSelection"].toString()
 		if (updatedSelection.equals('G'))
 			updatedSelection = AbsenceType.GROSSESSE
@@ -802,25 +826,34 @@ def vacationFollowup(){
 		}else{
 			flash.message=message(code: 'absence.impossible.update')
 		}
-		def cartoucheTable = timeManagerService.getCartoucheData(employee,cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)	
+		
+		def cartoucheTable = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH)+1, cal.get(Calendar.YEAR))
+		
 		def workingDays=cartoucheTable.getAt('workingDays')
 		def holiday=cartoucheTable.getAt('holidays')
-		def exceptionnel=cartoucheTable.getAt('exceptionnel')		
+		def exceptionnel=cartoucheTable.getAt('exceptionnel')	
+		def dif=cartoucheTable.getAt('dif')	
 		def rtt=cartoucheTable.getAt('rtt')
 		def sickness=cartoucheTable.getAt('sickness')
 		def sansSolde=cartoucheTable.getAt('sansSolde')
-		def monthTheoritical = timeManagerService.computeHumanTimeAsString(cartoucheTable.getAt('monthTheoritical'))
-		def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.getAt('pregnancyCredit'))
+		def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
+		def pregnancyCredit = cartoucheTable.getAt('pregnancyCredit')
 		def yearlyHoliday=cartoucheTable.getAt('yearlyHolidays')
 		def yearlyExceptionnel=cartoucheTable.getAt('yearlyExceptionnel')	
+		def yearlyDif=cartoucheTable.getAt('yearlyDif')	
 		def yearlyRtt=cartoucheTable.getAt('yearlyRtt')
 		def yearlySickness=cartoucheTable.getAt('yearlySickness')
-		def yearlyTheoritical = timeManagerService.computeHumanTimeAsString(cartoucheTable.getAt('yearlyTheoritical'))
-		def yearlyPregnancyCredit = timeManagerService.computeHumanTimeAsString(cartoucheTable.getAt('yearlyPregnancyCredit'))
-		def yearlyActualTotal = timeManagerService.computeHumanTimeAsString(cartoucheTable.getAt('yearlyTotalTime'))
+		def yearlyTheoritical = cartoucheTable.getAt('yearlyTheoritical')
+		def yearlyPregnancyCredit = cartoucheTable.getAt('yearlyPregnancyCredit')
+		def yearlyActualTotal = cartoucheTable.getAt('yearlyTotalTime')
 		def yearlySansSolde=cartoucheTable.getAt('yearlySansSolde')
-		def payableSupTime=timeManagerService.computeHumanTime(supTime)
-		def payableCompTime=timeManagerService.computeHumanTime(compTime)
+		def payableSupTime=cartoucheTable.getAt('payableSupTime')
+		def payableCompTime=cartoucheTable.getAt('payableCompTime')
+		def initialCA=cartoucheTable.getAt('initialCA')
+		def initialRTT=cartoucheTable.getAt('initialRTT')
+		
+
+
 		def openedDays = timeManagerService.computeMonthlyHours(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)
 		def yearInf
 		def yearSup
@@ -833,8 +866,8 @@ def vacationFollowup(){
 		}
 		
 		def currentContract = cartoucheTable.getAt('currentContract')
-		def monthlyTotalRecapAsString = timeManagerService.computeHumanTimeAsString(monthlyTotal)
-		monthlyTotal=timeManagerService.computeHumanTime(monthlyTotal)
+		def monthlyTotalRecapAsString = cartoucheTable.getAt('monthlyTotalRecap')
+		def monthlyTotal=cartoucheTable.getAt('monthlyTotalRecap')
 		Period period = ((cal.get(Calendar.MONTH)+1)>5)?Period.findByYear(cal.get(Calendar.YEAR)):Period.findByYear(cal.get(Calendar.YEAR)-1)
 		def model=[
 			currentContract:currentContract,
@@ -853,13 +886,17 @@ def vacationFollowup(){
 			workingDays:workingDays,
 			holiday:holiday,
 			exceptionnel:exceptionnel,
+			dif:dif,
 			rtt:rtt,
 			sickness:sickness,
 			sansSolde:sansSolde,
 			monthTheoritical:monthTheoritical,
 			pregnancyCredit:pregnancyCredit,
+			initialCA:initialCA,
+			initialRTT:initialRTT,
 			yearlyHoliday:yearlyHoliday,
 			yearlyExceptionnel:yearlyExceptionnel,
+			yearlyDif:yearlyDif,
 			yearlyRtt:yearlyRtt,
 			yearlySickness:yearlySickness,
 			yearlyTheoritical:yearlyTheoritical,
@@ -1522,7 +1559,10 @@ def vacationFollowup(){
 
 
 	
-	def pointage(Long id){		
+	def pointage(Long id){	
+		
+		log.error('pointagege callded')
+		
 		try {	
 			def username = params["username"]
 			def employee

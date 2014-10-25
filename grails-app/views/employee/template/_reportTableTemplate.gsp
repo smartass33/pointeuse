@@ -44,14 +44,14 @@
 	                        <g:if
 	                          test="${weeklySupTotal.get(employee) != null && weeklySupTotal.get(employee).get(day.key) !=null}">
 	                          <g:if
-	                            test="${dailySupTotalMap.get(entries.key) !=null && (dailySupTotalMap.get(entries.key).get(0)>0 ||dailySupTotalMap.get(entries.key).get(1)>0)}">
+	                            test="${dailySupTotalMap.get(entries.key) !=null}">
 	                            ${dailySupTotalMap.get(entries.key).get(0)}:${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}
 	                          </g:if>
 	                        </g:if>
 	                      </g:if> 
 	                      <g:else>
 	                        <g:if
-	                          test="${dailySupTotalMap.get(entries.key) !=null && (dailySupTotalMap.get(entries.key).get(0)>0 ||dailySupTotalMap.get(entries.key).get(1)>0)}">
+	                          test="${dailySupTotalMap.get(entries.key) !=null}">
 	                          ${dailySupTotalMap.get(entries.key).get(0)}:${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}
 	                        </g:if>
 	                      </g:else>
@@ -73,15 +73,14 @@
 		                  	</g:if>
 	                  		<g:else>
 		   	                    <g:if test="${entries == null || entries.value ==null}">           
+		   	                    
 				                  	<g:if test="${holidayMap.get(entries.key) != null}">
 				                      <font size="2"> 
 				                      <g:select width="50px"
 				                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
 											  params:'\'employeeId=' + employee.id 						  
 											  + '&day=' + entries.key.format("dd/MM/yyyy")
-											  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
-											  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
-											  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
+							
 											  + '&updatedSelection=\' + this.value'								  )}"
 				                          name="absenceType" from="${AbsenceType.values()}"
 				                          value="${AbsenceType}" optionKey="key"
@@ -93,9 +92,7 @@
 				                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div',		  
 											  params:'\'employeeId=' + employee.id 						  
 											  + '&day=' + entries.key.format("dd/MM/yyyy")
-											  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
-											  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
-											  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
+						
 											  + '&updatedSelection=\' + this.value'
 											   )}"
 				                          name="absenceType" from="${AbsenceType.values()}"
@@ -111,9 +108,7 @@
 					                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
 												  params:'\'employeeId=' + employee.id 						  
 												  + '&day=' + entries.key.format("dd/MM/yyyy")
-												  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
-												  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
-												  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
+					
 												  + '&updatedSelection=\' + this.value'								  )}"
 					                          name="absenceType" from="${AbsenceType.values()}"
 					                          value="${AbsenceType}" optionKey="key"
@@ -125,9 +120,7 @@
 					                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
 												  params:'\'employeeId=' + employee.id 						  
 												  + '&day=' + entries.key.format("dd/MM/yyyy")
-												  + '&monthlyTotalRecap=' + (monthlyTotalRecap.get(0)*3600+monthlyTotalRecap.get(1)*60+monthlyTotalRecap.get(2))
-												  + '&payableSupTime=' + (payableSupTime.get(0)*3600+payableSupTime.get(1)*60+payableSupTime.get(2))
-												  + '&payableCompTime=' + (payableCompTime.get(0)*3600+payableCompTime.get(1)*60+payableCompTime.get(2))
+							
 												  + '&updatedSelection=\' + this.value'								  )}"
 					                          name="absenceType" from="${['-',AbsenceType.GROSSESSE]}"
 					                          noSelection="${['':'-']}" />

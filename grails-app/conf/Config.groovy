@@ -81,11 +81,13 @@ environments {
 			
 				appenders {
 					appender new EventLogAppender(source:'pointeuse', name: 'eventLogAppender', layout:new EnhancedPatternLayout(conversionPattern: '%d{DATE} %5p %c{1}:%L - %m%n %throwable{500}'), threshold: org.apache.log4j.Level.ERROR)		
-					rollingFile name:'myAppender',file:"/Users/henri/Documents/workspace/pointeuse/logs/pointeuse.log", maxFileSize:1024,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					rollingFile name:'rollingFileAppender',file:"/Users/henri/Documents/workspace/pointeuse/logs/pointeuse.log", maxFileSize:1024,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
 			
-				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
-							   
+				//warn  rollingFileAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
+				//warn  eventLogAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
+				//error 'eventLogAppender'
+				
 				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
 					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
 					   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
@@ -97,8 +99,7 @@ environments {
 					   'net.sf.ehcache.hibernate'
 				root {
 					//error 'eventLogAppender'
-					
-					warn 'rollingFile'//,'stdout'
+					warn 'rollingFileAppender','stdout','eventLogAppender'
 				}
 			}
     }
@@ -128,7 +129,7 @@ environments {
 					   'net.sf.ehcache.hibernate'
 				
 				root {
-					warn 'rollingFile'//,'stdout'
+					warn 'myAppender','rollingFile'
 				}
 			}
 	}
