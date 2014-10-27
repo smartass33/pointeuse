@@ -80,7 +80,7 @@ environments {
 		log4j = {
 			
 				appenders {
-					appender new EventLogAppender(source:'pointeuse', name: 'eventLogAppender', layout:new EnhancedPatternLayout(conversionPattern: '%d{DATE} %5p %c{1}:%L - %m%n %throwable{500}'), threshold: org.apache.log4j.Level.ERROR)		
+					//appender new EventLogAppender(source:'pointeuse', name: 'eventLogAppender', layout:new EnhancedPatternLayout(conversionPattern: '%d{DATE} %5p %c{1}:%L - %m%n %throwable{500}'), threshold: org.apache.log4j.Level.ERROR)		
 					rollingFile name:'rollingFileAppender',file:"/Users/henri/Documents/workspace/pointeuse/logs/pointeuse.log", maxFileSize:1024,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
 			
@@ -99,7 +99,7 @@ environments {
 					   'net.sf.ehcache.hibernate'
 				root {
 					//error 'eventLogAppender'
-					warn 'rollingFileAppender','stdout','eventLogAppender'
+					warn 'rollingFileAppender','stdout'//,'eventLogAppender'
 				}
 			}
     }

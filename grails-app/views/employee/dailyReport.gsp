@@ -98,7 +98,8 @@
 						url="[controller:'employee', action:'dailyReport']"
 					/>	
 				</li>		
-				<li>	<g:actionSubmit value="PDF" action="dailyTotalPDF" controller="employee"  class="pdfButton"/>	</li>				
+				<li>	
+					<g:actionSubmit value="PDF" action="dailyTotalPDF" controller="employee"  class="pdfButton"/>	</li>				
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
 					<g:hiddenField name="siteId" value="${siteId}" />
 				</ul>

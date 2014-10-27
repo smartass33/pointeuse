@@ -108,23 +108,27 @@
 <div>
 	<table style="width:75%;">
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><font color="red" style='font-weight:bold;'><g:message code="annual.theoritical.intial"/>:</font></td>
-			<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD"><font color="red" style='font-weight:bold;'>${annualTheoritical}</font></td>		
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="HRA" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.HRA.tooltip")}"><g:message code="annual.actual.intial"/>:</td>
+			<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD">${annualTotal}</td>		
 		</tr>	
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><g:message code="annual.HS.above.quota"/>:</td>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="HTA" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.HTA.tooltip")}"><g:message code="annual.theoritical.intial"/>:</td>
+			<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD">${annualTheoritical}</td>		
+		</tr>	
+		<tr>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="HSQ" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.HSQ.tooltip")}"><g:message code="annual.HS.above.quota"/>:</td>
 			<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD">${annualPayableSupTime}</td>
 		</tr>
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="annualQuota" href="#" style="text-decoration: none;color:#666;" title="[theorique annuel + heures sup]"><g:message code="annual.computed.quota"/>:</a><richui:tooltip id="annualQuota" /></td>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="HTA.recomputed" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.HTA.recomputed.tooltip")}"><g:message code="annual.computed.quota"/>:</a><richui:tooltip id="annualQuota" /></td>
 			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualTheoriticalIncludingExtra}</td>
 		</tr>
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="annualHS" href="#" style="text-decoration: none;color:#666;" title="[réalisé annuel - theorique annuel - HS annuel]"><g:message code="annual.other.HS.quota"/>:</a><richui:tooltip id="annualHS" /></td>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="QA" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.QA.tooltip")}"><g:message code="annual.other.HS.quota"/>:</a><richui:tooltip id="annualHS" /></td>
 			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualSupTimeAboveTheoritical}</td>
 		</tr>
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><g:message code="annual.total.HS.to.pay"/>:</td>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="HSP" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.HSP.tooltip")}"><g:message code="annual.total.HS.to.pay"/>:</td>
 			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualGlobalSupTimeToPay}</td>
 		</tr>				
 	</table>

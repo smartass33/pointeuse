@@ -18,6 +18,9 @@
 		<tr>
 			<td class="cartoucheLeftTD" >${message(code: 'employee.arrivalDate.short.label', default: 'report')}: <g:formatDate format="dd/MM/yyyy" date="${employee.arrivalDate}"/></td>
 		</tr>
+		<tr>
+			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="employee" action='annualReport'  id="${employee.id}" params="${[userId:employee?.id,siteId:siteId,isAjax:false]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
+		</tr>		
 	</table> 				
 	<table style="float: left;">						
 		<tbody>		
@@ -53,7 +56,12 @@
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.exceptionnel.count', default: 'report')} :</td>	
 				<td class="cartoucheRightFiguresTD">${exceptionnel as java.lang.Float}</td>        					
      			<td class="cartoucheRightFiguresTD">${yearlyExceptionnel as java.lang.Float}</td>
-			</tr>												
+			</tr>			
+			<tr>		
+				<td class="cartoucheRightTitleTD" >${message(code: 'employee.dif.count', default: 'report')} :</td>	
+				<td class="cartoucheRightFiguresTD">${dif as java.lang.Float}</td>        					
+     			<td class="cartoucheRightFiguresTD">${yearlyDif as java.lang.Float}</td>
+			</tr>										
 			<tr>
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
     			<g:if test="${monthTheoritical!=null}">
@@ -106,7 +114,35 @@
    					</td>
    					<td class="cartoucheRightFiguresTD"/>
 			</tr>
-					
+			<g:if test="${payableSupTime!=null}">
+				<tr>
+					<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
+     					<td style="font-weight:bold" class="cartoucheRightFiguresTD">
+	     					<g:if test="${payableSupTime.get(0)>9}">${payableSupTime.get(0)} :</g:if>
+	     					<g:else>0${payableSupTime.get(0)} :</g:else>
+	     					<g:if test="${payableSupTime.get(1)>9}">${payableSupTime.get(1)}</g:if>
+	     					<g:else>0${payableSupTime.get(1)}</g:else>
+	     					 ou ${(payableSupTime.get(0)+payableSupTime.get(1)/60).setScale(2,2)}
+     					 </td>        					
+					<td class="cartoucheRightFiguresTD" />	
+				</tr>
+			</g:if>
+			<g:if test="${payableCompTime!=null && employee.weeklyContractTime != 35}">						
+				<tr>
+					<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
+					<td class="cartoucheRightFiguresTD">${payableCompTime.get(0)}:${payableCompTime.get(1)} ou ${(payableCompTime.get(0)+payableCompTime.get(1)/60).setScale(2,2)}</td>
+					<td class="cartoucheRightFiguresTD"/>
+				</tr>
+			</g:if>	
+			<tr>
+				<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeBefore7', default: 'report')} :</td>							
+    			<td class="cartoucheRightFiguresTD">${timeBefore7.get(0)}:${timeBefore7.get(1)}</td>
+    			
+			</tr>
+			<tr>
+				<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeAfter21', default: 'report')} :</td>							
+    			<td class="cartoucheRightFiguresTD">${timeAfter21.get(0)}:${timeAfter21.get(1)}</td> 			
+			</tr>			
 		</tbody>
 	</table>
 </body>	

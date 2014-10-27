@@ -59,7 +59,7 @@ class EmployeeController {
 		def inAndOutList
 		def criteria
 		def site
-		def elapsedSeconds
+		def elapsedSeconds = 0
 		def employeeInstanceList
 		def currentDate
 		def calendar = Calendar.instance
@@ -113,7 +113,9 @@ class EmployeeController {
 			}
 			
 			dailyInAndOutMap.put(employee, inAndOutList)
-			elapsedSeconds = timeManagerService.getDailyTotal(dailyTotal)
+			if (dailyTotal != null){
+				elapsedSeconds = (timeManagerService.getDailyTotal(dailyTotal)).get('elapsedSeconds')
+			}
 			if (elapsedSeconds > DailyTotal.maxWorkingTime){
 				dailySupMap.put(employee,timeManagerService.computeHumanTime(elapsedSeconds-DailyTotal.maxWorkingTime))	
 			}else{
@@ -765,8 +767,6 @@ def vacationFollowup(){
 		def employee = Employee.get(params.int('employeeId'))
 		def day = params["day"]
 		def supTime=params['payableSupTime']
-		//def compTime=params.int('payableCompTime')
-		//def monthlyTotal=params.int('monthlyTotalRecap')
 		def updatedSelection = params["updatedSelection"].toString()
 		if (updatedSelection.equals('G'))
 			updatedSelection = AbsenceType.GROSSESSE
@@ -828,32 +828,6 @@ def vacationFollowup(){
 		}
 		
 		def cartoucheTable = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH)+1, cal.get(Calendar.YEAR))
-		
-		def workingDays=cartoucheTable.getAt('workingDays')
-		def holiday=cartoucheTable.getAt('holidays')
-		def exceptionnel=cartoucheTable.getAt('exceptionnel')	
-		def dif=cartoucheTable.getAt('dif')	
-		def rtt=cartoucheTable.getAt('rtt')
-		def sickness=cartoucheTable.getAt('sickness')
-		def sansSolde=cartoucheTable.getAt('sansSolde')
-		def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
-		def pregnancyCredit = cartoucheTable.getAt('pregnancyCredit')
-		def yearlyHoliday=cartoucheTable.getAt('yearlyHolidays')
-		def yearlyExceptionnel=cartoucheTable.getAt('yearlyExceptionnel')	
-		def yearlyDif=cartoucheTable.getAt('yearlyDif')	
-		def yearlyRtt=cartoucheTable.getAt('yearlyRtt')
-		def yearlySickness=cartoucheTable.getAt('yearlySickness')
-		def yearlyTheoritical = cartoucheTable.getAt('yearlyTheoritical')
-		def yearlyPregnancyCredit = cartoucheTable.getAt('yearlyPregnancyCredit')
-		def yearlyActualTotal = cartoucheTable.getAt('yearlyTotalTime')
-		def yearlySansSolde=cartoucheTable.getAt('yearlySansSolde')
-		def payableSupTime=cartoucheTable.getAt('payableSupTime')
-		def payableCompTime=cartoucheTable.getAt('payableCompTime')
-		def initialCA=cartoucheTable.getAt('initialCA')
-		def initialRTT=cartoucheTable.getAt('initialRTT')
-		
-
-
 		def openedDays = timeManagerService.computeMonthlyHours(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)
 		def yearInf
 		def yearSup
@@ -864,47 +838,21 @@ def vacationFollowup(){
 			yearInf=cal.get(Calendar.YEAR)-1
 			yearSup=cal.get(Calendar.YEAR)
 		}
-		
-		def currentContract = cartoucheTable.getAt('currentContract')
-		def monthlyTotalRecapAsString = cartoucheTable.getAt('monthlyTotalRecap')
-		def monthlyTotal=cartoucheTable.getAt('monthlyTotalRecap')
 		Period period = ((cal.get(Calendar.MONTH)+1)>5)?Period.findByYear(cal.get(Calendar.YEAR)):Period.findByYear(cal.get(Calendar.YEAR)-1)
 		def model=[
-			currentContract:currentContract,
 			period2:period,
 			period:cal.time,
 			firstName:employee.firstName,
 			lastName:employee.lastName,
 			weeklyContractTime:employee.weeklyContractTime,
 			matricule:employee.matricule,
-			monthlyTotalRecap:monthlyTotal,
-			monthlyTotalRecapAsString:monthlyTotalRecapAsString,
 			yearInf:yearInf,
 			yearSup:yearSup,
 			employee:employee,
-			openedDays:openedDays,
-			workingDays:workingDays,
-			holiday:holiday,
-			exceptionnel:exceptionnel,
-			dif:dif,
-			rtt:rtt,
-			sickness:sickness,
-			sansSolde:sansSolde,
-			monthTheoritical:monthTheoritical,
-			pregnancyCredit:pregnancyCredit,
-			initialCA:initialCA,
-			initialRTT:initialRTT,
-			yearlyHoliday:yearlyHoliday,
-			yearlyExceptionnel:yearlyExceptionnel,
-			yearlyDif:yearlyDif,
-			yearlyRtt:yearlyRtt,
-			yearlySickness:yearlySickness,
-			yearlyTheoritical:yearlyTheoritical,
-			yearlyPregnancyCredit:yearlyPregnancyCredit,
-			yearlyActualTotal:yearlyActualTotal,
-			yearlySansSolde:yearlySansSolde,
-			payableSupTime:payableSupTime,
-			payableCompTime:payableCompTime]
+			openedDays:openedDays
+
+			]
+		model << cartoucheTable
 		render template: "/employee/template/cartoucheTemplate", model:model
 		return
 	}
@@ -987,12 +935,6 @@ def vacationFollowup(){
 		}else{
 			entranceStatus=true
 		}
-		
-		//def humanTime = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(timeManagerService.getDailyTotal(inAndOuts)),false)
-		//def dailySupp = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(Math.max(timeManagerService.getDailyTotal(inAndOuts)-DailyTotal.maxWorkingTime,0)),false)
-
-		//employeeInstance.status = type.equals("S") ? false : true
-		
 		if (type.equals("E")){
 			if (flashMessage)
 				flash.message = message(code: 'inAndOut.create.label', args: [message(code: 'inAndOut.entry.label', default: 'exit'), cal.time])
@@ -1180,6 +1122,9 @@ def vacationFollowup(){
 		def monthList=params["month"]
 		def yearList=params["year"]
 		def employee = Employee.get(params.long("userId"))
+		if (employee == null){
+			employee = Employee.get(params["employee.id"])
+		}
 		def newTimeList=params["cell"]
 		def fromRegularize=params["fromRegularize"].equals("true") ? true : false
 
@@ -1394,9 +1339,11 @@ def vacationFollowup(){
 					eq('year',year)
 				}
 			}
-			// permet de r�cup�rer le total hebdo
+			// permet de récupérer le total hebdo
 			if (dailyTotal != null && dailyTotal != dailyTotalId){
-				dailySeconds = timeManagerService.getDailyTotal(dailyTotal)
+				
+				
+				dailySeconds = (timeManagerService.getDailyTotal(dailyTotal)).get("elapsedSeconds")
 				monthlyTotalTime += dailySeconds
 				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
 				if (previousValue!=null){
@@ -1561,7 +1508,7 @@ def vacationFollowup(){
 	
 	def pointage(Long id){	
 		
-		log.error('pointagege callded')
+		log.error('pointagege called')
 		
 		try {	
 			def username = params["username"]

@@ -87,15 +87,15 @@
 							<td style="text-align:left;">${message(code: 'employee.matricule.label', default: 'report')}: ${fieldValue(bean: employee, field: "matricule")}</td>
 						</tr>
 						<tr>
-							<td class="cartoucheLeftTD" >${message(code: 'employee.arrivalDate.short.label', default: 'report')}: <g:formatDate format="dd/MM/yyyy" date="${employee.arrivalDate}"/></td>
+							<td style="text-align:left;" >${message(code: 'employee.arrivalDate.short.label', default: 'report')}: <g:formatDate format="dd/MM/yyyy" date="${employee.arrivalDate}"/></td>
 						</tr>						
 					</table> 
 				</td>
-				<td width="80%">
-					<table width="100%" >						
+				<td width="85%">
+					<table width="120%" >						
 						<tbody>		
 							<tr>					
-								<td width="35%" pstyle="text-align:left;" ></td>	
+								<td width="40%" pstyle="text-align:left;" ></td>	
 	 							<td>
 	 								<table>
 	 									<thead></thead>
@@ -205,20 +205,35 @@
 	        						</table>
 	        					</td>
 							</tr>							
-							
+							<tr>
+								<td width="35%" style="text-align:left;" >${message(code: 'employee.dif.count', default: 'report')} :</td>	
+	 							<td>
+	 								<table border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${dif as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					
+	        					<td>
+	        						<table border="1" class="cartoucheValues">
+	        							<thead></thead>	        							
+	        							<tr><td>${yearlyDif as float}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>								
 											
 							<tr>
 								<td style="text-align:left;">${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${monthTheoritical.get(0)}H${monthTheoritical.get(1)==0?'00':monthTheoritical.get(1)}</td></tr>
+	        							<tr><td>${monthTheoritical.get(0)}:${monthTheoritical.get(1)}</td></tr>
 	        						</table>
 	        					</td>	
 	        					<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${yearlyTheoritical.get(0)}H${yearlyTheoritical.get(1)==0?'00':yearlyTheoritical.get(1)}</td></tr>
+	        							<tr><td>${yearlyTheoritical.get(0)}:${yearlyTheoritical.get(1)}</td></tr>
 	        						</table>
 	        					</td>					
 							</tr>
@@ -228,8 +243,8 @@
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
 	 									<tr>
-	 									<g:if test="${monthlyTotalRecap!=null}">
-	 										<td>${monthlyTotalRecap.get(0)}H${monthlyTotalRecap.get(1)==0?'00':monthlyTotalRecap.get(1)}</td>
+	 									<g:if test="${monthlyTotalRecapAsString!=null}">
+	 										<td>${monthlyTotalRecapAsString.get(0)}:${monthlyTotalRecapAsString.get(1)}</td>
 	 									</g:if>
 	 									<g:else>
 	 										<td>00H00</td>			
@@ -241,7 +256,7 @@
 	        					<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${yearlyActualTotal.get(0)}H${yearlyActualTotal.get(1)==0?'00':yearlyActualTotal.get(1)}</td></tr>
+	        							<tr><td>${yearlyActualTotal.get(0)}:${yearlyActualTotal.get(1)}</td></tr>
 	        						</table>
 	        					</td>					
 							</tr>
@@ -250,13 +265,13 @@
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
 	 									<thead></thead>
-	        							<tr><td>${pregnancyCredit.get(0)}H${pregnancyCredit.get(1)==0?'00':pregnancyCredit.get(1)}</td></tr>
+	        							<tr><td>${pregnancyCredit.get(0)}:${pregnancyCredit.get(1)}</td></tr>
 	        						</table>
 	        					</td>
 	        					<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${yearlyPregnancyCredit.get(0)}H${yearlyPregnancyCredit.get(1)==0?'00':yearlyPregnancyCredit.get(1)}</td></tr>
+	        							<tr><td>${yearlyPregnancyCredit.get(0)}:${yearlyPregnancyCredit.get(1)}</td></tr>
 	        						</table>
 	        					</td>					
 							</tr>
@@ -275,7 +290,14 @@
 									<td>
 		        						<table border="1" class="cartoucheValues" >
 		        							<thead></thead>
-		        							<tr><td style="font-weight:bold">${payableSupTime.get(0)}H${payableSupTime.get(1)==0?'00':payableSupTime.get(1)}</td><td style="font-weight:bold">${(payableSupTime.get(0)+payableSupTime.get(1)/60).setScale(2,2)}H</td></tr>
+		        							<tr>
+		        								<td style="font-weight:bold" >
+						  	     					<g:if test="${payableSupTime.get(0)>9}">${payableSupTime.get(0)}:</g:if>
+						     						<g:else>0${payableSupTime.get(0)}:</g:else>
+						     						<g:if test="${payableSupTime.get(1)>9}">${payableSupTime.get(1)}</g:if>
+						     						<g:else>0${payableSupTime.get(1)}</g:else>
+		        								</td>				        							
+		        							</tr>
 		        						</table>
 		        					</td>
 								</tr>
@@ -287,12 +309,31 @@
 										<td>
 			        						<table border="1" class="cartoucheValues" >
 			        							<thead></thead>
-			        							<tr><td style="font-weight:bold">${payableCompTime.get(0)}H${payableCompTime.get(1)==0?'00':payableCompTime.get(1)}</td><td style="font-weight:bold">${(payableCompTime.get(0)+payableCompTime.get(1)/60).setScale(2,2)}H</td></tr>
+			        							<tr><td style="font-weight:bold">${payableCompTime.get(0)}:${payableCompTime.get(1)}</td></tr>
 			        						</table>
 			        					</td>
 									</tr>
 								</g:if>		
-							</g:if>					
+							</g:if>
+							
+							<tr>
+								<td style="text-align:left;">${message(code: 'employee.monthly.timeBefore7', default: 'report')} :</td>				
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold">${timeBefore7.get(0)}:${timeBefore7.get(1)}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>	
+							<tr>
+								<td style="text-align:left;">${message(code: 'employee.monthly.timeAfter21', default: 'report')} :</td>				
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold">${timeAfter21.get(0)}:${timeAfter21.get(1)}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>													
 						</tbody>
 					</table> 
 				</td>
@@ -330,8 +371,10 @@
 					                </g:if>
 				                	<g:else><td style="border:1px;width:70px">00 : 00</td></g:else>
 				                  	<g:if test="${weeklySupTotal.get(employee) != null && weeklySupTotal.get(employee).get(day.key) !=null}">
-				                    	<g:if test="${dailySupTotalMap.get(entries.key) !=null && (dailySupTotalMap.get(entries.key).get(0)>0 ||dailySupTotalMap.get(entries.key).get(1)>0)}">
-				                            <td style="border:1px;width:40px">${dailySupTotalMap.get(entries.key).get(0)}H${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}</td>
+				                    	<g:if test="${dailySupTotalMap.get(entries.key) !=null}">
+				                            <td style="border:1px;width:40px">
+				                            	${dailySupTotalMap.get(entries.key).get(0)}:${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}
+				                            </td>
 				                         </g:if>
 					                    <g:else>
 				                    		<td style="border:1px;width:40px">-</td>

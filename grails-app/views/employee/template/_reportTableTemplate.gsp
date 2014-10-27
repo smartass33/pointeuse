@@ -285,6 +285,7 @@
 	          </g:each>
 	        </g:each>
 	        <g:hiddenField name="employee.id" value="${userId}" />
+	        <g:hiddenField name="userId" value="${userId}" />  
 	      </tbody>
 	</table>
 </form>

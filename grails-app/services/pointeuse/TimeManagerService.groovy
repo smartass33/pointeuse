@@ -58,8 +58,8 @@ class TimeManagerService {
 			}
 		}
 		criteria = WeeklyTotal.createCriteria()
-		for (DailyTotal tmpDaily:dailyTotals){
-			def tmpElapsed = getDailyTotal(tmpDaily)
+		for (DailyTotal tmpDaily:dailyTotals){		
+			def tmpElapsed = (getDailyTotal(tmpDaily)).get("elapsedSeconds")
 			dailyTotalSum += tmpElapsed
 			dailySupplementarySeconds += Math.max(tmpElapsed-DailyTotal.maxWorkingTime, 0)
 		}
@@ -640,10 +640,27 @@ class TimeManagerService {
 	def getDailyTotal(DailyTotal dailyTotal){
 		def criteria = InAndOut.createCriteria()
 		def elapsedSeconds = 0
+		def timeBefore7 = 0
+		def timeAfter21 = 0
 		def tmpInOrOut
 		def timeDifference
 		def currentInOrOut
 		def previousInOrOut
+		def calendarAtSeven = Calendar.instance
+		def calendarAtNine = Calendar.instance
+		calendarAtSeven.set(Calendar.YEAR,dailyTotal.year)
+		calendarAtSeven.set(Calendar.MONTH,dailyTotal.month-1)
+		calendarAtSeven.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
+		calendarAtSeven.set(Calendar.HOUR_OF_DAY,7)
+		calendarAtSeven.set(Calendar.MINUTE,0)
+		calendarAtSeven.set(Calendar.SECOND,0)	
+		calendarAtNine.set(Calendar.YEAR,dailyTotal.year)
+		calendarAtNine.set(Calendar.MONTH,dailyTotal.month-1)
+		calendarAtNine.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
+		calendarAtNine.set(Calendar.HOUR_OF_DAY,21)
+		calendarAtNine.set(Calendar.MINUTE,0)
+		calendarAtNine.set(Calendar.SECOND,0)
+		
 		def inOrOutList = criteria.list {
 			and {
 				eq('employee',dailyTotal.employee)
@@ -663,12 +680,38 @@ class TimeManagerService {
 				if (previousInOrOut.type.equals("E") && currentInOrOut.type.equals("S")){
 					use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
 					elapsedSeconds += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+					
+					// managing time before 7
+					if (currentInOrOut.time < calendarAtSeven.time){
+						use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+						timeBefore7 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+					}
+					if (currentInOrOut.time > calendarAtSeven.time && previousInOrOut.time < calendarAtSeven.time){
+						use (TimeCategory){timeDifference = calendarAtSeven.time - previousInOrOut.time}
+						timeBefore7 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+					}
+					
+					// managing time after 21
+					if (previousInOrOut.time > calendarAtNine.time){
+						use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+						timeAfter21 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+					}
+					if (currentInOrOut.time > calendarAtNine.time && previousInOrOut.time < calendarAtNine.time){
+						use (TimeCategory){timeDifference = currentInOrOut.time - calendarAtNine.time}
+						timeAfter21 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+					}
+					
+					
 				}
 				previousInOrOut = inOrOut
 			}
 		}
 		dailyTotal.elapsedSeconds=elapsedSeconds
-		return elapsedSeconds
+		return [
+			elapsedSeconds:elapsedSeconds,
+			timeBefore7:timeBefore7,
+			timeAfter21:timeAfter21
+		]
 	}
 	
 	def getDailyTotalWithMonth(DailyTotal dailyTotal){
@@ -1203,7 +1246,6 @@ class TimeManagerService {
 		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year)
 
 		criteria = Contract.createCriteria()
-		
 		def currentContract = criteria.get {
 			or{
 				and {
@@ -1267,6 +1309,8 @@ class TimeManagerService {
 		def dailySupTotalMap = [:]
 		def holidayMap = [:]
 		def mapByDay = [:]
+		def timeBefore7 = 0
+		def timeAfter21 = 0
 		def dailyTotalId=0
 		def monthlySupTime = 0
 		def monthlyTotalTime = 0
@@ -1319,7 +1363,11 @@ class TimeManagerService {
 			}
 			// permet de récupérer le total hebdo
 			if (dailyTotal != null && dailyTotal != dailyTotalId){
-				dailySeconds = getDailyTotal(dailyTotal)
+				def timing = getDailyTotal(dailyTotal)
+				dailySeconds = timing.get("elapsedSeconds")
+				timeBefore7 += timing.get("timeBefore7")
+				timeAfter21 +=  timing.get("timeAfter21")
+				//timeBefore7 += getTimeBefore7(dailyTotal)
 				monthlyTotalTime += dailySeconds
 				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
 				if (previousValue!=null){
@@ -1463,16 +1511,20 @@ class TimeManagerService {
 		monthlyTotalTimeByEmployee.put(employee, computeHumanTime(monthlyTotalTime))
 		def monthlyTotal=computeHumanTime(monthlyTotalTime)
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
-		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year-1)	
-		def initialCA = employeeService.getInitialCA(employee,period)
-		def initialRTT = employeeService.getInitialRTT(employee,period)
+		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)	
+		def initialCA = employeeService.getInitialCA(employee,(month>5)?Period.findByYear(year):Period.findByYear(year - 1))
+		def initialRTT = employeeService.getInitialRTT(employee,(month>5)?Period.findByYear(year):Period.findByYear(year - 1))
 		def departureDate
 		if (employee.status.date != null){
 			if (employee.status.date != null && employee.status.date <= calendarLoop.time){
 				departureDate = employee.status.date
 			}
 		}	
+		
+		 
 		return [
+			timeAfter21:computeHumanTimeAsString(timeAfter21),
+			timeBefore7:computeHumanTimeAsString(timeBefore7),
 			initialCA:initialCA,
 			initialRTT:initialRTT,	
 			isCurrentMonth:isCurrentMonth,
@@ -1480,7 +1532,6 @@ class TimeManagerService {
 			currentContract:currentContract,
 			period2:period,
 			dailyBankHolidayMap:dailyBankHolidayMap,
-			monthlyTotalRecap:monthlyTotal,
 			payableSupTime:payableSupTime,
 			payableCompTime:payableCompTime,
 			monthlyTotalRecapAsString:computeHumanTimeAsString(monthlyTotalTime),
@@ -1789,7 +1840,7 @@ class TimeManagerService {
 			}
 			dailySeconds = 0
 			for (DailyTotal dailyTotal:dailyTotalList){
-				dailySeconds = getDailyTotal(dailyTotal)
+				dailySeconds = (getDailyTotal(dailyTotal)).get("elapsedSeconds")
 				monthlyTotalTime += dailySeconds
 				annualEmployeeWorkingDays += 1
 				monthlyPresentDays += 1
@@ -2107,7 +2158,7 @@ class TimeManagerService {
 		startCalendar.set(Calendar.YEAR,year)
 		startCalendar.set(Calendar.MONTH,month-1)
 		startCalendar.clearTime()
-		log.debug('startCalendar: '+startCalendar.time)
+		log.warn('startCalendar: '+startCalendar.time)
 		
 		endCalendar.set(Calendar.YEAR,year)
 		endCalendar.set(Calendar.MONTH,month-1)
@@ -2115,7 +2166,7 @@ class TimeManagerService {
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
 		endCalendar.set(Calendar.DAY_OF_MONTH,startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-		log.debug('endCalendar: '+endCalendar.time)
+		log.warn('endCalendar: '+endCalendar.time)
 		
 		
 		
@@ -2123,6 +2174,13 @@ class TimeManagerService {
 		
 		previousContracts = criteria.list {
 			or{
+				// all contracts that were started during the month and not over during the month
+				and {
+					isNotNull('endDate')
+					le('startDate',startCalendar.time)
+					eq('employee',employee)
+				}
+				
 				// all contracts that close during the month
 				and {
 					ge('endDate',startCalendar.time)
@@ -2157,7 +2215,13 @@ class TimeManagerService {
 					startDate = startCalendar.time
 				}
 				
+				//the contract did not end during the month: we will take the last day of the month as end point.
 				endDate = currentContract.endDate
+				if (endDate > endCalendar.time){
+					endDate = endCalendar.time
+				}
+				
+				
 				// if the contract has no end date, set the end the end date to the end of the month.
 				if (currentContract.endDate ==  null){
 					def endContractCalendar = Calendar.instance
@@ -2259,7 +2323,7 @@ class TimeManagerService {
 			}
 			
 			dailyInAndOutMap.put(employee, inAndOutList)
-			elapsedSeconds = getDailyTotal(dailyTotal)
+			elapsedSeconds = (getDailyTotal(dailyTotal)).get("elapsedSeconds")
 			if (elapsedSeconds > DailyTotal.maxWorkingTime){
 				dailySupMap.put(employee,computeHumanTime(elapsedSeconds-DailyTotal.maxWorkingTime))
 			}else{
@@ -2277,6 +2341,9 @@ class TimeManagerService {
 		def totalByDay=[:]
 		def dailyCriteria
 		def elapsedSeconds=0
+		def timing 
+		def humanTime 
+		def dailySupp
 		def calendar = Calendar.instance
 		def inAndOutsCriteria = InAndOut.createCriteria()
 		def tmpCalendar = Calendar.instance
@@ -2312,7 +2379,7 @@ class TimeManagerService {
 		}
 		
 		dailyCriteria = DailyTotal.createCriteria()
-		def dailyTotal = dailyCriteria.get {
+		DailyTotal dailyTotal = dailyCriteria.get {
 			and {
 				eq('employee',employee)
 				eq('year',calendar.get(Calendar.YEAR))
@@ -2320,10 +2387,14 @@ class TimeManagerService {
 				eq('day',calendar.get(Calendar.DAY_OF_MONTH))
 			}
 		}
-		def humanTime = getTimeAsText(computeHumanTime(getDailyTotal(dailyTotal)),false)
-		def dailySupp = getTimeAsText(computeHumanTime(Math.max(getDailyTotal(dailyTotal)-DailyTotal.maxWorkingTime,0)),false)
-		
-		
+		if (dailyTotal != null){
+			timing = getDailyTotal(dailyTotal)
+			humanTime = getTimeAsText(computeHumanTime(timing.get("elapsedSeconds")),false)
+			dailySupp = getTimeAsText(computeHumanTime(Math.max(timing.get("elapsedSeconds")-DailyTotal.maxWorkingTime,0)),false)
+		}else{
+			humanTime = getTimeAsText(computeHumanTime(0),false)
+			dailySupp = getTimeAsText(computeHumanTime(0),false)
+		}
 		if (inAndOuts!=null){
 			def max = inAndOuts.size()
 			if (max>0){
@@ -2409,7 +2480,7 @@ class TimeManagerService {
 			}
 			// permet de récupérer le total hebdo
 			if (dailyTotal != null && dailyTotal != dailyTotalId){
-				dailySeconds = getDailyTotal(dailyTotal)
+				dailySeconds = (getDailyTotal(dailyTotal)).get("elapsedSeconds")
 				monthlyTotalTime += dailySeconds
 				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
 				if (previousValue!=null){
