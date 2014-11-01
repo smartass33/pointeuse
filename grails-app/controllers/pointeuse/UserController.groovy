@@ -2,7 +2,7 @@ package pointeuse
 
 import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
-
+import java.security.MessageDigest
 class UserController {
 	def authenticateService
 	def springSecurityService
@@ -110,4 +110,39 @@ class UserController {
             redirect(action: "show", id: id)
         }
     }
+	
+	def isAuthenticated(){
+		def username = params["username"]
+		def password = params["password"]
+		byte[] hash
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		def hashAsString
+		def user
+		def retour = false
+				
+		if (username == null){
+			log.error('authentication failed!')
+		} else{
+			user = User.findByUsername(username)
+		}
+		
+		if (password == null){
+			log.error('authentication failed!')
+			retour = false
+		}
+		else{
+			hash = digest.digest(password.getBytes("UTF-8"));
+			hashAsString = hash.encodeHex()
+		}
+		
+		if (user != null && !user.password.equals(hashAsString.toString())){
+			log.error('authentication failed!')
+		}else{
+			retour = true
+		}
+		log.error("retour is= "+retour)
+		return retour
+		
+	
+	}
 }

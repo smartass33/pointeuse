@@ -9,15 +9,13 @@
 			<g:sortableColumn property="lastName" style="width:150px;text-align:center" title="${message(code: 'employee.lastName.label', default: 'Last Name')}" />
 			<g:sortableColumn property="firstName" style="width:100px;text-align:center" title="${message(code: 'employee.firstName.label', default: 'First Name')}" />	
 			<g:sortableColumn property="site" title="${message(code: 'employee.site.label', default: 'Site')}" />
-			<th style="width:70px;text-align:center" class="principal">${message(code: 'function.label', default: 'Report')}</th>
-
 			<th style="width:70px;text-align:center" class="principal">${message(code: 'employee.annualReport.label', default: 'Report')}</th>
 			<th style="width:70px;text-align:center" class="principal">${message(code: 'employee.monthly.report.label', default: 'Report')}</th>
 			<th style="width:70px;text-align:center" class="principal">${message(code: 'vacation.report.label', default: 'Report')}</th>
 			<g:sortableColumn property="status" style="text-align:center" class="principal"
 				title="${message(code: 'employee.entry.status', default: 'Entry')}" />
 			<th style="text-align:center" class="principal">${message(code: 'employee.lastTime.label', default: 'Entry')}</th>
-			<g:sortableColumn class="principal"  property="hasError" style="width:60px;text-align:center" class="principal"
+			<g:sortableColumn class="principal"  property="hasError" style="width:55px;text-align:center" class="principal"
 				title="${message(code: 'employee.hasErrors', default: 'Errors')}" />
 			<g:sortableColumn property="lastName" style="width:150px;text-align:center" class="admin"
 				title="${message(code: 'employee.username.label', default: 'User Name')}" />
@@ -51,10 +49,6 @@
 				<td><g:if test="${employeeInstance?.site != null}">
 						${employeeInstance?.site.name}
 					</g:if>
-				</td>
-				<td style="width:120px" >
-					
-						${employeeInstance.function.name}
 				</td>					
 					<td style="border:1px;width:200px" class="principal"><g:link controller="employee" action='annualReport' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId,isAjax:false]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
 					<td style="border:1px;width:200px" class="principal"><g:link controller="employee" action='report' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link></td>

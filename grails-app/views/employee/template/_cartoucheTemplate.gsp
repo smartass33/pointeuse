@@ -142,7 +142,14 @@
 			<tr>
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeAfter21', default: 'report')} :</td>							
     			<td class="cartoucheRightFiguresTD">${timeAfter21.get(0)}:${timeAfter21.get(1)}</td> 			
+			</tr>	
+			<tr>
+				<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeOffHours', default: 'report')} :</td>							
+    			<td class="cartoucheRightFiguresTD">${timeOffHours.get(0)}:${timeOffHours.get(1)}</td> 			
 			</tr>			
+			
+			
+					
 		</tbody>
 	</table>
 </body>	

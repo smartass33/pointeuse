@@ -1108,15 +1108,8 @@ def vacationFollowup(){
 		render template: "/employee/template/reportTableTemplate", model: report
 		return
 	}
-	
-
-
-	
-	
+		
 	def modifyTime(){
-		params.each{i->
-			log.error('param: '+i)
-		}
 		def idList=params["inOrOutId"]
 		def dayList=params["day"]
 		def monthList=params["month"]
@@ -1129,19 +1122,15 @@ def vacationFollowup(){
 		def fromRegularize=params["fromRegularize"].equals("true") ? true : false
 
 		try{
-
 			def month=monthList[0]
-			def year=yearList[0]
-			
+			def year=yearList[0]		
 			if (idList==null){
 				log.error("list is null")
 				def retour = report(employee.id as long,month as int,year as int)
 				render(view: "report", model: retour)
 			}
-			
 			timeManagerService.timeModification( idList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
-				// now, find if employee still has errors:
-				
+				// now, find if employee still has errors:			
 			if (fromRegularize){
 				redirect(action: "pointage", id: employee.id)
 			}else{
@@ -1174,10 +1163,10 @@ def vacationFollowup(){
 	
 
 	def annualReport(Long userId){
+		
 		def year
 		def month
-		def calendar = Calendar.instance
-		
+		def calendar = Calendar.instance		
 		boolean isAjax = params["isAjax"].equals("true") ? true : false
 		if (userId == null){
 			userId = params.long('userId')
@@ -1210,6 +1199,7 @@ def vacationFollowup(){
 			log.error('userId is null. exiting')
 			return
 		}
+		log.error('annualReport called with param: employee='+employee+' and period='+period)
 		
 		def model = timeManagerService.getAnnualReportData(year, employee)
 		model << [period:period]
@@ -1243,21 +1233,13 @@ def vacationFollowup(){
 			year = year - 1
 		}
 		
-		
 		if (userId==null){
 			log.error('userId is null. exiting')
 			return
 		}
-
-		[employee:employee,userId:employee.id]		
-
-			
+		[employee:employee,userId:employee.id]				
 	}
 	
-
-	
-	
-
 	def reportLight(Long userId,int monthPeriod,int yearPeriod){
 		def yearInf
 		def yearSup
@@ -1289,8 +1271,7 @@ def vacationFollowup(){
 			SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 			myDate = dateFormat.parse(myDate)			
 		}
-		
-		
+			
 		def pppp = params["userId"]	
 		if (userId==null){
 			if (params["userId"] instanceof String)
@@ -1313,8 +1294,7 @@ def vacationFollowup(){
 		calendar.set(Calendar.MINUTE,59)
 		calendar.set(Calendar.SECOND,59)
 		calendar.set(Calendar.DATE,1)
-		
-		
+			
 		def calendarLoop = calendar
 		int month = calendar.get(Calendar.MONTH)+1 // starts at 0
 		int year = calendar.get(Calendar.YEAR)

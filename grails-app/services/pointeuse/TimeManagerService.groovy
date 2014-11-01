@@ -22,6 +22,29 @@ class TimeManagerService {
 		return inOrOut
 	}
 	
+	def computePayableSupplementaryTime(Employee employee,long realise, long theorique, long supTime){
+		def payableSupTime = 0
+		def aboveTheoritical = (realise > theorique)?(realise - theorique):0
+		/* 
+		* si Realisé - Theorique < HS j ou hebdo
+		* alors payableSUpTIme = HS j ou hebdo
+		* sinon, payableSupTime = Réalisé - Theorique
+		*
+		*/
+		if (aboveTheoritical > 0){
+			if (aboveTheoritical < supTime){
+				payableSupTime = supTime
+			}else{
+				payableSupTime = aboveTheoritical
+			}
+		}else{
+			if (supTime > 0){
+				payableSupTime = supTime
+			}
+		}
+		return payableSupTime
+	}
+		
 	def computeSupplementaryTime(Employee employee,int week, int year){
 		def dailySupplementarySeconds = 0
 		def weeklySupplementarySeconds = 0
@@ -642,6 +665,7 @@ class TimeManagerService {
 		def elapsedSeconds = 0
 		def timeBefore7 = 0
 		def timeAfter21 = 0
+		def timeOffHours = 0
 		def tmpInOrOut
 		def timeDifference
 		def currentInOrOut
@@ -710,7 +734,8 @@ class TimeManagerService {
 		return [
 			elapsedSeconds:elapsedSeconds,
 			timeBefore7:timeBefore7,
-			timeAfter21:timeAfter21
+			timeAfter21:timeAfter21,
+			timeOffHours:(timeBefore7 + timeAfter21)
 		]
 	}
 	
@@ -860,12 +885,21 @@ class TimeManagerService {
 		}
 
 		// set the date end of may
+		calendar.set(Calendar.DAY_OF_MONTH,10)
+		
 		calendar.set(Calendar.MONTH,month-1)
+		log.debug("month: "+calendar.get(Calendar.MONTH))
+		
 		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug("last day of the month: "+calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug("calendar: "+calendar)
+
 		calendar.set(Calendar.HOUR_OF_DAY,23)
 		calendar.set(Calendar.MINUTE,59)
 		calendar.set(Calendar.SECOND,59)
 		def maxDate = calendar.time
+		log.debug("month: "+calendar.get(Calendar.MONTH))
+		log.error("maxDate: "+maxDate)
 		calendar.set(Calendar.YEAR,year-1)
 		calendar.set(Calendar.MONTH,5)
 		calendar.set(Calendar.DAY_OF_MONTH,1)
@@ -1311,6 +1345,7 @@ class TimeManagerService {
 		def mapByDay = [:]
 		def timeBefore7 = 0
 		def timeAfter21 = 0
+		def timeOffHours = 0
 		def dailyTotalId=0
 		def monthlySupTime = 0
 		def monthlyTotalTime = 0
@@ -1367,6 +1402,7 @@ class TimeManagerService {
 				dailySeconds = timing.get("elapsedSeconds")
 				timeBefore7 += timing.get("timeBefore7")
 				timeAfter21 +=  timing.get("timeAfter21")
+				timeOffHours = timeOffHours + timing.get("timeBefore7") + timing.get("timeAfter21")
 				//timeBefore7 += getTimeBefore7(dailyTotal)
 				monthlyTotalTime += dailySeconds
 				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
@@ -1501,16 +1537,24 @@ class TimeManagerService {
 		def yearlyPregnancyCredit = computeHumanTimeAsString(cartoucheTable.get('yearlyPregnancyCredit'))
 		def yearlyActualTotal = computeHumanTimeAsString(cartoucheTable.get('yearlyTotalTime'))
 		def yearlySansSolde=cartoucheTable.get('yearlySansSolde')
-		def payableSupTime = computeHumanTime(Math.round(monthlySupTime))
+		
+		// ADD a computing principle for payable sup time:
+		/*
+		 * si Realisé - Theorique < HS j ou hebdo
+		 * alors payableSUpTIme = HS j ou hebdo
+		 * sinon, payableSupTime = Réalisé - Theorique
+		 *
+		 */
+		
+		def payableSupTime = computeHumanTime(Math.round(computePayableSupplementaryTime(employee,monthlyTotalTime as long,monthTheoritical as long,monthlySupTime as long)))
 		def payableCompTime = computeHumanTime(0)
-		
 		if (currentContract.weeklyLength != Employee.legalWeekTime && monthlyTotalTime > monthTheoritical){
-			payableCompTime = computeHumanTime(Math.round(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0)))	
+			payableCompTime = computeHumanTime(Math.round(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0)))
 		}
-		
 		monthlyTotalTimeByEmployee.put(employee, computeHumanTime(monthlyTotalTime))
 		def monthlyTotal=computeHumanTime(monthlyTotalTime)
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
+		
 		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)	
 		def initialCA = employeeService.getInitialCA(employee,(month>5)?Period.findByYear(year):Period.findByYear(year - 1))
 		def initialRTT = employeeService.getInitialRTT(employee,(month>5)?Period.findByYear(year):Period.findByYear(year - 1))
@@ -1525,6 +1569,7 @@ class TimeManagerService {
 		return [
 			timeAfter21:computeHumanTimeAsString(timeAfter21),
 			timeBefore7:computeHumanTimeAsString(timeBefore7),
+			timeOffHours:computeHumanTimeAsString(timeOffHours),
 			initialCA:initialCA,
 			initialRTT:initialRTT,	
 			isCurrentMonth:isCurrentMonth,
@@ -1750,12 +1795,9 @@ class TimeManagerService {
 			supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 			calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
 			calendarLoop.set(Calendar.YEAR,year)
-		  //  log.error('calendarLoop after special loop '+calendarLoop.time)
 		}
 		
 		while(calendarLoop.get(Calendar.DAY_OF_YEAR)<=lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
-		//	log.error('calendarLoop : '+calendarLoop.time)
-			
 			if ((calendarLoop.get(Calendar.DAY_OF_YEAR)+7)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
 				break
 			}
@@ -1801,20 +1843,19 @@ class TimeManagerService {
 		def monthlyPresentDays = 0
 		def monthlyWorkingDays = [:]
 		def monthlyTakenHolidays = [:]
-		def monthlyQuotaIncludingExtra = [:]
-			
+		def monthlyQuotaIncludingExtra = [:]		
 		def period = Period.findByYear(year)
 		def remainingCA = employeeService.getRemainingCA(employee,period)
 		def takenCA = employeeService.getTakenCA(employee,period)
 		def initialCA = employeeService.getInitialCA(employee,period)
 				
-		for (int monthLoop = 6 ;monthLoop <18 ; monthLoop++){
+		for (int monthLoop = 6 ;monthLoop < 18 ; monthLoop++){
 			monthlyPresentDays = 0
-			if (monthLoop>12){
-				currentYear=year+1
-				currentMonth=monthLoop-12
+			if (monthLoop > 12){
+				currentYear = year + 1
+				currentMonth = monthLoop - 12
 			}else{
-				currentMonth=monthLoop
+				currentMonth = monthLoop
 			}
 			
 			log.debug('monthLoop: '+monthLoop)
@@ -1867,9 +1908,7 @@ class TimeManagerService {
 			}
 
 			def tmpQuota = monthlyTotalTime+monthlySupTotalTime+payableCompTime
-			monthlyQuotaIncludingExtra.put(currentMonth, computeHumanTime(Math.round(tmpQuota) as long))
-			
-			
+			monthlyQuotaIncludingExtra.put(currentMonth, computeHumanTime(Math.round(tmpQuota) as long))		
 			annualTheoritical += cartoucheTable.getAt('monthTheoritical')
 			annualHoliday += cartoucheTable.getAt('holidays')
 			monthlyTakenHolidays.put(currentMonth, initialCA - annualHoliday)
@@ -2158,7 +2197,7 @@ class TimeManagerService {
 		startCalendar.set(Calendar.YEAR,year)
 		startCalendar.set(Calendar.MONTH,month-1)
 		startCalendar.clearTime()
-		log.warn('startCalendar: '+startCalendar.time)
+		log.debug('startCalendar: '+startCalendar.time)
 		
 		endCalendar.set(Calendar.YEAR,year)
 		endCalendar.set(Calendar.MONTH,month-1)
@@ -2166,7 +2205,7 @@ class TimeManagerService {
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
 		endCalendar.set(Calendar.DAY_OF_MONTH,startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-		log.warn('endCalendar: '+endCalendar.time)
+		log.debug('endCalendar: '+endCalendar.time)
 		
 		
 		
