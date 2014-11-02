@@ -119,6 +119,8 @@ class UserController {
 		def hashAsString
 		def user
 		def retour = false
+		response.status = 404;
+		
 				
 		if (username == null){
 			log.error('authentication failed!')
@@ -127,22 +129,23 @@ class UserController {
 		}
 		
 		if (password == null){
-			log.error('authentication failed!')
-			retour = false
+			log.error('authentication failed!')			
 		}
 		else{
 			hash = digest.digest(password.getBytes("UTF-8"));
 			hashAsString = hash.encodeHex()
 		}
 		
-		if (user != null && !user.password.equals(hashAsString.toString())){
-			log.error('authentication failed!')
-		}else{
-			retour = true
+		if (user != null){
+			if (!user.password.equals(hashAsString.toString())){
+				log.error('authentication failed!')
+			}else{
+				retour = true
+				response.status = 200;
+			}
 		}
 		log.error("retour is= "+retour)
+		render retour
 		return retour
-		
-	
 	}
 }

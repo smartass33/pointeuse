@@ -93,8 +93,8 @@
 		<td style="vertical-align: middle;text-align:center;">${annualSickness}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualExceptionnel}</td>
 		<td style="vertical-align: middle;text-align:right;">
-			<g:if test="${annualPayableSupTime !=null}">
-				${annualPayableSupTime}
+			<g:if test="${annualMonthlySupTime !=null}">
+				${annualMonthlySupTime}
           	</g:if>
           	<g:else>
           		00 : 00

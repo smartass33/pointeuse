@@ -109,22 +109,20 @@
 			</tr>
 			<tr>
 				<td class="cartoucheRightTitleTD" >${message(code: 'default.monthly.open.day', default: 'report')} :</td>				
-   					<td style="font-weight:bold" class="cartoucheRightFiguresTD">${workingDays}<g:if test="${isCurrentMonth}">(en cours)</g:if>
-   					
-   					</td>
+   					<td style="font-weight:bold" class="cartoucheRightFiguresTD">${workingDays}<g:if test="${isCurrentMonth}">(en cours)</g:if></td>
    					<td class="cartoucheRightFiguresTD"/>
 			</tr>
-			<g:if test="${payableSupTime!=null}">
+			<g:if test="${monthlySupTime!=null}">
 				<tr>
 					<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
      					<td style="font-weight:bold" class="cartoucheRightFiguresTD">
-	     					<g:if test="${payableSupTime.get(0)>9}">${payableSupTime.get(0)} :</g:if>
-	     					<g:else>0${payableSupTime.get(0)} :</g:else>
-	     					<g:if test="${payableSupTime.get(1)>9}">${payableSupTime.get(1)}</g:if>
-	     					<g:else>0${payableSupTime.get(1)}</g:else>
-	     					 ou ${(payableSupTime.get(0)+payableSupTime.get(1)/60).setScale(2,2)}
+	     					<g:if test="${monthlySupTime.get(0)>9}">${monthlySupTime.get(0)} :</g:if>
+	     					<g:else>0${monthlySupTime.get(0)} :</g:else>
+	     					<g:if test="${monthlySupTime.get(1)>9}">${monthlySupTime.get(1)}</g:if>
+	     					<g:else>0${monthlySupTime.get(1)}</g:else>
+	     					 ou ${(monthlySupTime.get(0)+monthlySupTime.get(1)/60).setScale(2,2)}
      					 </td>        					
-					<td class="cartoucheRightFiguresTD" />	
+					<td class="cartoucheRightFiguresTD"><g:if test="${yearlySupTime != null}">${yearlySupTime.get(0)}:${yearlySupTime.get(1)}</g:if>	</td>
 				</tr>
 			</g:if>
 			<g:if test="${payableCompTime!=null && employee.weeklyContractTime != 35}">						

@@ -284,24 +284,21 @@
 	        						</table>
 	        					</td>
 							</tr>
-							<g:if test="${payableSupTime!=null}">
+							
+							
+							<g:if test="${monthlySupTime!=null}">						
 								<tr>
 									<td style="text-align:left;">${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
 									<td>
 		        						<table border="1" class="cartoucheValues" >
 		        							<thead></thead>
-		        							<tr>
-		        								<td style="font-weight:bold" >
-						  	     					<g:if test="${payableSupTime.get(0)>9}">${payableSupTime.get(0)}:</g:if>
-						     						<g:else>0${payableSupTime.get(0)}:</g:else>
-						     						<g:if test="${payableSupTime.get(1)>9}">${payableSupTime.get(1)}</g:if>
-						     						<g:else>0${payableSupTime.get(1)}</g:else>
-		        								</td>				        							
-		        							</tr>
+		        							<tr><td style="font-weight:bold">${monthlySupTime.get(0)}:${monthlySupTime.get(1)}</td></tr>
 		        						</table>
 		        					</td>
 								</tr>
-							</g:if>
+							</g:if>		
+							
+		
 							<g:if test="${employee.weeklyContractTime!=35}">
 								<g:if test="${payableCompTime!=null}">						
 									<tr>
