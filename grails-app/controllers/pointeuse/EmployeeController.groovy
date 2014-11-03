@@ -9,8 +9,8 @@ import java.text.SimpleDateFormat
 import java.util.Date;
 
 import groovy.time.TimeCategory
-
 import grails.converters.JSON
+
 import org.apache.commons.logging.LogFactory
 
 
@@ -685,23 +685,18 @@ def vacationFollowup(){
 	
 	
     def edit(Long id) {
-		params.each{i->
-			log.error('param: '+i)
-		}
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
 		def fromSite = (params["fromSite"] != null  && params["fromSite"].equals("true")) ? true : false
-		def back = (params["back"] != null  && params["back"].equals("true")) ? true : false
-		
+		def back = (params["back"] != null  && params["back"].equals("true")) ? true : false		
         def employeeInstance = Employee.get(id)
 		def myDate = params["myDate"] 
-
+		def orderedVacationList=[]
 		def previousContracts
 		// starting calendar: 1 of June of the period
 		def startCalendar = Calendar.instance		
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
 		startCalendar.clearTime()
-		
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
 		endCalendar.set(Calendar.DAY_OF_MONTH,31)
@@ -710,15 +705,13 @@ def vacationFollowup(){
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
 		
-		def orderedVacationList=[]
 		def periodList= Period.findAll("from Period as p order by year asc")
 		
 		for (Period period:periodList){
 			def vacations = Vacation.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
 			for (Vacation vacation:vacations){
 				orderedVacationList.add(vacation)
-			}
-			
+			}			
 		}		
 		
 		previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'startDate',order:'desc'])
@@ -743,6 +736,19 @@ def vacationFollowup(){
 		return retour
 	}
 	
+
+	def getAjaxSupplementaryTime(Long id) {
+		def year = params.int('year')
+		def period = params['period']
+		def month = params.int('month')
+		log.error("getAjaxSupplementaryTime triggered with params: month="+month+" and year="+year)
+		def employee = Employee.get(id)		
+		def model = timeManagerService.getYearSupTime(employee,year,month)
+		model << [id:id,month:month,year:year]
+		render template: "/employee/template/yearSupplementaryTime", model: model
+		return 
+	}
+	
 	
 	def getSupplementaryTime(Long id) {
 		def employeeInstance = Employee.get(id)
@@ -752,9 +758,11 @@ def vacationFollowup(){
 		data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)	
 		def model = [employeeInstance:employeeInstance]
 		model << data 		
-		render template: "/employee/template/paidHSEditTemplate", model:model
-		return
+		//render template: "/employee/template/paidHSEditTemplate", model:model
+		return model
 	}
+	
+	
 	
 
 	def cartouche(long userId,int year,int month){
@@ -1002,12 +1010,7 @@ def vacationFollowup(){
 			function = Function.get(function)
 			employeeInstance.function=function
 		}
-		
-
-		
-		
-		employeeInstance.status = employeeStatus
-		
+		employeeInstance.status = employeeStatus		
         if (!employeeInstance.save(flush: true)) {
             render(view: "edit", model: [employeeInstance: employeeInstance])
             return
@@ -1163,7 +1166,6 @@ def vacationFollowup(){
 	
 
 	def annualReport(Long userId){
-		
 		def year
 		def month
 		def calendar = Calendar.instance		
@@ -1487,9 +1489,7 @@ def vacationFollowup(){
 
 	
 	def pointage(Long id){	
-		
 		log.error('pointagege called')
-		
 		try {	
 			def username = params["username"]
 			def employee
@@ -2099,19 +2099,8 @@ def vacationFollowup(){
 		return
 	}
 	
-	def dummy(){
-		def text = '11 : 22'
-		def values = text.split(' : ')
-		def time = (values[0] as long)*3600 + (values[1] as long)*60
-		log.error('time: '+time);
-				
-		
-	}
-	
-	
 	
 	def getEmployees() {
-		params.each{i->log.debug('parameter of list: '+i)}
 		params.sort='site'
 		def username=params["username"]
 		def password=params["password"]
@@ -2169,31 +2158,15 @@ def vacationFollowup(){
 		render employeeInstanceList// as JSON
 	}
 	
-	def updateUsername(Long id, Long version) {
-
-		
+	def updateUsername(Long id, Long version) {		
 		def employeeInstance = Employee.get(id)
 		if (!employeeInstance) {
 			return
 		}
-
-
-		
-		
-		def employeeStatus = employeeInstance.status
-		
-		log.error('employee status: '+employeeInstance.status)
-		
+		def employeeStatus = employeeInstance.status	
+		log.error('employee status: '+employeeInstance.status)	
 		employeeInstance.userName = params['username']
-		
-		
-		employeeInstance.save(flush: true)
-		
+		employeeInstance.save(flush: true)		
 		render employeeInstance
-		
-		
-		
-		
-		
 	}
 }

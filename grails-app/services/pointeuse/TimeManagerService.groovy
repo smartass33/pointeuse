@@ -1337,9 +1337,8 @@ class TimeManagerService {
 	def getReportData(String siteId,Employee employee, Date myDate,int monthPeriod,int yearPeriod){
 		def calendar = Calendar.instance
 		def monthlyTotalTimeByEmployee = [:]
-		def dailySupTotalMap= [:]
-		def dailyTotalMap= [:]
-		def holidayMap= [:]
+		
+	
 /*
 		def weekName="semaine "
 		def weeklyTotalTime = [:]
@@ -1350,6 +1349,8 @@ class TimeManagerService {
 		def monthlyCorrectedQuotaByEmployee = [:]
 		def weeklyAggregate = [:]
 		def dailyTotalMap = [:]
+		def holidayMap= [:]
+		def dailySupTotalMap= [:]
 		def dailyBankHolidayMap = [:]
 		def dailySupTotalMap = [:]
 		def holidayMap = [:]
@@ -1360,7 +1361,7 @@ class TimeManagerService {
 		def dailyTotalId=0
 		def monthlySupTime = 0
 		def monthlyTotalTime = 0
-				def dailySeconds = 0
+		def dailySeconds = 0
 		def weeklySupTime
 		def currentWeek=0
 		*/
@@ -1494,9 +1495,9 @@ class TimeManagerService {
 			monthlyTotal:monthlyTotalTimeByEmployee,
 			weeklyTotal:data.get('weeklyTotalTimeByEmployee'),
 			weeklySupTotal:data.get('weeklySupTotalTimeByEmployee'),
-			dailySupTotalMap:dailySupTotalMap,
-			dailyTotalMap:dailyTotalMap,
-			holidayMap:holidayMap,
+			dailySupTotalMap:data.get('dailySupTotalMap'),
+			dailyTotalMap:data.get('dailyTotalMap'),
+			holidayMap:data.get('holidayMap'),
 			month:month,
 			year:year,
 			period:calendarLoop.getTime(),		
@@ -1780,7 +1781,7 @@ class TimeManagerService {
 			yearTotalMap.put(currentMonth, getTimeAsText(computeHumanTime(monthlyTotalTime),true))
 			annualSupTimeAboveTheoritical += monthlyTotalTime
 			monthlySupTotalTime = getMonthlySupTime(employee,currentMonth, currentYear)
-			annualMonthlySupTime += monthlySupTomaxDatealTime
+			annualMonthlySupTime += monthlySupTotalTime
 			yearMonthlySupTime.put(currentMonth,getTimeAsText(computeHumanTime(Math.round(monthlySupTotalTime) as long),true))
 			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
 			
@@ -2088,7 +2089,7 @@ class TimeManagerService {
 		startCalendar.set(Calendar.YEAR,year)
 		startCalendar.set(Calendar.MONTH,month-1)
 		startCalendar.clearTime()
-		log.error('startCalendar: '+startCalendar.time)
+		log.debug('startCalendar: '+startCalendar.time)
 		
 		endCalendar.set(Calendar.YEAR,year)
 		endCalendar.set(Calendar.MONTH,month-1)
@@ -2096,7 +2097,7 @@ class TimeManagerService {
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
 		endCalendar.set(Calendar.DAY_OF_MONTH,startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-		log.error('endCalendar: '+endCalendar.time)
+		log.debug('endCalendar: '+endCalendar.time)
 		
 		
 		
@@ -2736,26 +2737,135 @@ class TimeManagerService {
 			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
 		}
 		return [
-			
-
 			timeBefore7:timeBefore7,
 			timeAfter21:timeAfter21,
 			timeOffHours:timeOffHours,
 			monthlyTotalTime:monthlyTotalTime,
 			monthlySupTime:monthlySupTime,
-			 mapByDay:mapByDay,
-			 weeklyTotalTime:weeklyTotalTime,
-			 weeklySuppTotalTime:weeklySuppTotalTime,
-			 weeklySupTotalTimeByEmployee:weeklySupTotalTimeByEmployee,
-			 weeklyTotalTimeByEmployee:weeklyTotalTimeByEmployee,
-			 dailyTotalMap:dailyTotalMap,
-			 dailySupTotalMap:dailySupTotalMap,
-			 dailyBankHolidayMap:dailyBankHolidayMap,
-			 holidayMap:holidayMap,
-			 weeklyAggregate:weeklyAggregate,
-			 monthlySupTime:monthlySupTime
-			]
+			mapByDay:mapByDay,
+			weeklyTotalTime:weeklyTotalTime,
+			weeklySuppTotalTime:weeklySuppTotalTime,
+			weeklySupTotalTimeByEmployee:weeklySupTotalTimeByEmployee,
+			weeklyTotalTimeByEmployee:weeklyTotalTimeByEmployee,
+			dailyTotalMap:dailyTotalMap,
+			dailySupTotalMap:dailySupTotalMap,
+			dailyBankHolidayMap:dailyBankHolidayMap,
+			holidayMap:holidayMap,
+			weeklyAggregate:weeklyAggregate,
+			monthlySupTime:monthlySupTime
+		]
 		
 		
 	}
+	
+	
+	def getYearSupTime(Employee employee,int year,int month){
+		def monthNumber=0
+		def yearSupTime = 0
+		def yearTimeBefore7 = 0
+		def yearTimeAfter20 = 0
+		def yearTimeOffHours = 0
+		def yearlyCounter = 0
+		def data
+		def calendar = Calendar.instance
+		calendar.set(Calendar.YEAR,year)
+		def bankHolidayList
+		def criteria = Absence.createCriteria()
+
+		if (month > 5){
+			year = year + 1
+			monthNumber = month -6 + 1
+		}else{
+			monthNumber = month + 1 + 6
+		}
+
+		// set the date end of may
+		calendar.set(Calendar.DAY_OF_MONTH,10)
+		calendar.set(Calendar.MONTH,month-1)
+		log.debug("month: "+calendar.get(Calendar.MONTH))
+		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug("last day of the month: "+calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug("calendar: "+calendar)
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		def maxDate = calendar.time
+		log.debug("month: "+calendar.get(Calendar.MONTH))
+		log.debug("maxDate: "+maxDate)
+		calendar.set(Calendar.YEAR,year-1)
+		calendar.set(Calendar.MONTH,5)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.clearTime()
+		def minDate = calendar.time
+
+		/* create a loop over months and invoke getMonthTheoritical method */
+		// check if employee entered the company or left the company over the period.
+		def arrivalDate = employee.arrivalDate
+		def exitDate = employee.status == StatusType.TERMINE ? employee.status.date : null
+
+		// the employee arrived after the period started: resetting the minDate
+		if (arrivalDate > minDate){
+			minDate = arrivalDate
+		}
+
+		// the employee left before period's end:
+		if ((exitDate != null) && exitDate < maxDate){
+			maxDate = exitDate
+		}
+		
+		def calendarIter = Calendar.instance
+		calendarIter.time = minDate
+		
+
+		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
+		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
+			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
+				log.debug('calendarIter: '+calendarIter.time)
+				data = computeWeeklyTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearSupTime +=  data.get('monthlySupTime')
+				yearTimeBefore7 += data.get('timeBefore7')
+				yearTimeAfter20 += data.get('timeAfter21')
+				yearTimeOffHours += data.get('timeOffHours')
+				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+		}else{
+			while(calendarIter.get(Calendar.MONTH) <= 11){
+				log.debug('calendarIter: '+calendarIter.time)
+				data = computeWeeklyTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearSupTime +=  data.get('monthlySupTime')
+				if (calendarIter.get(Calendar.MONTH) == 11){
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+			calendarIter.set(Calendar.MONTH,0)
+			calendarIter.set(Calendar.YEAR,(calendarIter.get(Calendar.YEAR)+1))
+			
+			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
+				log.debug('calendarIter: '+calendarIter.time)
+				data = computeWeeklyTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearSupTime +=  data.get('monthlySupTime')
+				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+		}
+		
+		yearlyCounter = month > 5 ? utilService.getYearlyCounter(year-1,month,employee) : utilService.getYearlyCounter(year,month,employee)
+		
+		return [
+			ajaxYearlySupTime:getTimeAsText(computeHumanTime(yearSupTime as long),false),
+			yearlyCounter:yearlyCounter,
+			yearTimeBefore7:getTimeAsText(computeHumanTime(yearTimeBefore7 as long),false),
+			yearTimeAfter20:getTimeAsText(computeHumanTime(yearTimeAfter20 as long),false),
+			yearTimeOffHours:getTimeAsText(computeHumanTime(yearTimeOffHours as long),false)
+			]
+		
+	}
+	
+	
 }

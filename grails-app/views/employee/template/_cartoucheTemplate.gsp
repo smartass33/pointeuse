@@ -115,14 +115,21 @@
 			<g:if test="${monthlySupTime!=null}">
 				<tr>
 					<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
-     					<td style="font-weight:bold" class="cartoucheRightFiguresTD">
-	     					<g:if test="${monthlySupTime.get(0)>9}">${monthlySupTime.get(0)} :</g:if>
-	     					<g:else>0${monthlySupTime.get(0)} :</g:else>
-	     					<g:if test="${monthlySupTime.get(1)>9}">${monthlySupTime.get(1)}</g:if>
-	     					<g:else>0${monthlySupTime.get(1)}</g:else>
-	     					 ou ${(monthlySupTime.get(0)+monthlySupTime.get(1)/60).setScale(2,2)}
-     					 </td>        					
-					<td class="cartoucheRightFiguresTD"><g:if test="${yearlySupTime != null}">${yearlySupTime.get(0)}:${yearlySupTime.get(1)}</g:if>	</td>
+   					<td style="font-weight:bold" class="cartoucheRightFiguresTD">
+    					<g:if test="${monthlySupTime.get(0)>9}">${monthlySupTime.get(0)} :</g:if>
+    					<g:else>0${monthlySupTime.get(0)} :</g:else>
+    					<g:if test="${monthlySupTime.get(1)>9}">${monthlySupTime.get(1)}</g:if>
+    					<g:else>0${monthlySupTime.get(1)}</g:else>
+    					 ou ${(monthlySupTime.get(0)+monthlySupTime.get(1)/60).setScale(2,2)}
+   					 </td>  	 
+   					 <td style="font-weight:bold; text-align: center;" class="cartoucheRightTitleTD">   
+	    				 <script type="text/javascript">
+							$(function(){$('#yearSupTotal').load('${createLink(controller:'employee', action:'getAjaxSupplementaryTime',params:[id:employee?.id,month:period.getAt(Calendar.MONTH)+1,year:period.getAt(Calendar.YEAR)])}');});
+						 </script>					 
+	   					 <div id="yearSupTotal">  
+	   					 	<g:yearSupTime id="yearSupTotal"/>
+	   					 </div>
+					</td>
 				</tr>
 			</g:if>
 			<g:if test="${payableCompTime!=null && employee.weeklyContractTime != 35}">						
@@ -134,8 +141,7 @@
 			</g:if>	
 			<tr>
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeBefore7', default: 'report')} :</td>							
-    			<td class="cartoucheRightFiguresTD">${timeBefore7.get(0)}:${timeBefore7.get(1)}</td>
-    			
+    			<td class="cartoucheRightFiguresTD">${timeBefore7.get(0)}:${timeBefore7.get(1)}</td> 			
 			</tr>
 			<tr>
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeAfter21', default: 'report')} :</td>							
@@ -145,9 +151,6 @@
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeOffHours', default: 'report')} :</td>							
     			<td class="cartoucheRightFiguresTD">${timeOffHours.get(0)}:${timeOffHours.get(1)}</td> 			
 			</tr>			
-			
-			
-					
 		</tbody>
 	</table>
 </body>	

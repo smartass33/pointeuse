@@ -330,7 +330,16 @@
 	        							<tr><td style="font-weight:bold">${timeAfter21.get(0)}:${timeAfter21.get(1)}</td></tr>
 	        						</table>
 	        					</td>
-							</tr>													
+							</tr>	
+							<tr>
+								<td style="width:25%;text-align:left;">${message(code: 'employee.monthly.timeOffHours', default: 'report')} :</td>				
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold">${timeOffHours.get(0)}:${timeOffHours.get(1)}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>																											
 						</tbody>
 					</table> 
 				</td>

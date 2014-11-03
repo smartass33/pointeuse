@@ -134,9 +134,7 @@
 						style="vertical-align: middle;" /> 
 				</li>
 				<li style="vertical-align: middle;" class="displayButton"><g:actionSubmit value="Afficher" action="report" class="displayButton" /></li>	
-				<li style="vertical-align: middle;"><g:actionSubmit disabled="${isCurrentMonth}"  value="PDF" action="userPDF" class="${isCurrentMonth ? 'pdfButtonDisabled':'pdfButton'}" /></li>
-				
-				
+				<li style="vertical-align: middle;"><g:actionSubmit disabled="${isCurrentMonth}"  value="PDF" action="userPDF" class="${isCurrentMonth ? 'pdfButtonDisabled':'pdfButton'}" /></li>								
 				<li><g:inAndOutPopup fromReport="true"/></li>
 			</g:form>
 			<li>
@@ -150,21 +148,21 @@
 					<tr><td style='font-weight: bold;'><g:message code='legend.SYSTEM_GENERATED' default='Régul' /></td></tr>
 					</table>">Légende</a> <richui:tooltip id="legend" />
 			</li>	
-			<li><g:link class="logout" action="" controller="logout"><g:message code='admin.logout.label' default='Régul' />  </g:link></li>
-				
+			<li><g:link class="logout" action="" controller="logout"><g:message code='admin.logout.label' default='Régul' />  </g:link></li>			
 		</ul>
 		<g:if test="${flash.message}"><div class="message">${flash.message}</div></g:if>
 	</div>
 	<div id='cartouche_input_image'>
 		<button type='button' id="cartouche_toggle" ><img alt="toggle" src="${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
 		Récapitulatifs mensuels et annuels
-	</div>
-	
+	</div>	
 	<div id="cartouche_div">
 		<g:cartouche />
 	</div> 
+	<BR>	
+
+			
 	<BR>
-		
 	<div id="report_table_div">
 		<g:reportTable />
 	</div>

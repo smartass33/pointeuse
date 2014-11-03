@@ -73,4 +73,9 @@ class EmployeeTagLib {
 		out<<render(template:"/employee/template/last5DaysTemplate")
 		
 	}
+	
+	def yearSupTime = {attrs,body->
+		out<<render(template:"/employee/template/yearSupplementaryTime")
+		
+	}
 }
