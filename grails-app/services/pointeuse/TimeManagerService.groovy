@@ -59,11 +59,21 @@ class TimeManagerService {
 		
 		criteria = BankHoliday.createCriteria()
 		bankHolidays = criteria.list {
-			and {
-				eq('year',year)
-				eq('month',calendar.get(Calendar.MONTH)+1)
+			or{
+				and {
+					eq('year',year)
+					eq('month',calendar.get(Calendar.MONTH)+1)
+				}
+				
+				and{
+					eq('year',year)
+					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
+					
+				}		
 			}
 		}
+		
+		
 		
 		for (BankHoliday bankHoliday:bankHolidays){
 			if (bankHoliday.calendar.get(Calendar.WEEK_OF_YEAR)==week){
@@ -109,9 +119,6 @@ class TimeManagerService {
 			}
 		
 		if (monthlyTotal==null){
-			log.error("employee: "+employee)
-			log.error("currentDate: "+currentDate)
-			
 			monthlyTotal = new MonthlyTotal(employee,currentDate)
 			employee.monthlyTotals.add(monthlyTotal)
 			monthlyTotal.save(flush:true)
@@ -281,7 +288,7 @@ class TimeManagerService {
 		// l'idée: comparer time et newTime
 			def inOrOut = InAndOut.get(idList[p])
 			if (inOrOut==null){
-				log.error("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification")
+				log.debug("InAndOut with id= "+idList[p]+" cannot be found. exiting timeModification")
 				throw new PointeuseException("inAndOut.not.found")
 				return
 			}
@@ -366,7 +373,7 @@ class TimeManagerService {
 				}
 			
 				if (previousInOrOut!=null && inititalPrevious != null && previousInOrOut!=inititalPrevious){
-					log.error('entry cannot be positionned after exit')
+					log.debug('entry cannot be positionned after exit')
 					throw new PointeuseException('inAndOut.updateTime.error')
 					return
 				}
@@ -379,7 +386,7 @@ class TimeManagerService {
 				if (user!=null){
 					inOrOut.modifyingUser=user
 					inOrOut.modifyingTime=new Date()
-					log.error("user "+user?.username+" modified "+inOrOut)
+					log.debug("user "+user?.username+" modified "+inOrOut)
 				}
 			}
 		}
@@ -458,10 +465,6 @@ class TimeManagerService {
 			openedDays += openDaysBetweenDates(startCalendar.time,endCalendar.time)
 			
 		}
-		
-		//log.error('openedDays: '+openedDays)
-
-		
 		return openedDays
 	}
 	
@@ -724,8 +727,6 @@ class TimeManagerService {
 						use (TimeCategory){timeDifference = currentInOrOut.time - calendarAtNine.time}
 						timeAfter21 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
 					}
-					
-					
 				}
 				previousInOrOut = inOrOut
 			}
@@ -1337,36 +1338,7 @@ class TimeManagerService {
 	def getReportData(String siteId,Employee employee, Date myDate,int monthPeriod,int yearPeriod){
 		def calendar = Calendar.instance
 		def monthlyTotalTimeByEmployee = [:]
-		
-	
-/*
-		def weekName="semaine "
-		def weeklyTotalTime = [:]
-		def weeklySuppTotalTime = [:]
-		def weeklyTotalTimeByEmployee = [:]
-		def weeklySupTotalTimeByEmployee = [:]
-		def monthlyTotalTimeByEmployee = [:]
-		def monthlyCorrectedQuotaByEmployee = [:]
-		def weeklyAggregate = [:]
-		def dailyTotalMap = [:]
-		def holidayMap= [:]
-		def dailySupTotalMap= [:]
-		def dailyBankHolidayMap = [:]
-		def dailySupTotalMap = [:]
-		def holidayMap = [:]
-		def mapByDay = [:]
-		def timeBefore7 = 0
-		def timeAfter21 = 0
-		def timeOffHours = 0
-		def dailyTotalId=0
-		def monthlySupTime = 0
-		def monthlyTotalTime = 0
-		def dailySeconds = 0
-		def weeklySupTime
-		def currentWeek=0
-		*/
 		def criteria
-
 
 		//get last day of the month
 		if (myDate==null){
@@ -1402,6 +1374,7 @@ class TimeManagerService {
 		}
 		if (monthlyTotalInstance!=null){
 			monthlyTotalInstance.elapsedSeconds=data.get('monthlyTotalTime')
+			monthlyTotalInstance.save()
 		}
 		def cartoucheTable = getCartoucheData(employee,year,month)
 		def currentContract = cartoucheTable.get('currentContract')
@@ -1577,18 +1550,23 @@ class TimeManagerService {
 					}
 				}
 				data = getCartoucheData(employee,tmpYear,month)
+				//def totals = computeWeeklyTotals( employee,  month,  tmpYear)
+				
+				//def monthlyTotalTime = totals.get('monthlyTotalTime')
+				
+				
 				def theoricalTime2add = 0
 				def actualTime2add = 0
 				def takenRTT2add
 				// initialization month
-				if (month==6){
+				if (month == 6){
 					theoricalTime2add = 0
 					actualTime2add = 0
 					takenRTT2add = referenceRTT.counter	
 				}
 
 				// special case for 1st month of year
-				if (month==1){
+				if (month == 1){
 					theoricalTime2add = monthlyTheoriticalMap.get(12)
 					actualTime2add = monthlyActualMap.get(12)
 					takenRTT2add = monthlyTakenRTTMap.get(12)
@@ -1602,7 +1580,10 @@ class TimeManagerService {
 				
 				monthlyTheoriticalMap.put(month, data.get('monthTheoritical') + theoricalTime2add)
 				if (monthlyTotalInstance!=null){
+					
 					monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds + actualTime2add)
+					
+					//monthlyActualMap.put(month, monthlyTotalTime + actualTime2add)
 				}else{
 					monthlyActualMap.put(month, actualTime2add)
 				}
@@ -2588,7 +2569,7 @@ class TimeManagerService {
 		def dailyTotalId = 0
 		def weeklySupTime = 0
 		def currentWeek = 0
-		
+
 		//maps
 		def mapByDay = [:]
 		def weeklyTotalTime = [:]
@@ -2650,6 +2631,7 @@ class TimeManagerService {
 				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
 					weeklySupTime = 0
 				}else{
+				//	log.error('week of year: '+calendarLoop.get(Calendar.WEEK_OF_YEAR))
 					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 				}
 				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
@@ -2674,7 +2656,6 @@ class TimeManagerService {
 					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
 				}
 				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
-			
 			}
 						
 			criteria = InAndOut.createCriteria()
@@ -2767,6 +2748,10 @@ class TimeManagerService {
 		def yearTimeOffHours = 0
 		def yearlyCounter = 0
 		def data
+		def monthlySupTime 
+		def timeBefore7
+		def timeAfter20 
+		def timeOffHours
 		def calendar = Calendar.instance
 		calendar.set(Calendar.YEAR,year)
 		def bankHolidayList
@@ -2774,7 +2759,7 @@ class TimeManagerService {
 
 		if (month > 5){
 			year = year + 1
-			monthNumber = month -6 + 1
+			monthNumber = month - 6 + 1
 		}else{
 			monthNumber = month + 1 + 6
 		}
@@ -2827,6 +2812,10 @@ class TimeManagerService {
 				yearTimeAfter20 += data.get('timeAfter21')
 				yearTimeOffHours += data.get('timeOffHours')
 				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					monthlySupTime = data.get('monthlySupTime')
+					timeBefore7 = data.get('timeBefore7')
+					timeAfter20 = data.get('timeAfter21')
+					timeOffHours = data.get('timeOffHours')
 					break
 				}
 				calendarIter.roll(Calendar.MONTH, 1)
@@ -2858,6 +2847,10 @@ class TimeManagerService {
 		yearlyCounter = month > 5 ? utilService.getYearlyCounter(year-1,month,employee) : utilService.getYearlyCounter(year,month,employee)
 		
 		return [
+			monthlySupTime:monthlySupTime,
+			timeBefore7:timeBefore7,
+			timeAfter20:timeAfter20,
+			timeOffHours:timeOffHours,
 			ajaxYearlySupTime:getTimeAsText(computeHumanTime(yearSupTime as long),false),
 			yearlyCounter:yearlyCounter,
 			yearTimeBefore7:getTimeAsText(computeHumanTime(yearTimeBefore7 as long),false),

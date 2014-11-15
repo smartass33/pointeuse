@@ -738,13 +738,16 @@ def vacationFollowup(){
 	
 
 	def getAjaxSupplementaryTime(Long id) {
+		def monthlySupTime = params['monthlySupTime']
 		def year = params.int('year')
 		def period = params['period']
 		def month = params.int('month')
 		log.error("getAjaxSupplementaryTime triggered with params: month="+month+" and year="+year)
 		def employee = Employee.get(id)		
 		def model = timeManagerService.getYearSupTime(employee,year,month)
-		model << [id:id,month:month,year:year]
+		log.error("getYearSupTime has terminated")
+		
+		model << [id:id,month:month,year:year,monthlySupTime:monthlySupTime]
 		render template: "/employee/template/yearSupplementaryTime", model: model
 		return 
 	}
@@ -1144,22 +1147,28 @@ def vacationFollowup(){
 		catch(PointeuseException ex){
 			flash.message = message(code: ex.message)
 			if (fromRegularize){
-			render(view: "index")
+				//render(view: "index")
+				redirect(uri:'/')
+				
+				return
 			}else{
-			def retour = report(employee.id as long,month as int,year as int)
-			render(view: "report", model: retour)
+				def retour = report(employee.id as long,month as int,year as int)
+				render(view: "report", model: retour)
+				return
 			}
 			
 		}catch(NullPointerException e2){
 			flash.message = message(code: "appliquer.inutile.message")
 			log.error(e2.message)
 			if (fromRegularize){
-			render(view: "index")
+				render(view: "index")
+				return
 			}else{
 				def currentMonth=params.int('myDate_month')
 				def currentYear=params.int('myDate_year')	
 				def retour = report(employee.id as long,currentMonth as int,currentYear as int)
 				render(view: "report", model: retour)
+				return
 			}
 		}
 	}
@@ -2100,7 +2109,7 @@ def vacationFollowup(){
 	}
 	
 	
-	def getEmployees() {
+	def getAllEmployees() {
 		params.sort='site'
 		def username=params["username"]
 		def password=params["password"]
@@ -2157,6 +2166,53 @@ def vacationFollowup(){
 	//	response.contentType = "application/json"
 		render employeeInstanceList// as JSON
 	}
+	
+	
+	def getEmployee(Long id) {
+
+		def username=params["username"]
+		def password=params["password"]
+		def employeeLogin = params["employeeLogin"]
+		def employee
+		byte[] hash
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		def hashAsString
+		def user
+		
+		
+		if (username == null){
+			log.error('authentication failed!')
+			response.status = 401;
+			return
+		}
+		else{
+			user = User.findByUsername(username)
+		}
+		
+		if (password == null){
+			log.error('authentication failed!')
+			response.status = 401;
+			return
+		}
+		else{
+			hash = digest.digest(password.getBytes("UTF-8"));
+			hashAsString = hash.encodeHex()
+		}
+		
+		if (user != null && !user.password.equals(hashAsString.toString())){
+			log.error('authentication failed!')
+			response.status = 401;
+			return
+		}
+		employee= Employee.get(id)
+		if (employeeLogin != null){
+			employee=Employee.findByUserName(employeeLogin)
+		}
+		render employee// as JSON
+	}
+	
+	
+	
 	
 	def updateUsername(Long id, Long version) {		
 		def employeeInstance = Employee.get(id)

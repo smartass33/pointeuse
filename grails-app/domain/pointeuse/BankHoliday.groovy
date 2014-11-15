@@ -5,6 +5,7 @@ class BankHoliday {
 	int month
 	int year
 	int day
+	int week
 	Calendar calendar
 	User user
 	Date loggingDate
@@ -12,6 +13,6 @@ class BankHoliday {
 	static belongsTo = [period:Period]
 	
     static constraints = {
-		calendar(unique:['day','month','year'])
+		calendar(unique:['day','month','year','week'])
     }
 }

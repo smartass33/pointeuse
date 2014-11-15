@@ -1,3 +1,7 @@
+<script type="text/javascript">
+	$(function(){$('#yearSupTotal').load('${createLink(controller:'employee', action:'getAjaxSupplementaryTime',params:[id:employee?.id,month:period.getAt(Calendar.MONTH)+1,year:period.getAt(Calendar.YEAR)])}');});
+</script>	
+
 <body>
 	<BR/>
 	<table style="float: left;">
@@ -22,8 +26,7 @@
 			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="employee" action='annualReport'  id="${employee.id}" params="${[userId:employee?.id,siteId:siteId,isAjax:false]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
 		</tr>		
 	</table> 				
-	<table style="float: left;">						
-		<tbody>		
+	<table style="float: left;">
 			<tr>
 				<td class="cartoucheRightFiguresTD" />
 				<td class="cartoucheRightFiguresTD" style="font-weight: bold"  align="center"><g:formatDate format="MMMMM yyyy" date="${period}"/></td>
@@ -123,11 +126,8 @@
     					 ou ${(monthlySupTime.get(0)+monthlySupTime.get(1)/60).setScale(2,2)}
    					 </td>  	 
    					 <td style="font-weight:bold; text-align: center;" class="cartoucheRightTitleTD">   
-	    				 <script type="text/javascript">
-							$(function(){$('#yearSupTotal').load('${createLink(controller:'employee', action:'getAjaxSupplementaryTime',params:[id:employee?.id,month:period.getAt(Calendar.MONTH)+1,year:period.getAt(Calendar.YEAR)])}');});
-						 </script>					 
 	   					 <div id="yearSupTotal">  
-	   					 	<g:yearSupTime id="yearSupTotal"/>
+	   					 	<g:yearSupTime/>
 	   					 </div>
 					</td>
 				</tr>
@@ -150,7 +150,6 @@
 			<tr>
 				<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeOffHours', default: 'report')} :</td>							
     			<td class="cartoucheRightFiguresTD">${timeOffHours.get(0)}:${timeOffHours.get(1)}</td> 			
-			</tr>			
-		</tbody>
+			</tr>
 	</table>
 </body>	

@@ -41,6 +41,7 @@ class BankHolidayController {
 			bankHolidayInstance.month=bankHolidayInstance.calendar.get(Calendar.MONTH)+1
 			bankHolidayInstance.year=bankHolidayInstance.calendar.get(Calendar.YEAR)
 			bankHolidayInstance.day=bankHolidayInstance.calendar.get(Calendar.DAY_OF_MONTH)
+			bankHolidayInstance.week=bankHolidayInstance.calendar.get(Calendar.WEEK_OF_YEAR)
 			bankHolidayInstance.loggingDate=new Date()
 			if (user!=null){
 				bankHolidayInstance.user=user
@@ -125,6 +126,7 @@ class BankHolidayController {
 			bankHolidayInstance.month=bankHolidayInstance.calendar.get(Calendar.MONTH)+1
 			bankHolidayInstance.year=bankHolidayInstance.calendar.get(Calendar.YEAR)
 			bankHolidayInstance.day=bankHolidayInstance.calendar.get(Calendar.DAY_OF_MONTH)
+			bankHolidayInstance.week=bankHolidayInstance.calendar.get(Calendar.WEEK_OF_YEAR)
 		}
 
         if (!bankHolidayInstance.save(flush: true)) {
@@ -161,40 +163,17 @@ class BankHolidayController {
             redirect(action: "show", id: id)
         }
     }
-	/*
-	private setYearlyOpenDays(int year){
-		def calendar = Calendar.instance
-		calendar.set(Calendar.YEAR,year)
-		calendar.set(Calendar.DAY_OF_YEAR,1)
-		def yearInstance = Year.findByYear(year)
-		
-		if ()
-		
-		if (yearInstance==null){
-			yearInstance=new Year()
-			yearInstance.year=year
-			yearInstance.period=year.toString()+"/"(year+1).toString()
+	
+	public addWeeks(){
+		def bankHolidays = BankHoliday.list()
+		def calendar 
+		for (BankHoliday bankHoliday:bankHolidays){
+			calendar = bankHoliday.calendar 
+			log.error('calendar.get(Calendar.WEEK_OF_YEAR): '+calendar.get(Calendar.WEEK_OF_YEAR))
+			bankHoliday.week = calendar.get(Calendar.WEEK_OF_YEAR)
+			bankHoliday.save()
 		}
 		
-		yearInstance.bankHolidays=BankHoliday.findAllByYear(year).size()
-		yearInstance.solidarityDays=1
-		
-		def openedDays = 0
-		
-		def startCalendar = Calendar.instance
-		startCalendar = 
-		
-		while(calendar.get(Calendar.DAY_OF_YEAR) <= calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
-			if (calendar.get(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
-				openedDays += 1
-			}
-			if (calendar.getAt(Calendar.DAY_OF_YEAR) == calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
-				break
-			}
-			calendar.roll(Calendar.DAY_OF_YEAR, 1)
-		}
-		yearInstance.openedDays=openedDays
-		yearInstance.save()
 	}
-	*/
+
 }
