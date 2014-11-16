@@ -738,7 +738,7 @@ def vacationFollowup(){
 	
 
 	def getAjaxSupplementaryTime(Long id) {
-		def monthlySupTime = params['monthlySupTime']
+	//	def monthlySupTime = params['monthlySupTime']
 		def year = params.int('year')
 		def period = params['period']
 		def month = params.int('month')
@@ -747,7 +747,7 @@ def vacationFollowup(){
 		def model = timeManagerService.getYearSupTime(employee,year,month)
 		log.error("getYearSupTime has terminated")
 		
-		model << [id:id,month:month,year:year,monthlySupTime:monthlySupTime]
+		model << [id:id,month:month,year:year]
 		render template: "/employee/template/yearSupplementaryTime", model: model
 		return 
 	}

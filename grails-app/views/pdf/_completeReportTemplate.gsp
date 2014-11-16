@@ -292,7 +292,21 @@
 									<td>
 		        						<table border="1" class="cartoucheValues" >
 		        							<thead></thead>
-		        							<tr><td style="font-weight:bold">${monthlySupTime.get(0)}:${monthlySupTime.get(1)}</td></tr>
+		        							<tr>
+		        								<td style="font-weight:bold">	  					
+			        								<g:if test="${monthlySupTime.get(0)>9}">${monthlySupTime.get(0)} :</g:if>
+								  					<g:else>0${monthlySupTime.get(0)} :</g:else>
+								  					<g:if test="${monthlySupTime.get(1)>9}">${monthlySupTime.get(1)}</g:if>
+								  					<g:else>0${monthlySupTime.get(1)}</g:else>
+							  					</td>
+							  				</tr>
+		        						</table>
+
+		        					</td>
+									<td>
+		        						<table border="1" class="cartoucheValues" >
+		        							<thead></thead>
+		        							<tr><td style="font-weight:bold">${ajaxYearlySupTime}</td></tr>
 		        						</table>
 		        					</td>
 								</tr>
@@ -309,6 +323,7 @@
 			        							<tr><td style="font-weight:bold">${payableCompTime.get(0)}:${payableCompTime.get(1)}</td></tr>
 			        						</table>
 			        					</td>
+			        					
 									</tr>
 								</g:if>		
 							</g:if>
@@ -318,16 +333,29 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${timeBefore7.get(0)}:${timeBefore7.get(1)}</td></tr>
+	        							<tr><td style="font-weight:bold">${timeBefore7}</td></tr>
 	        						</table>
 	        					</td>
-							</tr>	
-							<tr>
-								<td style="text-align:left;">${message(code: 'employee.monthly.timeAfter21', default: 'report')} :</td>				
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${timeAfter21.get(0)}:${timeAfter21.get(1)}</td></tr>
+	        							<tr><td style="font-weight:bold">${yearTimeBefore7}</td></tr>
+	        						</table>
+	        					</td>	        					
+	        					
+							</tr>	
+							<tr>
+								<td style="text-align:left;">${message(code: 'employee.monthly.timeAfter20', default: 'report')} :</td>				
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold">${timeAfter20}</td></tr>
+	        						</table>
+	        					</td>
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold">${yearTimeAfter20}</td></tr>
 	        						</table>
 	        					</td>
 							</tr>	
@@ -336,7 +364,13 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${timeOffHours.get(0)}:${timeOffHours.get(1)}</td></tr>
+	        							<tr><td style="font-weight:bold">${timeOffHours}</td></tr>
+	        						</table>
+	        					</td>
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold">${yearTimeOffHours}</td></tr>
 	        						</table>
 	        					</td>
 							</tr>																											

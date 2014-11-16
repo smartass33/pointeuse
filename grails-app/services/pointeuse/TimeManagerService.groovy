@@ -667,7 +667,7 @@ class TimeManagerService {
 		def criteria = InAndOut.createCriteria()
 		def elapsedSeconds = 0
 		def timeBefore7 = 0
-		def timeAfter21 = 0
+		def timeAfter20 = 0
 		def timeOffHours = 0
 		def tmpInOrOut
 		def timeDifference
@@ -721,11 +721,11 @@ class TimeManagerService {
 					// managing time after 21
 					if (previousInOrOut.time > calendarAtNine.time){
 						use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
-						timeAfter21 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						timeAfter20 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
 					}
 					if (currentInOrOut.time > calendarAtNine.time && previousInOrOut.time < calendarAtNine.time){
 						use (TimeCategory){timeDifference = currentInOrOut.time - calendarAtNine.time}
-						timeAfter21 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						timeAfter20 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
 					}
 				}
 				previousInOrOut = inOrOut
@@ -735,8 +735,8 @@ class TimeManagerService {
 		return [
 			elapsedSeconds:elapsedSeconds,
 			timeBefore7:timeBefore7,
-			timeAfter21:timeAfter21,
-			timeOffHours:(timeBefore7 + timeAfter21)
+			timeAfter20:timeAfter20,
+			timeOffHours:(timeBefore7 + timeAfter20)
 		]
 	}
 	
@@ -1430,9 +1430,9 @@ class TimeManagerService {
 		 
 		return [
 			monthlySupTime:monthlySupTime,
-			timeAfter21:computeHumanTimeAsString(data.get('timeAfter21')),
-			timeBefore7:computeHumanTimeAsString(data.get('timeBefore7')),
-			timeOffHours:computeHumanTimeAsString(data.get('timeOffHours')),
+			timeAfter20:getTimeAsText(computeHumanTime(data.get('timeAfter20')),false),
+			timeBefore7:getTimeAsText(computeHumanTime(data.get('timeBefore7')),false),
+			timeOffHours:getTimeAsText(computeHumanTime(data.get('timeOffHours')),false),
 			initialCA:initialCA,
 			initialRTT:initialRTT,	
 			isCurrentMonth:isCurrentMonth,
@@ -2559,7 +2559,7 @@ class TimeManagerService {
 		def criteria
 		def dailySeconds
 		def timeBefore7 = 0
-		def timeAfter21 = 0
+		def timeAfter20 = 0
 		def timeOffHours = 0
 		def yearlyBefore7 = 0
 		def yearlyAfter21 = 0
@@ -2617,8 +2617,8 @@ class TimeManagerService {
 				def timing = getDailyTotal(dailyTotal)
 				dailySeconds = timing.get("elapsedSeconds")
 				timeBefore7 += timing.get("timeBefore7")
-				timeAfter21 +=  timing.get("timeAfter21")
-				timeOffHours = timeOffHours + timing.get("timeBefore7") + timing.get("timeAfter21")
+				timeAfter20 +=  timing.get("timeAfter20")
+				timeOffHours = timeOffHours + timing.get("timeBefore7") + timing.get("timeAfter20")
 				monthlyTotalTime += dailySeconds
 				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
 				if (previousValue!=null){
@@ -2719,7 +2719,7 @@ class TimeManagerService {
 		}
 		return [
 			timeBefore7:timeBefore7,
-			timeAfter21:timeAfter21,
+			timeAfter20:timeAfter20,
 			timeOffHours:timeOffHours,
 			monthlyTotalTime:monthlyTotalTime,
 			monthlySupTime:monthlySupTime,
@@ -2748,7 +2748,7 @@ class TimeManagerService {
 		def yearTimeOffHours = 0
 		def yearlyCounter = 0
 		def data
-		def monthlySupTime 
+		def monthlySupTime = 0
 		def timeBefore7
 		def timeAfter20 
 		def timeOffHours
@@ -2809,13 +2809,13 @@ class TimeManagerService {
 				data = computeWeeklyTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				yearSupTime +=  data.get('monthlySupTime')
 				yearTimeBefore7 += data.get('timeBefore7')
-				yearTimeAfter20 += data.get('timeAfter21')
+				yearTimeAfter20 += data.get('timeAfter20')
 				yearTimeOffHours += data.get('timeOffHours')
 				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
 					monthlySupTime = data.get('monthlySupTime')
-					timeBefore7 = data.get('timeBefore7')
-					timeAfter20 = data.get('timeAfter21')
-					timeOffHours = data.get('timeOffHours')
+					timeBefore7 = data.get('timeBefore7') != null ? data.get('timeBefore7') : 0
+					timeAfter20 = data.get('timeAfter20') != null ? data.get('timeAfter20') : 0
+					timeOffHours = data.get('timeOffHours') != null ? data.get('timeOffHours') : 0
 					break
 				}
 				calendarIter.roll(Calendar.MONTH, 1)
@@ -2845,12 +2845,13 @@ class TimeManagerService {
 		}
 		
 		yearlyCounter = month > 5 ? utilService.getYearlyCounter(year-1,month,employee) : utilService.getYearlyCounter(year,month,employee)
+		//monthlySupTime=getTimeAsText(computeHumanTime(monthlySupTime as long),false)
 		
 		return [
-			monthlySupTime:monthlySupTime,
-			timeBefore7:timeBefore7,
-			timeAfter20:timeAfter20,
-			timeOffHours:timeOffHours,
+			monthlySupTime:computeHumanTime(monthlySupTime as long),
+			timeBefore7:getTimeAsText(computeHumanTime(timeBefore7 as long),false),
+			timeAfter20:getTimeAsText(computeHumanTime(timeAfter20 as long),false),
+			timeOffHours:getTimeAsText(computeHumanTime(timeOffHours as long),false),
 			ajaxYearlySupTime:getTimeAsText(computeHumanTime(yearSupTime as long),false),
 			yearlyCounter:yearlyCounter,
 			yearTimeBefore7:getTimeAsText(computeHumanTime(yearTimeBefore7 as long),false),

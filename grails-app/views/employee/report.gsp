@@ -134,7 +134,16 @@
 						style="vertical-align: middle;" /> 
 				</li>
 				<li style="vertical-align: middle;" class="displayButton"><g:actionSubmit value="Afficher" action="report" class="displayButton" /></li>	
-				<li style="vertical-align: middle;"><g:actionSubmit disabled="${isCurrentMonth}"  value="PDF" action="userPDF" class="${isCurrentMonth ? 'pdfButtonDisabled':'pdfButton'}" /></li>								
+				<li style="vertical-align: middle;">
+					<g:actionSubmit disabled="${isCurrentMonth}"  value="PDF" action="userPDF" class="${isCurrentMonth ? 'pdfButtonDisabled':'pdfButton'}" />
+					
+					<g:submitToRemote class='${isCurrentMonth ? 'pdfButtonDisabled':'pdfButton'}' 
+						disabled="${isCurrentMonth}"
+						onLoading="document.getElementById('spinner').style.display = 'inline';"  
+						onComplete="document.getElementById('spinner').style.display = 'none';"
+						url="[controller:'employee', action:'userPDF']" value="PDFAJAX">
+					</g:submitToRemote>					
+					</li>								
 				<li><g:inAndOutPopup fromReport="true"/></li>
 			</g:form>
 			<li>
@@ -163,7 +172,7 @@
 
 			
 	<BR>
-	<div id="report_table_div">
+	<div style='float:none' id="report_table_div">
 		<g:reportTable />
 	</div>
 </body>
