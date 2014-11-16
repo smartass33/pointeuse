@@ -49,6 +49,7 @@ class PDFService {
 		
 		def filename
 		Calendar calendar = Calendar.instance
+		calendar.time = myDate
 		OutputStream outputStream
 		File file
 

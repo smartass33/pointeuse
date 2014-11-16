@@ -512,8 +512,14 @@ class TimeManagerService {
 	}
 	
 	
-	def getTimeFromText(String text){
-		def values = text.split(' : ')
+	def getTimeFromText(String text, boolean hasSpace){
+		def values
+		if (hasSpace){
+			values = text.split(' : ')
+		}
+		else{
+			 values = text.split(':')	
+		}
 		def time = (values[0] as long)*3600 + (values[1] as long)*60
 		return time;
 	}
@@ -1416,7 +1422,7 @@ class TimeManagerService {
 		monthlyTotalTimeByEmployee.put(employee, computeHumanTime(data.get('monthlyTotalTime')))
 		def monthlyTotal=computeHumanTime(data.get('monthlyTotalTime'))
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
-		
+		def monthlyTheoriticalAsString = computeHumanTimeAsString(cartoucheTable.get('monthTheoritical'))
 		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)	
 		def initialCA = employeeService.getInitialCA(employee,(month>5)?Period.findByYear(year):Period.findByYear(year - 1))
 		def initialRTT = employeeService.getInitialRTT(employee,(month>5)?Period.findByYear(year):Period.findByYear(year - 1))
@@ -1427,12 +1433,26 @@ class TimeManagerService {
 			}
 		}	
 		
-		 
+		def monthlySupTimeDecimal=(monthlySupTime.get(0)+monthlySupTime.get(1)/60).setScale(2,2)
+				
+		def timeBefore7Decimal=computeHumanTime(data.get('timeBefore7') as long)
+		timeBefore7Decimal=(timeBefore7Decimal.get(0)+timeBefore7Decimal.get(1)/60).setScale(2,2)
+		
+		def timeAfter20Decimal=computeHumanTime(data.get('timeAfter20') as long)
+		timeAfter20Decimal=(timeAfter20Decimal.get(0)+timeAfter20Decimal.get(1)/60).setScale(2,2)
+		
+		def timeOffHoursDecimal=computeHumanTime(data.get('timeOffHours') as long)
+		timeOffHoursDecimal= (timeOffHoursDecimal.get(0)+timeOffHoursDecimal.get(1)/60).setScale(2,2)
+		
 		return [
-			monthlySupTime:monthlySupTime,
-			timeAfter20:getTimeAsText(computeHumanTime(data.get('timeAfter20')),false),
+			monthlySupTime:getTimeAsText(monthlySupTime,false),
 			timeBefore7:getTimeAsText(computeHumanTime(data.get('timeBefore7')),false),
+			timeAfter20:getTimeAsText(computeHumanTime(data.get('timeAfter20')),false),	
 			timeOffHours:getTimeAsText(computeHumanTime(data.get('timeOffHours')),false),
+			monthlySupTimeDecimal:monthlySupTimeDecimal,
+			timeBefore7Decimal:timeBefore7Decimal,
+			timeAfter20Decimal:timeAfter20Decimal,
+			timeOffHoursDecimal:timeOffHoursDecimal,
 			initialCA:initialCA,
 			initialRTT:initialRTT,	
 			isCurrentMonth:isCurrentMonth,
@@ -1453,6 +1473,7 @@ class TimeManagerService {
 			sansSolde:sansSolde,
 			yearlyActualTotal:yearlyActualTotal,
 			monthTheoritical:monthTheoritical,
+			monthlyTheoriticalAsString:monthlyTheoriticalAsString,
 			pregnancyCredit:pregnancyCredit,
 			yearlyPregnancyCredit:yearlyPregnancyCredit,
 			yearlyHoliday:yearlyHoliday,
@@ -1698,6 +1719,7 @@ class TimeManagerService {
 		def annualHoliday = 0
 		def annualRTT = 0
 		def annualCSS = 0
+		def annualDIF = 0
 		def annualSickness = 0
 		def annualExceptionnel = 0	
 		def annualPayableSupTime = 0
@@ -1785,6 +1807,7 @@ class TimeManagerService {
 			annualHoliday += cartoucheTable.getAt('holidays')
 			monthlyTakenHolidays.put(currentMonth, initialCA - annualHoliday)
 			annualRTT += cartoucheTable.getAt('rtt')
+			annualDIF += cartoucheTable.getAt('dif')			
 			annualCSS += cartoucheTable.getAt('sansSolde')
 			annualSickness += cartoucheTable.getAt('sickness')
 			annualExceptionnel += cartoucheTable.getAt('exceptionnel')
@@ -1825,6 +1848,7 @@ class TimeManagerService {
 			annualGlobalSupTimeToPay:annualGlobalSupTimeToPay,
 			annualHoliday:annualHoliday,
 			annualRTT:annualRTT,
+			annualDIF:annualDIF,
 			annualCSS:annualCSS,
 			annualSickness:annualSickness,
 			annualExceptionnel:annualExceptionnel,
@@ -2518,8 +2542,8 @@ class TimeManagerService {
 			log.error("current employee: "+employee)
 			annualReportMap.put(employee,getAnnualReportData(period.year, employee))		
 			siteAnnualEmployeeWorkingDays += ((annualReportMap.get(employee)).get('annualEmployeeWorkingDays'))
-			siteAnnualTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualTheoritical'))
-			siteAnnualTotal += getTimeFromText((annualReportMap.get(employee)).get('annualTotal'))
+			siteAnnualTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualTheoritical'),true)
+			siteAnnualTotal += getTimeFromText((annualReportMap.get(employee)).get('annualTotal'),true)
 			siteAnnualHoliday += ((annualReportMap.get(employee)).get('annualHoliday'))
 			siteRemainingCA += ((annualReportMap.get(employee)).get('remainingCA'))
 			siteAnnualRTT += ((annualReportMap.get(employee)).get('annualRTT'))
@@ -2527,10 +2551,10 @@ class TimeManagerService {
 			siteAnnualSickness += ((annualReportMap.get(employee)).get('annualSickness'))
 			siteAnnualDIF += ((annualReportMap.get(employee)).get('annualDIF'))
 			siteAnnualExceptionnel += ((annualReportMap.get(employee)).get('annualExceptionnel'))
-			siteAnnualPayableSupTime += getTimeFromText((annualReportMap.get(employee)).get('annualPayableSupTime'))
-			siteAnnualTheoriticalIncludingExtra += getTimeFromText((annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra'))
-			siteAnnualSupTimeAboveTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical'))
-			siteAnnualGlobalSupTimeToPay += getTimeFromText((annualReportMap.get(employee)).get('annualGlobalSupTimeToPay'))
+			siteAnnualPayableSupTime += getTimeFromText((annualReportMap.get(employee)).get('annualPayableSupTime'),true)
+			siteAnnualTheoriticalIncludingExtra += getTimeFromText((annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra'),true)
+			siteAnnualSupTimeAboveTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical'),true)
+			siteAnnualGlobalSupTimeToPay += getTimeFromText((annualReportMap.get(employee)).get('annualGlobalSupTimeToPay'),true)
 		}
 		return [
 			annualReportMap:annualReportMap,
@@ -2843,20 +2867,52 @@ class TimeManagerService {
 				calendarIter.roll(Calendar.MONTH, 1)
 			}
 		}
-		
 		yearlyCounter = month > 5 ? utilService.getYearlyCounter(year-1,month,employee) : utilService.getYearlyCounter(year,month,employee)
 		//monthlySupTime=getTimeAsText(computeHumanTime(monthlySupTime as long),false)
 		
+		def monthlySupTimeDecimal=computeHumanTime(monthlySupTime as long)
+		monthlySupTimeDecimal=(monthlySupTimeDecimal.get(0)+monthlySupTimeDecimal.get(1)/60).setScale(2,2)
+		
+		def timeBefore7Decimal=computeHumanTime(timeBefore7 as long)
+		timeBefore7Decimal=(timeBefore7Decimal.get(0)+timeBefore7Decimal.get(1)/60).setScale(2,2)
+		
+		def timeAfter20Decimal=computeHumanTime(timeAfter20 as long)
+		timeAfter20Decimal=(timeAfter20Decimal.get(0)+timeAfter20Decimal.get(1)/60).setScale(2,2)
+		
+		def timeOffHoursDecimal=computeHumanTime(timeOffHours as long)
+		timeOffHoursDecimal= (timeOffHoursDecimal.get(0)+timeOffHoursDecimal.get(1)/60).setScale(2,2)
+		
+		def ajaxYearlySupTimeDecimal=computeHumanTime(yearSupTime as long)
+		ajaxYearlySupTimeDecimal= (ajaxYearlySupTimeDecimal.get(0)+ajaxYearlySupTimeDecimal.get(1)/60).setScale(2,2)
+		
+		def yearTimeBefore7Decimal=computeHumanTime(yearTimeBefore7 as long)
+		yearTimeBefore7Decimal= (yearTimeBefore7Decimal.get(0)+yearTimeBefore7Decimal.get(1)/60).setScale(2,2)
+		
+		def yearTimeAfter20Decimal=computeHumanTime(yearTimeAfter20 as long)
+		yearTimeAfter20Decimal= (yearTimeAfter20Decimal.get(0)+yearTimeAfter20Decimal.get(1)/60).setScale(2,2)
+		
+		def yearTimeOffHoursDecimal=computeHumanTime(yearTimeOffHours as long)
+		yearTimeOffHoursDecimal=(yearTimeOffHoursDecimal.get(0)+yearTimeOffHoursDecimal.get(1)/60).setScale(2,2)
+		
+		
 		return [
-			monthlySupTime:computeHumanTime(monthlySupTime as long),
+			yearlyCounter:yearlyCounter,	
+			monthlySupTime:getTimeAsText(computeHumanTime(monthlySupTime as long),false),
 			timeBefore7:getTimeAsText(computeHumanTime(timeBefore7 as long),false),
 			timeAfter20:getTimeAsText(computeHumanTime(timeAfter20 as long),false),
 			timeOffHours:getTimeAsText(computeHumanTime(timeOffHours as long),false),
 			ajaxYearlySupTime:getTimeAsText(computeHumanTime(yearSupTime as long),false),
-			yearlyCounter:yearlyCounter,
 			yearTimeBefore7:getTimeAsText(computeHumanTime(yearTimeBefore7 as long),false),
 			yearTimeAfter20:getTimeAsText(computeHumanTime(yearTimeAfter20 as long),false),
-			yearTimeOffHours:getTimeAsText(computeHumanTime(yearTimeOffHours as long),false)
+			yearTimeOffHours:getTimeAsText(computeHumanTime(yearTimeOffHours as long),false),			
+			monthlySupTimeDecimal:monthlySupTimeDecimal,
+			timeBefore7Decimal:timeBefore7Decimal,
+			timeAfter20Decimal:timeAfter20Decimal,
+			timeOffHoursDecimal:timeOffHoursDecimal,
+			ajaxYearlySupTimeDecimal:ajaxYearlySupTimeDecimal,
+			yearTimeBefore7Decimal:yearTimeBefore7Decimal,
+			yearTimeAfter20Decimal:yearTimeAfter20Decimal,
+			yearTimeOffHoursDecimal:yearTimeOffHoursDecimal
 			]
 		
 	}

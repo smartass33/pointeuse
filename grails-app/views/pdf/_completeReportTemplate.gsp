@@ -227,7 +227,7 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td>${monthTheoritical.get(0)}:${monthTheoritical.get(1)}</td></tr>
+	        							<tr><td>${monthlyTheoriticalAsString.get(0)}:${monthlyTheoriticalAsString.get(1)}</td></tr>
 	        						</table>
 	        					</td>	
 	        					<td>
@@ -288,16 +288,14 @@
 							
 							<g:if test="${monthlySupTime!=null}">						
 								<tr>
-									<td style="text-align:left;">${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
+									<td style="text-align:left;">${message(code: 'employee.monthly.sup.above.42.time', default: 'report')} :</td>				
 									<td>
 		        						<table border="1" class="cartoucheValues" >
 		        							<thead></thead>
 		        							<tr>
 		        								<td style="font-weight:bold">	  					
-			        								<g:if test="${monthlySupTime.get(0)>9}">${monthlySupTime.get(0)} :</g:if>
-								  					<g:else>0${monthlySupTime.get(0)} :</g:else>
-								  					<g:if test="${monthlySupTime.get(1)>9}">${monthlySupTime.get(1)}</g:if>
-								  					<g:else>0${monthlySupTime.get(1)}</g:else>
+													${monthlySupTime} ou ${monthlySupTimeDecimal}
+
 							  					</td>
 							  				</tr>
 		        						</table>
@@ -306,7 +304,9 @@
 									<td>
 		        						<table border="1" class="cartoucheValues" >
 		        							<thead></thead>
-		        							<tr><td style="font-weight:bold">${ajaxYearlySupTime}</td></tr>
+		        							<tr><td style="font-weight:bold">
+												${ajaxYearlySupTime} ou ${ajaxYearlySupTimeDecimal}
+		        							</td></tr>
 		        						</table>
 		        					</td>
 								</tr>
@@ -333,13 +333,13 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${timeBefore7}</td></tr>
+	        							<tr><td style="font-weight:bold">${timeBefore7} ou ${timeBefore7Decimal}</td></tr>
 	        						</table>
 	        					</td>
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${yearTimeBefore7}</td></tr>
+	        							<tr><td style="font-weight:bold">${yearTimeBefore7} ou ${yearTimeBefore7Decimal}	 </td></tr>
 	        						</table>
 	        					</td>	        					
 	        					
@@ -349,13 +349,13 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${timeAfter20}</td></tr>
+	        							<tr><td style="font-weight:bold">${timeAfter20} ou ${timeAfter20Decimal}</td></tr>
 	        						</table>
 	        					</td>
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${yearTimeAfter20}</td></tr>
+	        							<tr><td style="font-weight:bold">${yearTimeAfter20} ou ${yearTimeAfter20Decimal}</td></tr>
 	        						</table>
 	        					</td>
 							</tr>	
@@ -364,13 +364,13 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${timeOffHours}</td></tr>
+	        							<tr><td style="font-weight:bold">${timeOffHours} ou ${timeOffHoursDecimal}</td></tr>
 	        						</table>
 	        					</td>
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${yearTimeOffHours}</td></tr>
+	        							<tr><td style="font-weight:bold">${yearTimeOffHours} ou ${yearTimeOffHoursDecimal}</td></tr>
 	        						</table>
 	        					</td>
 							</tr>																											

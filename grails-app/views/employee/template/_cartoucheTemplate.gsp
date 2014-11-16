@@ -71,8 +71,10 @@
 					</tr>										
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
-		    			<g:if test="${monthTheoritical!=null}">
-		    				<td class="cartoucheRightFiguresTD">${monthTheoritical.get(0)}:${monthTheoritical.get(1)}</td>
+		    			<g:if test="${monthlyTheoriticalAsString!=null}">
+		    				<td class="cartoucheRightFiguresTD">
+		  	  					${monthlyTheoriticalAsString.get(0)}:${monthlyTheoriticalAsString.get(1)}	    				
+		    				</td>
 		    			</g:if>
 						<g:else>
 							<td class="cartoucheRightFiguresTD">00:00</td>

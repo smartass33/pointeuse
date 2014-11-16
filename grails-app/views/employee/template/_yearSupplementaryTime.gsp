@@ -1,19 +1,15 @@
 <table style="float: left; border-style:none;">
 		<tr>
-			<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.sup.time', default: 'report')} :</td>				
+			<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.sup.above.42.time', default: 'report')} :</td>				
 			<g:if test="${monthlySupTime!=null}">
  					<td style="font-weight:bold" class="cartoucheRightFiguresTD">
-	  					<g:if test="${monthlySupTime.get(0)>9}">${monthlySupTime.get(0)} :</g:if>
-	  					<g:else>0${monthlySupTime.get(0)} :</g:else>
-	  					<g:if test="${monthlySupTime.get(1)>9}">${monthlySupTime.get(1)}</g:if>
-	  					<g:else>0${monthlySupTime.get(1)}</g:else>
-	  					 ou ${(monthlySupTime.get(0)+monthlySupTime.get(1)/60).setScale(2,2)}
+						${monthlySupTime} ou ${monthlySupTimeDecimal}
  					 </td>  	 
  				</g:if>
  					 
  			 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
 				<g:if test="${ajaxYearlySupTime != null}">
-					${ajaxYearlySupTime}
+						${ajaxYearlySupTime} ou ${ajaxYearlySupTimeDecimal}
 				</g:if>
 				<g:else>
 					chargement...
@@ -32,7 +28,7 @@
 		
 		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
 				<g:if test="${timeBefore7 != null}">
-	  					${timeBefore7}
+						${timeBefore7} ou ${timeBefore7Decimal}
 	  			</g:if>
 				<g:else>
 					chargement...
@@ -40,8 +36,8 @@
 			</td>
 		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
 				<g:if test="${yearTimeBefore7 != null}">
-	  					${yearTimeBefore7}
-	  			</g:if>
+						${yearTimeBefore7} ou ${yearTimeBefore7Decimal}	  			
+				</g:if>
 				<g:else>
 					chargement...
 				</g:else>	  		
@@ -52,7 +48,7 @@
 		
 		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
 				<g:if test="${timeAfter20 != null}">
-	  					${timeAfter20}
+						${timeAfter20} ou ${timeAfter20Decimal}	  			
 	  			</g:if>
 				<g:else>
 					chargement...
@@ -60,7 +56,7 @@
 		</td>	
 		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
 				<g:if test="${yearTimeAfter20 != null}">
-	  					${yearTimeAfter20}
+						${yearTimeAfter20} ou ${yearTimeAfter20Decimal}	  			
 	  			</g:if>
 				<g:else>
 					chargement...
@@ -72,7 +68,7 @@
 		
 		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
 				<g:if test="${timeOffHours != null}">
-	  					${timeOffHours}
+						${timeOffHours} ou ${timeOffHoursDecimal}	  			
 	  			</g:if>
 				<g:else>
 					chargement...
@@ -81,7 +77,7 @@
 			
 		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
 				<g:if test="${yearTimeOffHours != null}">
-	  					${yearTimeOffHours}
+						${yearTimeOffHours} ou ${yearTimeOffHoursDecimal}	  			
 	  			</g:if>
 				<g:else>
 					chargement...
