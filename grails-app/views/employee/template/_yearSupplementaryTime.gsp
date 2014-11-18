@@ -7,14 +7,14 @@
  					 </td>  	 
  				</g:if>
  					 
- 			 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
+ 			 <td style="font-weight:bold; text-align: center;border-width:0px;" class="cartoucheRightFiguresTD">  
 				<g:if test="${ajaxYearlySupTime != null}">
 						${ajaxYearlySupTime} ou ${ajaxYearlySupTimeDecimal}
 				</g:if>
 				<g:else>
 					chargement...
 				</g:else>	  		
-			</td>
+			</td>			
 		</tr>
 	<g:if test="${payableCompTime!=null && employee.weeklyContractTime != 35}">						
 		<tr>
@@ -41,7 +41,7 @@
 				<g:else>
 					chargement...
 				</g:else>	  		
-		</td>								
+		</td>				
 	</tr>
 	<tr>
 		<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeAfter20', default: 'report')} :</td>		
@@ -61,7 +61,7 @@
 				<g:else>
 					chargement...
 				</g:else>	  		
-		</td>							
+		</td>
 	</tr>
 	<tr>
 		<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeOffHours', default: 'report')} :</td>		
@@ -82,6 +82,6 @@
 				<g:else>
 					chargement...
 				</g:else>	  		
-		</td>						
+		</td>
 	</tr>	
 </table>

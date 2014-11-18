@@ -52,22 +52,26 @@
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.sickness.count', default: 'report')} :</td>
 						<td class="cartoucheRightFiguresTD">${sickness as java.lang.Float}</td>
-		     			<td class="cartoucheRightFiguresTD">${yearlySickness as java.lang.Float}</td>   						
+		     			<td class="cartoucheRightFiguresTD">${yearlySickness as java.lang.Float}</td>   
+		     			<td class="cartoucheRightFiguresTD"/>						
 					</tr>
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.sanssolde.count', default: 'report')} :</td>
 						<td class="cartoucheRightFiguresTD">${sansSolde as java.lang.Float}</td>
 		    			<td class="cartoucheRightFiguresTD">${yearlySansSolde as java.lang.Float}</td>
+		    			<td class="cartoucheRightFiguresTD">
 					</tr>
 					<tr>		
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.exceptionnel.count', default: 'report')} :</td>	
 						<td class="cartoucheRightFiguresTD">${exceptionnel as java.lang.Float}</td>        					
 		     			<td class="cartoucheRightFiguresTD">${yearlyExceptionnel as java.lang.Float}</td>
+		     			<td class="cartoucheRightFiguresTD">
 					</tr>			
 					<tr>		
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.dif.count', default: 'report')} :</td>	
 						<td class="cartoucheRightFiguresTD">${dif as java.lang.Float}</td>        					
 		     			<td class="cartoucheRightFiguresTD">${yearlyDif as java.lang.Float}</td>
+		     			<td class="cartoucheRightFiguresTD">
 					</tr>										
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
@@ -85,6 +89,7 @@
 		  					<g:else>
 		  						<td class="cartoucheRightFiguresTD">00:00</td>
 		  					</g:else>
+		  				<td class="cartoucheRightFiguresTD">	
 					</tr>
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.yearly.actual.time', default: 'report')} :</td>								 						
@@ -99,7 +104,8 @@
 						</g:if>
 						<g:else>
 							<td class="cartoucheRightFiguresTD">00:00</td>			
-						</g:else>											
+						</g:else>
+						<td class="cartoucheRightFiguresTD">											
 					</tr>
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.peculiar.time', default: 'report')} :</td>							
@@ -114,14 +120,15 @@
 						</g:if>
 						<g:else>
 							<td class="cartoucheRightFiguresTD">00:00</td>			
-						</g:else>											
+						</g:else>
+						<td class="cartoucheRightFiguresTD">											
 					</tr>
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'default.monthly.open.day', default: 'report')} :</td>				
 		   					<td style="font-weight:bold" class="cartoucheRightFiguresTD">${workingDays}<g:if test="${isCurrentMonth}">(en cours)</g:if></td>
-		   					<td class="cartoucheRightFiguresTD"/>
-					</tr>
-	
+		   					<td class="cartoucheRightFiguresTD">${yearOpenDays}
+		   					<td class="cartoucheRightFiguresTD">
+						</tr>
 				</table>
 				</td>
 			</tr>

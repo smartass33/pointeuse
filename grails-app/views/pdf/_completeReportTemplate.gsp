@@ -280,9 +280,16 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${workingDays}</td></tr>
+	        							<tr><td>${workingDays}</td>
+	        							</tr>
 	        						</table>
 	        					</td>
+	        					<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td>${yearOpenDays}</td></tr>
+	        						</table>
+	        					</td>	
 							</tr>
 							
 							
@@ -409,11 +416,11 @@
 											${dailyTotalMap.get(entries.key)}                  	
 								         </td>
 					                </g:if>
-				                	<g:else><td style="border:1px;width:70px">00 : 00</td></g:else>
+				                	<g:else><td style="border:1px;width:70px">00:00</td></g:else>
 				                  	<g:if test="${weeklySupTotal.get(employee) != null && weeklySupTotal.get(employee).get(day.key) !=null}">
 				                    	<g:if test="${dailySupTotalMap.get(entries.key) !=null}">
 				                            <td style="border:1px;width:40px">
-				                            	${dailySupTotalMap.get(entries.key).get(0)}:${dailySupTotalMap.get(entries.key).get(1)==0?'':dailySupTotalMap.get(entries.key).get(1)}
+				                            	${dailySupTotalMap.get(entries.key)}
 				                            </td>
 				                         </g:if>
 					                    <g:else>
@@ -440,42 +447,17 @@
 	            	<tr>
 	            	<td  colspan="34" style="font-style: bold;">
 	              ${day.key}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	              <g:if test="${weeklyTotal.get(employee) != null && weeklyTotal.get(employee).get(day.key) !=null && (weeklyTotal.get(employee).get(day.key).get(2)>0 || weeklyTotal.get(employee).get(day.key).get(1)>0 || weeklyTotal.get(employee).get(day.key).get(0)>0)}">
-	                  
-	                  <g:if test='${(weeklyTotal.get(employee).get(day.key)).get(0)<10}'>
-	                  	0${(weeklyTotal.get(employee).get(day.key)).get(0)} : </g:if>
-	                  <g:else>${(weeklyTotal.get(employee).get(day.key)).get(0)} :</g:else>
-	                  
-	                  <g:if test='${(weeklyTotal.get(employee).get(day.key)).get(1)<10}'>
-	                  	   ${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'00 ':'0'+(weeklyTotal.get(employee).get(day.key)).get(1)}
-	                  </g:if>
-	                  <g:else>
-	                  	${(weeklyTotal.get(employee).get(day.key)).get(1)}
-	                  </g:else>
-	                  
-	                                    
-	                  <g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null && ((weeklySupTotal.get(employee).get(day.key)).get(0) > 0 || (weeklySupTotal.get(employee).get(day.key)).get(1) >0)}">
-	                   &nbsp;&nbsp;&nbsp;dont ${message(code: 'which.sup.time', default: 'Report')} 
-	                    ${(weeklySupTotal.get(employee).get(day.key)).get(0)} :
-	                   <g:if test="${(weeklySupTotal.get(employee).get(day.key)).get(1)==0}">
-	                   00
-	                   </g:if>
-	                   <g:else>
-		                   <g:if test="${(weeklySupTotal.get(employee).get(day.key)).get(1)>9}">
-		                    	${(weeklySupTotal.get(employee).get(day.key)).get(1)}      
-		                   </g:if>
-		                   <g:else>
-		                   	0${(weeklySupTotal.get(employee).get(day.key)).get(1)} 
-		                   </g:else>
-	                   </g:else>
-	                      
+	              <g:if test="${weeklyTotal.get(employee) != null && weeklyTotal.get(employee).get(day.key) !=null && !(weeklyTotal.get(employee).get(day.key)).equals('00:00')}">
+	                  	${weeklyTotal.get(employee).get(day.key)}
+	                  <g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null && !(weeklySupTotal.get(employee).get(day.key)).equals('00:00')}">
+	                   &nbsp;&nbsp;&nbsp;dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee)).get(day.key)}  
 	                  </g:if>
 	              </g:if>
 	              <g:else>
-	                 00 : 00
-	               		<g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null  && weeklySupTotal.get(employee).get(day.key) != null && ((weeklySupTotal.get(employee).get(day.key)).get(0) > 0 || (weeklySupTotal.get(employee).get(day.key)).get(1) >0)}">
-	                   &nbsp;&nbsp;&nbsp;dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee).get(day.key)).get(0)} : ${(weeklySupTotal.get(employee).get(day.key)).get(1)==0?'':(weeklySupTotal.get(employee).get(day.key)).get(1)}  
-	                  </g:if>
+	              	00:00
+	              	<g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null  && weeklySupTotal.get(employee).get(day.key) != null && !(weeklySupTotal.get(employee).get(day.key)).equals('00:00')}">
+	                   &nbsp;&nbsp;&nbsp;dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee)).get(day.key)}  
+	                </g:if>
 	              </g:else>
 	              </td>
 	            </tr>

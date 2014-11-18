@@ -875,6 +875,7 @@ class TimeManagerService {
 
 	def getYearCartoucheData(Employee employee,int year,int month){
 		def monthNumber=0
+		def yearOpenDays = 0
 		def yearTheoritical = 0
 		def yearSupTime = 0
 		def data
@@ -928,6 +929,8 @@ class TimeManagerService {
 			maxDate = exitDate
 		}
 		
+		
+		yearOpenDays = openDaysBetweenDates(minDate,maxDate)
 		// get initial vacation
 		
 		// get initial RTT
@@ -1125,6 +1128,7 @@ class TimeManagerService {
 		
 		yearlyCounter = openDaysBetweenDates(minDate,maxDate)
 		return [
+			yearOpenDays:yearOpenDays,
 			yearlyActualTotal:yearlyCounter,
 			yearlyHolidays:yearlyHolidays.size(),
 			yearlyExceptionnel:yearlyExceptionnel.size(),
@@ -1319,7 +1323,7 @@ class TimeManagerService {
 		}
 		
 
-		def monthTheoriticalHuman=getTimeAsText(computeHumanTime(monthTheoritical),true)
+		def monthTheoriticalHuman=getTimeAsText(computeHumanTime(monthTheoritical),false)
 		def cartoucheMap=[
 			isCurrentMonth:isCurrentMonth,
 			currentContract:currentContract,
@@ -1361,12 +1365,9 @@ class TimeManagerService {
 		calendar.set(Calendar.MINUTE,59)
 		calendar.set(Calendar.SECOND,59)
 		calendar.set(Calendar.DATE,1)
-		
-		
 		def calendarLoop = calendar
 		int month = calendar.get(Calendar.MONTH)+1 // starts at 0
-		int year = calendar.get(Calendar.YEAR)
-			
+		int year = calendar.get(Calendar.YEAR)			
 		def data = computeWeeklyTotals( employee,  month,  year)
 	
 		//update monthlyTotal
@@ -1404,6 +1405,7 @@ class TimeManagerService {
 		def yearlyActualTotal = computeHumanTimeAsString(cartoucheTable.get('yearlyTotalTime'))
 		def yearlySansSolde=cartoucheTable.get('yearlySansSolde')
 		def yearlySupTime = cartoucheTable.get('yearSupTime')
+		def yearOpenDays = cartoucheTable.get('yearOpenDays')
 		
 		// ADD a computing principle for payable sup time:
 		/*
@@ -1445,6 +1447,7 @@ class TimeManagerService {
 		timeOffHoursDecimal= (timeOffHoursDecimal.get(0)+timeOffHoursDecimal.get(1)/60).setScale(2,2)
 		
 		return [
+			yearOpenDays:yearOpenDays,
 			monthlySupTime:getTimeAsText(monthlySupTime,false),
 			timeBefore7:getTimeAsText(computeHumanTime(data.get('timeBefore7')),false),
 			timeAfter20:getTimeAsText(computeHumanTime(data.get('timeAfter20')),false),	
@@ -1781,21 +1784,21 @@ class TimeManagerService {
 				monthlyPresentDays += 1
 			}
 			monthlyWorkingDays.put(currentMonth,monthlyPresentDays)
-			yearTotalMap.put(currentMonth, getTimeAsText(computeHumanTime(monthlyTotalTime),true))
+			yearTotalMap.put(currentMonth, getTimeAsText(computeHumanTime(monthlyTotalTime),false))
 			annualSupTimeAboveTheoritical += monthlyTotalTime
 			monthlySupTotalTime = getMonthlySupTime(employee,currentMonth, currentYear)
 			annualMonthlySupTime += monthlySupTotalTime
-			yearMonthlySupTime.put(currentMonth,getTimeAsText(computeHumanTime(Math.round(monthlySupTotalTime) as long),true))
+			yearMonthlySupTime.put(currentMonth,getTimeAsText(computeHumanTime(Math.round(monthlySupTotalTime) as long),false))
 			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
 			
 			// in order to compute complementary time, we are going to look for employees whose contract equal 35h over a sub-period of time during the month
 			if (utilService.getActiveFullTimeContract( currentMonth,  currentYear, employee)){
 				if (monthlyTotalTime > monthTheoritical){
 					payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime,0)
-					yearMonthlyCompTime.put(currentMonth, getTimeAsText(computeHumanTime(payableCompTime as long),true))
+					yearMonthlyCompTime.put(currentMonth, getTimeAsText(computeHumanTime(payableCompTime as long),false))
 				}else{
 					payableCompTime = 0
-					yearMonthlyCompTime.put(currentMonth, getTimeAsText(computeHumanTime(0),true))
+					yearMonthlyCompTime.put(currentMonth, getTimeAsText(computeHumanTime(0),false))
 				}
 			}else{
 				payableCompTime = 0	
@@ -1827,11 +1830,11 @@ class TimeManagerService {
 			annualGlobalSupTimeToPay = annualPayableSupTime
 		}	
 			
-		annualTheoriticalIncludingExtra = getTimeAsText(computeHumanTime(Math.round(annualTheoriticalIncludingExtra) as long),true)
+		annualTheoriticalIncludingExtra = getTimeAsText(computeHumanTime(Math.round(annualTheoriticalIncludingExtra) as long),false)
 		// if the total is less than 0, consider only above daily and weekly threshold HS
-		annualGlobalSupTimeToPay = (annualGlobalSupTimeToPay > 0 ? getTimeAsText(computeHumanTime(Math.round(annualGlobalSupTimeToPay) as long),true) : getTimeAsText(computeHumanTime(Math.round(annualPayableSupTime) as long),true))
+		annualGlobalSupTimeToPay = (annualGlobalSupTimeToPay > 0 ? getTimeAsText(computeHumanTime(Math.round(annualGlobalSupTimeToPay) as long),false) : getTimeAsText(computeHumanTime(Math.round(annualPayableSupTime) as long),false))
 		// if the total is less than 0, set it to 0 as it makes no sens
-		annualSupTimeAboveTheoritical = (annualSupTimeAboveTheoritical > 0 ? getTimeAsText(computeHumanTime(Math.round(annualSupTimeAboveTheoritical) as long),true) : getTimeAsText(computeHumanTime(Math.round(0) as long),true))
+		annualSupTimeAboveTheoritical = (annualSupTimeAboveTheoritical > 0 ? getTimeAsText(computeHumanTime(Math.round(annualSupTimeAboveTheoritical) as long),false) : getTimeAsText(computeHumanTime(Math.round(0) as long),false))
 
 		return [
 			monthlyQuotaIncludingExtra:monthlyQuotaIncludingExtra,
@@ -1841,8 +1844,8 @@ class TimeManagerService {
 			initialCA:initialCA,
 			remainingCA:remainingCA,
 			annualEmployeeWorkingDays:annualEmployeeWorkingDays,	
-			annualMonthlySupTime:getTimeAsText(computeHumanTime(Math.round(annualMonthlySupTime) as long),true),
-			annualTheoritical:getTimeAsText(computeHumanTime(Math.round(annualTheoritical) as long),true),			
+			annualMonthlySupTime:getTimeAsText(computeHumanTime(Math.round(annualMonthlySupTime) as long),false),
+			annualTheoritical:getTimeAsText(computeHumanTime(Math.round(annualTheoritical) as long),false),			
 			annualTheoriticalIncludingExtra:annualTheoriticalIncludingExtra,
 			annualSupTimeAboveTheoritical:annualSupTimeAboveTheoritical,
 			annualGlobalSupTimeToPay:annualGlobalSupTimeToPay,
@@ -1853,9 +1856,9 @@ class TimeManagerService {
 			annualSickness:annualSickness,
 			annualExceptionnel:annualExceptionnel,
 			annualWorkingDays:annualWorkingDays,
-			annualPayableSupTime:getTimeAsText(computeHumanTime(Math.round(annualPayableSupTime) as long),true),
-			annualPayableCompTime:getTimeAsText(computeHumanTime(Math.round(annualPayableCompTime) as long),true),
-			annualTotal:getTimeAsText(computeHumanTime(Math.round(annualTotal) as long),true),
+			annualPayableSupTime:getTimeAsText(computeHumanTime(Math.round(annualPayableSupTime) as long),false),
+			annualPayableCompTime:getTimeAsText(computeHumanTime(Math.round(annualPayableCompTime) as long),false),
+			annualTotal:getTimeAsText(computeHumanTime(Math.round(annualTotal) as long),false),
 			lastYear:year,
 			thisYear:year+1,
 			yearMap:yearMap,
@@ -2432,7 +2435,8 @@ class TimeManagerService {
 				}else{
 					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 				}
-				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
+				
+				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),getTimeAsText(computeHumanTime(Math.round(weeklySupTime)),false))
 				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
 					monthlySupTime += weeklySupTime
 					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
@@ -2448,7 +2452,7 @@ class TimeManagerService {
 				}else{
 					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 				}
-					weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
+					weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),getTimeAsText(computeHumanTime(Math.round(weeklySupTime)),false))
 				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
 					monthlySupTime += weeklySupTime
 					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
@@ -2472,7 +2476,7 @@ class TimeManagerService {
 			if 	(entriesByDay.size()>0){
 				if (dailyTotal!=null){
 					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(dailySeconds),false))
-					dailySupTotalMap.put(tmpDate, computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)))
+					dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)),false))
 				}else {
 					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
 					dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
@@ -2542,8 +2546,8 @@ class TimeManagerService {
 			log.error("current employee: "+employee)
 			annualReportMap.put(employee,getAnnualReportData(period.year, employee))		
 			siteAnnualEmployeeWorkingDays += ((annualReportMap.get(employee)).get('annualEmployeeWorkingDays'))
-			siteAnnualTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualTheoritical'),true)
-			siteAnnualTotal += getTimeFromText((annualReportMap.get(employee)).get('annualTotal'),true)
+			siteAnnualTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualTheoritical'),false)
+			siteAnnualTotal += getTimeFromText((annualReportMap.get(employee)).get('annualTotal'),false)
 			siteAnnualHoliday += ((annualReportMap.get(employee)).get('annualHoliday'))
 			siteRemainingCA += ((annualReportMap.get(employee)).get('remainingCA'))
 			siteAnnualRTT += ((annualReportMap.get(employee)).get('annualRTT'))
@@ -2551,16 +2555,16 @@ class TimeManagerService {
 			siteAnnualSickness += ((annualReportMap.get(employee)).get('annualSickness'))
 			siteAnnualDIF += ((annualReportMap.get(employee)).get('annualDIF'))
 			siteAnnualExceptionnel += ((annualReportMap.get(employee)).get('annualExceptionnel'))
-			siteAnnualPayableSupTime += getTimeFromText((annualReportMap.get(employee)).get('annualPayableSupTime'),true)
-			siteAnnualTheoriticalIncludingExtra += getTimeFromText((annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra'),true)
-			siteAnnualSupTimeAboveTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical'),true)
-			siteAnnualGlobalSupTimeToPay += getTimeFromText((annualReportMap.get(employee)).get('annualGlobalSupTimeToPay'),true)
+			siteAnnualPayableSupTime += getTimeFromText((annualReportMap.get(employee)).get('annualPayableSupTime'),false)
+			siteAnnualTheoriticalIncludingExtra += getTimeFromText((annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra'),false)
+			siteAnnualSupTimeAboveTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical'),false)
+			siteAnnualGlobalSupTimeToPay += getTimeFromText((annualReportMap.get(employee)).get('annualGlobalSupTimeToPay'),false)
 		}
 		return [
 			annualReportMap:annualReportMap,
 			siteAnnualEmployeeWorkingDays:siteAnnualEmployeeWorkingDays,
-			siteAnnualTheoritical:getTimeAsText(computeHumanTime(siteAnnualTheoritical),true),
-			siteAnnualTotal:getTimeAsText(computeHumanTime(siteAnnualTotal),true),
+			siteAnnualTheoritical:getTimeAsText(computeHumanTime(siteAnnualTheoritical),false),
+			siteAnnualTotal:getTimeAsText(computeHumanTime(siteAnnualTotal),false),
 			siteAnnualHoliday:siteAnnualHoliday,
 			siteRemainingCA:siteRemainingCA,
 			siteAnnualRTT:siteAnnualRTT,
@@ -2568,10 +2572,10 @@ class TimeManagerService {
 			siteAnnualSickness:siteAnnualSickness,
 			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
-			siteAnnualPayableSupTime:getTimeAsText(computeHumanTime(siteAnnualPayableSupTime),true),
-			siteAnnualTheoriticalIncludingExtra:getTimeAsText(computeHumanTime(siteAnnualTheoriticalIncludingExtra),true),
-			siteAnnualSupTimeAboveTheoritical:getTimeAsText(computeHumanTime(siteAnnualSupTimeAboveTheoritical),true),
-			siteAnnualGlobalSupTimeToPay:getTimeAsText(computeHumanTime(siteAnnualGlobalSupTimeToPay),true),
+			siteAnnualPayableSupTime:getTimeAsText(computeHumanTime(siteAnnualPayableSupTime),false),
+			siteAnnualTheoriticalIncludingExtra:getTimeAsText(computeHumanTime(siteAnnualTheoriticalIncludingExtra),false),
+			siteAnnualSupTimeAboveTheoritical:getTimeAsText(computeHumanTime(siteAnnualSupTimeAboveTheoritical),false),
+			siteAnnualGlobalSupTimeToPay:getTimeAsText(computeHumanTime(siteAnnualGlobalSupTimeToPay),false),
 			employeeList:employeeList		
 			]
 	}
@@ -2582,6 +2586,7 @@ class TimeManagerService {
 		def weekName="semaine "
 		def criteria
 		def dailySeconds
+		def previousValue
 		def timeBefore7 = 0
 		def timeAfter20 = 0
 		def timeOffHours = 0
@@ -2644,21 +2649,22 @@ class TimeManagerService {
 				timeAfter20 +=  timing.get("timeAfter20")
 				timeOffHours = timeOffHours + timing.get("timeBefore7") + timing.get("timeAfter20")
 				monthlyTotalTime += dailySeconds
-				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
+				if (weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR) != null)){
+					previousValue=getTimeFromText(weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR)),false)
+				}
 				if (previousValue!=null){
 					def newValue=previousValue.get(0)*3600+previousValue.get(1)*60+previousValue.get(2)
-					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), computeHumanTime(dailySeconds+newValue))
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), getTimeAsText(computeHumanTime(dailySeconds+newValue),false))
 				}else{
-					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), computeHumanTime(dailySeconds))
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), getTimeAsText(computeHumanTime(dailySeconds),false))
 				}
 
 				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
 					weeklySupTime = 0
 				}else{
-				//	log.error('week of year: '+calendarLoop.get(Calendar.WEEK_OF_YEAR))
 					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 				}
-				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
+				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),getTimeAsText(computeHumanTime(Math.round(weeklySupTime)),false))
 				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
 					monthlySupTime += weeklySupTime
 					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
@@ -2674,7 +2680,7 @@ class TimeManagerService {
 				}else{
 					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 				}
-					weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),computeHumanTime(Math.round(weeklySupTime)))
+					weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),getTimeAsText(computeHumanTime(Math.round(weeklySupTime)),false))
 				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
 					monthlySupTime += weeklySupTime
 					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
@@ -2697,16 +2703,16 @@ class TimeManagerService {
 			if 	(entriesByDay.size()>0){
 				if (dailyTotal!=null){
 					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(dailySeconds),false))
-					dailySupTotalMap.put(tmpDate, computeHumanTimeAsString(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)))
+					dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)),false))
 				}else {
 					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
-					dailySupTotalMap.put(tmpDate, computeHumanTimeAsString(0))
+					dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)),false))
 				}
 				mapByDay.put(tmpDate, entriesByDay)
 			}
 			else{
 				dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
-				dailySupTotalMap.put(tmpDate, computeHumanTimeAsString(0))
+				dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
 				mapByDay.put(tmpDate, null)
 			}
 			
@@ -2758,11 +2764,8 @@ class TimeManagerService {
 			holidayMap:holidayMap,
 			weeklyAggregate:weeklyAggregate,
 			monthlySupTime:monthlySupTime
-		]
-		
-		
+		]	
 	}
-	
 	
 	def getYearSupTime(Employee employee,int year,int month){
 		def monthNumber=0
@@ -2825,7 +2828,6 @@ class TimeManagerService {
 		def calendarIter = Calendar.instance
 		calendarIter.time = minDate
 		
-
 		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
 		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
 			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
@@ -2867,7 +2869,6 @@ class TimeManagerService {
 				calendarIter.roll(Calendar.MONTH, 1)
 			}
 		}
-		yearlyCounter = month > 5 ? utilService.getYearlyCounter(year-1,month,employee) : utilService.getYearlyCounter(year,month,employee)
 		//monthlySupTime=getTimeAsText(computeHumanTime(monthlySupTime as long),false)
 		
 		def monthlySupTimeDecimal=computeHumanTime(monthlySupTime as long)
@@ -2893,10 +2894,8 @@ class TimeManagerService {
 		
 		def yearTimeOffHoursDecimal=computeHumanTime(yearTimeOffHours as long)
 		yearTimeOffHoursDecimal=(yearTimeOffHoursDecimal.get(0)+yearTimeOffHoursDecimal.get(1)/60).setScale(2,2)
-		
-		
+			
 		return [
-			yearlyCounter:yearlyCounter,	
 			monthlySupTime:getTimeAsText(computeHumanTime(monthlySupTime as long),false),
 			timeBefore7:getTimeAsText(computeHumanTime(timeBefore7 as long),false),
 			timeAfter20:getTimeAsText(computeHumanTime(timeAfter20 as long),false),
@@ -2913,9 +2912,6 @@ class TimeManagerService {
 			yearTimeBefore7Decimal:yearTimeBefore7Decimal,
 			yearTimeAfter20Decimal:yearTimeAfter20Decimal,
 			yearTimeOffHoursDecimal:yearTimeOffHoursDecimal
-			]
-		
-	}
-	
-	
+			]	
+	}	
 }

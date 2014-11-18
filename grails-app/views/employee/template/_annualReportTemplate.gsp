@@ -38,7 +38,7 @@
  						${cartouche.value.getAt('monthTheoriticalHuman')}
                		</g:if>
                		<g:else>
-           				00 : 00
+           				00:00
                		</g:else>
 				</td>
 				<td style="vertical-align: middle;width:100px;text-align:right;">
@@ -46,7 +46,7 @@
 						${yearTotalMap.get(cartouche.key)}
                		</g:if>
                		<g:else>
-           				00 : 00
+           				00:00
                		</g:else>
 				</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('holidays')}</td>
@@ -60,13 +60,13 @@
                    		${yearMonthlySupTime.get(cartouche.key)}              		                                  		
               		</g:if>
               		<g:else>
-           				00 : 00
+           				00:00
               		</g:else>
 				</td>								
 			</tr>
 		</g:each>
 		<tr class='even' style='font-weight:bold;'>
-			<td><g:message code="annual.total"/></td>
+			<td style="vertical-align: middle;text-align:center;"><g:message code="annual.total"/></td>
 			<td  style="text-align:center;">${annualWorkingDays}</td>
 			<td style="text-align:center;">${annualEmployeeWorkingDays}</td>
 					
@@ -75,7 +75,7 @@
                		${annualTheoritical}
            		</g:if>
            		<g:else>
-           			00 : 00
+           			00:00
            		</g:else>
 			</td>
 			<td style="vertical-align: middle;text-align:right;">
@@ -83,7 +83,7 @@
 					${annualTotal}    		
            		</g:if>
            		<g:else>
-           			00 : 00
+           			00:00
            		</g:else>
 		</td>
 		<td style="vertical-align: middle;text-align:center;">${annualHoliday}</td>

@@ -11,12 +11,12 @@
 <table  style="width:90%;"class="table  site-table-header-rotated" >
 	<BR>
 	<thead>
-		<th class='rotate-45'style="width:100px;"><div><span><g:message code="employee.site.label"/></span></div></th>	
-		<th class='rotate-45' style="width:120px;"><div><span><g:message code="employee.label"/></span></div></th>	
+		<th class='rotate-45'style="width:95px;"><div><span><g:message code="employee.site.label"/></span></div></th>	
+		<th class='rotate-45' style="width:115px;"><div><span><g:message code="employee.label"/></span></div></th>	
 		<th class='rotate-45' style="width:40px;"><div><span><g:message code="annual.report.working.days.label"/></span></div></th>			
 		<th class='rotate-45' style="width:40px;"><div><span><g:message code="annual.report.working.days"/></span></div></th>			
-		<th class='rotate-45' style="width:100px;"><div><span><g:message code="annual.report.theoritical.label"/></span></div></th>
-		<th class='rotate-45' style="width:100px;"><div><span><g:message code="annual.report.elapsed.label"/></span></div></th>
+		<th class='rotate-45' style="width:85px;"><div><span><g:message code="annual.report.theoritical.label"/></span></div></th>
+		<th class='rotate-45' style="width:85px;"><div><span><g:message code="annual.report.elapsed.label"/></span></div></th>
 		<th class='rotate-45' style="width:45px;"><div><span><g:message code="annual.report.holidays.label"/></span></div></th>
 		<th class='rotate-45' style="width:45px;"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>
 		<th class='rotate-45' style="width:45px;"><div><span><g:message code="annual.report.RTT.label"/></span></div></th>
@@ -25,7 +25,7 @@
 		<th class='rotate-45' style="width:45px;"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>		
 		<th class='rotate-45' style="width:45px;"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.HS.above.quota.short"/></span></div></th>
-		<th class='rotate-45' style="width:100px;"><div><span><g:message code="annual.computed.quota.short"/></span></div></th>
+		<th class='rotate-45' style="width:85px;"><div><span><g:message code="annual.computed.quota.short"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.other.HS.quota.short"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.total.HS.to.pay"/></span></div></th>
 	</thead>

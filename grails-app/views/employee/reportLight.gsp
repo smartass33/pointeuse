@@ -43,15 +43,7 @@
 						<li style="vertical-align: middle;"><g:actionSubmit class="displayButton" value="afficher" action="reportLight"/></li>
 					</form>					
 				</ul>
-			</div>
-
-			
-			
-			
-			
-			
-			
-			
+			</div>			
 			<g:if test="${flash.message}">
 				<div class="message">
 					${flash.message}
