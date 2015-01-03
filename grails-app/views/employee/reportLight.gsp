@@ -94,7 +94,7 @@
 												<td class="eventTD" ><font size="2">${(dailyTotalMap.get(entries.key)).get(0)}:${(dailyTotalMap.get(entries.key)).get(1)}:${(dailyTotalMap.get(entries.key)).get(2)}</font></td>
 											</g:if>
 											<g:else>
-												<td class="eventTD" ><font size="2">00:00:00</font></td>
+												<td class="eventTD" ><font size="2">00:00</font></td>
 											</g:else>
 											
 											
