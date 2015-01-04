@@ -8,6 +8,7 @@ import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date;
 
+import groovy.time.TimeDuration
 import groovy.time.TimeCategory
 import grails.converters.JSON
 
@@ -740,11 +741,32 @@ def vacationFollowup(){
 	def getAjaxSupplementaryTime(Long id) {
 	//	def monthlySupTime = params['monthlySupTime']
 		def year = params.int('year')
-		def period = params['period']
+	//	def period = params['period']
 		def month = params.int('month')
 		log.error("getAjaxSupplementaryTime triggered with params: month="+month+" and year="+year)
 		def employee = Employee.get(id)		
 		def model = timeManagerService.getYearSupTime(employee,year,month)
+		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)
+		
+		//here, we can proceed to the creation, or update of the SupplementaryTime object
+		def criteria = SupplementaryTime.createCriteria()
+		def supTime = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('period',period)
+				eq('month',month)
+			}
+			maxResults(1)
+		}
+		if (supTime == null){
+			supTime = new SupplementaryTime( employee, period,  month, model.get('ajaxYearlySupTimeDecimal'))
+		}else{
+			supTime.value = model.get('ajaxYearlySupTimeDecimal')
+		}
+		supTime.save(flush: true)
+		
+		
+		
 		log.error("getYearSupTime has terminated")
 		
 		model << [id:id,month:month,year:year]
@@ -1625,7 +1647,9 @@ def vacationFollowup(){
 		def myDate = params["myDate"]
 		def site
 		def siteId
+		def timeDifference
 		Calendar calendar = Calendar.instance
+		def startTime = calendar.time
 		def folder = grailsApplication.config.pdf.directory
 		
 		if (myDate==null || myDate.equals("")){
@@ -1646,11 +1670,71 @@ def vacationFollowup(){
 		}
 			
 		def retour = PDFService.generateSiteMonthlyTimeSheet(myDate,site,folder)
+		calendar = Calendar.instance
+		def endTime = calendar.time
+		use (TimeCategory){timeDifference = endTime - startTime}
+		log.error("le rapport a pris: "+timeDifference)
+		//response.setContentType("application/pdf")
+		//response.setHeader("Content-disposition", "filename=${retour[1]}")
+		//response.outputStream << retour[0]
+		
+		def file = new File(folder+'/'+retour[1])
+		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
+		/*
 		response.setContentType("application/octet-stream")
-		response.setHeader("Content-disposition", "filename=${retour[1]}")
-		response.outputStream << retour[0]
+		response.setHeader("Content-disposition", "attachment;filename=${file.getName()}")
+		
+		response.outputStream << file.newInputStream()
+		*/
+		
 	}
 	
+	
+	def siteMonthlyWithSupTimePDF(){
+		def myDate = params["myDate"]
+		def site
+		def siteId
+		def timeDifference
+		Calendar calendar = Calendar.instance
+		def startTime = calendar.time
+		def folder = grailsApplication.config.pdf.directory
+		
+		if (myDate==null || myDate.equals("")){
+			myDate=calendar.time
+		}else {
+			calendar.time=myDate
+		}
+	
+
+		if (params["site.id"]!=null && !params["site.id"].equals('')){
+			siteId = params["site.id"].toInteger()
+			site = Site.get(siteId)
+			siteId=site.id
+		}else{
+			flash.message = message(code: 'pdf.site.selection.error')
+			redirect(action: "list")
+			return
+		}
+			
+		def retour = PDFService.generateSiteMonthlyTimeWithSupTimeSheet(myDate,site,folder)
+		calendar = Calendar.instance
+		def endTime = calendar.time
+		use (TimeCategory){timeDifference = endTime - startTime}
+		log.error("le rapport a pris: "+timeDifference)
+		//response.setContentType("application/pdf")
+		//response.setHeader("Content-disposition", "filename=${retour[1]}")
+		//response.outputStream << retour[0]
+		
+		def file = new File(folder+'/'+retour[1])
+		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
+		/*
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "attachment;filename=${file.getName()}")
+		
+		response.outputStream << file.newInputStream()
+		*/
+		
+	}
 	
 	def allSiteMonthlyPDF(){
 		def myDate = params["myDate"]
@@ -1708,9 +1792,24 @@ def vacationFollowup(){
 			calendar.time=myDate
 		}
 		def retour = PDFService.generateUserMonthlyTimeSheet(myDate,employee,folder)
+	//	response.setContentType("application/pdf")
+	//	response.setHeader("Content-disposition", "filename=${retour[1]}")
+	//	response.outputStream << retour[0]
+		
+		
+		
+		def file = new File(folder+'/'+retour[1])
+		/*
 		response.setContentType("application/octet-stream")
-		response.setHeader("Content-disposition", "filename=${retour[1]}")
-		response.outputStream << retour[0]
+		response.setHeader("Content-disposition", "attachment;filename=${file.getName()}")
+		
+		response.outputStream << file.newInputStream()
+		*/
+		//render file:file.newInputStream()
+		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
+		
+		
+		
 	}
 	
 
@@ -2212,7 +2311,94 @@ def vacationFollowup(){
 	}
 	
 	
+	def computeYearSupTime(Long id){
+		log.error('computeYearSupTime called')
+		
+		def calendar = Calendar.instance
+		def month = calendar.get(Calendar.MONTH)+1
+		def year = calendar.get(Calendar.YEAR)
+		def employee = Employee.get(id)
+		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)
+		
+		def data = timeManagerService.getYearSupTime(employee,year,month)
+		
+		def criteria = SupplementaryTime.createCriteria()
+		def supTime = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('period',period)
+				eq('month',month)
+			}
+			maxResults(1)
+		}
+		if (supTime == null){	
+			supTime = new SupplementaryTime( employee, period,  month, data.get('ajaxYearlySupTimeDecimal'))		
+		}else{
+			supTime.value = data.get('ajaxYearlySupTimeDecimal')
+		}		
+		supTime.save(flush: true)
+		log.error('computeYearSupTime ended')
+	}
 	
+	def initializeSupTime(Long id){
+		log.error('initializeSupTime called')
+		
+		def calendar = Calendar.instance
+		def currentYear = calendar.get(Calendar.YEAR)
+		def currentMonth = calendar.get(Calendar.MONTH)+1
+		def startTime = calendar.time
+		def timeDiff
+
+		
+		// it all starts on June 1st, 2013
+		def month = 6
+		def loopMonth = 5
+		def year = 2014
+		
+		def employees = Employee.findAll()
+		log.error('there are '+employees.size()+' employees found')
+		def counter = 1
+		for (Employee employee: employees){
+			month = 6
+			loopMonth = 5
+			year = 2014
+			log.error('dealing with employee #'+counter)
+			//def employee = Employee.get(id)
+			
+			
+			while (year <= currentYear){
+				
+	
+				if (loopMonth == 12){
+					loopMonth = 1
+					year += 1			
+				}else{
+					loopMonth += 1	
+				}
+				
+				Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
+				log.error('will compute yearSupTime for month:  '+loopMonth+' and year: '+year)
+				def data = timeManagerService.getYearSupTime(employee,year,loopMonth)
+				SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth, data.get('ajaxYearlySupTimeDecimal'))
+				log.error('supTime computed')
+				
+				supTime.save(flush: true)
+				if (loopMonth == currentMonth && year == currentYear){
+					break;
+				}
+			}
+			counter += 1
+		}
+		//compute sup time month by month, 
+		
+		
+		
+
+		calendar = Calendar.instance
+		def endTime = calendar.time
+		use (TimeCategory){timeDiff=endTime-startTime}	
+		log.error('computeYearSupTime executed in '+timeDiff)
+	}
 	
 	def updateUsername(Long id, Long version) {		
 		def employeeInstance = Employee.get(id)
@@ -2224,5 +2410,16 @@ def vacationFollowup(){
 		employeeInstance.userName = params['username']
 		employeeInstance.save(flush: true)		
 		render employeeInstance
+	}
+	
+	def displayArchive(){
+		def folder = grailsApplication.config.pdf.directory
+		def baseDir = new File(folder)
+		def archiveList = []
+		basedir.eachFileMatch (~/.*.pdf/) { file ->
+		  archiveList << file
+		
+		}
+		log.error('archiveList: '+archiveList)
 	}
 }

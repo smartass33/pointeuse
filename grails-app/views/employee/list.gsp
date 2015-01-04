@@ -96,6 +96,8 @@
 								precision="month" noSelection="['':'-Choisissez-']" style="vertical-align: middle;"/>
 					</li>
 					<li><g:actionSubmit value="PDF" action="siteMonthlyPDF" class="pdfButton" /></li>
+					<li><g:actionSubmit value="PDF avec HS" action="siteMonthlyWithSupTimePDF" class="pdfButton" /></li>
+					
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
 					<g:hiddenField name="siteId" value="${siteId}" />
 				</ul>

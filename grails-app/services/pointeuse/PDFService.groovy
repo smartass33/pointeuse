@@ -21,7 +21,7 @@ class PDFService {
 		for (Employee employee:employeeList){
 			log.error('method pdf siteMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
 			def modelReport=timeManagerService.getReportData((site.id).toString(),employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-			modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+			//modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 			log.error('getReportData and getYearSupTime finalized')
 			
 			// Get the bytes
@@ -46,6 +46,67 @@ class PDFService {
 		return [file.bytes,file.name]
 	}
 
+	
+	
+	def generateSiteMonthlyTimeWithSupTimeSheet(Date myDate,Site site,String folder){
+		def fileNameList=[]
+		def filename
+		PdfCopyFields finalCopy
+		Calendar calendar = Calendar.instance
+		def year = calendar.get(Calendar.YEAR)
+		def month = calendar.get(Calendar.MONTH) + 1
+		OutputStream outputStream
+		File file
+		
+		def employeeList = Employee.findAllBySite(site)
+		for (Employee employee:employeeList){
+			log.error('method pdf generateSiteMonthlyTimeWithSupTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+year+', Month= '+month)
+			def modelReport=timeManagerService.getReportData((site.id).toString(),employee,myDate,year,month)
+			
+			Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)
+			
+			def criteria = SupplementaryTime.createCriteria()
+			def supTime = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('period',period)
+					eq('month',month)
+				}
+				maxResults(1)
+			}
+			if (supTime == null){
+				def data = timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+				supTime = new SupplementaryTime( employee, period,  month, data.get('ajaxYearlySupTimeDecimal'))
+				supTime.save(flush: true)
+			}
+			
+			
+			
+			modelReport << [ajaxYearlySupTime:timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(3600*supTime.value as long),false),ajaxYearlySupTimeDecimal:supTime.value]
+			log.error('getReportData and getYearSupTime finalized')
+			
+			// Get the bytes
+			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeReportWithSupTimeTemplate', model: modelReport)
+			filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
+			fileNameList.add(filename)
+			outputStream = new FileOutputStream (folder+'/'+filename);
+			bytes.writeTo(outputStream)
+			if(bytes)
+				bytes.close()
+			if(outputStream)
+				outputStream.close()
+		}
+		finalCopy = new PdfCopyFields(new FileOutputStream(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'));
+		finalCopy.open()
+		for (String tmpFile:fileNameList){
+			PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
+			finalCopy.addDocument(pdfReader)
+		}
+		finalCopy.close();
+		file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+		return [file.bytes,file.name]
+	}
+	
 
 	def generateUserMonthlyTimeSheet(Date myDate,Employee employee,String folder){
 		log.error('generateUserMonthlyTimeSheet called')

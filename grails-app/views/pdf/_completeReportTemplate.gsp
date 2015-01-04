@@ -311,15 +311,13 @@
 									<td>
 		        						<table border="1" class="cartoucheValues" >
 		        							<thead></thead>
-		        							<tr><td style="font-weight:bold">
-												${ajaxYearlySupTime} ou ${ajaxYearlySupTimeDecimal}
-		        							</td></tr>
+		        							<tr><td style="font-style: italic">tbd</td></tr>
 		        						</table>
 		        					</td>
 								</tr>
-							</g:if>		
+							</g:if>	
 							
-		
+
 							<g:if test="${employee.weeklyContractTime!=35}">
 								<g:if test="${payableCompTime!=null}">						
 									<tr>

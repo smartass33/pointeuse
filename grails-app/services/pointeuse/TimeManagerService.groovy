@@ -2776,9 +2776,9 @@ class TimeManagerService {
 		def yearlyCounter = 0
 		def data
 		def monthlySupTime = 0
-		def timeBefore7
-		def timeAfter20 
-		def timeOffHours
+		def timeBefore7 = 0
+		def timeAfter20 = 0
+		def timeOffHours= 0
 		def calendar = Calendar.instance
 		calendar.set(Calendar.YEAR,year)
 		def bankHolidayList
@@ -2874,25 +2874,26 @@ class TimeManagerService {
 		def monthlySupTimeDecimal=computeHumanTime(monthlySupTime as long)
 		monthlySupTimeDecimal=(monthlySupTimeDecimal.get(0)+monthlySupTimeDecimal.get(1)/60).setScale(2,2)
 		
-		def timeBefore7Decimal=computeHumanTime(timeBefore7 as long)
+		
+		def timeBefore7Decimal = computeHumanTime(timeBefore7 as long) 
 		timeBefore7Decimal=(timeBefore7Decimal.get(0)+timeBefore7Decimal.get(1)/60).setScale(2,2)
 		
-		def timeAfter20Decimal=computeHumanTime(timeAfter20 as long)
+		def timeAfter20Decimal = computeHumanTime(timeAfter20 as long) 
 		timeAfter20Decimal=(timeAfter20Decimal.get(0)+timeAfter20Decimal.get(1)/60).setScale(2,2)
 		
-		def timeOffHoursDecimal=computeHumanTime(timeOffHours as long)
+		def timeOffHoursDecimal = computeHumanTime(timeOffHours as long)
 		timeOffHoursDecimal= (timeOffHoursDecimal.get(0)+timeOffHoursDecimal.get(1)/60).setScale(2,2)
 		
-		def ajaxYearlySupTimeDecimal=computeHumanTime(yearSupTime as long)
+		def ajaxYearlySupTimeDecimal = computeHumanTime(yearSupTime as long)
 		ajaxYearlySupTimeDecimal= (ajaxYearlySupTimeDecimal.get(0)+ajaxYearlySupTimeDecimal.get(1)/60).setScale(2,2)
 		
-		def yearTimeBefore7Decimal=computeHumanTime(yearTimeBefore7 as long)
+		def yearTimeBefore7Decimal =computeHumanTime(yearTimeBefore7 as long)
 		yearTimeBefore7Decimal= (yearTimeBefore7Decimal.get(0)+yearTimeBefore7Decimal.get(1)/60).setScale(2,2)
 		
-		def yearTimeAfter20Decimal=computeHumanTime(yearTimeAfter20 as long)
+		def yearTimeAfter20Decimal = computeHumanTime(yearTimeAfter20 as long) 
 		yearTimeAfter20Decimal= (yearTimeAfter20Decimal.get(0)+yearTimeAfter20Decimal.get(1)/60).setScale(2,2)
 		
-		def yearTimeOffHoursDecimal=computeHumanTime(yearTimeOffHours as long)
+		def yearTimeOffHoursDecimal = computeHumanTime(yearTimeOffHours as long)
 		yearTimeOffHoursDecimal=(yearTimeOffHoursDecimal.get(0)+yearTimeOffHoursDecimal.get(1)/60).setScale(2,2)
 			
 		return [
