@@ -5,6 +5,7 @@ import org.apache.log4j.DailyRollingFileAppender
 import java.util.Calendar
 import pointeuse.InAndOutCLosingJob
 import pointeuse.SiteAnnualReportJob
+import pointeuse.SupTimeComputationJob
 import pointeuse.EventLogAppender
 
 class BootStrap {
@@ -18,6 +19,12 @@ class BootStrap {
 		calendar.set(Calendar.MINUTE,0)
 		log.error 'registring InAndOutCLosingJob at '+calendar.time
 		InAndOutCLosingJob.schedule(calendar.time)
+		
+		
+		calendar.set(Calendar.HOUR_OF_DAY,2)
+		calendar.set(Calendar.MINUTE,0)
+		SupTimeComputationJob.schedule(calendar.time)
+		log.error 'registring SupTimeComputationJob at '+calendar.time
 		
 		
 		//create a calendar to schedule next JOB first day of month

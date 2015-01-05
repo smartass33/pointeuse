@@ -2311,33 +2311,47 @@ def vacationFollowup(){
 	}
 	
 	
-	def computeYearSupTime(Long id){
+	def computeYearSupTime(boolean isLastMonth){
 		log.error('computeYearSupTime called')
-		
+		def month
+		def year
 		def calendar = Calendar.instance
-		def month = calendar.get(Calendar.MONTH)+1
-		def year = calendar.get(Calendar.YEAR)
-		def employee = Employee.get(id)
-		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)
-		
-		def data = timeManagerService.getYearSupTime(employee,year,month)
-		
-		def criteria = SupplementaryTime.createCriteria()
-		def supTime = criteria.get {
-			and {
-				eq('employee',employee)
-				eq('period',period)
-				eq('month',month)
+		if (isLastMonth){
+			month = calendar.get(Calendar.MONTH)
+			year = calendar.get(Calendar.YEAR)		
+			if (month == 0){
+				month = 1
+				year = year - 1
 			}
-			maxResults(1)
+		} else{
+			month = calendar.get(Calendar.MONTH)+1
+			year = calendar.get(Calendar.YEAR)
 		}
-		if (supTime == null){	
-			supTime = new SupplementaryTime( employee, period,  month, data.get('ajaxYearlySupTimeDecimal'))		
-		}else{
-			supTime.value = data.get('ajaxYearlySupTimeDecimal')
-		}		
-		supTime.save(flush: true)
+		
+		def employees = Employee.findAll()
+		log.error('there are '+employees.size()+' employees found')
+		def counter = 1
+		for (Employee employee: employees){
+			Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)	
+			def data = timeManagerService.getYearSupTime(employee,year,month)		
+			def criteria = SupplementaryTime.createCriteria()
+			def supTime = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('period',period)
+					eq('month',month)
+				}
+				maxResults(1)
+			}
+			if (supTime == null){
+				supTime = new SupplementaryTime( employee, period,  month, data.get('ajaxYearlySupTimeDecimal'))
+			}else{
+				supTime.value = data.get('ajaxYearlySupTimeDecimal')
+			}
+			supTime.save(flush: true)		
+		}
 		log.error('computeYearSupTime ended')
+		log.error('recreating job')
 	}
 	
 	def initializeSupTime(Long id){
