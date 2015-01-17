@@ -742,7 +742,7 @@ def vacationFollowup(){
 	//	def monthlySupTime = params['monthlySupTime']
 		def year = params.int('year')
 	//	def period = params['period']
-		def month = params.int('month')
+ 		def month = params.int('month')
 		log.error("getAjaxSupplementaryTime triggered with params: month="+month+" and year="+year)
 		def employee = Employee.get(id)		
 		def model = timeManagerService.getYearSupTime(employee,year,month)
@@ -946,8 +946,12 @@ def vacationFollowup(){
 		// initialisation
 		if (flashMessage){
 			def inOrOut = timeManagerService.initializeTotals(employeeInstance,currentDate,type,null,isOutSideSite)
+			timeManagerService.getDailyTotalWithMonth(inOrOut.dailyTotal)	
 			log.error('entry created with params: '+inOrOut)
 		}
+		
+		
+		
 		criteria = InAndOut.createCriteria()
 		def inAndOuts = criteria.list {
 			and {
@@ -958,6 +962,7 @@ def vacationFollowup(){
 				order('time','asc')
 			}
 		}
+		
 		
 		if (lastIn!=null){
 			if (flashMessage){
@@ -2354,35 +2359,50 @@ def vacationFollowup(){
 		log.error('recreating job')
 	}
 	
-	def initializeSupTime(Long id){
-		log.error('initializeSupTime called')
-		
+	def initializeSupTime(Long id,Long siteId,Long initialMonth,Long initialYear){
+		log.error('initializeSupTime called')	
 		def calendar = Calendar.instance
 		def currentYear = calendar.get(Calendar.YEAR)
 		def currentMonth = calendar.get(Calendar.MONTH)+1
 		def startTime = calendar.time
 		def timeDiff
+		def year
+		def month
+		def loopMonth
+		def employees = []
 
+		if (siteId != null){
+			log.error('finding all employees of a given site')
+			def site = Site.get(siteId)
+			employees = Employee.findAllBySite(site)
+		}else{
+			if (id != null){
+				employees.add(Employee.get(id))
+			}else{
+				employees = Employee.findAll()
+			}
+		}
 		
 		// it all starts on June 1st, 2013
-		def month = 6
-		def loopMonth = 5
-		def year = 2014
-		
-		def employees = Employee.findAll()
+		if (initialMonth == null){
+			initialMonth = 6
+			loopMonth = 5
+		}else{
+			loopMonth = initialMonth - 1
+		}
+		if (initialYear == null){
+			initialYear = 2014
+		}
+
 		log.error('there are '+employees.size()+' employees found')
 		def counter = 1
 		for (Employee employee: employees){
-			month = 6
-			loopMonth = 5
-			year = 2014
+			month = initialMonth
+			loopMonth = initialMonth - 1
+			year = initialYear
 			log.error('dealing with employee #'+counter)
-			//def employee = Employee.get(id)
-			
-			
+					
 			while (year <= currentYear){
-				
-	
 				if (loopMonth == 12){
 					loopMonth = 1
 					year += 1			
@@ -2392,8 +2412,8 @@ def vacationFollowup(){
 				
 				Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
 				log.error('will compute yearSupTime for month:  '+loopMonth+' and year: '+year)
-				def data = timeManagerService.getYearSupTime(employee,year,loopMonth)
-				SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth, data.get('ajaxYearlySupTimeDecimal'))
+				def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
+				SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
 				log.error('supTime computed')
 				
 				supTime.save(flush: true)

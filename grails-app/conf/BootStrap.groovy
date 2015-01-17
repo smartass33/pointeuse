@@ -21,8 +21,8 @@ class BootStrap {
 		InAndOutCLosingJob.schedule(calendar.time)
 		
 		
-		calendar.set(Calendar.HOUR_OF_DAY,2)
-		calendar.set(Calendar.MINUTE,0)
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,30)
 		SupTimeComputationJob.schedule(calendar.time)
 		log.error 'registring SupTimeComputationJob at '+calendar.time
 		

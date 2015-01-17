@@ -749,11 +749,28 @@ class TimeManagerService {
 	def getDailyTotalWithMonth(DailyTotal dailyTotal){
 		def criteria = InAndOut.createCriteria()
 		def elapsedSeconds = 0
+		def timeBefore7 = 0
+		def timeAfter20 = 0
+		def timeOffHours = 0
 		def tmpInOrOut
 		def timeDifference
 		def deltaTime
 		def currentInOrOut
 		def previousInOrOut
+		def calendarAtSeven = Calendar.instance
+		def calendarAtNine = Calendar.instance
+		calendarAtSeven.set(Calendar.YEAR,dailyTotal.year)
+		calendarAtSeven.set(Calendar.MONTH,dailyTotal.month-1)
+		calendarAtSeven.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
+		calendarAtSeven.set(Calendar.HOUR_OF_DAY,7)
+		calendarAtSeven.set(Calendar.MINUTE,0)
+		calendarAtSeven.set(Calendar.SECOND,0)
+		calendarAtNine.set(Calendar.YEAR,dailyTotal.year)
+		calendarAtNine.set(Calendar.MONTH,dailyTotal.month-1)
+		calendarAtNine.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
+		calendarAtNine.set(Calendar.HOUR_OF_DAY,20)
+		calendarAtNine.set(Calendar.MINUTE,0)
+		calendarAtNine.set(Calendar.SECOND,0)
 		def inOrOutList = criteria.list {
 			and {
 				eq('employee',dailyTotal.employee)
@@ -774,14 +791,43 @@ class TimeManagerService {
 					use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
 					elapsedSeconds += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
 				}
+				// managing time before 7
+				if (currentInOrOut.time < calendarAtSeven.time){
+					use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+					timeBefore7 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+				}
+				if (currentInOrOut.time > calendarAtSeven.time && previousInOrOut.time < calendarAtSeven.time){
+					use (TimeCategory){timeDifference = calendarAtSeven.time - previousInOrOut.time}
+					timeBefore7 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+				}
+				
+				// managing time after 21
+				if (previousInOrOut.time > calendarAtNine.time){
+					use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+					timeAfter20 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+				}
+				if (currentInOrOut.time > calendarAtNine.time && previousInOrOut.time < calendarAtNine.time){
+					use (TimeCategory){timeDifference = currentInOrOut.time - calendarAtNine.time}
+					timeAfter20 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+				}
+				
 				previousInOrOut = inOrOut
 			}
 		}
-		deltaTime=dailyTotal.elapsedSeconds - elapsedSeconds//old-new
-		dailyTotal.elapsedSeconds=elapsedSeconds
+
+		deltaTime = dailyTotal.elapsedSeconds - elapsedSeconds//old-new
+		dailyTotal.elapsedSeconds = elapsedSeconds
+
+		def deltaBefore7 = dailyTotal.weeklyTotal.monthlyTotal.timeBefore7 - timeBefore7
+		def deltaAfter20 = dailyTotal.weeklyTotal.monthlyTotal.timeAfter20 - timeAfter20
+	
+		
 		dailyTotal.weeklyTotal.elapsedSeconds -= deltaTime
 		dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds -= deltaTime
-
+		
+		dailyTotal.weeklyTotal.monthlyTotal.timeBefore7 -= deltaBefore7
+		dailyTotal.weeklyTotal.monthlyTotal.timeAfter20 -= deltaAfter20
+		
 		return elapsedSeconds
 	}
 	
@@ -2485,16 +2531,11 @@ class TimeManagerService {
 				timeOffHours = timeOffHours + timing.get("timeBefore7") + timing.get("timeAfter20")
 				monthlyTotalTime += dailySeconds
 							
-		//		log.error("weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR): "+weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
-		//		log.error("currentWeek: "+currentWeek)
-							
 				if (currentWeek == calendarLoop.get(Calendar.WEEK_OF_YEAR)){
 					weeklyTotal += dailySeconds
 				}else{
 					weeklyTotal = dailySeconds
 				}
-		//		log.error("weeklyTotal: "+weeklyTotal)
-		//		log.error("weeklyTotalTime: "+weeklyTotalTime)
 				
 				weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), getTimeAsText(computeHumanTime(weeklyTotal),false))
 			
@@ -2586,6 +2627,22 @@ class TimeManagerService {
 			}
 			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
 		}
+		
+		def montlyTotalCriteria = MonthlyTotal.createCriteria()
+		def monthlyTotal = montlyTotalCriteria.get {
+			and {
+				eq('employee',employee)
+				eq('year',calendarLoop.get(Calendar.YEAR))
+				eq('month',calendarLoop.get(Calendar.MONTH)+1)
+			}
+		}
+
+		if (monthlyTotal != null){
+			monthlyTotal.timeBefore7=timeBefore7
+			monthlyTotal.timeAfter20=timeAfter20
+			monthlyTotal.supplementarySeconds=monthlySupTime
+			monthlyTotal.save(flush:true)
+		}
 		return [
 			timeBefore7:timeBefore7,
 			timeAfter20:timeAfter20,
@@ -2605,6 +2662,73 @@ class TimeManagerService {
 			monthlySupTime:monthlySupTime
 		]	
 	}
+	
+	def computeOffTimeTotals(Employee employee, int month, int year){
+		//variables
+		def criteria
+		def timeBefore7 = 0
+		def timeAfter20 = 0
+		def timeOffHours = 0
+		def currentWeek = 0
+		
+		def dailyTotalId = 0
+		
+		//calendars
+		def calendar = Calendar.instance
+		calendar.set(Calendar.MONTH,month - 1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		calendar.set(Calendar.DATE,1)
+		def calendarLoop = calendar
+
+		calendarLoop.getTime().clearTime()
+		
+		def lastWeekParam = utilService.getLastWeekOfMonth(month, year)
+		def isSunday = lastWeekParam.get(1)
+		
+		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			// élimine les dimanches du rapport
+		
+			//print calendarLoop.time
+			criteria = DailyTotal.createCriteria()
+			def dailyTotal = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+					eq('month',month)
+					eq('year',year)
+				}
+			}
+			// permet de récupérer le total hebdo
+			if (dailyTotal != null && dailyTotal != dailyTotalId){
+				def timing = getDailyTotal(dailyTotal)
+				timeBefore7 += timing.get("timeBefore7")
+				timeAfter20 +=  timing.get("timeAfter20")
+				timeOffHours = timeOffHours + timing.get("timeBefore7") + timing.get("timeAfter20")
+							
+				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
+					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
+				}
+
+				dailyTotalId=dailyTotal.id
+			}
+			if (calendarLoop.get(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				break
+			}
+			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
+		}
+						
+			return [
+			timeBefore7:timeBefore7,
+			timeAfter20:timeAfter20,
+			timeOffHours:timeOffHours
+
+		]
+	}
+	
+	
 	
 	def getYearSupTime(Employee employee,int year,int month){
 		def monthNumber=0
@@ -2690,6 +2814,13 @@ class TimeManagerService {
 				log.debug('calendarIter: '+calendarIter.time)
 				data = computeWeeklyTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				yearSupTime +=  data.get('monthlySupTime')
+				yearTimeBefore7 += data.get('timeBefore7')
+				yearTimeAfter20 += data.get('timeAfter20')
+				yearTimeOffHours += data.get('timeOffHours')
+				monthlySupTime = data.get('monthlySupTime')
+				timeBefore7 = data.get('timeBefore7') != null ? data.get('timeBefore7') : 0
+				timeAfter20 = data.get('timeAfter20') != null ? data.get('timeAfter20') : 0
+				timeOffHours = data.get('timeOffHours') != null ? data.get('timeOffHours') : 0
 				if (calendarIter.get(Calendar.MONTH) == 11){
 					break
 				}
@@ -2702,6 +2833,13 @@ class TimeManagerService {
 				log.debug('calendarIter: '+calendarIter.time)
 				data = computeWeeklyTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				yearSupTime +=  data.get('monthlySupTime')
+				yearTimeBefore7 += data.get('timeBefore7')
+				yearTimeAfter20 += data.get('timeAfter20')
+				yearTimeOffHours += data.get('timeOffHours')
+				monthlySupTime = data.get('monthlySupTime')
+				timeBefore7 = data.get('timeBefore7') != null ? data.get('timeBefore7') : 0
+				timeAfter20 = data.get('timeAfter20') != null ? data.get('timeAfter20') : 0
+				timeOffHours = data.get('timeOffHours') != null ? data.get('timeOffHours') : 0
 				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
 					break
 				}
@@ -2712,8 +2850,7 @@ class TimeManagerService {
 		
 		def monthlySupTimeDecimal=computeHumanTime(monthlySupTime as long)
 		monthlySupTimeDecimal=(monthlySupTimeDecimal.get(0)+monthlySupTimeDecimal.get(1)/60).setScale(2,2)
-		
-		
+			
 		def timeBefore7Decimal = computeHumanTime(timeBefore7 as long) 
 		timeBefore7Decimal=(timeBefore7Decimal.get(0)+timeBefore7Decimal.get(1)/60).setScale(2,2)
 		
@@ -2753,5 +2890,329 @@ class TimeManagerService {
 			yearTimeAfter20Decimal:yearTimeAfter20Decimal,
 			yearTimeOffHoursDecimal:yearTimeOffHoursDecimal
 			]	
-	}	
+	}
+	
+	
+	def getOffHoursTime(Employee employee,int year,int month){
+		def monthNumber=0
+		def yearTimeBefore7 = 0
+		def yearTimeAfter20 = 0
+		def yearTimeOffHours = 0
+		def yearlyCounter = 0
+		def data
+		def timeBefore7 = 0
+		def timeAfter20 = 0
+		def timeOffHours= 0
+		def calendar = Calendar.instance
+		calendar.set(Calendar.YEAR,year)
+		def bankHolidayList
+		def criteria = Absence.createCriteria()
+
+		if (month > 5){
+			year = year + 1
+			monthNumber = month - 6 + 1
+		}else{
+			monthNumber = month + 1 + 6
+		}
+
+		// set the date end of may
+		calendar.set(Calendar.DAY_OF_MONTH,10)
+		calendar.set(Calendar.MONTH,month-1)
+		log.debug("month: "+calendar.get(Calendar.MONTH))
+		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug("last day of the month: "+calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug("calendar: "+calendar)
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		def maxDate = calendar.time
+		log.debug("month: "+calendar.get(Calendar.MONTH))
+		log.debug("maxDate: "+maxDate)
+		calendar.set(Calendar.YEAR,year-1)
+		calendar.set(Calendar.MONTH,5)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.clearTime()
+		def minDate = calendar.time
+
+		/* create a loop over months and invoke getMonthTheoritical method */
+		// check if employee entered the company or left the company over the period.
+		def arrivalDate = employee.arrivalDate
+		def exitDate = employee.status == StatusType.TERMINE ? employee.status.date : null
+
+		// the employee arrived after the period started: resetting the minDate
+		if (arrivalDate > minDate){
+			minDate = arrivalDate
+		}
+
+		// the employee left before period's end:
+		if ((exitDate != null) && exitDate < maxDate){
+			maxDate = exitDate
+		}
+		
+		def calendarIter = Calendar.instance
+		calendarIter.time = minDate
+		
+		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
+		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
+			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
+				log.debug('calendarIter: '+calendarIter.time)
+				data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTimeBefore7 += data.get('timeBefore7')
+				yearTimeAfter20 += data.get('timeAfter20')
+				yearTimeOffHours += data.get('timeOffHours')
+				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					timeBefore7 = data.get('timeBefore7') != null ? data.get('timeBefore7') : 0
+					timeAfter20 = data.get('timeAfter20') != null ? data.get('timeAfter20') : 0
+					timeOffHours = data.get('timeOffHours') != null ? data.get('timeOffHours') : 0
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+		}else{
+			while(calendarIter.get(Calendar.MONTH) <= 11){
+				log.debug('calendarIter: '+calendarIter.time)
+				data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTimeBefore7 += data.get('timeBefore7')
+				yearTimeAfter20 += data.get('timeAfter20')
+				yearTimeOffHours += data.get('timeOffHours')
+				if (calendarIter.get(Calendar.MONTH) == 11){
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+			calendarIter.set(Calendar.MONTH,0)
+			calendarIter.set(Calendar.YEAR,(calendarIter.get(Calendar.YEAR)+1))
+			
+			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
+				log.debug('calendarIter: '+calendarIter.time)
+				data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTimeBefore7 += data.get('timeBefore7')
+				yearTimeAfter20 += data.get('timeAfter20')
+				yearTimeOffHours += data.get('timeOffHours')
+				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+		}
+			
+		def timeBefore7Decimal = computeHumanTime(timeBefore7 as long)
+		timeBefore7Decimal=(timeBefore7Decimal.get(0)+timeBefore7Decimal.get(1)/60).setScale(2,2)
+		
+		def timeAfter20Decimal = computeHumanTime(timeAfter20 as long)
+		timeAfter20Decimal=(timeAfter20Decimal.get(0)+timeAfter20Decimal.get(1)/60).setScale(2,2)
+		
+		def timeOffHoursDecimal = computeHumanTime(timeOffHours as long)
+		timeOffHoursDecimal= (timeOffHoursDecimal.get(0)+timeOffHoursDecimal.get(1)/60).setScale(2,2)
+				
+		def yearTimeBefore7Decimal =computeHumanTime(yearTimeBefore7 as long)
+		yearTimeBefore7Decimal= (yearTimeBefore7Decimal.get(0)+yearTimeBefore7Decimal.get(1)/60).setScale(2,2)
+		
+		def yearTimeAfter20Decimal = computeHumanTime(yearTimeAfter20 as long)
+		yearTimeAfter20Decimal= (yearTimeAfter20Decimal.get(0)+yearTimeAfter20Decimal.get(1)/60).setScale(2,2)
+		
+		def yearTimeOffHoursDecimal = computeHumanTime(yearTimeOffHours as long)
+		yearTimeOffHoursDecimal=(yearTimeOffHoursDecimal.get(0)+yearTimeOffHoursDecimal.get(1)/60).setScale(2,2)
+			
+		return [
+			timeBefore7:getTimeAsText(computeHumanTime(timeBefore7 as long),false),
+			timeAfter20:getTimeAsText(computeHumanTime(timeAfter20 as long),false),
+			timeOffHours:getTimeAsText(computeHumanTime(timeOffHours as long),false),
+			yearTimeBefore7:getTimeAsText(computeHumanTime(yearTimeBefore7 as long),false),
+			yearTimeAfter20:getTimeAsText(computeHumanTime(yearTimeAfter20 as long),false),
+			yearTimeOffHours:getTimeAsText(computeHumanTime(yearTimeOffHours as long),false),
+			timeBefore7Decimal:timeBefore7Decimal,
+			timeAfter20Decimal:timeAfter20Decimal,
+			timeOffHoursDecimal:timeOffHoursDecimal,
+			yearTimeBefore7Decimal:yearTimeBefore7Decimal,
+			yearTimeAfter20Decimal:yearTimeAfter20Decimal,
+			yearTimeOffHoursDecimal:yearTimeOffHoursDecimal
+			]
+	}
+	
+	def retrieveOffHoursTime(Employee employee,int year,int month){
+		def monthNumber=0
+		def yearTimeBefore7 = 0
+		def yearTimeAfter20 = 0
+		def yearTimeOffHours = 0
+		def yearlyCounter = 0
+		def data
+		def timeBefore7 = 0
+		def timeAfter20 = 0
+		def timeOffHours= 0
+		def calendar = Calendar.instance
+		calendar.set(Calendar.YEAR,year)
+		def bankHolidayList
+		def criteria = Absence.createCriteria()
+
+		if (month > 5){
+			year = year + 1
+			monthNumber = month - 6 + 1
+		}else{
+			monthNumber = month + 1 + 6
+		}
+
+		// set the date end of may
+		calendar.set(Calendar.DAY_OF_MONTH,10)
+		calendar.set(Calendar.MONTH,month-1)
+		log.debug("month: "+calendar.get(Calendar.MONTH))
+		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug("last day of the month: "+calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug("calendar: "+calendar)
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		def maxDate = calendar.time
+		log.debug("month: "+calendar.get(Calendar.MONTH))
+		log.debug("maxDate: "+maxDate)
+		calendar.set(Calendar.YEAR,year-1)
+		calendar.set(Calendar.MONTH,5)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.clearTime()
+		def minDate = calendar.time
+		def monthlyTotal
+
+		/* create a loop over months and invoke getMonthTheoritical method */
+		// check if employee entered the company or left the company over the period.
+		def arrivalDate = employee.arrivalDate
+		def exitDate = employee.status == StatusType.TERMINE ? employee.status.date : null
+
+		// the employee arrived after the period started: resetting the minDate
+		if (arrivalDate > minDate){
+			minDate = arrivalDate
+		}
+
+		// the employee left before period's end:
+		if ((exitDate != null) && exitDate < maxDate){
+			maxDate = exitDate
+		}
+		
+		def calendarIter = Calendar.instance
+		calendarIter.time = minDate
+		
+		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
+		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
+			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
+				log.error('calendarIter: '+calendarIter.time)
+				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				
+				criteria = MonthlyTotal.createCriteria()
+				 monthlyTotal = criteria.get {
+						and {
+							eq('employee',employee)
+							eq('year',calendarIter.get(Calendar.YEAR))
+							eq('month',calendarIter.get(Calendar.MONTH)+1)
+						}
+					}
+				
+				if (monthlyTotal != null){
+					yearTimeBefore7 += monthlyTotal.timeBefore7
+					yearTimeOffHours += monthlyTotal.timeBefore7
+					yearTimeAfter20 += monthlyTotal.timeAfter20
+					yearTimeOffHours += monthlyTotal.timeAfter20
+				}
+				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					timeBefore7 = monthlyTotal != null ? monthlyTotal.timeBefore7 : 0
+					timeAfter20 = monthlyTotal != null ? monthlyTotal.timeAfter20 : 0
+					timeOffHours = monthlyTotal != null ? (monthlyTotal.timeAfter20 + monthlyTotal.timeBefore7) : 0
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+		}else{
+			while(calendarIter.get(Calendar.MONTH) <= 11){
+				log.debug('calendarIter: '+calendarIter.time)
+				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				
+				
+				criteria = MonthlyTotal.createCriteria()
+				monthlyTotal = criteria.get {
+					   and {
+						   eq('employee',employee)
+						   eq('year',calendarIter.get(Calendar.YEAR))
+						   eq('month',calendarIter.get(Calendar.MONTH)+1)
+					   }
+				   }
+			   
+	
+				
+				if (monthlyTotal != null){
+					yearTimeBefore7 += monthlyTotal.timeBefore7
+					yearTimeOffHours += monthlyTotal.timeBefore7
+					yearTimeAfter20 += monthlyTotal.timeAfter20
+					yearTimeOffHours += monthlyTotal.timeAfter20
+				}
+				if (calendarIter.get(Calendar.MONTH) == 11){
+					timeBefore7 = monthlyTotal != null ? monthlyTotal.timeBefore7 : 0
+					timeAfter20 = monthlyTotal != null ? monthlyTotal.timeAfter20 : 0
+					timeOffHours = monthlyTotal != null ? (monthlyTotal.timeAfter20 + monthlyTotal.timeBefore7) : 0
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+			calendarIter.set(Calendar.MONTH,0)
+			calendarIter.set(Calendar.YEAR,(calendarIter.get(Calendar.YEAR)+1))
+			
+			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
+				log.debug('calendarIter: '+calendarIter.time)
+				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				criteria = MonthlyTotal.createCriteria()
+				 monthlyTotal = criteria.get {
+						and {
+							eq('employee',employee)
+							eq('year',calendarIter.get(Calendar.YEAR))
+							eq('month',calendarIter.get(Calendar.MONTH)+1)
+						}
+					}
+				
+				if (monthlyTotal != null){
+					yearTimeBefore7 += monthlyTotal.timeBefore7
+					yearTimeOffHours += monthlyTotal.timeBefore7
+					yearTimeAfter20 += monthlyTotal.timeAfter20
+					yearTimeOffHours += monthlyTotal.timeAfter20
+				}
+				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					timeBefore7 = monthlyTotal != null ? monthlyTotal.timeBefore7 : 0
+					timeAfter20 = monthlyTotal != null ? monthlyTotal.timeAfter20 : 0
+					timeOffHours = monthlyTotal != null ? (monthlyTotal.timeAfter20 + monthlyTotal.timeBefore7) : 0
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+		}
+			
+		def timeBefore7Decimal = computeHumanTime(timeBefore7 as long)
+		timeBefore7Decimal=(timeBefore7Decimal.get(0)+timeBefore7Decimal.get(1)/60).setScale(2,2)
+		
+		def timeAfter20Decimal = computeHumanTime(timeAfter20 as long)
+		timeAfter20Decimal=(timeAfter20Decimal.get(0)+timeAfter20Decimal.get(1)/60).setScale(2,2)
+		
+		def timeOffHoursDecimal = computeHumanTime(timeOffHours as long)
+		timeOffHoursDecimal= (timeOffHoursDecimal.get(0)+timeOffHoursDecimal.get(1)/60).setScale(2,2)
+				
+		def yearTimeBefore7Decimal =computeHumanTime(yearTimeBefore7 as long)
+		yearTimeBefore7Decimal= (yearTimeBefore7Decimal.get(0)+yearTimeBefore7Decimal.get(1)/60).setScale(2,2)
+		
+		def yearTimeAfter20Decimal = computeHumanTime(yearTimeAfter20 as long)
+		yearTimeAfter20Decimal= (yearTimeAfter20Decimal.get(0)+yearTimeAfter20Decimal.get(1)/60).setScale(2,2)
+		
+		def yearTimeOffHoursDecimal = computeHumanTime(yearTimeOffHours as long)
+		yearTimeOffHoursDecimal=(yearTimeOffHoursDecimal.get(0)+yearTimeOffHoursDecimal.get(1)/60).setScale(2,2)
+			
+		return [
+			timeBefore7:getTimeAsText(computeHumanTime(timeBefore7 as long),false),
+			timeAfter20:getTimeAsText(computeHumanTime(timeAfter20 as long),false),
+			timeOffHours:getTimeAsText(computeHumanTime(timeOffHours as long),false),
+			yearTimeBefore7:getTimeAsText(computeHumanTime(yearTimeBefore7 as long),false),
+			yearTimeAfter20:getTimeAsText(computeHumanTime(yearTimeAfter20 as long),false),
+			yearTimeOffHours:getTimeAsText(computeHumanTime(yearTimeOffHours as long),false),
+			timeBefore7Decimal:timeBefore7Decimal,
+			timeAfter20Decimal:timeAfter20Decimal,
+			timeOffHoursDecimal:timeOffHoursDecimal,
+			yearTimeBefore7Decimal:yearTimeBefore7Decimal,
+			yearTimeAfter20Decimal:yearTimeAfter20Decimal,
+			yearTimeOffHoursDecimal:yearTimeOffHoursDecimal
+			]
+	}
+	
 }

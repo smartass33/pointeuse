@@ -118,4 +118,21 @@ class PeriodController {
 		render template: "/common/periodBoxTemplate", model:[yearAsString:yearAsString]
 		return
 	}
+	
+	def addPeriodToMonthlyTotals(){
+		def monthlyTotals = MonthlyTotal.findAll()
+		def month
+		def year
+		Period period
+		
+		for (MonthlyTotal monthlyTotal : monthlyTotals){
+			month = monthlyTotal.month
+			year = monthlyTotal.year
+			period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)
+			monthlyTotal.period = period
+			monthlyTotal.save(flush: true)
+			
+			
+		}
+	}
 }

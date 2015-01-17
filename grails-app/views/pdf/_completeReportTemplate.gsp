@@ -311,7 +311,7 @@
 									<td>
 		        						<table border="1" class="cartoucheValues" >
 		        							<thead></thead>
-		        							<tr><td style="font-style: italic">tbd</td></tr>
+		        							<tr><td style="font-weight:bold">${ajaxYearlySupTime} ou ${ajaxYearlySupTimeDecimal}</td></tr>
 		        						</table>
 		        					</td>
 								</tr>

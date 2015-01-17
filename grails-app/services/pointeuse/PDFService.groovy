@@ -62,6 +62,8 @@ class PDFService {
 		for (Employee employee:employeeList){
 			log.error('method pdf generateSiteMonthlyTimeWithSupTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+year+', Month= '+month)
 			def modelReport=timeManagerService.getReportData((site.id).toString(),employee,myDate,year,month)
+			modelReport << timeManagerService.retrieveOffHoursTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+			
 			
 			Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)
 			
@@ -74,13 +76,10 @@ class PDFService {
 				}
 				maxResults(1)
 			}
-			if (supTime == null){
-				def data = timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-				supTime = new SupplementaryTime( employee, period,  month, data.get('ajaxYearlySupTimeDecimal'))
+			if (supTime == null){		
+				supTime = new SupplementaryTime( employee, period,  month, 0)
 				supTime.save(flush: true)
 			}
-			
-			
 			
 			modelReport << [ajaxYearlySupTime:timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(3600*supTime.value as long),false),ajaxYearlySupTimeDecimal:supTime.value]
 			log.error('getReportData and getYearSupTime finalized')

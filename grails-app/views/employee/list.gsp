@@ -67,7 +67,7 @@
 				<g:message code="default.list.label" args="[entityName]" />
 				<br>
 				<br>
-				<g:form method="POST" url="[controller:'employee', action:'siteMonthlyPDF']">
+				<g:form method="POST" url="[controller:'employee', action:'siteMonthlyWithSupTimePDF']">
 				<ul>
 					<li><g:message code="laboratory.label" default="Search" style="vertical-align: middle;" /></li>
 					<li>
@@ -95,8 +95,7 @@
 								name="myDate" value="${period ? period : new Date()}"  relativeYears="[-3..5]"
 								precision="month" noSelection="['':'-Choisissez-']" style="vertical-align: middle;"/>
 					</li>
-					<li><g:actionSubmit value="PDF" action="siteMonthlyPDF" class="pdfButton" /></li>
-					<li><g:actionSubmit value="PDF avec HS" action="siteMonthlyWithSupTimePDF" class="pdfButton" /></li>
+					<li><g:actionSubmit value="PDF" action="siteMonthlyWithSupTimePDF" class="pdfButton" /></li>
 					
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
 					<g:hiddenField name="siteId" value="${siteId}" />

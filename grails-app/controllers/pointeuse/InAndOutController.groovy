@@ -56,11 +56,11 @@ class InAndOutController {
 		def second = params["myTime_second"]!=null ? params.int("myTime_second") :0
 		def fromReport = params["fromReport"].equals('true') ? true:false
 		if (userId != null && userId != "" && userId.size()>0){
-			if (fromReport){
+		//	if (fromReport){
 				employee=Employee.get(userId)
-			}else{
-				employee=Employee.get(userId[0])
-			}
+		//	}else{
+		//		employee=Employee.get(userId[0])
+		//	}
 			employeeId=employee.id
 		}else{
 			flash.message = message(code: 'employee.not.null')

@@ -9,7 +9,7 @@ class SupTimeComputationJob {
 	def timeManagerService
 	static triggers = {
 		// fire trigger every day of the month at 2AM
-		cron name: 'myTrigger', cronExpression: "0 0 2 * * ?"
+		cron name: 'myTrigger', cronExpression: "0 30 23 * * ?"
 
 	}
 	def group = "MyGroup"
@@ -77,8 +77,8 @@ class SupTimeComputationJob {
 		}else{
 			calendar.roll(Calendar.DAY_OF_YEAR,1)	
 		}
-		calendar.set(Calendar.HOUR_OF_DAY,2)
-		calendar.set(Calendar.MINUTE,0)
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,30)
 		log.error 'registring SupTimeComputationJob at '+calendar.time
 		
 		this.schedule(calendar.time)
