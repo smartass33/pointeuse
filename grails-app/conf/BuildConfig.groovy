@@ -52,6 +52,8 @@ grails.project.dependency.resolution = {
 		compile 'log4j:apache-log4j-extras:1.0'
 		runtime 'mysql:mysql-connector-java:5.1.21'
 		compile 'com.itextpdf:itextpdf:5.4.1'
+		
+		
     }
 
     plugins {
@@ -83,5 +85,7 @@ grails.project.dependency.resolution = {
 		runtime ":searchable:0.6.6"	
 		compile ":codenarc:0.20"
 		compile ":mail:1.0.4"
+		//compile ":executor:0.3"
+		
     }
 }

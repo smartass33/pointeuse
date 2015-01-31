@@ -5,9 +5,7 @@ import java.util.Date;
 class SupplementaryTime {
 	Employee employee
 	Date loggingTime
-	//User user
 	double value
-	//SupplementaryType type
 	Period period
 	int month
 	

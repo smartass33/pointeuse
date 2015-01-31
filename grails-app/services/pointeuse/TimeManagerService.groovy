@@ -2638,6 +2638,7 @@ class TimeManagerService {
 		}
 
 		if (monthlyTotal != null){
+			//monthlyTotal.elapsedSeconds=monthlyTotalTime
 			monthlyTotal.timeBefore7=timeBefore7
 			monthlyTotal.timeAfter20=timeAfter20
 			monthlyTotal.supplementarySeconds=monthlySupTime

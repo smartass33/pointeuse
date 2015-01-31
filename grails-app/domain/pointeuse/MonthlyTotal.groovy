@@ -24,7 +24,7 @@ class MonthlyTotal {
 		this.elapsedSeconds=0
 		this.supplementarySeconds=0
 		this.timeBefore7=0
-		this.timeAfter21=0
+		this.timeAfter20=0
 		this.weeklyTotals=[]
 		this.loggingTime = new Date()
 		this.period = (this.month > 5)?Period.findByYear(this.year):Period.findByYear(this.year - 1)
