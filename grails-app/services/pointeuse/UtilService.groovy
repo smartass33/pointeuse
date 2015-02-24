@@ -1,6 +1,6 @@
 package pointeuse
 
-class UtilService {
+class UtilService  {
 
 	def springSecurityService
 	

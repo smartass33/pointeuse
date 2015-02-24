@@ -81,7 +81,12 @@
 						</tr>
 						<tr/><tr/><tr/><tr/><tr/><tr/><tr/><tr/>						
 						<tr>
-							<td style="text-align:left;">${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${currentContract.weeklyLength}</td>
+							<g:if test="${currentContract!=null}">		
+								<td style="text-align:left;">${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${currentContract.weeklyLength}</td>
+							</g:if>
+							<g:else>
+								<td style="text-align:left;">${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: N/A</td>
+							</g:else>
 						</tr>
 						<tr>
 							<td style="text-align:left;">${message(code: 'employee.matricule.label', default: 'report')}: ${fieldValue(bean: employee, field: "matricule")}</td>

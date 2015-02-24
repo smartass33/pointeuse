@@ -96,8 +96,40 @@
 						<td class="eventTD" style="background-color:#CCCCCE"/>
 					</g:else>
 				</g:each>
-			</tr>			
-		</g:each>
+			</tr>	
+			<tr>
+				<td class="eventTD" style="text-align:left;">&Delta; HS cumulées</td>
+				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
+					<g:if test='${monthlySupTimeMapByEmployee.get(employee)!=null}'>
+						<g:if test="${monthList != null && monthList.contains(month_rtt)}">				
+							<td class="eventTD">${monthlySupTimeMapByEmployee.get(employee).get(month_rtt)}</td>
+						</g:if>
+						<g:else>
+							<td class="eventTD" style="background-color:#CCCCCE"/>
+						</g:else>
+					</g:if>
+					<g:else>
+						<td class="eventTD" style="background-color:#CCCCCE"/>
+					</g:else>
+				</g:each>
+			</tr>
+			<tr>
+				<td class="eventTD" style="text-align:left;">&Delta; corrigé des RTT et HS</td>
+				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
+					<g:if test='${ecartMinusRTTAndHSByEmployee.get(employee)!=null}'>
+						<g:if test="${monthList != null && monthList.contains(month_rtt)}">				
+							<td class="eventTD">${ecartMinusRTTAndHSByEmployee.get(employee).get(month_rtt)}</td>
+						</g:if>
+						<g:else>
+							<td class="eventTD" style="background-color:#CCCCCE"/>
+						</g:else>
+					</g:if>
+					<g:else>
+						<td class="eventTD" style="background-color:#CCCCCE"/>
+					</g:else>
+				</g:each>
+			</tr>					
+		</g:each>		
 	</tbody>
 </table>
 <g:if test="${employeeInstanceTotal!=null && employeeInstanceTotal>20}">

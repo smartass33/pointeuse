@@ -1,8 +1,11 @@
 package pointeuse
 
+
+import groovy.time.TimeDuration
+import groovy.time.TimeCategory
 class EmployeeService {
 
-	
+	def grailsApplication
 	
 	public int getTakenCA(Employee employee,Period period){
 		def criteria
@@ -112,6 +115,5 @@ class EmployeeService {
 			}
 		}		
 		return remainingCA=takenCA!=null?(initialCA.counter - takenCA.size()):initialCA.counter
-	}
-	
+	}	
 }

@@ -15,6 +15,8 @@ import grails.converters.JSON
 
 import org.apache.commons.logging.LogFactory
 
+import java.util.concurrent.*
+
 
 class EmployeeController {	
 	def PDFService
@@ -742,9 +744,7 @@ def vacationFollowup(){
 	
 
 	def getAjaxSupplementaryTime(Long id) {
-	//	def monthlySupTime = params['monthlySupTime']
 		def year = params.int('year')
-	//	def period = params['period']
  		def month = params.int('month')
 		log.error("getAjaxSupplementaryTime triggered with params: month="+month+" and year="+year)
 		def employee = Employee.get(id)		
@@ -766,9 +766,7 @@ def vacationFollowup(){
 		}else{
 			supTime.value = model.get('ajaxYearlySupTimeDecimal')
 		}
-		supTime.save(flush: true)
-		
-		
+		supTime.save(flush: true)	
 		
 		log.error("getYearSupTime has terminated")
 		
@@ -2469,949 +2467,167 @@ def vacationFollowup(){
 	}
 	
 	
-	def supTime0(){
-		log.error('supTime0 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
+	def getSitePDF(Long id){
+		
+		def myDate = params["myDate"]
+		def site
+		def siteId
+		def timeDifference
+		Calendar calendar = Calendar.instance
 		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
+		def folder = grailsApplication.config.pdf.directory
 		
-		employees= criteria.list{
-			and {
-				ge('id',1 as Long)
-				le('id',10 as Long)
-			}
+		if (myDate==null || myDate.equals("")){
+			myDate=calendar.time
+		}else {
+			calendar.time=myDate
 		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
 
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
+		if (params["site.id"]!=null && !params["site.id"].equals('')){
+			site = Site.get(params["site.id"].toInteger())
+		}else{
+			flash.message = message(code: 'pdf.site.selection.error')
+			redirect(action: "list")
+			return
+		}
 				
-			counter += 1
+		//log.error("calendar is: "+calendar.time)
+		//calendar.roll(Calendar.MONTH,-1)
+		
+		def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')		
+		if (!file.exists()){
+			flash.message = message(code: 'pdf.site.report.not.available')
+			redirect(action: "list")
+			return
+		}else{
+			render(file: file, fileName: file.name,contentType: "application/octet-stream")
 		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime0 executed in '+timeDiff)
 	}
 	
 	
-	def supTime1(){
-		log.error('supTime1 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',11 as Long)
-				le('id',20 as Long)
+	def createAllSitesPDF() {
+		def timeDifference
+		def folder = grailsApplication.config.pdf.directory
+		def retour
+		Date startDate = new Date()
+		Calendar calendar= Calendar.instance
+		log.error("createAllSitesPDF called at: "+calendar.time)
+		calendar.roll(Calendar.MONTH,-1)
+		def currentDate = calendar.time
+		def sites = Site.findAll()
+		def threads = []	
+	    def thr = sites.each{ site ->
+			
+			if (site.id != 16){
+		        def th = new Thread({
+		            				
+					log.error('generating PDF for site: '+site.name)
+					retour = PDFService.generateSiteMonthlyTimeSheet(currentDate,site,folder)
+		        })
+		        println "putting thread in list"
+		        threads << th
 			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
-				
-			counter += 1
-		}
-		//compute sup time month by month,
+	    }
 	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime1 executed in '+timeDiff)
+	    threads.each { it.start() }
+	    threads.each { it.join() }
+			
+		def thTime = Thread.start{
+			
+			def endDate = new Date()
+			log.error('end time= '+endDate)
+			use (TimeCategory){timeDifference = endDate - startDate}
+			log.error("le rapport a pris: "+timeDifference)
+		}
+		thTime.join()
 	}
+
+
 	
-	
-	def supTime2(){
-		log.error('supTime2 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
+	def computeMonthlyTotals() {
+		def timeDifference
+		def retour
+		Date startDate = new Date()
+		Calendar calendar= Calendar.instance
+		log.error("computeMonthlyTotals called at: "+calendar.time)
+		def currentDate = calendar.time
+		def sites = Site.findAll()
+		def refCalendar = Calendar.instance	
+		def year = refCalendar.get(Calendar.YEAR)
+		def period = Period.findByYear(year)
 		
-		employees= criteria.list{
-			and {
-				ge('id',21 as Long)
-				le('id',30 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
-				
-			counter += 1
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime2 executed in '+timeDiff)
-	}
-	
-	def supTime3(){
-		log.error('supTime3 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',31 as Long)
-				le('id',40 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
-				
-			counter += 1
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime3 executed in '+timeDiff)
-	}
-	
-	def supTime4(){
-		log.error('supTime4 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',41 as Long)
-				le('id',50 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
-				
-			counter += 1
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime4 executed in '+timeDiff)
-	}
-	
-	def supTime5(){
-		log.error('supTime5 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',51 as Long)
-				le('id',60 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-					log.error('supTime computed for employee '+employee.id)
-					
-			counter += 1
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime5 executed in '+timeDiff)
-	}
-	
-	def supTime6(){
-		log.error('supTime6 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',61 as Long)
-				le('id',70 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-					log.error('supTime computed for employee '+employee.id)
-					
-			counter += 1
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime6 executed in '+timeDiff)
-	}
-	
-	
-	def supTime7(){
-		log.error('supTime7 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',71 as Long)
-				le('id',80 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
-				
-			counter += 1
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('computeYearSupTime executed in '+timeDiff)
-	}
-	def supTime8(){
-		log.error('supTime8 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',81 as Long)
-				le('id',90 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
-				
-			counter += 1
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime8 executed in '+timeDiff)
-	}
-	def supTime9(){
-		log.error('supTime9 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',91 as Long)
-				le('id',100 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
-				
-			counter += 1
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime9 executed in '+timeDiff)
-	}
-	
-	def supTime10(){
-		log.error('supTime10 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',101 as Long)
-				le('id',110 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
-				
-			counter += 1
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime10 executed in '+timeDiff)
-	}
-	
-	def supTime11(){
-		log.error('supTime11 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',111 as Long)
-				le('id',120 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-			counter += 1
-			log.error('supTime computed for employee '+employee.id)
+		if (refCalendar.get(Calendar.MONTH)<5){
+			refCalendar.roll(Calendar.YEAR,- 1)
+			year -= 1
+			log.debug('changing refCalendar YEAR: '+refCalendar.time)
 			
 		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime11 executed in '+timeDiff)
-	}
-	
-	def supTime12(){
-		log.error('supTime12 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',121 as Long)
-				le('id',130 as Long)
+		def monthList = []			 
+		refCalendar.set(Calendar.MONTH,5)		
+		if (refCalendar.get(Calendar.YEAR)==calendar.get(Calendar.YEAR)){
+			while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
+				log.debug('refCalendar: '+refCalendar.time)
+				monthList.add(refCalendar.get(Calendar.MONTH)+1)
+				refCalendar.roll(Calendar.MONTH, 1)
+				if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+					monthList.add(refCalendar.get(Calendar.MONTH)+1)
+					break
+				}
+			}
+		}else{
+			while(refCalendar.get(Calendar.MONTH) <= 11){
+				log.debug('refCalendar: '+refCalendar.time)
+				monthList.add(refCalendar.get(Calendar.MONTH)+1)
+				if (refCalendar.get(Calendar.MONTH)==11){
+					monthList.add(refCalendar.get(Calendar.MONTH)+1)
+					break
+				}
+				refCalendar.roll(Calendar.MONTH, 1)
+			}
+			refCalendar.set(Calendar.MONTH,0)
+			refCalendar.set(Calendar.YEAR,calendar.get(Calendar.YEAR))
+			while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
+				log.debug('refCalendar: '+refCalendar.time)
+				monthList.add(refCalendar.get(Calendar.MONTH)+1)
+				refCalendar.roll(Calendar.MONTH, 1)
+				if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+					monthList.add(refCalendar.get(Calendar.MONTH)+1)				
+					break
+				}
 			}
 		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
+		def threads = []
+		def thr = sites.each{ site ->		
+				def th = new Thread({								
+					log.debug('generating computeWeeklyTotals for site: '+site.name)
+					def employeeList = Employee.findAllBySite(site)
+					for (Employee employee: employeeList){
+						employee.attach()
+						log.debug('treating employee: '+employee.lastName)
+						for (month in monthList){
+							try{
+								if (month>=6){
+									timeManagerService.computeWeeklyTotals( employee,  month,  year)									
+								}else{
+									timeManagerService.computeWeeklyTotals( employee,  month,  year+1)						
+								}
+							}catch (Exception e){
+								log.error('Exception: '+e.message)
+							}	
+						}
 					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
-				
-			counter += 1
+				})
+				threads << th			
 		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime12 executed in '+timeDiff)
+		threads.each { it.start() }
+		threads.each { it.join() }
+		def thTime = Thread.start{
+			def endDate = new Date()
+			log.debug('end time= '+endDate)
+			use (TimeCategory){timeDifference = endDate - startDate}
+			log.error("le rapport a pris: "+timeDifference)
+		}
+		thTime.join()
 	}
 	
-	def supTime13(){
-		log.error('supTime13 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',131 as Long)
-				le('id',140 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-				log.error('supTime computed for employee '+employee.id)
-				
-			counter += 1
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime13 executed in '+timeDiff)
-	}
-	
-	def supTime14(){
-		log.error('supTime14 called')
-		def calendar = Calendar.instance
-		def currentYear = calendar.get(Calendar.YEAR)
-		def currentMonth = calendar.get(Calendar.MONTH)+1
-		def startTime = calendar.time
-		def timeDiff
-		def year
-		def month
-		def loopMonth
-		def employees = []
-		def counter = 1
-		def criteria = Employee.createCriteria()
-
-		
-		employees= criteria.list{
-			and {
-				ge('id',141 as Long)
-				le('id',150 as Long)
-			}
-		}
-		// it all starts on June 1st, 2013
-		def initialMonth = 6
-		loopMonth = 5
-		def initialYear = 2014
-		
-
-		log.error('there are '+employees.size()+' employees found')
-		for (Employee employee: employees){
-			month = initialMonth
-			loopMonth = initialMonth - 1
-			year = initialYear
-			log.error('dealing with employee #'+employee.id)
-		//	 executorService.submit({
-				while (year <= currentYear){
-					if (loopMonth == 12){
-						loopMonth = 1
-						year += 1
-					}else{
-						loopMonth += 1
-					}
-					
-					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
-					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
-					
-					supTime.save(flush: true)
-					if (loopMonth == currentMonth && year == currentYear){
-						break;
-					}
-				}
-			counter += 1
-			log.error('supTime computed for employee '+employee.id)
-			
-		}
-		//compute sup time month by month,
-	
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}
-		log.error('supTime14 executed in '+timeDiff)
-	}
 }

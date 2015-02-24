@@ -4,16 +4,21 @@ import java.util.Date;
 
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.PdfCopyFields
+import groovy.time.TimeDuration
+import groovy.time.TimeCategory
 
 class PDFService {
 	def timeManagerService
 	def pdfRenderingService
+	def grailsApplication
+	
 	
 	def generateSiteMonthlyTimeSheet(Date myDate,Site site,String folder){
 		def fileNameList=[]
 		def filename
 		PdfCopyFields finalCopy
 		Calendar calendar = Calendar.instance
+		calendar.time = myDate
 		OutputStream outputStream
 		File file
 		
@@ -21,7 +26,7 @@ class PDFService {
 		for (Employee employee:employeeList){
 			log.error('method pdf siteMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
 			def modelReport=timeManagerService.getReportData((site.id).toString(),employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-			//modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+			modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 			log.error('getReportData and getYearSupTime finalized')
 			
 			// Get the bytes
@@ -252,5 +257,51 @@ class PDFService {
 		file = new File(folder+'/'+period.year+'-'+(period.year+1) +'-allSites'+'.pdf')		
 		return [file.bytes,file.name]
 	}
+	
+	def killThemAll(){
+		def folder = grailsApplication.config.pdf.directory
+		def fileNameList=[]
+		def filename
+		PdfCopyFields finalCopy
+		Calendar calendar = Calendar.instance
+		calendar.roll(Calendar.MONTH,-1)
+		OutputStream outputStream
+		File file
+		
+		
+		def sites = Site.findAll()
+		
+		for (Site site: sites){
+		
+			def employeeList = Employee.findAllBySite(site)
+			for (Employee employee:employeeList){
+				log.error('method pdf siteMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
+				def modelReport=timeManagerService.getReportData((site.id).toString(),employee,calendar.time,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+				modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+				log.error('getReportData and getYearSupTime finalized')
+				
+				// Get the bytes
+				ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeReportTemplate', model: modelReport)
+				filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
+				fileNameList.add(filename)
+				outputStream = new FileOutputStream (folder+'/'+filename);
+				bytes.writeTo(outputStream)
+				if(bytes)
+					bytes.close()
+				if(outputStream)
+					outputStream.close()
+			}
+			finalCopy = new PdfCopyFields(new FileOutputStream(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'));
+			finalCopy.open()
+			for (String tmpFile:fileNameList){
+				PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
+				finalCopy.addDocument(pdfReader)
+			}
+			finalCopy.close();
+			file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+		}
+	//	return [file.bytes,file.name]
+	}
+
 	
 }

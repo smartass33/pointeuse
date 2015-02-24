@@ -27,6 +27,11 @@ class Employee{
 		userName (unique: true,blank: false)
 	}
 
+	
+	static mapping = {
+		site lazy: false
+	}
+	
 	String toString(){
 		return 'employee: lastname:'+ this.lastName+' firstname:'+this.firstName + ' username:'+ this.userName+' id:'+ this.id + ' site:'+this.site.name
 	}

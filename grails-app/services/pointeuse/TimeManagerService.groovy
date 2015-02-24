@@ -2,8 +2,12 @@ package pointeuse
 
 import groovy.time.TimeDuration;
 import groovy.time.TimeCategory;
+
 import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeUnit;
+
+import org.springframework.transaction.annotation.Transactional
+
 
 class TimeManagerService {
 
@@ -1057,8 +1061,7 @@ class TimeManagerService {
 				
 		
 		if (month>=6){
-			criteria = MonthlyTotal.createCriteria()
-			
+			criteria = MonthlyTotal.createCriteria()	
 			monthsAggregate = criteria.list{
 				and {
 					eq('employee',employee)
@@ -1390,7 +1393,7 @@ class TimeManagerService {
 		return mergedMap
 	}
 
-
+	
 	def getReportData(String siteId,Employee employee, Date myDate,int monthPeriod,int yearPeriod){
 		def calendar = Calendar.instance
 		def monthlyTotalTimeByEmployee = [:]
@@ -1417,7 +1420,11 @@ class TimeManagerService {
 		def data = computeWeeklyTotals( employee,  month,  year)
 	
 		//update monthlyTotal
-		criteria = MonthlyTotal.createCriteria()
+
+		
+		/*
+		 * 
+		 * 		criteria = MonthlyTotal.createCriteria()
 		def monthlyTotalInstance = criteria.get {
 			and {
 				eq('employee',employee)
@@ -1426,9 +1433,10 @@ class TimeManagerService {
 			}
 		}
 		if (monthlyTotalInstance!=null){
-			monthlyTotalInstance.elapsedSeconds=data.get('monthlyTotalTime')
+			monthlyTotalInstance.elapsedSeconds=data.get('monthlyTotalTime') as long
 			monthlyTotalInstance.save()
 		}
+		*/
 		def cartoucheTable = getCartoucheData(employee,year,month)
 		def currentContract = cartoucheTable.get('currentContract')
 		def workingDays=cartoucheTable.get('workingDays')
@@ -1462,7 +1470,7 @@ class TimeManagerService {
 		 */
 		def payableSupTime = computeHumanTime(Math.round(computePayableSupplementaryTime(employee,data.get('monthlyTotalTime') as long,monthTheoritical as long,data.get('monthlySupTime') as long)))
 		def payableCompTime = computeHumanTime(0)
-		if (currentContract.weeklyLength != Employee.legalWeekTime && data.get('monthlyTotalTime') > monthTheoritical){
+		if (currentContract != null && currentContract.weeklyLength != Employee.legalWeekTime && data.get('monthlyTotalTime') > monthTheoritical){
 			payableCompTime = computeHumanTime(Math.round(Math.max(data.get('monthlyTotalTime')-monthTheoritical-data.get('monthlySupTime'),0)))
 		}
 		def monthlySupTime = computeHumanTime(data.get('monthlySupTime') as long)
@@ -1559,11 +1567,16 @@ class TimeManagerService {
 		def monthlyTakenRTTMap = [:]
 		def ecartMap = [:]
 		def ecartMinusRTTMap = [:]
+		def ecartMinusRTTAndHSMap = [:]
 		def monthlyTheoriticalByEmployee = [:]
 		def monthlyActualByEmployee = [:]
 		def ecartMinusRTTByEmployee = [:]
+		def ecartMinusRTTAndHSByEmployee = [:]
 		def ecartByEmployee = [:]
 		def rttByEmployee = [:]
+		def monthlySupTimeMap = [:]
+		def monthlySupTimeMapByEmployee =[:]
+
 		def employeeInstanceList
 		Contract currentContract
 		
@@ -1574,11 +1587,14 @@ class TimeManagerService {
 		}
 		
 		for (Employee employee:employeeInstanceList){
+			monthlySupTimeMap = [:]
 			monthlyTheoriticalMap = [:]
 			monthlyActualMap = [:]
 			monthlyTakenRTTMap = [:]
 			ecartMap = [:]
 			ecartMinusRTTMap = [:]
+			ecartMinusRTTAndHSMap = [:]
+			
 			for (month in monthList){
 				tmpYear=(month<6)?period.year+1:period.year
 	   
@@ -1598,6 +1614,23 @@ class TimeManagerService {
 						eq('type',VacationType.RTT)
 					}
 				}
+				
+				criteria = SupplementaryTime.createCriteria()	
+				def supTime = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('period',period)
+						eq('month',month)
+					}
+					maxResults(1)
+				}
+				if (supTime == null){
+					monthlySupTimeMap.put(month,0)
+					
+				}else{
+					monthlySupTimeMap.put(month,supTime.value as long)
+				}
+				
 				//special case for employees for which vacations were not properly instanciated
 				if (referenceRTT == null && employee.weeklyContractTime == Employee.legalWeekTime){
 						utilService.initiateVacations(employee)
@@ -1628,6 +1661,7 @@ class TimeManagerService {
 				def theoricalTime2add = 0
 				def actualTime2add = 0
 				def takenRTT2add
+				def actualSupTime2add = 0
 				// initialization month
 				if (month == 6){
 					theoricalTime2add = 0
@@ -1640,19 +1674,20 @@ class TimeManagerService {
 					theoricalTime2add = monthlyTheoriticalMap.get(12)
 					actualTime2add = monthlyActualMap.get(12)
 					takenRTT2add = monthlyTakenRTTMap.get(12)
+					actualSupTime2add = monthlySupTimeMap.get(12)
 				}
 				
 				if (month != 6 && month != 1){
 					theoricalTime2add = monthlyTheoriticalMap.get(month-1)
 					actualTime2add = monthlyActualMap.get(month-1)
-					takenRTT2add = monthlyTakenRTTMap.get(month-1)			
+					takenRTT2add = monthlyTakenRTTMap.get(month-1)
+					actualSupTime2add = monthlySupTimeMap.get(month-1)
+					
 				}
 				
 				monthlyTheoriticalMap.put(month, data.get('monthTheoritical') + theoricalTime2add)
-				if (monthlyTotalInstance!=null){
-					
+				if (monthlyTotalInstance!=null){				
 					monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds + actualTime2add)
-					
 					//monthlyActualMap.put(month, monthlyTotalTime + actualTime2add)
 				}else{
 					monthlyActualMap.put(month, actualTime2add)
@@ -1661,14 +1696,25 @@ class TimeManagerService {
 					monthlyTakenRTTMap.put(month,takenRTT2add - takenRTT.size())
 				}else{
 					monthlyTakenRTTMap.put(month,takenRTT2add)
-				}				
+				}		
+							
+				if (supTime != null){
+					monthlySupTimeMap.put(month,(supTime.value as long) + actualSupTime2add)
+					
+				}else{
+					monthlySupTimeMap.put(month,actualSupTime2add)		
+				}
+						
 				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))	
 				currentContract = data.get('currentContract')	
 				if (currentContract != null){
 					ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(currentContract.weeklyLength/Employee.WeekOpenedDays)) as long)
+					ecartMinusRTTAndHSMap.put(month, (ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(currentContract.weeklyLength/Employee.WeekOpenedDays)) - monthlySupTimeMap.get(month))as long)
+					
 				}else{
 					log.error('currentContract is null for employee  '+employee+ ' and month= '+month)
 					ecartMinusRTTMap.put(month, ecartMap.get(month) as long)
+					ecartMinusRTTAndHSMap.put(month, (ecartMap.get(month) - monthlySupTimeMap.get(month))as long)
 					
 				}			
 			}
@@ -1685,11 +1731,21 @@ class TimeManagerService {
 			ecartMinusRTTMap.each() {
 				it.value=getTimeAsText(computeHumanTime(it.value),false)
 		   }
-		   
+			
+			ecartMinusRTTAndHSMap.each() {
+				it.value=getTimeAsText(computeHumanTime(it.value),false)
+		   }
+			monthlySupTimeMap.each(){
+				it.value=getTimeAsText(computeHumanTime(it.value),false)
+			}
+			
+			monthlySupTimeMapByEmployee.put(employee,monthlySupTimeMap)
 			monthlyTheoriticalByEmployee.put(employee,monthlyTheoriticalMap)
 			monthlyActualByEmployee.put(employee,monthlyActualMap)
 			ecartByEmployee.put(employee, ecartMap)
 			ecartMinusRTTByEmployee.put(employee,ecartMinusRTTMap)
+			ecartMinusRTTAndHSByEmployee.put(employee,ecartMinusRTTAndHSMap)
+			
 			rttByEmployee.put(employee, monthlyTakenRTTMap)
 		}
 		return [
@@ -1700,7 +1756,9 @@ class TimeManagerService {
 			ecartByEmployee:ecartByEmployee,
 			rttByEmployee:rttByEmployee,
 			ecartMinusRTTByEmployee:ecartMinusRTTByEmployee,
-			monthList:monthList
+			monthList:monthList,
+			monthlySupTimeMapByEmployee:monthlySupTimeMapByEmployee,
+			ecartMinusRTTAndHSByEmployee:ecartMinusRTTAndHSByEmployee
 		]
 	
 	}
@@ -2461,8 +2519,8 @@ class TimeManagerService {
 			]
 	}
 	
-	
 	def computeWeeklyTotals(Employee employee, int month, int year){
+		log.debug('computeWeeklyTotals called for employee: '+employee+', month: '+month+',year: '+year)
 		//variables
 		def weekName="semaine "
 		def criteria
@@ -2636,14 +2694,34 @@ class TimeManagerService {
 				eq('month',calendarLoop.get(Calendar.MONTH)+1)
 			}
 		}
-
 		if (monthlyTotal != null){
-			//monthlyTotal.elapsedSeconds=monthlyTotalTime
+			monthlyTotal.elapsedSeconds=monthlyTotalTime
 			monthlyTotal.timeBefore7=timeBefore7
 			monthlyTotal.timeAfter20=timeAfter20
 			monthlyTotal.supplementarySeconds=monthlySupTime
-			monthlyTotal.save(flush:true)
+			monthlyTotal.save(flush:true,failOnError:true)
 		}
+		
+		
+		//here, we can proceed to the creation, or update of the SupplementaryTime object
+		criteria = SupplementaryTime.createCriteria()	
+		Period period = (month < 6) ? Period.findByYear(year-1) : Period.findByYear(year)
+
+		def supTime = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('period',period)
+				eq('month',month)
+			}
+			maxResults(1)
+		}
+		if (supTime == null){
+			supTime = new SupplementaryTime( employee, period,  month,monthlySupTime)
+		}else{
+			supTime.value = monthlySupTime
+		}
+		supTime.save(flush: true)
+		
 		return [
 			timeBefore7:timeBefore7,
 			timeAfter20:timeAfter20,
@@ -2894,143 +2972,7 @@ class TimeManagerService {
 	}
 	
 	
-	def getOffHoursTime(Employee employee,int year,int month){
-		def monthNumber=0
-		def yearTimeBefore7 = 0
-		def yearTimeAfter20 = 0
-		def yearTimeOffHours = 0
-		def yearlyCounter = 0
-		def data
-		def timeBefore7 = 0
-		def timeAfter20 = 0
-		def timeOffHours= 0
-		def calendar = Calendar.instance
-		calendar.set(Calendar.YEAR,year)
-		def bankHolidayList
-		def criteria = Absence.createCriteria()
 
-		if (month > 5){
-			year = year + 1
-			monthNumber = month - 6 + 1
-		}else{
-			monthNumber = month + 1 + 6
-		}
-
-		// set the date end of may
-		calendar.set(Calendar.DAY_OF_MONTH,10)
-		calendar.set(Calendar.MONTH,month-1)
-		log.debug("month: "+calendar.get(Calendar.MONTH))
-		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-		log.debug("last day of the month: "+calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-		log.debug("calendar: "+calendar)
-		calendar.set(Calendar.HOUR_OF_DAY,23)
-		calendar.set(Calendar.MINUTE,59)
-		calendar.set(Calendar.SECOND,59)
-		def maxDate = calendar.time
-		log.debug("month: "+calendar.get(Calendar.MONTH))
-		log.debug("maxDate: "+maxDate)
-		calendar.set(Calendar.YEAR,year-1)
-		calendar.set(Calendar.MONTH,5)
-		calendar.set(Calendar.DAY_OF_MONTH,1)
-		calendar.clearTime()
-		def minDate = calendar.time
-
-		/* create a loop over months and invoke getMonthTheoritical method */
-		// check if employee entered the company or left the company over the period.
-		def arrivalDate = employee.arrivalDate
-		def exitDate = employee.status == StatusType.TERMINE ? employee.status.date : null
-
-		// the employee arrived after the period started: resetting the minDate
-		if (arrivalDate > minDate){
-			minDate = arrivalDate
-		}
-
-		// the employee left before period's end:
-		if ((exitDate != null) && exitDate < maxDate){
-			maxDate = exitDate
-		}
-		
-		def calendarIter = Calendar.instance
-		calendarIter.time = minDate
-		
-		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
-		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
-			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
-				log.debug('calendarIter: '+calendarIter.time)
-				data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
-				yearTimeBefore7 += data.get('timeBefore7')
-				yearTimeAfter20 += data.get('timeAfter20')
-				yearTimeOffHours += data.get('timeOffHours')
-				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
-					timeBefore7 = data.get('timeBefore7') != null ? data.get('timeBefore7') : 0
-					timeAfter20 = data.get('timeAfter20') != null ? data.get('timeAfter20') : 0
-					timeOffHours = data.get('timeOffHours') != null ? data.get('timeOffHours') : 0
-					break
-				}
-				calendarIter.roll(Calendar.MONTH, 1)
-			}
-		}else{
-			while(calendarIter.get(Calendar.MONTH) <= 11){
-				log.debug('calendarIter: '+calendarIter.time)
-				data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
-				yearTimeBefore7 += data.get('timeBefore7')
-				yearTimeAfter20 += data.get('timeAfter20')
-				yearTimeOffHours += data.get('timeOffHours')
-				if (calendarIter.get(Calendar.MONTH) == 11){
-					break
-				}
-				calendarIter.roll(Calendar.MONTH, 1)
-			}
-			calendarIter.set(Calendar.MONTH,0)
-			calendarIter.set(Calendar.YEAR,(calendarIter.get(Calendar.YEAR)+1))
-			
-			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
-				log.debug('calendarIter: '+calendarIter.time)
-				data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
-				yearTimeBefore7 += data.get('timeBefore7')
-				yearTimeAfter20 += data.get('timeAfter20')
-				yearTimeOffHours += data.get('timeOffHours')
-				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
-					break
-				}
-				calendarIter.roll(Calendar.MONTH, 1)
-			}
-		}
-			
-		def timeBefore7Decimal = computeHumanTime(timeBefore7 as long)
-		timeBefore7Decimal=(timeBefore7Decimal.get(0)+timeBefore7Decimal.get(1)/60).setScale(2,2)
-		
-		def timeAfter20Decimal = computeHumanTime(timeAfter20 as long)
-		timeAfter20Decimal=(timeAfter20Decimal.get(0)+timeAfter20Decimal.get(1)/60).setScale(2,2)
-		
-		def timeOffHoursDecimal = computeHumanTime(timeOffHours as long)
-		timeOffHoursDecimal= (timeOffHoursDecimal.get(0)+timeOffHoursDecimal.get(1)/60).setScale(2,2)
-				
-		def yearTimeBefore7Decimal =computeHumanTime(yearTimeBefore7 as long)
-		yearTimeBefore7Decimal= (yearTimeBefore7Decimal.get(0)+yearTimeBefore7Decimal.get(1)/60).setScale(2,2)
-		
-		def yearTimeAfter20Decimal = computeHumanTime(yearTimeAfter20 as long)
-		yearTimeAfter20Decimal= (yearTimeAfter20Decimal.get(0)+yearTimeAfter20Decimal.get(1)/60).setScale(2,2)
-		
-		def yearTimeOffHoursDecimal = computeHumanTime(yearTimeOffHours as long)
-		yearTimeOffHoursDecimal=(yearTimeOffHoursDecimal.get(0)+yearTimeOffHoursDecimal.get(1)/60).setScale(2,2)
-			
-		return [
-			timeBefore7:getTimeAsText(computeHumanTime(timeBefore7 as long),false),
-			timeAfter20:getTimeAsText(computeHumanTime(timeAfter20 as long),false),
-			timeOffHours:getTimeAsText(computeHumanTime(timeOffHours as long),false),
-			yearTimeBefore7:getTimeAsText(computeHumanTime(yearTimeBefore7 as long),false),
-			yearTimeAfter20:getTimeAsText(computeHumanTime(yearTimeAfter20 as long),false),
-			yearTimeOffHours:getTimeAsText(computeHumanTime(yearTimeOffHours as long),false),
-			timeBefore7Decimal:timeBefore7Decimal,
-			timeAfter20Decimal:timeAfter20Decimal,
-			timeOffHoursDecimal:timeOffHoursDecimal,
-			yearTimeBefore7Decimal:yearTimeBefore7Decimal,
-			yearTimeAfter20Decimal:yearTimeAfter20Decimal,
-			yearTimeOffHoursDecimal:yearTimeOffHoursDecimal
-			]
-	}
-	
 	def retrieveOffHoursTime(Employee employee,int year,int month){
 		def monthNumber=0
 		def yearTimeBefore7 = 0
@@ -3122,7 +3064,7 @@ class TimeManagerService {
 			}
 		}else{
 			while(calendarIter.get(Calendar.MONTH) <= 11){
-				log.debug('calendarIter: '+calendarIter.time)
+				log.error('calendarIter: '+calendarIter.time)
 				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				
 				
@@ -3155,7 +3097,7 @@ class TimeManagerService {
 			calendarIter.set(Calendar.YEAR,(calendarIter.get(Calendar.YEAR)+1))
 			
 			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
-				log.debug('calendarIter: '+calendarIter.time)
+				log.error('calendarIter: '+calendarIter.time)
 				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				criteria = MonthlyTotal.createCriteria()
 				 monthlyTotal = criteria.get {
@@ -3182,6 +3124,21 @@ class TimeManagerService {
 			}
 		}
 			
+		
+		criteria = MonthlyTotal.createCriteria()
+		monthlyTotal = criteria.get {
+			   and {
+				   eq('employee',employee)
+				   eq('year',year)
+				   eq('month',month)
+			   }
+		   }
+		if (monthlyTotal != null){
+			timeBefore7 = monthlyTotal.timeBefore7
+			timeAfter20 = monthlyTotal.timeAfter20
+			timeOffHours = timeBefore7 + timeAfter20
+		}
+		
 		def timeBefore7Decimal = computeHumanTime(timeBefore7 as long)
 		timeBefore7Decimal=(timeBefore7Decimal.get(0)+timeBefore7Decimal.get(1)/60).setScale(2,2)
 		
