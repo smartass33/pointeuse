@@ -1346,6 +1346,25 @@ class TimeManagerService {
 		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year)
 
 		criteria = Contract.createCriteria()
+		
+		def currentContract 
+		
+		def contracts = Contract.findAllByEmployee(employeeInstance)
+		for (Contract contract : contracts){
+
+			if (contract.endDate != null && contract.startDate < endCalendar.time && contract.endDate > endCalendar.time){
+				currentContract = contract
+			}
+			
+			if (contract.endDate != null && contract.startDate < endCalendar.time && contract.endDate < endCalendar.time && contract.endDate.getAt(Calendar.MONTH)==endCalendar.time.getAt(Calendar.MONTH)){
+				currentContract = contract
+				
+			}
+			if (currentContract == null && contract.endDate == null){
+				currentContract = contract
+			}
+		}
+		/*
 		def currentContract = criteria.get {
 			or{
 				and {
@@ -1370,7 +1389,7 @@ class TimeManagerService {
 			order('startDate','desc')
 			maxResults(1)
 		}
-		
+		*/
 
 		def monthTheoriticalHuman=getTimeAsText(computeHumanTime(monthTheoritical),false)
 		def cartoucheMap=[
@@ -2175,8 +2194,6 @@ class TimeManagerService {
 		return absenceMap
 	}
 	
-	
-	
 	def getMonthTheoritical(Employee employee, int month,int year){
 		def monthTheoritical = 0
 		def counter = 0
@@ -2193,8 +2210,7 @@ class TimeManagerService {
 		def startDate
 		def endDate
 		def startCalendar = Calendar.instance
-		def endCalendar = Calendar.instance
-		
+		def endCalendar = Calendar.instance		
 		def calendarCompute = Calendar.instance
 		
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
@@ -2211,10 +2227,7 @@ class TimeManagerService {
 		endCalendar.set(Calendar.DAY_OF_MONTH,startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
 		log.debug('endCalendar: '+endCalendar.time)
 		
-		
-		
-		criteria = Contract.createCriteria()
-		
+		criteria = Contract.createCriteria()		
 		previousContracts = criteria.list {
 			or{
 				// all contracts that were started during the month and not over during the month
@@ -2239,10 +2252,16 @@ class TimeManagerService {
 					eq('employee',employee)
 				}
 				
+				//contract started during the month
+				and {
+					isNotNull('endDate')
+					ge('startDate',startCalendar.time)
+					le('startDate',endCalendar.time)
+					eq('employee',employee)
+				}
 			}
 			order('startDate','desc')
 		}
-
 		
 		monthTheoritical = 0
 		for (Contract currentContract : previousContracts){
@@ -2316,12 +2335,23 @@ class TimeManagerService {
 				if (isOut){
 					monthTheoritical += 0
 				}else{
-				monthTheoritical += (
-					3600*(
-							realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
-							+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
-							-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)))
-						- absenceMap.get(AbsenceType.GROSSESSE)) as int
+					monthTheoritical += 3600*(realOpenDays*weeklyContractTime/Employee.WeekOpenedDays) as long
+					monthTheoritical += 3600*(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime) as long
+					
+					def types=AbsenceTypeConfig.findAll()
+
+					for (def type:types){
+						if (type.isPorportional){
+							def toCompare = type.name as AbsenceType
+							monthTheoritical -= 3600*(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(toCompare)) as long
+							log.error('toCompare: '+toCompare)
+							log.error('3600*(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(toCompare): '+3600*(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(toCompare)))
+						}
+					}
+					
+
+					//monthTheoritical -= 3600*(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF))
+					monthTheoritical -= absenceMap.get(AbsenceType.GROSSESSE) as int
 				}
 			}
 			log.debug('monthTheoritical: '+monthTheoritical)

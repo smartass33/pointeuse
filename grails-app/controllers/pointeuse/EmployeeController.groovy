@@ -245,9 +245,6 @@ class EmployeeController {
 		}
 	}
 
-	
-	
-	
     def show(Long id) {		
 		def siteId=params["siteId"]
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
@@ -261,9 +258,6 @@ class EmployeeController {
     }
 
 def vacationFollowup(){
-		params.each {
-			i-> log.error('parameter= '+i)
-		}
 		def year = params["year"]
 		def max = params["max"] != null ? params.int("max") : 20
 		def offset = params["offset"] != null ? params.int("offset") : 0
@@ -290,10 +284,8 @@ def vacationFollowup(){
 		def takenCSS
 		def takenAutre
 		def takenExceptionnel
-		def takenDIF
-		
+		def takenDIF	
 		def employeeInstanceTotal
-
 		
 		if (params["siteId"]!=null && !params["siteId"].equals("")){
 			site = Site.get(params["siteId"])
@@ -313,8 +305,7 @@ def vacationFollowup(){
 			}
 		}
 		
-		if (year!=null && !year.equals("")){
-			
+		if (year!=null && !year.equals("")){		
 			if (year instanceof String[]){
 				year= (year[0] != "") ? year[0].toInteger():year[1].toInteger()					
 			}else {
@@ -341,8 +332,7 @@ def vacationFollowup(){
 		}else{
 			period = (currentMonth < 5) ? Period.findByYear(startCalendar.get(Calendar.YEAR) - 1) : Period.findByYear(startCalendar.get(Calendar.YEAR))
 		}
-	
-		
+			
 		if (site != null){
 			employeeInstanceList = Employee.findAllBySite(site)
 			employeeInstanceTotal = employeeInstanceList.size()		
@@ -353,8 +343,7 @@ def vacationFollowup(){
 			employeeInstanceTotal = employeeInstanceList.size()
 			employeeInstanceList = Employee.findAll("from Employee",[max:max,offset:offset])	
 		}
-		
-		
+				
 		// for each employee, retrieve absences
 		for (Employee employee: employeeInstanceList){
 			// step 1: fill initial values
@@ -1655,6 +1644,8 @@ def vacationFollowup(){
 		def siteId
 		def timeDifference
 		Calendar calendar = Calendar.instance
+		calendar.roll(Calendar.MONTH,-1)
+		
 		def startTime = calendar.time
 		def folder = grailsApplication.config.pdf.directory
 		
@@ -1676,53 +1667,6 @@ def vacationFollowup(){
 		}
 			
 		def retour = PDFService.generateSiteMonthlyTimeSheet(myDate,site,folder)
-		calendar = Calendar.instance
-		def endTime = calendar.time
-		use (TimeCategory){timeDifference = endTime - startTime}
-		log.error("le rapport a pris: "+timeDifference)
-		//response.setContentType("application/pdf")
-		//response.setHeader("Content-disposition", "filename=${retour[1]}")
-		//response.outputStream << retour[0]
-		
-		def file = new File(folder+'/'+retour[1])
-		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
-		/*
-		response.setContentType("application/octet-stream")
-		response.setHeader("Content-disposition", "attachment;filename=${file.getName()}")
-		
-		response.outputStream << file.newInputStream()
-		*/
-		
-	}
-	
-	
-	def siteMonthlyWithSupTimePDF(){
-		def myDate = params["myDate"]
-		def site
-		def siteId
-		def timeDifference
-		Calendar calendar = Calendar.instance
-		def startTime = calendar.time
-		def folder = grailsApplication.config.pdf.directory
-		
-		if (myDate==null || myDate.equals("")){
-			myDate=calendar.time
-		}else {
-			calendar.time=myDate
-		}
-	
-
-		if (params["site.id"]!=null && !params["site.id"].equals('')){
-			siteId = params["site.id"].toInteger()
-			site = Site.get(siteId)
-			siteId=site.id
-		}else{
-			flash.message = message(code: 'pdf.site.selection.error')
-			redirect(action: "list")
-			return
-		}
-			
-		def retour = PDFService.generateSiteMonthlyTimeWithSupTimeSheet(myDate,site,folder)
 		calendar = Calendar.instance
 		def endTime = calendar.time
 		use (TimeCategory){timeDifference = endTime - startTime}
@@ -2517,33 +2461,26 @@ def vacationFollowup(){
 		def sites = Site.findAll()
 		def threads = []	
 	    def thr = sites.each{ site ->
-			
 			if (site.id != 16){
-		        def th = new Thread({
-		            				
+		        def th = new Thread({	            				
 					log.error('generating PDF for site: '+site.name)
 					retour = PDFService.generateSiteMonthlyTimeSheet(currentDate,site,folder)
 		        })
 		        println "putting thread in list"
 		        threads << th
 			}
-	    }
-	
+	    }	
 	    threads.each { it.start() }
-	    threads.each { it.join() }
-			
-		def thTime = Thread.start{
-			
+	    threads.each { it.join() }	
+		def thTime = Thread.start{			
 			def endDate = new Date()
 			log.error('end time= '+endDate)
 			use (TimeCategory){timeDifference = endDate - startDate}
-			log.error("le rapport a pris: "+timeDifference)
+			log.error("report createAllSitesPDF execution time"+timeDifference)
 		}
 		thTime.join()
 	}
 
-
-	
 	def computeMonthlyTotals() {
 		def timeDifference
 		def retour
@@ -2625,7 +2562,7 @@ def vacationFollowup(){
 			def endDate = new Date()
 			log.debug('end time= '+endDate)
 			use (TimeCategory){timeDifference = endDate - startDate}
-			log.error("le rapport a pris: "+timeDifference)
+			log.error("report computeMonthlyTotals execution time: "+timeDifference)
 		}
 		thTime.join()
 	}
