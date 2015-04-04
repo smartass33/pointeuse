@@ -23,6 +23,7 @@
 		<th class='rotate-45'><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.report.sickness.label"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
+		<th class='rotate-45'><div><span><g:message code="employee.paternite.count"/></span></div></th>		
 		<th class='rotate-45'><div><span><g:message code="annual.report.supplementary.label"/></span></div></th>
 		
 	</thead>
@@ -55,6 +56,7 @@
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sansSolde')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sickness')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('exceptionnel')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('paternite')}</td>
 				<td style="vertical-align: middle;text-align:right;">
 					<g:if test="${yearMonthlySupTime.get(cartouche.key) !=null}">
                    		${yearMonthlySupTime.get(cartouche.key)}              		                                  		
@@ -92,6 +94,7 @@
 		<td style="vertical-align: middle;text-align:center;">${annualCSS}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualSickness}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualExceptionnel}</td>
+		<td style="vertical-align: middle;text-align:center;">${annualPaternite}</td>
 		<td style="vertical-align: middle;text-align:right;">
 			<g:if test="${annualMonthlySupTime !=null}">
 				${annualMonthlySupTime}

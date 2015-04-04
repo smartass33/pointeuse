@@ -206,6 +206,22 @@
 	        					</td>
 							</tr>							
 							<tr>
+								<td width="35%" style="text-align:left;" >${message(code: 'employee.paternite.count', default: 'report')} :</td>	
+	 							<td>
+	 								<table border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${paternite as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					
+	        					<td>
+	        						<table border="1" class="cartoucheValues">
+	        							<thead></thead>	        							
+	        							<tr><td>${yearlyPaternite as float}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>	
+							<tr>
 								<td width="35%" style="text-align:left;" >${message(code: 'employee.dif.count', default: 'report')} :</td>	
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >

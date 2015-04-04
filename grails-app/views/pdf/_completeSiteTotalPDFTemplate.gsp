@@ -41,6 +41,7 @@
 				<th  style="width:80px;"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>		
 				<th  style="width:80px;"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
+				<th  style="width:80px;"><div><span><g:message code="employee.paternite.count"/></span></div></th>
 				<th  style="width:120px;"><div><span><g:message code="annual.HS.above.quota.short"/></span></div></th>
 				<th  style="width:120px;"><div><span><g:message code="annual.computed.quota.short"/></span></div></th>
 				<th  style="width:120px;"><div><span><g:message code="annual.other.HS.quota.short"/></span></div></th>
@@ -67,6 +68,7 @@
 						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualCSS')}</td>
 						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualSickness')}</td>
 						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualExceptionnel')}</td>
+						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualPaternite')}</td>
 						<td style="width:120px;">${(annualReportMap.get(employee)).get('annualPayableSupTime')}</td>
 						<td style="width:120px;">${(annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra')}</td>
 						<td style="width:120px;">${(annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical')}</td>

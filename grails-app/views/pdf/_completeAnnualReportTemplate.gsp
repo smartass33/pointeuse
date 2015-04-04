@@ -68,8 +68,8 @@
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.CSS.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.sickness.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="employee.exceptionnel.count"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="employee.paternite.count"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.supplementary.label"/></th>
-			<!--th><g:message code="annual.report.complementary.label"/></th-->
 		</thead>
 		<tbody id='body_update' style="border:1px;">
 			<g:each in="${yearMonthMap}"  status="i" var="cartouche">
@@ -97,6 +97,7 @@
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('sansSolde')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('sickness')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('exceptionnel')}</td>
+					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('paternite')}</td>
 					<td style="vertical-align: middle;text-align:right;">
 						<g:if test="${yearMonthlySupTime.get(cartouche.key) !=null}">
 	                   		${yearMonthlySupTime.get(cartouche.key)} 
@@ -104,15 +105,7 @@
 	              		<g:else>
 	              			00 : 00
 	              		</g:else>
-					</td>			
-					<!--td style="vertical-align: middle;text-align:right;">
-						<g:if test="${yearMonthlyCompTime.get(cartouche.key) !=null}">
-	                   		${yearMonthlyCompTime.get(cartouche.key)} 
-	              		</g:if>
-	              		<g:else>
-	              			00 : 00
-	              		</g:else>	
-					</td -->							
+					</td>									
 				</tr>
 			</g:each>
 			<tr class='even'>			
@@ -138,6 +131,7 @@
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualCSS}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualSickness}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualExceptionnel}</td>
+				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualPaternite}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">
 					<g:if test="${annualPayableSupTime !=null}">
 	               		${annualPayableSupTime} 
@@ -146,15 +140,7 @@
 	           			00 : 00
 	           		</g:else>	
 				</td>
-				<!--td>
-					<g:if test="${annualPayableCompTime !=null}">
-	               		${annualPayableCompTime} 
-	           		</g:if>
-	           		<g:else>
-	           			00 : 00
-	           		</g:else>
-	           	</td -->
-				<td></td>
+				<td></td>				
 			</tr>
 		</tbody>
 	</table>

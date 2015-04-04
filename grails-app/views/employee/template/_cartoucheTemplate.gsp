@@ -68,6 +68,12 @@
 		     			<td class="cartoucheRightFiguresTD">
 					</tr>			
 					<tr>		
+						<td class="cartoucheRightTitleTD" >${message(code: 'employee.paternite.count', default: 'report')} :</td>	
+						<td class="cartoucheRightFiguresTD">${paternite as java.lang.Float}</td>        					
+		     			<td class="cartoucheRightFiguresTD">${yearlyPaternite as java.lang.Float}</td>
+		     			<td class="cartoucheRightFiguresTD">
+					</tr>
+					<tr>		
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.dif.count', default: 'report')} :</td>	
 						<td class="cartoucheRightFiguresTD">${dif as java.lang.Float}</td>        					
 		     			<td class="cartoucheRightFiguresTD">${yearlyDif as java.lang.Float}</td>

@@ -277,6 +277,7 @@ def vacationFollowup(){
 		def takenCSSMap=[:]
 		def takenAutreMap=[:]
 		def takenExceptionnelMap=[:]		
+		def takenPaterniteMap=[:]
 		def takenDifMap=[:]
 		def takenSickness
 		def takenRTT
@@ -284,6 +285,7 @@ def vacationFollowup(){
 		def takenCSS
 		def takenAutre
 		def takenExceptionnel
+		def takenPaternite
 		def takenDIF	
 		def employeeInstanceTotal
 		
@@ -481,6 +483,22 @@ def vacationFollowup(){
 				takenExceptionnelMap.put(employee, 0)
 			}
 			
+			//PATERNITE
+			criteria = Absence.createCriteria()
+			takenExceptionnel = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.PATERNITE)
+				}
+			}
+			if (takenPaternite!=null){
+				takenPaterniteMap.put(employee, takenPaternite.size())
+			}else{
+				takenPaterniteMap.put(employee, 0)
+			}
+			
 			//DIF
 			criteria = Absence.createCriteria()
 			takenDIF = criteria.list {
@@ -500,8 +518,6 @@ def vacationFollowup(){
 		log.debug("done")
 		[
 			employeeInstanceTotal:employeeInstanceTotal,
-			takenExceptionnelMap:takenExceptionnelMap,
-			takenDifMap:takenDifMap,
 			period:period,
 			employeeInstanceTotal:employeeInstanceTotal,
 			site:site,
@@ -511,6 +527,9 @@ def vacationFollowup(){
 			takenAutreMap:takenAutreMap,
 			takenSicknessMap:takenSicknessMap,
 			takenRTTMap:takenRTTMap,
+			takenExceptionnelMap:takenExceptionnelMap,
+			takenPaterniteMap:takenPaterniteMap,
+			takenDifMap:takenDifMap,
 			takenCAMap:takenCAMap,
 			initialCAMap:initialCAMap,
 			initialRTTMap:initialRTTMap,
@@ -1742,31 +1761,11 @@ def vacationFollowup(){
 			calendar.time=myDate
 		}
 		def retour = PDFService.generateUserMonthlyTimeSheet(myDate,employee,folder)
-	//	response.setContentType("application/pdf")
-	//	response.setHeader("Content-disposition", "filename=${retour[1]}")
-	//	response.outputStream << retour[0]
-		
-		
-		
 		def file = new File(folder+'/'+retour[1])
-		/*
-		response.setContentType("application/octet-stream")
-		response.setHeader("Content-disposition", "attachment;filename=${file.getName()}")
-		
-		response.outputStream << file.newInputStream()
-		*/
-		//render file:file.newInputStream()
 		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
-		
-		
-		
 	}
 	
-
-	
-	
 	def annualTotalPDF(Long userId){	
-		params.each{i-> log.error(i)}
 		def year
 		def month
 		def calendar = Calendar.instance

@@ -12,6 +12,7 @@ public enum AbsenceType {
 	CSS('CSS'),
 	FERIE('F'),
 	EXCEPTIONNEL('CE'),
+	PATERNITE('CP'),
 	DIF('DIF')
 	
 	final String value

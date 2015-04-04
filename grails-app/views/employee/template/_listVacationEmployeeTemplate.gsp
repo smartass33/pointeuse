@@ -12,6 +12,7 @@
 			<th class='rotate-45'><div><span><g:message code="rtt.remainder.label"/></span></div></th>
 			<th class='rotate-45'><div><span><g:message code="other.vacation.label"/></span></div></th>
 			<th class='rotate-45'><div><span><g:message code="exceptionnal.vacation.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="paternite.vacation.label"/></span></div></th>
 	</thead>
 	<tbody>
 	<g:if test="${employeeInstanceList!=null}">
@@ -27,6 +28,7 @@
 					<td>${remainingRTTMap.get(employee)}</td>		
 					<td>${takenAutreMap.get(employee)}</td>			
 					<td>${takenExceptionnelMap.get(employee)}</td>	
+					<td>${takenPaterniteMap.get(employee)}</td>	
 				</g:if>
 			</tr>
 		</g:each>

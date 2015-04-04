@@ -9,7 +9,7 @@
 		<style  type="text/css">
 			@page {
 			   size: 210mm 297mm;
-			   margin: 5px 10px 10px 10px;
+			   margin: 5px 5px 5px 5px;
 			 }
 			table {
 			  font: normal 11px verdana, arial, helvetica, sans-serif;
@@ -29,10 +29,10 @@
 			thead, tfoot {
 				background:url(bg1.png) repeat-x;
 				text-align:left;
-				height:30px;
+				height:20px;
 			}
 			thead th, tfoot th {
-				padding:5px;
+				padding:3px;
 			}
 			table a {
 				color: #333333;
@@ -69,7 +69,7 @@
 		</style>
 	</head>
 	<body>
-	<h1 style="text-align:center;font-size:150%">${message(code: 'employee.monthly.report.label')} <g:formatDate format="MMMM yyyy" date="${period}"/></h1>
+	<h1 style="text-align:center;font-size:130%">${message(code: 'employee.monthly.report.label')} <g:formatDate format="MMMM yyyy" date="${period}"/></h1>
 	<table>
 		<thead></thead>
 		<tbody>  
@@ -210,6 +210,22 @@
 	        						</table>
 	        					</td>
 							</tr>							
+							<tr>
+								<td width="35%" style="text-align:left;" >${message(code: 'employee.paternite.count', default: 'report')} :</td>	
+	 							<td>
+	 								<table border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${paternite as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					
+	        					<td>
+	        						<table border="1" class="cartoucheValues">
+	        							<thead></thead>	        							
+	        							<tr><td>${yearlyPaternite as float}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>
 							<tr>
 								<td width="35%" style="text-align:left;" >${message(code: 'employee.dif.count', default: 'report')} :</td>	
 	 							<td>
@@ -398,10 +414,8 @@
 		      <th style="border:1px;width:32px;text-align:center">${message(code: 'report.table.HS.label', default: 'report')}</th>
 		      <th style="border:1px;width:48px;text-align:center">${message(code: 'report.table.absence.label', default: 'report')}</th>
 		      <th style="border:1px;width:400px;text-align:center">${message(code: 'events.label', default: 'report')}</th>
-		    </thead>
-		    
-		</table>	
-		
+		    </thead>	    
+		</table>		
 		        <g:each in="${weeklyAggregate}" status="k" var="week">
 		        <table >
 			        <tbody>
@@ -463,32 +477,26 @@
 	                </g:if>
 	              </g:else>
 	              </td>
-	            </tr>
-		            
-		          </g:each>
-		          
-		          </table>
-		        </g:each>
-		         <br/><br/>
-		         
-  				<table  >
-					<thead></thead>
-					<tr>
-						<td>${message(code: 'report.verification.date.label', default: 'Report')}: ${new Date().format('EEEE dd MMM yyyy')}</td>
-					</tr>
-					<tr><td></td></tr>
-					<tr><td></td></tr>
-					<tr><td></td></tr>
-
-					<tr>
-						<td>${message(code: 'report.employee.signature.label', default: 'Report')}:</td>
-						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-						<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-						<td>${message(code: 'report.employer.signature.label', default: 'Report')}:</td>				
-					</tr>
-				</table>	    
+	            </tr> 
+		       </g:each>        
+		     </table>
+		 </g:each>		         
+		<table>
+			<thead></thead>
+			<tr><td></td></tr>
+			<tr><td></td></tr>			
+			<tr>
+				<td>${message(code: 'report.verification.date.label', default: 'Report')}: ${new Date().format('EEEE dd MMM yyyy')}</td>
+			</tr>
+			<tr>
+				<td>${message(code: 'report.employee.signature.label', default: 'Report')}:</td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+				<td>${message(code: 'report.employer.signature.label', default: 'Report')}:</td>				
+			</tr>
+		</table>	    
 	</body>
 </html>
