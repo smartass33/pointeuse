@@ -19,7 +19,7 @@
 				<li><g:link class="logout" action="" controller="logout"><g:message code='admin.logout.label' default='Régul' />  </g:link></li>
 			</ul>
 		</div>
-		<div id="list-employee" class="standardNav">
+		<div id="ecart-list" class="standardNav">
 			<h1>
 				<g:message code="ecart.followup" /> 			
 				<g:if test="${site}">pour le site ${site.name}</g:if>

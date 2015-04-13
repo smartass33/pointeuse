@@ -23,17 +23,14 @@
 			th {
 				padding: 2px 4px 2px 4px;
 			}
-			
 			#newContractForm {
-    display: none;
-}
+    			display: none;
+			}
 		</style>
-
 		<g:javascript library="application"/> 		
 		<r:require module="report"/>
 		<r:layoutResources/>	
-		<resource:include components="autoComplete, dateChooser" autoComplete="[skin: 'default']" />
-			
+		<resource:include components="autoComplete, dateChooser" autoComplete="[skin: 'default']" />		
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>		
@@ -62,11 +59,8 @@
 
 			});
 		</script>
-		
-
 	</head>
 	<body>
-
 		<a href="#edit-employee" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div class="nav" role="navigation">
 			<ul>
@@ -107,11 +101,8 @@
 					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
 				</fieldset>
 			</g:form>	
-
 			<h1>gestion des contrats et du statut du salarié</H1>		
 			<BR>
-
-
 			<g:form method="post" >
 				<g:hiddenField name="id" value="${employeeInstance?.id}" />
 				<g:hiddenField name="isAdmin" value="${isAdmin}" />	

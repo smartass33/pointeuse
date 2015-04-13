@@ -78,6 +78,7 @@
 				<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="daily.followup" default="Last Name" /></g:link></li>	
 				<li class="controller"><g:link controller="employee" action='vacationFollowup' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="absence.followup" default="Last Name" /></g:link></li>	
 				<li class="controller"><g:link controller="employee" action='ecartFollowup' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="ecart.followup" default="Last Name" /></g:link></li>	
+				<li class="controller"><g:link controller="payment" action='paymentReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="payment.management" default="Last Name" /></g:link></li>	
 				<li class="controller"><g:link controller="reason" style="text-decoration: none;"><g:message code="regularization.reasons" default="Last Name" /></g:link></li>		
 				<li><BR></li>
 				<li class="controller"><g:link controller="logout" class="adminLogout"><g:message code="admin.logout.label" default="Last Name" /></g:link></li>							

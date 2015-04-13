@@ -33,41 +33,46 @@
 		<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>	
 		<div class="nav" id="nav">
 			<ul>
-			<g:form method="POST">
-				<li><a class="home" href="${createLink(uri: '/')}"><g:message
-							code="default.home.label" /></a></li>
-				<li><g:link class="list" action="list"
-						params="${[isAdmin:isAdmin]}"><g:message code="employee.list.annualReport.label"/>
-					</g:link></li>
-				<g:if test="${username != null}">
-					<li><g:link class="list" action="" controller="logout">
-							${message(code: 'admin.logout.label', default: 'Logout')}
+				<g:form method="POST">
+					<li><a class="home" href="${createLink(uri: '/')}"><g:message
+								code="default.home.label" /></a></li>
+					<li><g:link class="list" action="list"
+							params="${[isAdmin:isAdmin]}"><g:message code="employee.list.annualReport.label"/>
 						</g:link></li>
-				</g:if>
-				<li class="datePicker">
-					<g:select name="year" from="${Period.list([sort:'year'])}"
-						value="${period}"
-						noSelection="${['':(period?period:'-')]}" optionKey="id" 		
-						onchange="${remoteFunction(action: 'annualReport',
-	                  		update: 'monthlyTable',
-	                  		params: 
-							'\'isAjax=' + true 	
-							+ '&userId=' + userId
-							+ '&periodId=\' + this.value',
-							onLoading: "document.getElementById('spinner').style.display = 'inline';",
-							onComplete: "document.getElementById('spinner').style.display = 'none';"
-							)}"				
-						style="vertical-align: middle;" />					
-				</li>				
-				<li style="vertical-align: middle;">				
-					<g:actionSubmit value="PDF" action="annualTotalPDF" class="pdfButton" />
-							<g:hiddenField name="isAdmin" value="${isAdmin}" />
-							<g:hiddenField name="siteId" value="${siteId}" />
-							<g:hiddenField name="userId" value="${userId}" />
-							<g:hiddenField name="periodId" value="${period}" />							
-							<g:hiddenField name="isAjax" value="true" />	
-				</li>
-				</g:form>				
+					<g:if test="${username != null}">
+						<li><g:link class="list" action="" controller="logout">
+								${message(code: 'admin.logout.label', default: 'Logout')}
+							</g:link></li>
+					</g:if>
+					<li class="datePicker">
+						<g:select name="year" from="${Period.list([sort:'year'])}"
+							value="${period}"
+							noSelection="${['':(period?period:'-')]}" optionKey="id" 		
+							onchange="${remoteFunction(action: 'annualReport',
+		                  		update: 'monthlyTable',
+		                  		params: 
+								'\'isAjax=' + true 	
+								+ '&userId=' + userId
+								+ '&periodId=\' + this.value',
+								onLoading: "document.getElementById('spinner').style.display = 'inline';",
+								onComplete: "document.getElementById('spinner').style.display = 'none';"
+								)}"				
+							style="vertical-align: middle;" />					
+					</li>				
+					<li style="vertical-align: middle;">				
+						<g:actionSubmit value="PDF" action="annualTotalPDF" class="pdfButton" />
+						<g:hiddenField name="isAdmin" value="${isAdmin}" />
+						<g:hiddenField name="siteId" value="${siteId}" />
+						<g:hiddenField name="userId" value="${userId}" />
+						<g:hiddenField name="periodId" value="${period}" />							
+						<g:hiddenField name="isAjax" value="true" />	
+					</li>	
+					<g:if test="${employee != null}">
+						<li style="vertical-align: middle;">
+							<g:link controller="payment" action='paymentReport' class="HSButton" id="${paymentReport}" params="${[siteId:siteId,periodId:periodId,fromIndex:true,fromAnnualReport:true,periodId:periodId,employeeId:employee.id]}">${message(code: 'employee.sup.time.label', default: 'Report')}</g:link>
+						</li>
+					</g:if>	
+				</g:form>
 			</ul>	
 		</div>
 		<div id="list-employee" class="content scaffold-list">

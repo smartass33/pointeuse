@@ -8,14 +8,15 @@
 		<tr>
 			<g:sortableColumn property="lastName" style="width:150px;text-align:center" title="${message(code: 'employee.lastName.label', default: 'Last Name')}" />
 			<g:sortableColumn property="firstName" style="width:100px;text-align:center" title="${message(code: 'employee.firstName.label', default: 'First Name')}" />	
-			<g:sortableColumn property="site" title="${message(code: 'employee.site.label', default: 'Site')}" />
+			<g:sortableColumn property="site" style="text-align:center" title="${message(code: 'employee.site.label', default: 'Site')}" />
+			<th style="text-align:center" class="principal">${message(code: 'employee.function.label', default: 'Site')}</th>		
 			<th style="width:70px;text-align:center" class="principal">${message(code: 'employee.annualReport.label', default: 'Report')}</th>
 			<th style="width:70px;text-align:center" class="principal">${message(code: 'employee.monthly.report.label', default: 'Report')}</th>
 			<th style="width:70px;text-align:center" class="principal">${message(code: 'vacation.report.label', default: 'Report')}</th>
 			<g:sortableColumn property="status" style="text-align:center" class="principal"
 				title="${message(code: 'employee.entry.status', default: 'Entry')}" />
 			<th style="text-align:center" class="principal">${message(code: 'employee.lastTime.label', default: 'Entry')}</th>
-			<g:sortableColumn class="principal"  property="hasError" style="width:55px;text-align:center" class="principal"
+			<g:sortableColumn class="principal"  property="hasError" style="width:20px;text-align:center" class="principal"
 				title="${message(code: 'employee.hasErrors', default: 'Errors')}" />
 			<g:sortableColumn property="lastName" style="width:150px;text-align:center" class="admin"
 				title="${message(code: 'employee.username.label', default: 'User Name')}" />
@@ -50,9 +51,13 @@
 						${employeeInstance?.site.name}
 					</g:if>
 				</td>					
-					<td style="border:1px;width:200px" class="principal"><g:link controller="employee" action='annualReport' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId,isAjax:false]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
-					<td style="border:1px;width:200px" class="principal"><g:link controller="employee" action='report' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link></td>
-					<td style="border:1px;width:200px" class="principal"><g:link controller="employee" action='vacationDisplay' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'vacation.report.label', default: 'Report')}</g:link></td>
+				<td><g:if test="${employeeInstance?.function != null}">
+						${employeeInstance?.function.name}
+					</g:if>
+				</td>				
+				<td style="border:1px;width:200px;padding:2px 5px 2px 15px;" class="principal"><g:link controller="employee" action='annualReport' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId,isAjax:false]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
+				<td style="border:1px;width:200px;padding:2px 5px 2px 15px;" class="principal"><g:link controller="employee" action='report' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link></td>
+				<td style="border:1px;width:200px;padding:2px 5px 2px 15px;" class="principal"><g:link controller="employee" action='vacationDisplay' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'vacation.report.label', default: 'Report')}</g:link></td>
 					<g:form controller="employee">
 						<g:hiddenField name="userId" value="${employeeInstance?.id}" />
 						<td class="principal"><g:if test="${employeeInstance?.status}">
@@ -74,12 +79,11 @@
 						</g:else>
 						<g:if test="${!employeeInstance?.hasError}">
 							<td class="principal" align="center" style="text-align:middle;" ondblclick="this.style.display = 'none';">
-								<img alt="tick" src="../images/skin/tick.png" style="vertical-align: middle;horizontal-align:middle;">
-							</td>
+								<div style="padding:2px 20px 2px 20px; "><img alt="tick" src="../images/skin/tick.png" style="align:middle;"></div>
 						</g:if>
 						<g:else>	
 							<td class="principal" align="center" style="text-align:middle;" ondblclick="this.style.display = 'none';">
-								<img alt="cross" src="../images/skin/cross.png" style="vertical-align: middle;horizontal-align:middle;">
+								<div style="padding:2px 20px 2px 20px; "><img alt="cross" src="../images/skin/cross.png" style="align:middle;"></div>
 							</td>
 						</g:else>
 					</g:form>

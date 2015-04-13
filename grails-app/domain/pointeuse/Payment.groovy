@@ -2,31 +2,27 @@ package pointeuse
 
 import java.util.Date;
 
-class SupplementaryTime {
+class Payment {
 	Employee employee
 	Date loggingTime
-	double value
 	Period period
 	int month
 	double amountPaid
-	Date lastPayment
 	
     static constraints = {
-		month (unique:['employee','period'])
+		amountPaid (unique:['employee','period','month'])
 		amountPaid (blank: true,nullable:true)
-		lastPayment(blank: true,nullable:true)
     }
 	
 	String toString(){
-		return (this.period).toString() +' - month - ' + month + ' : ' +this.value
 	}
 	
 	
-	SupplementaryTime(Employee employee,Period period, int month,double value){
+	Payment(Employee employee,Period period, int month,double amountPaid){
 		this.employee = employee
 		this.period = period
 		this.month = month
-		this.value = value
+		this.amountPaid = amountPaid
 		this.loggingTime = new Date()
 	}
 }

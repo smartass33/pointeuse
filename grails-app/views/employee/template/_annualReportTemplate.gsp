@@ -13,19 +13,20 @@
 	<BR>
 	<thead>
 		<th class='rotate-45' style="width:100px"><div><span><g:message code="annual.report.month.label"/></span></div></th>	
-		<th class='rotate-45'><div><span><g:message code="annual.report.opened.days"/></span></div></th>	
-		<th class='rotate-45'><div><span><g:message code="annual.report.working.days"/></span></div></th>			
+		<th class='rotate-45'  style="width:60px"><div><span><g:message code="annual.report.opened.days"/></span></div></th>	
+		<th class='rotate-45'  style="width:60px"><div><span><g:message code="annual.report.working.days"/></span></div></th>			
 		<th class='rotate-45'><div><span><g:message code="annual.report.theoritical.label"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.report.elapsed.label"/></span></div></th>
-		<th class='rotate-45'><div><span><g:message code="annual.report.holidays.label"/></span></div></th>
-		<th class='rotate-45'><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>	
-		<th class='rotate-45'><div><span><g:message code="annual.report.RTT.label"/></span></div></th>
-		<th class='rotate-45'><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
-		<th class='rotate-45'><div><span><g:message code="annual.report.sickness.label"/></span></div></th>
-		<th class='rotate-45'><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
-		<th class='rotate-45'><div><span><g:message code="employee.paternite.count"/></span></div></th>		
+		<th class='rotate-45' style="width:55px"><div><span><g:message code="annual.report.holidays.label"/></span></div></th>
+		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>	
+		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.RTT.label"/></span></div></th>
+		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
+		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>
+		<th class='rotate-45'  style="width:75px"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
+		<th class='rotate-45'  style="width:70px"><div><span><g:message code="employee.paternite.count"/></span></div></th>		
 		<th class='rotate-45'><div><span><g:message code="annual.report.supplementary.label"/></span></div></th>
-		
+		<th class='rotate-45'  style="width:65px"><div><span><g:message code="annual.report.sunday.time.label"/></span></div></th>
+		<th class='rotate-45'><div><span><g:message code="annual.report.bank.holiday.time.label"/></span></div></th>
 	</thead>
 	<tbody id='body_update' style="border:1px;">
 		<g:each in="${yearMonthMap}"  status="i" var="cartouche">
@@ -64,7 +65,9 @@
               		<g:else>
            				00:00
               		</g:else>
-				</td>								
+				</td>	
+				<td style="vertical-align: middle;text-align:right;">${yearSundayMap.get(cartouche.key)}</td>
+				<td style="vertical-align: middle;text-align:right;">${yearBankHolidayMap.get(cartouche.key)}</td>							
 			</tr>
 		</g:each>
 		<tr class='even' style='font-weight:bold;'>
@@ -103,6 +106,8 @@
           		00 : 00
           	</g:else>	
 		</td>
+		<td style="vertical-align: middle;text-align:right;"><my:humanTimeTD id="sundayTime"  name="sundayTime" value="${annualSundayTime}"/></td>
+		<td style="vertical-align: middle;text-align:right;"><my:humanTimeTD id="bankTime"  name="bankTime" value="${annualBankHolidayTime}"/></td>
 		</tr>
 	</tbody>
 </table>
@@ -114,6 +119,15 @@
 			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="HRA" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.HRA.tooltip")}"><g:message code="annual.actual.intial"/>:</td>
 			<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD">${annualTotal}</td>		
 		</tr>	
+		<tr>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><g:message code="annual.report.bank.sunday.holiday.time.label"/>:</td>
+			<g:if test="${annualSundayTime != null &&  annualBankHolidayTime != null}">
+				<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="sundayBank"  name="sundayBank" value="${annualSundayTime + annualBankHolidayTime}"/></td>				
+			</g:if>
+			<g:else>
+				<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="sundayBank"  name="sundayBank" value="${0}"/></td>							
+			</g:else>
+		</tr>			
 		<tr>
 			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="HTA" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.HTA.tooltip")}"><g:message code="annual.theoritical.intial"/>:</td>
 			<td style="witdh: 50px;text-align:right;" class="cartoucheRightFiguresTD">${annualTheoritical}</td>		
@@ -131,8 +145,32 @@
 			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualSupTimeAboveTheoritical}</td>
 		</tr>
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="HSP" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.HSP.tooltip")}"><g:message code="annual.total.HS.to.pay"/>:</td>
-			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD">${annualGlobalSupTimeToPay}</td>
-		</tr>				
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="HSP" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.HSP.tooltip")}"><g:message code="annual.total.HS.to.pay.no.sunday"/>:</td>
+			<%
+				if (annualGlobalSupTimeToPay == null){ annualGlobalSupTimeToPay = 0}
+				if (annualSundayTime == null){ annualSundayTime = 0}
+				if (annualBankHolidayTime == null){ annualBankHolidayTime = 0}
+				if (annualPaidHS == null){ annualPaidHS = 0}
+			 %>
+			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="paidHSNoSunday"  name="paidHSNoSunday" value="${annualGlobalSupTimeToPay - annualSundayTime - annualBankHolidayTime}"/></td>
+		</tr>	
+		<!-- tr>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="sunday" href="#" style="text-decoration: none;color:#666;" ><g:message code="annual.report.sunday.time.label"/>:</td>
+			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="sunday"  name="sunday" value="${annualSundayTime}"/></td>		
+			
+		</tr>	
+		<tr>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="sunday" href="#" style="text-decoration: none;color:#666;" ><g:message code="annual.report.bank.holiday.time.label"/>:</td>
+			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="sunday"  name="sunday" value="${annualBankHolidayTime}"/></td>
+		</tr-->		
+		
+		<tr>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD">HS déjà payées:</td>
+			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="paidHS"  name="paidHS" value="${annualPaidHS}"/></td>
+		</tr >	
+		<tr>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD">HS à payer au solde de la période:</td>
+			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="HStoPay"  name="HStoPay" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/></td>
+		</tr >			
 	</table>
 </div>

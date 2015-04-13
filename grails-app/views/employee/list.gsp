@@ -44,7 +44,6 @@
 		<script>
 		function showVal() {
 			if (document.getElementById("detail").value == "1"){
-			    //document.getElementById(i).style.visibility='visible';
 			    document.getElementById('employee-table').className='hideDetail';
 			    document.getElementById('detailSelector').style.display = 'none';
 			    document.getElementById('principalSelector').style.display = 'block';

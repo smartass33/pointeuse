@@ -5,15 +5,12 @@
 <html>
 <head>
 	<g:javascript library="application"/> 		
-	<r:require module="report"/>		<r:layoutResources/>		
-	
+	<r:require module="report"/>		
+	<r:layoutResources/>		
   	<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-
 	<meta name="layout" content="main" id="mainLayout">
-	<g:set var="isNotSelected" value="true" />
-	
-	<g:set var="entityName"
-		value="${message(code: 'employee.label', default: 'Employee')}" />
+	<g:set var="isNotSelected" value="true" />	
+	<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 	<title><g:message code="default.list.label" args="[entityName]" /></title>
 		<style type="text/css">
 			body {
@@ -62,23 +59,21 @@
 		
 </head>
 <body>
-
 	<div class="nav" id="nav">
 		<g:headerMenu />
 	</div>	
 	<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>	
-	<div id="list-employee" class="nav">
+	<div id="daily-list" class="standardNav">
 		<h1>
 			<g:message code="daily.recap.label"/>
 			<br>
 			<g:if test="${site!=null}"><g:message code="site.label"/>:${site.name}</g:if>
 			<br>
-
 			<g:form method="POST" url="[controller:'employee', action:'pdf']">
-				<ul>
-				
-				<li>	<g:message code="laboratory.label" default="Search" style="vertical-align: middle;" /> </li>
-				<li>	<g:if test="${siteId != null && !siteId.equals('')}">
+				<ul>	
+				<li><g:message code="laboratory.label" default="Search" style="vertical-align: middle;" /> </li>
+				<li>	
+					<g:if test="${siteId != null && !siteId.equals('')}">
 						<g:select name="site.id" from="${Site.list([sort:'name'])}"
 							noSelection="${['':site.name]}" optionKey="id" optionValue="name"
 							style="vertical-align: middle;" />
@@ -88,7 +83,7 @@
 							noSelection="${['':'-']}" optionKey="id" optionValue="name"/>
 					</g:else>	
 				</li>
-				<li>	<input type="text" id="date_picker" name="date_picker" /></li>
+				<li><input type="text" id="date_picker" name="date_picker" /></li>
 				<li>	
 					<g:submitToRemote class="displayButton"
 						value="Rapport"
@@ -103,8 +98,7 @@
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
 					<g:hiddenField name="siteId" value="${siteId}" />
 				</ul>
-			</g:form>
-			
+			</g:form>			
 		</h1>
 		<g:if test="${flash.message}">
 			<div class="message" id="flash">
@@ -112,7 +106,6 @@
 			</div>
 		</g:if>
 	</div>	
-	
 	<div id="dailyTable">
 		<g:listDailyTime/>
 	</div>

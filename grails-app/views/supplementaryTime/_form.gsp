@@ -2,6 +2,14 @@
 
 
 
+<div class="fieldcontain ${hasErrors(bean: supplementaryTimeInstance, field: 'month', 'error')} required">
+	<label for="month">
+		<g:message code="supplementaryTime.month.label" default="Month" />
+		<span class="required-indicator">*</span>
+	</label>
+	<g:field name="month" type="number" value="${supplementaryTimeInstance.month}" required=""/>
+</div>
+
 <div class="fieldcontain ${hasErrors(bean: supplementaryTimeInstance, field: 'employee', 'error')} required">
 	<label for="employee">
 		<g:message code="supplementaryTime.employee.label" default="Employee" />
@@ -24,22 +32,6 @@
 		<span class="required-indicator">*</span>
 	</label>
 	<g:select id="period" name="period.id" from="${pointeuse.Period.list()}" optionKey="id" required="" value="${supplementaryTimeInstance?.period?.id}" class="many-to-one"/>
-</div>
-
-<div class="fieldcontain ${hasErrors(bean: supplementaryTimeInstance, field: 'type', 'error')} required">
-	<label for="type">
-		<g:message code="supplementaryTime.type.label" default="Type" />
-		<span class="required-indicator">*</span>
-	</label>
-	<g:select name="type" from="${pointeuse.SupplementaryType?.values()}" keys="${pointeuse.SupplementaryType.values()*.name()}" required="" value="${supplementaryTimeInstance?.type?.name()}"/>
-</div>
-
-<div class="fieldcontain ${hasErrors(bean: supplementaryTimeInstance, field: 'user', 'error')} required">
-	<label for="user">
-		<g:message code="supplementaryTime.user.label" default="User" />
-		<span class="required-indicator">*</span>
-	</label>
-	<g:select id="user" name="user.id" from="${pointeuse.User.list()}" optionKey="id" required="" value="${supplementaryTimeInstance?.user?.id}" class="many-to-one"/>
 </div>
 
 <div class="fieldcontain ${hasErrors(bean: supplementaryTimeInstance, field: 'value', 'error')} required">

@@ -9,6 +9,7 @@ import groovy.time.TimeCategory
 
 class PDFService {
 	def timeManagerService
+	def paymentService
 	def pdfRenderingService
 	def grailsApplication
 	
@@ -171,8 +172,6 @@ class PDFService {
 			modelSiteTotal << [site:site,period2:period]
 			def siteName = (site.name).replaceAll("\\s","").trim()
 			
-			
-			
 			// Get the bytes
 			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeSiteTotalPDFTemplate', model: modelSiteTotal)
 			filename = siteName+'-'+period.year+'-'+(period.year+1)+'-report' +'.pdf'
@@ -239,8 +238,56 @@ class PDFService {
 			finalCopy.close();
 			file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
 		}
-	//	return [file.bytes,file.name]
 	}
 
+	def generateSitePaymentSheet(def model,String folder){
+		def filename		
+		OutputStream outputStream
+		File file
+		def siteName = (model.site.name).replaceAll("\\s","").trim()
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeHSPDFTemplate', model: model)
+		filename = model.period.year.toString()+'-'+siteName +'-HSPaymentReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
 	
+	
+	def generateAllSitesPaymentSheet(Period period,String folder){
+		log.error('generating paymentPDF for all sites with period: '+period)
+		def fileNameList=[]
+		def filename
+		Calendar calendar = Calendar.instance
+		PdfCopyFields finalCopy
+		OutputStream outputStream
+		File file
+		
+		for (Site site:Site.findAll()){
+			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeHSPDFTemplate', model: paymentService.getReportData(period,site))
+			filename = period.year.toString()+'-'+site.name +'-HSPaymentReport' +'.pdf'
+			fileNameList.add(filename)
+			outputStream = new FileOutputStream (folder+'/'+filename);
+			bytes.writeTo(outputStream)
+			if(bytes)
+				bytes.close()
+			if(outputStream)
+				outputStream.close()
+		}
+		
+		def finalCopyName = folder+'/'+period.year+'-'+'paymentReport'+'.pdf'
+		finalCopy = new PdfCopyFields(new FileOutputStream(finalCopyName));
+		finalCopy.open()
+		for (String tmpFile:fileNameList){
+			PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
+			finalCopy.addDocument(pdfReader)
+		}
+		finalCopy.close();
+		file = new File(finalCopyName)
+		return [file.bytes,file.name]
+	}
 }

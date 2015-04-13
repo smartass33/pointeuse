@@ -70,6 +70,8 @@
 			<th style="vertical-align: middle;text-align:center;"><g:message code="employee.exceptionnel.count"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="employee.paternite.count"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.supplementary.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.sunday.time.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.bank.holiday.time.label"/></th>
 		</thead>
 		<tbody id='body_update' style="border:1px;">
 			<g:each in="${yearMonthMap}"  status="i" var="cartouche">
@@ -81,7 +83,7 @@
 	                    	${cartouche.value.getAt('monthTheoriticalHuman')} 
 	               		</g:if>
 	               		<g:else>
-	               			00 : 00
+	               			00:00
 	               		</g:else>
 					</td>
 					<td style="vertical-align: middle;text-align:right;">
@@ -89,7 +91,7 @@
 	                    	${yearTotalMap.get(cartouche.key)} 
 	               		</g:if>
 	               		<g:else>
-	               			00 : 00
+	               			00:00
 	               		</g:else>
 					</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('holidays')}</td>
@@ -103,9 +105,11 @@
 	                   		${yearMonthlySupTime.get(cartouche.key)} 
 	              		</g:if>
 	              		<g:else>
-	              			00 : 00
+	              			00:00
 	              		</g:else>
-					</td>									
+					</td>					
+					<td style="vertical-align: middle;text-align:right;">${yearSundayMap.get(cartouche.key)}</td>
+					<td style="vertical-align: middle;text-align:right;">${yearBankHolidayMap.get(cartouche.key)}</td>										
 				</tr>
 			</g:each>
 			<tr class='even'>			
@@ -115,7 +119,7 @@
 	               		${annualTheoritical} 
 	           		</g:if>
 	           		<g:else>
-	           			00 : 00
+	           			00:00
 	           		</g:else>
 				</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">
@@ -123,7 +127,7 @@
 	               		${annualTotal}
 	           		</g:if>
 	           		<g:else>
-	           			00 : 00
+	           			00:00
 	           		</g:else>
 				</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualHoliday}</td>
@@ -137,10 +141,11 @@
 	               		${annualPayableSupTime} 
 	           		</g:if>
 	           		<g:else>
-	           			00 : 00
+	           			00:00
 	           		</g:else>	
 				</td>
-				<td></td>				
+				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualSundayTime}</td>
+				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualBankHolidayTime}</td>				
 			</tr>
 		</tbody>
 	</table>
@@ -160,7 +165,7 @@
 		               	${annualTheoritical} 
 		           	</g:if>	
 		           	<g:else>
-		           		00 : 00
+		           		00:00
 		           	</g:else>
 		        </td>
 		        <td style="vertical-align: middle;text-align:center;">${initialCA}</td>
@@ -188,6 +193,14 @@
 		<tr>
 			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.total.HS.to.pay"/>:</td>
 			<td style="witdh: 60px;text-align:right;font-weight:bold;">${annualGlobalSupTimeToPay}</td>
+		</tr>		
+		<tr>
+			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.report.sunday.time.label"/>:</td>
+			<td style="witdh: 60px;text-align:right;font-weight:bold;">${annualSundayTime}</td>
+		</tr>			
+		<tr>
+			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.report.bank.holiday.time.label"/>:</td>
+			<td style="witdh: 60px;text-align:right;font-weight:bold;">${annualBankHolidayTime}</td>
 		</tr>				
 	</table>	
 	<table style="width:95%">

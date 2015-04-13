@@ -1185,7 +1185,6 @@ a.skip {
 		background-position: 0.7em center;
 		background-repeat: no-repeat;
 		text-indent: 20px;
-	
 		color: #666666;
 		display: block;
 		padding: 0.25em 0.7em;
@@ -1198,29 +1197,26 @@ a.skip {
 		background-color: #999999;
 		outline: none;
 		border: none;
-		font-family: Verdana,Arial,sans-serif;
+		font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
     	font-size: 1em;
-
 }
 
 
 
 .pdfButtonDisabled:focus {
-		background-image: url(../images/skin/pdf.png);
-	
+	background-image: url(../images/skin/pdf.png);
 	background-color: #666;
 	background-color: #999999;
 	outline: none;
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
 
-	}
+}
 
 .pdfButton {
 		background-image: url(../images/skin/pdf.png);
 		background-position: 0.7em center;
 		background-repeat: no-repeat;
 		text-indent: 20px;
-	
 		color: #666666;
 		display: block;
 		padding: 0.25em 0.7em;
@@ -1233,9 +1229,8 @@ a.skip {
 		background-color: transparent;
 		outline: none;
 		border: none;
-		font-family: Verdana,Arial,sans-serif;
+		font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
     	font-size: 1em;
-
 }
 
 .pdfButton:hover {
@@ -1247,8 +1242,46 @@ a.skip {
 }
 
 .pdfButton:focus {
-		background-image: url(../images/skin/pdf.png);
-	
+	background-image: url(../images/skin/pdf.png);
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+
+.HSButton {
+		background-image: url(../images/skin/time7.png);
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		text-indent: 25px;
+		color: #666666;
+		display: block;
+		padding: 0.25em 0.7em;
+		text-decoration: none;
+	   	-moz-border-radius: 0.3em;
+		-webkit-border-radius: 0.3em;
+	    border-radius: 0.3em;
+		background-position: 0.7em center;
+		background-repeat: no-repeat;
+		background-color: transparent;
+		outline: none;
+		border: none;
+		font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    	font-size: 1em;
+}
+
+.HSButton:hover {
+	background-image: url(../images/skin/time7.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.HSButton:focus {
+	background-image: url(../images/skin/time7.png);
 	background-color: #666;
 	background-color: #999999;
 	color: #ffffff;
@@ -1256,7 +1289,7 @@ a.skip {
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
 
 	}
-	
+		
 	
 .backButton {
 		background-image: url(../images/skin/back.png);
@@ -1264,7 +1297,6 @@ a.skip {
 		background-position: 0.7em center;
 		background-repeat: no-repeat;
 		text-indent: 25px;
-	
 		color: #666666;
 		display: block;
 		padding: 0.6em 0.7em;
@@ -1284,7 +1316,6 @@ a.skip {
 .backButton:hover {
 	background-image: url(../images/skin/back.png);
 	background-size:16px 16px;
-	
 	background-color: #999999;
 	color: #ffffff;
 	outline: none;
@@ -1310,7 +1341,6 @@ a.skip {
 		background-position: 0.7em center;
 		background-repeat: no-repeat;
 		text-indent: 25px;
-	
 		color: #666666;
 		display: block;
 		padding: 0.6em 0.7em;
