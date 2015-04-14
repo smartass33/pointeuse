@@ -2066,8 +2066,6 @@ class TimeManagerService {
 			annualPayableSupTime:getTimeAsText(computeHumanTime(Math.round(annualPayableSupTime) as long),false),
 			annualPayableCompTime:getTimeAsText(computeHumanTime(Math.round(annualPayableCompTime) as long),false),
 			annualTotal:getTimeAsText(computeHumanTime(Math.round(annualTotal) as long),false),
-		//	annualSundayTime:getTimeAsText(computeHumanTime(Math.round(annualSundayTime) as long),false),
-		//	annualBankHolidayTime:getTimeAsText(computeHumanTime(Math.round(annualBankHolidayTime) as long),false),
 			annualSundayTime:Math.round(annualSundayTime) as long,
 			annualBankHolidayTime:Math.round(annualBankHolidayTime) as long,
 			lastYear:year,

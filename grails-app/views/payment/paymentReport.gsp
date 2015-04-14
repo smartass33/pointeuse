@@ -29,13 +29,13 @@
 					<ul>
 						<li><g:message code="laboratory.label" default="Search" style="vertical-align: middle;" /></li>
 						<li>	
-							<g:select name="site.id" from="${Site.list([sort:'name'])}"
+							<g:select name="siteId" from="${Site.list([sort:'name'])}"
 								value="${site}"
 								noSelection="${['':(site?site.name:'-')]}" optionKey="id" optionValue="name"
 								style="vertical-align: middle;" />						
 						</li>						
 						<li class='datePicker'>	
-							<g:select name="year" from="${Period.list([sort:'year'])}"
+							<g:select name="periodId" from="${Period.list([sort:'year'])}"
 								value="${period}"
 								noSelection="${['':(period?period:'-')]}" optionKey="id" 
 								style="vertical-align: middle;" />
@@ -47,7 +47,7 @@
 								onComplete="document.getElementById('spinner').style.display = 'none';"
 								url="[controller:'payment', action:'paymentReport']" value="${message(code: 'default.search.label', default: 'List')}">
 							</g:submitToRemote>
-						<li><g:actionSubmit class='pdfButton' value="PDF"  action="getPaymentPDF"/></li>	
+						<li><g:actionSubmit class='pdfButton' value="PDF"  action="getPaymentPDF" params="${[siteId:siteId,periodId:periodId]}"/></li>	
 						
 						<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">
 							<li><g:actionSubmit class='pdfButton' value="PDF pour tous les sites"  action="getAllSitesPaymentPDF"/></li>

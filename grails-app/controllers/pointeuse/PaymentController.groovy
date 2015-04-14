@@ -1,7 +1,6 @@
 package pointeuse
 
 
-
 import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional
 import java.text.SimpleDateFormat
@@ -106,34 +105,29 @@ class PaymentController {
         }
     }
 	
-	 
-	
-	
 	def getPaymentPDF(){		
-		log.error('getPaymentPDF called')
 		params.each{i-> log.error(i)}	
 		def folder = grailsApplication.config.pdf.directory
-		
 		def fromIndex=params.boolean('fromIndex')
-		def periodId = params['year']
+		def periodId = params['periodId']
+		def siteId = params['siteId']
+		def sessionSite = session['siteId']
+		def sessionPeriod = session['periodId']
 		def isAdmin = params.boolean('isAdmin')
-
 		def calendar = Calendar.instance
 		def criteria
 		def period 
+		def site
+		log.error('getPaymentPDF called with periodId: '+periodId+' and site: '+params["site.id"])
 		
-		if (periodId != null && !periodId.equals('')){
-			period = Period.get(periodId)
-		}else{
-			def month =  calendar.get(Calendar.MONTH) + 1
-			def year = calendar.get(Calendar.YEAR)
-			if (month < 6){
-				year -=1
-			}
-			period = Period.findByYear(year)
-		}
-			
-		def site = (params["siteId"]!=null && params["siteId"]!='') ? Site.get(params["siteId"]) : Site.get(params["site.id"])
+		def paramMap = paymentService.getSiteAndPeriod(params,session)
+		site = paramMap.get('site')
+		period = paramMap.get('period')
+		def isSitePresent = paramMap.get('isSitePresent')
+		def isPeriodPresent = paramMap.get('isPeriodPresent')
+		if (isSitePresent){session['sessionSite'] = site.id}
+		if (isPeriodPresent){session['sessionPeriod'] = period.id}
+		
 		if (site != null){
 			def retour = PDFService.generateSitePaymentSheet(paymentService.getReportData(period,site), folder)
 			response.setContentType("application/octet-stream")
@@ -146,44 +140,37 @@ class PaymentController {
 	def getAllSitesPaymentPDF(){
 		log.error('getAllSitesPaymentPDF called')
 		params.each{i-> log.error(i)}
-		def folder = grailsApplication.config.pdf.directory
-		
+		def folder = grailsApplication.config.pdf.directory	
 		def fromIndex=params.boolean('fromIndex')
 		def periodId = params['year']
 		def isAdmin = params.boolean('isAdmin')
-
 		def calendar = Calendar.instance
 		def criteria
 		def period
+		def site
 		
-		if (periodId != null && !periodId.equals('')){
-			period = Period.get(periodId)
-		}else{
-			def month =  calendar.get(Calendar.MONTH) + 1
-			def year = calendar.get(Calendar.YEAR)
-			if (month < 6){
-				year -=1
-			}
-			period = Period.findByYear(year)
-		}
+		def paramMap = paymentService.getSiteAndPeriod(params,session)
+		site = paramMap.get('site')
+		period = paramMap.get('period')
+		def isSitePresent = paramMap.get('isSitePresent')
+		def isPeriodPresent = paramMap.get('isPeriodPresent')
+		if (isSitePresent){session['sessionSite'] = site.id}
+		if (isPeriodPresent){session['sessionPeriod'] = period.id}
 
 		def retour = PDFService.generateAllSitesPaymentSheet(period, folder)
 		response.setContentType("application/octet-stream")
 		response.setHeader("Content-disposition", "filename=${retour[1]}")
-		response.outputStream << retour[0]
-		
+		response.outputStream << retour[0]		
 	}
 	
 	def paymentReport() {
 		params.each{i-> log.error(i)}	
 		def fromIndex = (params['fromIndex'] != null) ? params.boolean('fromIndex') :false
 		def fromAnnualReport = (params['fromAnnualReport'] != null) ? params.boolean('fromAnnualReport') :false
-		def periodId = params["periodId"]
 		def employee 
 		SimpleDateFormat dateFormat
 		def calendar = Calendar.instance
 		def criteria
-		def site = Site.get(params["siteId"])
 		def monthList=[6,7,8,9,10,11,12,1,2,3,4,5]
 		def paymentMap = [:]
 		def paymentIDMap = [:]
@@ -196,17 +183,17 @@ class PaymentController {
 			dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 			myDate = dateFormat.parse(myDate)
 		}
+		def paramMap = paymentService.getSiteAndPeriod(params,session)
+		def site = paramMap.get('site')
+		def period = paramMap.get('period')
+		def isSitePresent = paramMap.get('isSitePresent')
+		def isPeriodPresent = paramMap.get('isPeriodPresent')
+		if (isSitePresent){session['sessionSite'] = site.id}
+		if (isPeriodPresent){session['sessionPeriod'] = period.id}
 
-		def period = (periodId != null) ? Period.get(periodId) : Period.findByYear(year)
-
-		if (site == null){
-			site = Site.get(params["site.id"])
-		}
-		if (site == null && !fromIndex){
-			flash.message = message(code: 'site.selection.error')
-		}else{
-			flash.message = null
-		}		
+		if (site == null && !fromIndex){flash.message = message(code: 'site.selection.error')}
+		else{flash.message = null}
+			
 		def model = paymentService.getReportData( period, site)
 		model << [fromAnnualReport:fromAnnualReport,myDate:myDate]
 		if (fromAnnualReport){
@@ -264,13 +251,8 @@ class PaymentController {
 		def model = [fromIndex:true,siteId:site.id,periodId:period.id,site:site]
 		
 		model << paymentService.getReportData( period, site)
-		
-		
-		
 		render template:"/payment/template/paymentTemplate",model:model
 		return
-		//redirect(action: "paymentReport",params:[fromIndex:true,siteId:site.id,periodId:period.id])
-		//return
 	}
 	
 	
@@ -292,16 +274,19 @@ class PaymentController {
 			newValuesAsString[j] = timeManagerService.getTimeFromText(newValuesAsString[j], false)
 		}		
 	
-		def employeeList = Employee.findAllBySite(site)
+		def employeeList = Employee.findAllBySite(site,[sort:'lastName',order:'asc'])
 		log.error('newValuesAsString.size(): '+newValuesAsString.size())
 		def iterator = 0
 		for (def i = 0;i<newValuesAsString.size();i++){
+			if (i != 0 && i % 12 == 0){
+				iterator+=1
+				table=[]
+			}
 			log.error('iterator: '+iterator)
 			def employee = employeeList.get(iterator)
 			table.add(newValuesAsString)
 			if (newValuesAsString[i] as double != paymentsAsLong[i] as double){
-				def coc = i%12
-				month = (i%12 > 7) ? i%12 - 6 : i%12 + 6 
+				month = (i % 12 > 7) ? i % 12 - 6 : i % 12 + 6 
 				if (paymentIdList[i] as long != 0){
 					log.error('updating existing payment with period: '+period+' and month: '+month)			
 					Payment payment = Payment.get(paymentIdList[i])
@@ -313,21 +298,15 @@ class PaymentController {
 				log.error('values are different:'+paymentsAsLong[i]+' vs '+newValuesAsString[i])
 			}
 			log.debug("i: "+i)
-			if (i != 0 && i%12 == 0){
+			if (i != 0 && i % 12 == 0){
 				employeeMap.put(employee,table)
-				iterator+=1
-				table=[]
-			}
-			
+			}	
 		}
 		def payment=params["payment"]
 		log.error('done')
 		def model = [fromIndex:true,siteId:site.id,periodId:period.id,site:site]
-		
 		model << paymentService.getReportData( period, site)
-		//render template:"/payment/template/paymentTemplate",model:model
 		render(view:'paymentReport',model:model)
-	//	redirect(action: "paymentReport",params:model)
 		return
 	}
 }

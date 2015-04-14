@@ -28,11 +28,11 @@
 		<tbody id='body_update' style="border:1px;">
 			<g:each in="${employeeInstanceList}" var='employee'>
 				<g:hiddenField name="siteId" value="${employee.site.id}" /> 				
-				<tr style="height:25px;">
-					<td style="vertical-align: middle;text-align: left;width:120px;" class="eventTD" >${employee.lastName} ${employee.firstName}</td>
+				<tr style="height:25px;">			
+					<td style="vertical-align: middle;text-align: left;width:120px;" class="eventTD" ><g:link style="text-decoration: none;" controller="employee" action='annualReport'  id="${employee.id}" params="${[userId:employee?.id,siteId:siteId,isAjax:false,periodId:periodId]}">${employee.lastName} ${employee.firstName}</g:link></td>
 					<g:each in="${paymentMapByEmployee.get(employee)}" var='paymentMap'>
 					   <g:hiddenField name="payment" value="${paymentMap.value}" /> 
-	                    <g:hiddenField name="periodList" value="${currentYear}" /> 
+	                    <g:hiddenField name="periodList" value="${period.year}" /> 
 						<g:each in="${paymentMap}" var="payment" >		
 							<g:hiddenField name="paymentIds" value="${(paymentIDMapByEmployee.get(employee)).get(payment.key)}" />                    
 							<td style="vertical-align: middle;text-align:center;" class="eventTD" >

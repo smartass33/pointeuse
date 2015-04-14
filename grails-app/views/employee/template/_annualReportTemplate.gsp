@@ -154,23 +154,13 @@
 			 %>
 			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="paidHSNoSunday"  name="paidHSNoSunday" value="${annualGlobalSupTimeToPay - annualSundayTime - annualBankHolidayTime}"/></td>
 		</tr>	
-		<!-- tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="sunday" href="#" style="text-decoration: none;color:#666;" ><g:message code="annual.report.sunday.time.label"/>:</td>
-			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="sunday"  name="sunday" value="${annualSundayTime}"/></td>		
-			
+		<tr>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><g:message code="supplementary.time.already.paid"/>:</td>
+			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="paidHS"  name="paidHS" value="${annualPaidHS}"/></td>
 		</tr>	
 		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><a id="sunday" href="#" style="text-decoration: none;color:#666;" ><g:message code="annual.report.bank.holiday.time.label"/>:</td>
-			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="sunday"  name="sunday" value="${annualBankHolidayTime}"/></td>
-		</tr-->		
-		
-		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD">HS déjà payées:</td>
-			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="paidHS"  name="paidHS" value="${annualPaidHS}"/></td>
-		</tr >	
-		<tr>
-			<td style="witdh: 200px;" class="cartoucheRightTitleTD">HS à payer au solde de la période:</td>
+			<td style="witdh: 200px;" class="cartoucheRightTitleTD"><g:message code="supplementary.time.to.pay"/>:</td>
 			<td style="witdh: 60px;text-align:right;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="HStoPay"  name="HStoPay" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/></td>
-		</tr >			
+		</tr>			
 	</table>
 </div>
