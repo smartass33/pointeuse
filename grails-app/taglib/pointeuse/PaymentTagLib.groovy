@@ -17,6 +17,11 @@ class PaymentTagLib {
 		out << writeHumanTime(attr.value as long)		
 	}
 	
+	def humanTimeDecimalTD ={attr ->
+		attr.value = (attr.value == null) ? attr.value = 0 : attr.value
+		out << writeHumanTimeWithDecimal(attr.value as long)
+	}
+	
 	def humanTimeTextField = { attrs ->
 		attrs.type = "text"
 		attrs.tagName = "textField"
@@ -103,6 +108,34 @@ class PaymentTagLib {
 			if (Math.abs(minutes)<10)
 				outputString += '0'
 				outputString += Math.abs(minutes)
+		}
+		return outputString
+	}
+	
+	String writeHumanTimeWithDecimal(long inputSeconds){
+		boolean isNegative = (inputSeconds < 0) ? true : false
+		def outputString = ''
+		def diff = inputSeconds
+		long hours = TimeUnit.SECONDS.toHours(diff);
+		diff = diff - (hours*3600);
+		long minutes=TimeUnit.SECONDS.toMinutes(diff);
+		diff = diff - (minutes*60);
+		long seconds = TimeUnit.SECONDS.toSeconds(diff);
+	
+		if (!isNegative){
+			outputString = hours + Math.abs((minutes/60).setScale(2,2))
+			if (hours < 10){
+				outputString = '0' + outputString	
+			}else{
+				outputString = '0' + outputString
+			}
+		}else{
+			outputString = hours + Math.abs((minutes/60).setScale(2,2))
+			if (hours < 10){
+				outputString = '-0' + outputString	
+			}else{
+				outputString = '-' + outputString
+			}
 		}
 		return outputString
 	}

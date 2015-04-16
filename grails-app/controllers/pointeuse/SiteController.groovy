@@ -8,7 +8,9 @@ import groovy.time.TimeCategory;
 
 import java.text.Normalizer
 import java.util.Date;
+import java.util.concurrent.ConcurrentMap
 
+import groovyx.gpars.*
 import org.apache.commons.logging.LogFactory
 
 
@@ -175,14 +177,13 @@ class SiteController {
 		[period2:period,year:year,month:month]
 	}
 	
-	
+	/*
 	def completeSiteReport(){
 		log.error('entering monthlyTotalTime method')
 		params.each{i->log.error('parameter of list: '+i)}
 		def site 
 		def executionTime
 		def data
-		def employeeList
 		def siteId=params["site.id"]
 		def periodId = params.int('periodId')
 		def period = Period.get(params.int('periodId'))
@@ -223,13 +224,136 @@ class SiteController {
 			flash.message = null
 		}
 		def startDate = new Date()		
-		data = timeManagerService.getSiteData(site,period)
+		
+		
+	
+		
+		
+	//	data = timeManagerService.getSiteData(site,period)
 		def endDate = new Date()
 		use (TimeCategory){executionTime=endDate-startDate}
 		log.error('execution time: '+executionTime)
 		model << data
 		model << [flash:flash]
 		model << [period2:period,site:site,siteId:siteId]
+		render template: "/site/template/siteMonthlyTemplate", model:model
+		return
+	}
+	
+	*/
+	
+	
+	def completeSiteReport(){
+		log.error('entering monthlyTotalTime method')
+		params.each{i->log.error('parameter of list: '+i)}
+		def site
+		def executionTime
+		def data
+		def siteId=params["site.id"]
+		def periodId = params.int('periodId')
+		def period = Period.get(params.int('periodId'))
+		def calendar = Calendar.instance
+		def year = calendar.get(Calendar.YEAR)
+		def annualReportMap =[:]
+		def model = [:]
+		def siteAnnualEmployeeWorkingDays = 0
+		def siteAnnualTheoritical = 0
+		def siteAnnualTotal = 0
+		def siteAnnualHoliday = 0
+		def siteRemainingCA = 0
+		def siteAnnualRTT = 0
+		def siteAnnualCSS = 0
+		def siteAnnualSickness = 0
+		def siteAnnualExceptionnel = 0
+		def siteAnnualPaternite = 0
+		def siteAnnualDIF = 0
+		def siteAnnualPayableSupTime = 0
+		def siteAnnualTheoriticalIncludingExtra = 0
+		def siteAnnualSupTimeAboveTheoritical = 0
+		def siteAnnualGlobalSupTimeToPay = 0
+		
+		if (period != null){
+			year = period.year
+		} else{
+			period = Period.findByYear(year)
+		}
+		
+		if (params["siteId"]!=null && !params["siteId"].equals("")){
+			site = Site.get(params["siteId"])
+			siteId=site.id
+		}else{
+			if (params["site.id"]!=null && !params["site.id"].equals("")){
+				def tmpSite = params["site.id"]
+				if (tmpSite instanceof String[]){
+					if (tmpSite[0]!=""){
+						tmpSite=tmpSite[0]!=""?tmpSite[0].toInteger():tmpSite[1].toInteger()
+					}
+				}else {
+					tmpSite=tmpSite.toInteger()
+				}
+				site = Site.get(tmpSite)
+				siteId=site.id
+			}
+		}
+		
+		if (site == null){
+			flash.message = message(code: 'site.selection.error')
+			render template: "/site/template/siteMonthlyTemplate", model:[period2:period,annualReportMap:null,employeeList:null,site:site,siteId:siteId,flash:flash]
+			return
+		}else{
+			flash.message = null
+		}
+		def startDate = new Date()
+		def employeeList = Employee.findAllBySite(site)
+		
+		GParsExecutorsPool.withPool {		 
+			 employeeList.iterator().eachParallel {
+				 println it
+				 data = timeManagerService.getAnnualReportData(period.year, it)
+				 annualReportMap.put(it,data)			 
+				 siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
+				 siteAnnualTheoritical += timeManagerService.getTimeFromText(data.get('annualTheoritical'),false)
+				 siteAnnualTotal += timeManagerService.getTimeFromText(data.get('annualTotal'),false)
+				 siteAnnualHoliday += data.get('annualHoliday')
+				 siteRemainingCA += data.get('remainingCA')
+				 siteAnnualRTT += data.get('annualRTT')
+				 siteAnnualCSS += data.get('annualCSS')
+				 siteAnnualSickness += data.get('annualSickness')
+				 siteAnnualDIF += data.get('annualDIF')
+				 siteAnnualExceptionnel += data.get('annualExceptionnel')
+				 siteAnnualPaternite += data.get('annualPaternite')
+				 siteAnnualPayableSupTime += timeManagerService.getTimeFromText(data.get('annualPayableSupTime'),false)
+				 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
+				 siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
+				 siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')
+			 }
+		 }
+		
+		def endDate = new Date()
+		use (TimeCategory){executionTime=endDate-startDate}
+		log.error('execution time: '+executionTime)
+		model << [flash:flash]
+		model << [period2:period,
+			site:site,
+			siteId:siteId,
+			employeeList:employeeList,
+			annualReportMap:annualReportMap,
+			siteAnnualEmployeeWorkingDays:siteAnnualEmployeeWorkingDays,
+			siteAnnualTheoritical:siteAnnualTheoritical,
+			siteAnnualTotal:siteAnnualTotal,
+			siteAnnualHoliday:siteAnnualHoliday,
+			siteRemainingCA:siteRemainingCA,
+			siteAnnualRTT:siteAnnualRTT,
+			siteAnnualCSS:siteAnnualCSS,
+			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualDIF:siteAnnualDIF,
+			siteAnnualExceptionnel:siteAnnualExceptionnel,
+			siteAnnualPaternite:siteAnnualPaternite,
+			siteAnnualPayableSupTime:siteAnnualPayableSupTime,
+			siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
+			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
+			siteAnnualGlobalSupTimeToPay:siteAnnualGlobalSupTimeToPay
+		]	
 		render template: "/site/template/siteMonthlyTemplate", model:model
 		return
 	}

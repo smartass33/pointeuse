@@ -6,6 +6,7 @@ import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.PdfCopyFields
 import groovy.time.TimeDuration
 import groovy.time.TimeCategory
+import groovyx.gpars.*
 
 class PDFService {
 	def timeManagerService
@@ -143,7 +144,90 @@ class PDFService {
 		def filename
 		OutputStream outputStream
 		File file
-		def modelSiteTotal=timeManagerService.getSiteData(site,period)
+		def modelSiteTotal = [:]
+	//	def modelSiteTotal=timeManagerService.getSiteData(site,period)
+		
+		
+		
+		
+		
+		
+		////
+		////
+		def executionTime
+		def data
+		def annualReportMap =[:]
+		def model = [:]
+		def siteAnnualEmployeeWorkingDays = 0
+		def siteAnnualTheoritical = 0
+		def siteAnnualTotal = 0
+		def siteAnnualHoliday = 0
+		def siteRemainingCA = 0
+		def siteAnnualRTT = 0
+		def siteAnnualCSS = 0
+		def siteAnnualSickness = 0
+		def siteAnnualExceptionnel = 0
+		def siteAnnualPaternite = 0
+		def siteAnnualDIF = 0
+		def siteAnnualPayableSupTime = 0
+		def siteAnnualTheoriticalIncludingExtra = 0
+		def siteAnnualSupTimeAboveTheoritical = 0
+		def siteAnnualGlobalSupTimeToPay = 0
+		
+		def startDate = new Date()
+		def employeeList = Employee.findAllBySite(site)
+		
+		GParsExecutorsPool.withPool {
+			 employeeList.iterator().eachParallel {
+				 println it
+				 data = timeManagerService.getAnnualReportData(period.year, it)
+				 annualReportMap.put(it,data)
+				 siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
+				 siteAnnualTheoritical += timeManagerService.getTimeFromText(data.get('annualTheoritical'),false)
+				 siteAnnualTotal += timeManagerService.getTimeFromText(data.get('annualTotal'),false)
+				 siteAnnualHoliday += data.get('annualHoliday')
+				 siteRemainingCA += data.get('remainingCA')
+				 siteAnnualRTT += data.get('annualRTT')
+				 siteAnnualCSS += data.get('annualCSS')
+				 siteAnnualSickness += data.get('annualSickness')
+				 siteAnnualDIF += data.get('annualDIF')
+				 siteAnnualExceptionnel += data.get('annualExceptionnel')
+				 siteAnnualPaternite += data.get('annualPaternite')
+				 siteAnnualPayableSupTime += timeManagerService.getTimeFromText(data.get('annualPayableSupTime'),false)
+				 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
+				 siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
+				 siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')
+			 }
+		 }
+		
+		def endDate = new Date()
+		use (TimeCategory){executionTime=endDate-startDate}
+		log.error('execution time: '+executionTime)
+		modelSiteTotal << [
+			employeeList:employeeList,
+			annualReportMap:annualReportMap,
+			siteAnnualEmployeeWorkingDays:siteAnnualEmployeeWorkingDays,
+			siteAnnualTheoritical:siteAnnualTheoritical,
+			siteAnnualTotal:siteAnnualTotal,
+			siteAnnualHoliday:siteAnnualHoliday,
+			siteRemainingCA:siteRemainingCA,
+			siteAnnualRTT:siteAnnualRTT,
+			siteAnnualCSS:siteAnnualCSS,
+			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualDIF:siteAnnualDIF,
+			siteAnnualExceptionnel:siteAnnualExceptionnel,
+			siteAnnualPaternite:siteAnnualPaternite,
+			siteAnnualPayableSupTime:siteAnnualPayableSupTime,
+			siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
+			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
+			siteAnnualGlobalSupTimeToPay:siteAnnualGlobalSupTimeToPay
+		]
+		///
+		
+		
+		
+		
+		
 		modelSiteTotal << [site:site,period2:period]
 		def siteName = (site.name).replaceAll("\\s","").trim()
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeSiteTotalPDFTemplate', model: modelSiteTotal)

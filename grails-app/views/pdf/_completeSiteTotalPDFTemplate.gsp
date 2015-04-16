@@ -39,6 +39,7 @@
 				<th  style="width:80px;"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.RTT.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
+				<th  style="width:80px;"><div><span><g:message code="annual.report.DIF.label"/></span></div></th>	
 				<th  style="width:80px;"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>		
 				<th  style="width:80px;"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="employee.paternite.count"/></span></div></th>
@@ -48,54 +49,58 @@
 				<th  style="width:120px;"><div><span><g:message code="annual.total.HS.to.pay"/></span></div></th>
 			</thead>
 			<tbody>
-				
-				<g:each in="${employeeList}"  status="i" var="employee">
-					<tr>
+					<g:if test='${employeeList != null }'>
+						<g:each in="${employeeList}"  status="i" var="employee">
+							<tr>
+								<g:if test="${site !=null}">
+									<td>${site.name}</td>
+								</g:if>
+								<g:else>
+									<td></td>
+								</g:else>
+								<td>${employee.lastName }</td>
+								<td style="width:50px;">${(annualReportMap.get(employee)).get('annualWorkingDays')}</td>
+								<td style="width:50px;">${(annualReportMap.get(employee)).get('annualEmployeeWorkingDays')}</td>
+								<td style="text-align:right;">${(annualReportMap.get(employee)).get('annualTheoritical')}</td>
+								<td style="text-align:right;">${(annualReportMap.get(employee)).get('annualTotal')}</td>
+								<td style="width:45px;">${(annualReportMap.get(employee)).get('annualHoliday')}</td>
+								<td style="width:45px;">${(annualReportMap.get(employee)).get('remainingCA')}</td>
+								<td style="width:45px;">${(annualReportMap.get(employee)).get('annualRTT')}</td>
+								<td style="width:45px;">${(annualReportMap.get(employee)).get('annualCSS')}</td>
+								<td style="width:45px;">${(annualReportMap.get(employee)).get('annualDIF')}</td>
+								<td style="width:45px;">${(annualReportMap.get(employee)).get('annualSickness')}</td>
+								<td style="width:45px;">${(annualReportMap.get(employee)).get('annualExceptionnel')}</td>
+								<td style="width:45px;">${(annualReportMap.get(employee)).get('annualPaternite')}</td>
+								<td style="text-align:right;width:50px;">${(annualReportMap.get(employee)).get('annualPayableSupTime')}</td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualTheoriticalIncludingExtra"  name="annualTheoriticalIncludingExtra" value="${(annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra')}"/></td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualSupTimeAboveTheoritical"  name="annualSupTimeAboveTheoritical" value="${(annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical')}"/></td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualGlobalSupTimeToPay"  name="annualGlobalSupTimeToPay" value="${(annualReportMap.get(employee)).get('annualGlobalSupTimeToPay')}"/></td>
+							</tr>
+						</g:each>
 						<g:if test="${site !=null}">
-							<td style="width:120px;">${site.name}</td>
-						</g:if>
-						<g:else>
-							<td style="width:120px;"></td>
-						</g:else>
-						<td style="width:120px;">${employee.lastName }</td>
-						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualWorkingDays')}</td>
-						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualEmployeeWorkingDays')}</td>
-						<td>${(annualReportMap.get(employee)).get('annualTheoritical')}</td>
-						<td>${(annualReportMap.get(employee)).get('annualTotal')}</td>
-						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualHoliday')}</td>
-						<td style="width:80px;">${(annualReportMap.get(employee)).get('remainingCA')}</td>
-						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualRTT')}</td>
-						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualCSS')}</td>
-						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualSickness')}</td>
-						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualExceptionnel')}</td>
-						<td style="width:80px;">${(annualReportMap.get(employee)).get('annualPaternite')}</td>
-						<td style="width:120px;">${(annualReportMap.get(employee)).get('annualPayableSupTime')}</td>
-						<td style="width:120px;">${(annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra')}</td>
-						<td style="width:120px;">${(annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical')}</td>
-						<td style="width:120px;">${(annualReportMap.get(employee)).get('annualGlobalSupTimeToPay')}</td>
-					</tr>
-				</g:each>
-				<g:if test="${site !=null}">
-					<tr style='font-weight: bold;'>
-						<td><g:message code="annual.total"/></td>
-						<td></td>
-						<td>n/a</td>
-						<td style="width:50px;">${siteAnnualEmployeeWorkingDays}</td>
-						<td style="text-align:right;">${siteAnnualTheoritical}</td>
-						<td style="text-align:right;">${siteAnnualTotal}</td>
-						<td style="width:50px;">${siteAnnualHoliday}</td>
-						<td style="width:50px;">${siteRemainingCA}</td>
-						<td style="width:50px;">${siteAnnualRTT}</td>
-						<td style="width:50px;">${siteAnnualCSS}</td>
-						<td style="width:50px;">${siteAnnualSickness}</td>
-						<td style="width:50px;">${siteAnnualExceptionnel}</td>
-						<td style="text-align:right;">${siteAnnualPayableSupTime}</td>
-						<td style="text-align:right;">${siteAnnualTheoriticalIncludingExtra}</td>
-						<td style="text-align:right;">${siteAnnualSupTimeAboveTheoritical}</td>
-						<td style="text-align:right;">${siteAnnualGlobalSupTimeToPay}</td>
-					</tr>	
-				</g:if>					
-			</tbody>
+							<tr style='font-weight: bold;'>
+								<td><g:message code="annual.total"/></td>
+								<td></td>
+								<td>n/a</td>
+								<td style="width:50px;">${siteAnnualEmployeeWorkingDays}</td>
+								<td style="text-align:right;"><my:humanTimeTD id="siteAnnualTheoritical"  name="siteAnnualTheoritical" value="${siteAnnualTheoritical}"/></td>
+								<td style="text-align:right;"><my:humanTimeTD id="siteAnnualTotal"  name="siteAnnualTotal" value="${siteAnnualTotal}"/></td>
+								<td style="width:50px;">${siteAnnualHoliday}</td>
+								<td style="width:50px;">${siteRemainingCA}</td>
+								<td style="width:50px;">${siteAnnualRTT}</td>
+								<td style="width:50px;">${siteAnnualCSS}</td>
+								<td style="width:50px;">${siteAnnualDIF}</td>
+								<td style="width:50px;">${siteAnnualSickness}</td>
+								<td style="width:50px;">${siteAnnualExceptionnel}</td>
+								<td style="width:50px;">${siteAnnualPaternite}</td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="siteAnnualPayableSupTime"  name="siteAnnualPayableSupTime" value="${siteAnnualPayableSupTime}"/></td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="siteAnnualTheoriticalIncludingExtra"  name="siteAnnualTheoriticalIncludingExtra" value="${siteAnnualTheoriticalIncludingExtra}"/></td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="siteAnnualSupTimeAboveTheoritical"  name="siteAnnualSupTimeAboveTheoritical" value="${siteAnnualSupTimeAboveTheoritical}"/></td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="siteAnnualGlobalSupTimeToPay"  name="siteAnnualGlobalSupTimeToPay" value="${siteAnnualGlobalSupTimeToPay}"/></td>				
+								</tr>	
+						</g:if>				
+					</g:if>
+				</tbody>
 		</table>
 	</body>
 </html>

@@ -16,7 +16,8 @@ import grails.converters.JSON
 import org.apache.commons.logging.LogFactory
 
 import java.util.concurrent.*
-
+import groovyx.gpars.GParsConfig
+import groovyx.gpars.GParsPool
 
 class EmployeeController {	
 	def PDFService
@@ -2572,7 +2573,23 @@ def vacationFollowup(){
 	}
 	
 	
-	
+	def test(){
+		def list = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+		def site = Site.get(2)
+		def employeeList =Employee.findAllBySite(site) 
+		def annualReportMap = [:]
+		def period = Period.findByYear('2013')
+
+		
+		GParsPool.withPool {
+		   // println list.collectParallel { it * 2 }
+		
+		    employeeList.iterator().eachParallel {
+		        println it
+				timeManagerService.getAnnualReportData(period.year, it)	
+			}		
+		}    	
+	}
 	
 	
 /*

@@ -41,7 +41,7 @@ grails.project.dependency.resolution = {
         mavenCentral()
         // uncomment these (or add new ones) to enable remote dependency resolution from public Maven repositories
 		mavenRepo "http://repo.grails.org/grails/core" // needed for compass, etc.
-	
+		mavenRepo 'http://repository.jboss.org/maven2/'
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
@@ -52,6 +52,7 @@ grails.project.dependency.resolution = {
 		compile 'log4j:apache-log4j-extras:1.0'
 		runtime 'mysql:mysql-connector-java:5.1.21'
 		compile 'com.itextpdf:itextpdf:5.4.1'
+		build 'org.codehaus.gpars:gpars:1.2.1'
 		
 		
     }

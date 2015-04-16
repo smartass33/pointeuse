@@ -219,7 +219,7 @@
 		</tr>	
 		<tr>
 			<td style="witdh: 200px;font-weight:bold;" class="cartoucheRightTitleTD"><g:message code="supplementary.time.to.pay"/>:</td>
-			<td style="witdh: 60px;text-align:right;font-weight:bold;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="HStoPay"  name="HStoPay" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/></td>
+			<td style="witdh: 60px;text-align:right;font-weight:bold;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="HStoPay"  name="HStoPay" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/> ou <my:humanTimeDecimalTD id="HStoPayWithDecimal"  name="HStoPayWithDecimal" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/></td>
 		</tr>		
 	</table>	
 	<table style="width:95%">

@@ -1014,16 +1014,8 @@ class TimeManagerService {
 		// the employee left before period's end:
 		if ((exitDate != null) && exitDate < maxDate){
 			maxDate = exitDate
-		}
-		
-		
+		}	
 		yearOpenDays = openDaysBetweenDates(minDate,maxDate)
-		// get initial vacation
-		
-		// get initial RTT
-		
-
-
 		// get cumul holidays
 		def yearlyHolidays = criteria.list {
 			and {
@@ -1033,7 +1025,6 @@ class TimeManagerService {
 				eq('type',AbsenceType.VACANCE)
 			}
 		}
-
 		criteria = Absence.createCriteria()
 		def yearlyExceptionnel = criteria.list {
 			and {
@@ -1042,8 +1033,7 @@ class TimeManagerService {
 				lt('date',maxDate)
 				eq('type',AbsenceType.EXCEPTIONNEL)
 			}
-		}
-		
+		}	
 		criteria = Absence.createCriteria()
 		def yearlyPaternite = criteria.list {
 			and {
@@ -1052,8 +1042,7 @@ class TimeManagerService {
 				lt('date',maxDate)
 				eq('type',AbsenceType.PATERNITE)
 			}
-		}
-		
+		}		
 		criteria = Absence.createCriteria()
 		def yearlyDif = criteria.list {
 			and {
@@ -1063,7 +1052,6 @@ class TimeManagerService {
 				eq('type',AbsenceType.DIF)
 			}
 		}
-
 		criteria = Absence.createCriteria()
 		def yearlyRtt = criteria.list {
 			and {
@@ -1072,8 +1060,7 @@ class TimeManagerService {
 				lt('date',maxDate)
 				eq('type',AbsenceType.RTT)
 			}
-		}
-		
+		}		
 		criteria = Absence.createCriteria()
 		def yearlySickness = criteria.list {
 			and {
@@ -1083,7 +1070,6 @@ class TimeManagerService {
 				eq('type',AbsenceType.MALADIE)
 			}
 		}
-		
 		criteria = Absence.createCriteria()
 		def pregnancy = criteria.list {
 			and {
@@ -1093,9 +1079,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.GROSSESSE)
 			}
 		}
-		def yearlyPregnancyCredit=30*60*pregnancy.size()
-		
-		
+		def yearlyPregnancyCredit=30*60*pregnancy.size()				
 		criteria = Absence.createCriteria()
 		def yearlySansSolde = criteria.list {
 			and {
@@ -1105,8 +1089,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.CSS)
 			}
 		}
-				
-		
+						
 		if (month>=6){
 			criteria = MonthlyTotal.createCriteria()	
 			monthsAggregate = criteria.list{
@@ -1142,7 +1125,6 @@ class TimeManagerService {
 		}
 
 		yearlyCounter = month > 5 ? utilService.getYearlyCounter(year-1,month,employee) : utilService.getYearlyCounter(year,month,employee)
-
 		criteria = BankHoliday.createCriteria()
 		
 		if (month < 6){
@@ -1179,7 +1161,6 @@ class TimeManagerService {
 		
 		def calendarIter = Calendar.instance
 		calendarIter.time = minDate
-		
 
 		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
 		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
@@ -1280,7 +1261,6 @@ class TimeManagerService {
 		
 		//special case: departure month
 		def currentStatus = employeeInstance.status
-		//if (currentStatus.date != null && (currentStatus.date.getAt(Calendar.MONTH) + 1) <= month && (currentStatus.date.getAt(Calendar.YEAR)) == year){	
 		if (currentStatus.date != null && currentStatus.date <= endCalendar.time){
 			if (currentStatus.type != StatusType.ACTIF){
 				if (currentStatus.date.getAt(Calendar.MONTH) == endCalendar.get(Calendar.MONTH) && currentStatus.date.getAt(Calendar.YEAR) == endCalendar.get(Calendar.YEAR) ){				
@@ -1394,13 +1374,9 @@ class TimeManagerService {
 		def yearlyCartouche=getYearCartoucheData(employeeInstance,year,month)
 
 		// determine monthly theoritical time:
-		
 		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year)
-
-		criteria = Contract.createCriteria()
-		
+		criteria = Contract.createCriteria()	
 		def currentContract 
-		
 		def contracts = Contract.findAllByEmployee(employeeInstance)
 		for (Contract contract : contracts){
 
@@ -1409,15 +1385,13 @@ class TimeManagerService {
 			}
 			
 			if (contract.endDate != null && contract.startDate < endCalendar.time && contract.endDate < endCalendar.time && contract.endDate.getAt(Calendar.MONTH)==endCalendar.time.getAt(Calendar.MONTH)){
-				currentContract = contract
-				
+				currentContract = contract			
 			}
 			if (currentContract == null && contract.endDate == null){
 				currentContract = contract
 			}
 		}
 
-		def monthTheoriticalHuman=getTimeAsText(computeHumanTime(monthTheoritical),false)
 		def cartoucheMap=[
 			isCurrentMonth:isCurrentMonth,
 			currentContract:currentContract,
@@ -1432,7 +1406,7 @@ class TimeManagerService {
 			sansSolde:sansSolde.size(),
 			monthTheoritical:monthTheoritical,
 			pregnancyCredit:pregnancyCredit,
-			monthTheoriticalHuman:monthTheoriticalHuman,
+			monthTheoriticalHuman:getTimeAsText(computeHumanTime(monthTheoritical),false),
 			calendar:calendar
 		]
 		def mergedMap = cartoucheMap << yearlyCartouche
@@ -1935,8 +1909,7 @@ class TimeManagerService {
 			}
 			
 			// finding time spent during bank holidays:
-			criteria = BankHoliday.createCriteria()
-			
+			criteria = BankHoliday.createCriteria()		
 			def bankHolidayList = criteria.list {
 				and {
 					eq('month',currentMonth)
@@ -2030,11 +2003,13 @@ class TimeManagerService {
 		annualTheoriticalIncludingExtra = annualTheoritical + annualPayableSupTime
 		annualSupTimeAboveTheoritical = annualSupTimeAboveTheoritical - annualTheoriticalIncludingExtra	
 		annualGlobalSupTimeToPay = (annualSupTimeAboveTheoritical > 0) ? (annualSupTimeAboveTheoritical + annualPayableSupTime) : annualPayableSupTime			
-		annualTheoriticalIncludingExtra = getTimeAsText(computeHumanTime(Math.round(annualTheoriticalIncludingExtra) as long),false)
-		// if the total is less than 0, consider only above daily and weekly threshold HS
+		//annualTheoriticalIncludingExtra = getTimeAsText(computeHumanTime(Math.round(annualTheoriticalIncludingExtra) as long),false)
+		annualTheoriticalIncludingExtra = Math.round(annualTheoriticalIncludingExtra) as long
+		
+				// if the total is less than 0, consider only above daily and weekly threshold HS
 		annualGlobalSupTimeToPay = (annualGlobalSupTimeToPay > 0 )? Math.round(annualGlobalSupTimeToPay) as long : Math.round(annualPayableSupTime) as long
 		// if the total is less than 0, set it to 0 as it makes no sens
-		annualSupTimeAboveTheoritical = (annualSupTimeAboveTheoritical > 0 ? getTimeAsText(computeHumanTime(Math.round(annualSupTimeAboveTheoritical) as long),false) : getTimeAsText(computeHumanTime(Math.round(0) as long),false))
+		annualSupTimeAboveTheoritical = (annualSupTimeAboveTheoritical > 0 ? Math.round(annualSupTimeAboveTheoritical) as long : Math.round(0) as long)
 
 		def paymentList = Payment.findAllByEmployeeAndPeriod(employee,period)
 		
@@ -2083,15 +2058,11 @@ class TimeManagerService {
 	}	
 	
 	def computeWeeklyContractTime(Employee employee,int month, int year){
-		
-		
 		def startCalendar = Calendar.instance
 		startCalendar.set(Calendar.MONTH,month - 1)
 		startCalendar.set(Calendar.YEAR,year)
-		startCalendar.clearTime()
-		
+		startCalendar.clearTime()	
 		def criteria = Contract.createCriteria()
-
 		def	previousContracts = criteria.list {
 				or{
 					and {
@@ -2115,13 +2086,11 @@ class TimeManagerService {
 			}
 	
 			if (previousContracts != null && previousContracts.size()>0){
-				log.debug("previousContracts: "+previousContracts)
-				
+				log.debug("previousContracts: "+previousContracts)				
 				if (previousContracts.size() == 1){
 					weeklyContractTime = previousContracts.get(0).weeklyLength
 				}else{
-					weeklyContractTime = previousContracts.get(0).weeklyLength
-				
+					weeklyContractTime = previousContracts.get(0).weeklyLength		
 				}
 			}
 			else{
@@ -2142,8 +2111,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.MALADIE)
 			}
 		}
-		absenceMap.put(AbsenceType.MALADIE, sickness.size())
-		
+		absenceMap.put(AbsenceType.MALADIE, sickness.size())	
 		// get cumul holidays
 		criteria = Absence.createCriteria()
 		def holidays = criteria.list {
@@ -2154,9 +2122,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.VACANCE)
 			}
 		}
-		absenceMap.put(AbsenceType.VACANCE, holidays.size())
-		
-		
+		absenceMap.put(AbsenceType.VACANCE, holidays.size())		
 		criteria = Absence.createCriteria()
 		def exceptionnel = criteria.list {
 			and {
@@ -2166,8 +2132,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.EXCEPTIONNEL)
 			}
 		}
-		absenceMap.put(AbsenceType.EXCEPTIONNEL, exceptionnel.size())
-		
+		absenceMap.put(AbsenceType.EXCEPTIONNEL, exceptionnel.size())	
 		criteria = Absence.createCriteria()
 		def paternite = criteria.list {
 			and {
@@ -2177,8 +2142,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.PATERNITE)
 			}
 		}
-		absenceMap.put(AbsenceType.PATERNITE, paternite.size())
-		
+		absenceMap.put(AbsenceType.PATERNITE, paternite.size())		
 		criteria = Absence.createCriteria()
 		def dif = criteria.list {
 			and {
@@ -2188,8 +2152,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.DIF)
 			}
 		}
-		absenceMap.put(AbsenceType.DIF, dif.size())
-				
+		absenceMap.put(AbsenceType.DIF, dif.size())				
 		criteria = Absence.createCriteria()
 		def sansSolde = criteria.list {
 			and {
@@ -2199,9 +2162,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.CSS)
 			}
 		}
-		absenceMap.put(AbsenceType.CSS, sansSolde.size())
-		
-				
+		absenceMap.put(AbsenceType.CSS, sansSolde.size())				
 		criteria = Absence.createCriteria()
 		def pregnancy = criteria.list {
 			and {
@@ -2212,13 +2173,10 @@ class TimeManagerService {
 			}
 		}
 		def pregnancyCredit=30*60*pregnancy.size()
-
-		absenceMap.put(AbsenceType.GROSSESSE, pregnancyCredit)
-		
+		absenceMap.put(AbsenceType.GROSSESSE, pregnancyCredit)		
 		return absenceMap
 	}
-	
-	
+		
 	def getAbsences(Employee employee,int month,int year){
 		def absenceMap = [:]
 		def	criteria = Contract.createCriteria()
@@ -2610,6 +2568,7 @@ class TimeManagerService {
 		def siteAnnualSupTimeAboveTheoritical = 0
 		def siteAnnualGlobalSupTimeToPay = 0
 		def employeeList = (site != null) ? Employee.findAllBySite(site) :Employee.findAll("from Employee")
+
 		for (Employee employee:employeeList){
 			log.error("current employee: "+employee)
 			annualReportMap.put(employee,getAnnualReportData(period.year, employee))		
@@ -2626,9 +2585,10 @@ class TimeManagerService {
 			siteAnnualPaternite += ((annualReportMap.get(employee)).get('annualPaternite'))
 			siteAnnualPayableSupTime += getTimeFromText((annualReportMap.get(employee)).get('annualPayableSupTime'),false)
 			siteAnnualTheoriticalIncludingExtra += getTimeFromText((annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra'),false)
-			siteAnnualSupTimeAboveTheoritical += getTimeFromText((annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical'),false)
-			siteAnnualGlobalSupTimeToPay += getTimeFromText((annualReportMap.get(employee)).get('annualGlobalSupTimeToPay'),false)
+			siteAnnualSupTimeAboveTheoritical += (annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical')
+			siteAnnualGlobalSupTimeToPay += (annualReportMap.get(employee)).get('annualGlobalSupTimeToPay')
 		}
+		
 		return [
 			annualReportMap:annualReportMap,
 			siteAnnualEmployeeWorkingDays:siteAnnualEmployeeWorkingDays,
