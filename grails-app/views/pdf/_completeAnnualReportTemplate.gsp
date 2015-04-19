@@ -101,12 +101,7 @@
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('exceptionnel')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('paternite')}</td>
 					<td style="vertical-align: middle;text-align:right;">
-						<g:if test="${yearMonthlySupTime.get(cartouche.key) !=null}">
-	                   		${yearMonthlySupTime.get(cartouche.key)} 
-	              		</g:if>
-	              		<g:else>
-	              			00:00
-	              		</g:else>
+						<g:if test="${yearMonthlySupTime.get(cartouche.key) !=null}"><my:humanTimeTD id="yearMonthlySupTime"  name="yearMonthlySupTime" value="${yearMonthlySupTime.get(cartouche.key)} "/></g:if>
 					</td>					
 					<td style="vertical-align: middle;text-align:right;">${yearSundayMap.get(cartouche.key)}</td>
 					<td style="vertical-align: middle;text-align:right;">${yearBankHolidayMap.get(cartouche.key)}</td>										
@@ -115,20 +110,10 @@
 			<tr class='even'>			
 				<td style="vertical-align: middle;font-weight:bold;"><g:message code="annual.total"/></td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">
-					<g:if test="${annualTheoritical !=null}">
-	               		${annualTheoritical} 
-	           		</g:if>
-	           		<g:else>
-	           			00:00
-	           		</g:else>
+					<g:if test="${annualTheoritical !=null}"><my:humanTimeTD id="annualTheoritical"  name="annualTheoritical" value="${annualTheoritical}"/></g:if>
 				</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">
-					<g:if test="${annualTotal !=null}">
-	               		${annualTotal}
-	           		</g:if>
-	           		<g:else>
-	           			00:00
-	           		</g:else>
+					<g:if test="${annualTotal !=null}"><my:humanTimeTD id="annualTotal"  name="annualTotal" value="${annualTotal}"/></g:if>
 				</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualHoliday}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualRTT}</td>
@@ -137,12 +122,7 @@
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualExceptionnel}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualPaternite}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">
-					<g:if test="${annualPayableSupTime !=null}">
-	               		${annualPayableSupTime} 
-	           		</g:if>
-	           		<g:else>
-	           			00:00
-	           		</g:else>	
+					<g:if test="${annualPayableSupTime !=null}"><my:humanTimeTD id="annualPayableSupTime"  name="annualPayableSupTime" value="${annualPayableSupTime}"/></g:if>
 				</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;"><my:humanTimeTD id="sunday"  name="sunday" value="${annualSundayTime}"/></td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;"><my:humanTimeTD id="bank"  name="bank" value="${annualBankHolidayTime}"/></td>				
@@ -173,10 +153,10 @@
 		        <td style="vertical-align: middle;text-align:center;">${remainingCA}</td>
 			</tr>
 	</table>
-	<table style="width:75%;">
+	<table>
 		<tr>
 			<td style="witdh: 200px;font-weight:bold;" class="cartoucheRightTitleTD"><g:message code="annual.actual.intial"/>:</td>
-			<td style="witdh: 50px;text-align:right;font-weight:bold;" class="cartoucheRightFiguresTD">${annualTotal}</td>		
+			<td style="witdh: 50px;text-align:right;font-weight:bold;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="annualTotal"  name="annualTotal" value="${annualTotal}"/></td>		
 		</tr>
 		<tr>
 			<td style="witdh: 200px;font-weight:bold;" class="cartoucheRightTitleTD"><g:message code="annual.report.bank.sunday.holiday.time.label"/>:</td>
@@ -189,19 +169,19 @@
 		</tr>	
 		<tr>
 			<td style="witdh: 200px;font-weight:bold;" class="cartoucheRightTitleTD"><g:message code="annual.theoritical.intial"/>:</td>
-			<td style="witdh: 50px;text-align:right;font-weight:bold;" class="cartoucheRightFiguresTD">${annualTheoritical}</td>		
+			<td style="witdh: 50px;text-align:right;font-weight:bold;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="annualTheoritical"  name="annualTheoritical" value="${annualTheoritical}"/></td>		
 		</tr>		
 		<tr>
 			<td style="witdh: 200px;font-weight:bold;"><g:message code="annual.HS.above.quota"/>:</td>
-			<td style="witdh: 50px;text-align:right;font-weight:bold;" >${annualPayableSupTime}</td>
+			<td style="witdh: 50px;text-align:right;font-weight:bold;" ><my:humanTimeTD id="annualPayableSupTime"  name="annualPayableSupTime" value="${annualPayableSupTime}"/></td>
 		</tr>
 		<tr>
 			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.computed.quota"/>:</td>
-			<td style="witdh: 60px;text-align:right;font-weight:bold;" >${annualTheoriticalIncludingExtra}</td>
+			<td style="witdh: 60px;text-align:right;font-weight:bold;" ><my:humanTimeTD id="annualTheoriticalIncludingExtra"  name="annualTheoriticalIncludingExtra" value="${annualTheoriticalIncludingExtra}"/></td>
 		</tr>
 		<tr>
 			<td style="witdh: 200px;font-weight:bold;" ><g:message code="annual.other.HS.quota"/>:</td>
-			<td style="witdh: 60px;text-align:right;font-weight:bold;" >${annualSupTimeAboveTheoritical}</td>
+			<td style="witdh: 60px;text-align:right;font-weight:bold;" ><my:humanTimeTD id="annualSupTimeAboveTheoritical"  name="annualSupTimeAboveTheoritical" value="${annualSupTimeAboveTheoritical}"/> </td>
 		</tr>
 		<tr>
 			<td style="witdh: 200px;font-weight:bold;" class="cartoucheRightTitleTD"><g:message code="annual.total.HS.to.pay.no.sunday"/>:</td>
@@ -218,9 +198,10 @@
 			<td style="witdh: 60px;text-align:right;font-weight:bold;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="paidHS"  name="paidHS" value="${annualPaidHS}"/></td>
 		</tr>	
 		<tr>
-			<td style="witdh: 200px;font-weight:bold;" class="cartoucheRightTitleTD"><g:message code="supplementary.time.to.pay"/>:</td>
-			<td style="witdh: 60px;text-align:right;font-weight:bold;" class="cartoucheRightFiguresTD"><my:humanTimeTD id="HStoPay"  name="HStoPay" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/> ou <my:humanTimeDecimalTD id="HStoPayWithDecimal"  name="HStoPayWithDecimal" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/></td>
-		</tr>		
+			<td style="witdh: 200px;font-weight:bold;" class="annualReportTitleTD"><g:message code="supplementary.time.to.pay"/>:</td>
+			<td style="witdh: 60px;text-align:right;font-weight:bold;" class="annualReportFiguresTD"><my:humanTimeTD id="HStoPay"  name="HStoPay" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/></td>
+			<td style="witdh: 60px;text-align:left;font-weight:bold;" class="annualReportFiguresTD"> ou <my:humanTimeDecimalTD id="HStoPayWithDecimal"  name="HStoPayWithDecimal" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/></td>
+		</tr>					
 	</table>	
 	<table style="width:95%">
 		<thead></thead>

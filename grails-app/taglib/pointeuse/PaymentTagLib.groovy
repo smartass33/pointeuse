@@ -120,18 +120,19 @@ class PaymentTagLib {
 		diff = diff - (hours*3600);
 		long minutes=TimeUnit.SECONDS.toMinutes(diff);
 		diff = diff - (minutes*60);
-		long seconds = TimeUnit.SECONDS.toSeconds(diff);
-	
+		long seconds = TimeUnit.SECONDS.toSeconds(diff);	
+		def decimal = Math.abs((minutes/60).setScale(2,2))
+		
 		if (!isNegative){
-			outputString = hours + Math.abs((minutes/60).setScale(2,2))
+			outputString = hours + decimal
 			if (hours < 10){
 				outputString = '0' + outputString	
 			}else{
 				outputString = '0' + outputString
 			}
 		}else{
-			outputString = hours + Math.abs((minutes/60).setScale(2,2))
-			if (hours < 10){
+			outputString = Math.abs(hours) + decimal
+			if (Math.abs(hours) < 10){
 				outputString = '-0' + outputString	
 			}else{
 				outputString = '-' + outputString

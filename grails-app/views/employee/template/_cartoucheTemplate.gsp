@@ -26,7 +26,7 @@
 			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="employee" action='annualReport'  id="${employee.id}" params="${[userId:employee?.id,siteId:siteId,isAjax:false]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
 		</tr>		
 		<tr>
-			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="supplementaryTime" action='supplementaryTimeReport'  id="${employee.id}" params="${[userId:employee?.id,siteId:siteId,isAjax:false]}">${message(code: 'employee.sup.time.label', default: 'Report')}</g:link></td>
+			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="payment" action='paymentReport'  id="${payment}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true]}">${message(code: 'employee.sup.time.label', default: 'Report')}</g:link></td>
 		</tr>	
 
 	</table> 				

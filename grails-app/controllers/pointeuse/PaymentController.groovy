@@ -258,9 +258,8 @@ class PaymentController {
 	
 	@Transactional
 	def modifyPayment(){
-		params.each{i-> log.error(i)}
-		def siteId = params["site.id"]
-		def site = Site.get(params["siteId"][0])
+		def siteId = params["siteId"]
+		def site = Site.get(params["siteId"][1])
 		def newValuesAsString=params["textField"]		
 		def paymentsAsLong=params["payment"]	
 		def periodList=params["periodList"]
@@ -273,37 +272,34 @@ class PaymentController {
 		for (int j=0;j<newValuesAsString.size();j++){
 			newValuesAsString[j] = timeManagerService.getTimeFromText(newValuesAsString[j], false)
 		}		
-	
 		def employeeList = Employee.findAllBySite(site,[sort:'lastName',order:'asc'])
-		log.error('newValuesAsString.size(): '+newValuesAsString.size())
 		def iterator = 0
 		for (def i = 0;i<newValuesAsString.size();i++){
 			if (i != 0 && i % 12 == 0){
 				iterator+=1
 				table=[]
 			}
-			log.error('iterator: '+iterator)
 			def employee = employeeList.get(iterator)
 			table.add(newValuesAsString)
-			if (newValuesAsString[i] as double != paymentsAsLong[i] as double){
-				month = (i % 12 > 7) ? i % 12 - 6 : i % 12 + 6 
-				if (paymentIdList[i] as long != 0){
-					log.error('updating existing payment with period: '+period+' and month: '+month)			
-					Payment payment = Payment.get(paymentIdList[i])
+			if (newValuesAsString[i] as double != paymentsAsLong[i] as double){				
+				// try to determine if payment already exists with these params:
+				month = (i % 12 >= 7) ? i % 12 - 6 : i % 12 + 6 
+				Payment existingPayment = Payment.find('from Payment where employee = :employee and period = :period and month = :month',[employee:employee,period:period,month:month])			
+				if (existingPayment != null) {
+					log.debug('updating existing payment with period: '+period+' and month: '+month)
+					existingPayment.amountPaid = Double.parseDouble(newValuesAsString[i])
+					existingPayment.save flush:true
 				}else{
-					 log.error('creating new payment with period: '+period+' and month: '+month)				 
-					Payment payment = new Payment(employee,period, month as int,newValuesAsString[i] as double)	
+					Payment payment = new Payment(employee,period, month as int,Double.parseDouble(newValuesAsString[i]))	
 					payment.save flush:true
 				}
-				log.error('values are different:'+paymentsAsLong[i]+' vs '+newValuesAsString[i])
+				log.debug('values are different:'+paymentsAsLong[i]+' vs '+newValuesAsString[i])
 			}
 			log.debug("i: "+i)
 			if (i != 0 && i % 12 == 0){
 				employeeMap.put(employee,table)
 			}	
 		}
-		def payment=params["payment"]
-		log.error('done')
 		def model = [fromIndex:true,siteId:site.id,periodId:period.id,site:site]
 		model << paymentService.getReportData( period, site)
 		render(view:'paymentReport',model:model)

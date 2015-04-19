@@ -93,13 +93,10 @@
 					<li class="datePicker"><g:datePicker
 								name="myDate" value="${period ? period : new Date()}"  relativeYears="[-3..5]"
 								precision="month" noSelection="['':'-Choisissez-']" style="vertical-align: middle;"/>
-					</li>
-					
+					</li>			
 					<li style="vertical-align: middle;">
 						<g:actionSubmit disabled="${period!=null}"  value="PDF" action="getSitePDF" class="${period!=null ? 'pdfButtonDisabled':'pdfButton'}" />
 					</li>	
-					
-					
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
 					<g:hiddenField name="siteId" value="${siteId}" />
 				</ul>

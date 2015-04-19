@@ -2191,3 +2191,28 @@ a.modalbox {
 		height: 13px;
 	}
 	
+	
+	.annualReportTitleTD {
+    font:14px Georgia, serif;
+    padding:2px 2px;
+    text-align:left;
+    border: 0px solid white;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+   // width:200px;
+}
+
+
+.annualReportFiguresTD {
+    font:14px Georgia, serif;
+    padding:2px 2px;
+    text-align:center;
+    border: 0px solid white;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+  //  width:150px;
+}

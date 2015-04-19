@@ -71,7 +71,7 @@ grails.hibernate.cache.queries = false
 
 environments {
     development {
-		pdf.directory='/Users/henri'
+		pdf.directory='/Users/henri/pointeuse'
 		grails.app.context=pointeuse
         grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false

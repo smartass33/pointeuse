@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.transaction.annotation.Transactional
+import groovyx.gpars.*
 
 
 class TimeManagerService {
@@ -977,7 +978,7 @@ class TimeManagerService {
 		def monthsAggregate
 		if (month > 5){
 			year = year + 1
-			monthNumber = month -6 + 1
+			monthNumber = month - 6 + 1
 		}else{
 			monthNumber = month + 1 + 6
 		}
@@ -1810,7 +1811,7 @@ class TimeManagerService {
 		}
 		return supTime
 	}
-
+	
 	def getAnnualReportData(int year, Employee employee){
 		def criteria
 		def dailySeconds
@@ -1967,7 +1968,7 @@ class TimeManagerService {
 			annualSupTimeAboveTheoritical += monthlyTotalTime
 			monthlySupTotalTime = getMonthlySupTime(employee,currentMonth, currentYear)
 			annualMonthlySupTime += monthlySupTotalTime
-			yearMonthlySupTime.put(currentMonth,getTimeAsText(computeHumanTime(Math.round(monthlySupTotalTime) as long),false))
+			yearMonthlySupTime.put(currentMonth,Math.round(monthlySupTotalTime) as long)
 			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
 			
 			// in order to compute complementary time, we are going to look for employees whose contract equal 35h over a sub-period of time during the month
@@ -2024,8 +2025,8 @@ class TimeManagerService {
 			initialCA:initialCA,
 			remainingCA:remainingCA,
 			annualEmployeeWorkingDays:annualEmployeeWorkingDays,	
-			annualMonthlySupTime:getTimeAsText(computeHumanTime(Math.round(annualMonthlySupTime) as long),false),
-			annualTheoritical:getTimeAsText(computeHumanTime(Math.round(annualTheoritical) as long),false),			
+			annualMonthlySupTime:Math.round(annualMonthlySupTime) as long,
+			annualTheoritical:Math.round(annualTheoritical) as long,			
 			annualTheoriticalIncludingExtra:annualTheoriticalIncludingExtra,
 			annualSupTimeAboveTheoritical:annualSupTimeAboveTheoritical,
 			annualGlobalSupTimeToPay:annualGlobalSupTimeToPay,
@@ -2038,9 +2039,9 @@ class TimeManagerService {
 			annualExceptionnel:annualExceptionnel,
 			annualPaternite:annualPaternite,
 			annualWorkingDays:annualWorkingDays,
-			annualPayableSupTime:getTimeAsText(computeHumanTime(Math.round(annualPayableSupTime) as long),false),
+			annualPayableSupTime:Math.round(annualPayableSupTime) as long,
 			annualPayableCompTime:getTimeAsText(computeHumanTime(Math.round(annualPayableCompTime) as long),false),
-			annualTotal:getTimeAsText(computeHumanTime(Math.round(annualTotal) as long),false),
+			annualTotal:Math.round(annualTotal) as long,
 			annualSundayTime:Math.round(annualSundayTime) as long,
 			annualBankHolidayTime:Math.round(annualBankHolidayTime) as long,
 			lastYear:year,
@@ -2057,46 +2058,6 @@ class TimeManagerService {
 		]
 	}	
 	
-	def computeWeeklyContractTime(Employee employee,int month, int year){
-		def startCalendar = Calendar.instance
-		startCalendar.set(Calendar.MONTH,month - 1)
-		startCalendar.set(Calendar.YEAR,year)
-		startCalendar.clearTime()	
-		def criteria = Contract.createCriteria()
-		def	previousContracts = criteria.list {
-				or{
-					and {
-						lt('year',year)
-						eq('employee',employee)
-					}
-					and {
-						eq('year',year)
-						lt('month',month)
-						eq('employee',employee)
-					}
-					
-					and {
-						eq('year',year)
-						eq('month',month)
-						eq('employee',employee)
-					}
-				}
-				order('startDate','desc')
-				//maxResults(1)
-			}
-	
-			if (previousContracts != null && previousContracts.size()>0){
-				log.debug("previousContracts: "+previousContracts)				
-				if (previousContracts.size() == 1){
-					weeklyContractTime = previousContracts.get(0).weeklyLength
-				}else{
-					weeklyContractTime = previousContracts.get(0).weeklyLength		
-				}
-			}
-			else{
-				weeklyContractTime =employee.weeklyContractTime
-			}
-	}
 	
 	def getAbsencesBetweenDates(Employee employee,Date startDate,Date endDate){
 		def absenceMap = [:]
@@ -2412,7 +2373,6 @@ class TimeManagerService {
 			log.debug('monthTheoritical: '+monthTheoritical)		
 		}
 		return monthTheoritical
-		
 	}
 	
 	def getDailyInAndOutsData(Site site,Date currentDate){
@@ -2448,8 +2408,7 @@ class TimeManagerService {
 						eq('year',calendar.get(Calendar.YEAR))
 						order('time')
 					}
-			}
-			
+			}		
 			dailyInAndOutMap.put(employee, inAndOutList)
 			def tt = getDailyTotal(dailyTotal)
 			
@@ -2489,7 +2448,6 @@ class TimeManagerService {
 			}
 		}
 		 
-
 		// iterate over tmpCalendar
 		while(tmpCalendar.get(Calendar.DAY_OF_YEAR) < (calendar.get(Calendar.DAY_OF_YEAR) -1)){
 			tmpCalendar.roll(Calendar.DAY_OF_YEAR, 1)
@@ -2840,7 +2798,6 @@ class TimeManagerService {
 		def timeAfter20 = 0
 		def timeOffHours = 0
 		def currentWeek = 0
-		
 		def dailyTotalId = 0
 		
 		//calendars
@@ -3264,4 +3221,713 @@ class TimeManagerService {
 			]
 	}
 	
+	
+	def getCartoucheDataMultiThread(Employee employeeInstance,int year,int month){
+		def holidays = []
+		def exceptionnel = []
+		def paternite = []
+		def dif = []
+		def rtt = []
+		def sickness = []
+		def pregnancy = []
+		def sansSolde = []
+		def pregnancyCredit = 0
+		def counter = 0
+		def totalNumberOfDays = 0
+		def monthTheoritical
+		def criteria
+		def calendar = Calendar.instance
+		def startCalendar = Calendar.instance
+		def endCalendar = Calendar.instance
+		def isCurrentMonth = false		
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.MONTH,month-1)
+		calendar.clearTime()
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.set(Calendar.YEAR,year)
+		startCalendar.set(Calendar.MONTH,month-1)
+		startCalendar.clearTime()
+		endCalendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		endCalendar.set(Calendar.YEAR,year)
+		endCalendar.set(Calendar.MONTH,month-1)
+		def currentCalendar = Calendar.instance
+
+		// special case: the month is not over yet
+		if (currentCalendar.get(Calendar.MONTH) == (month - 1) && currentCalendar.get(Calendar.YEAR) == year){
+			log.debug('the month is not over yet')
+			counter = openDaysBetweenDates(calendar.time,currentCalendar.time)
+			totalNumberOfDays = counter
+			isCurrentMonth = true
+		}else{
+			counter = openDaysBetweenDates(calendar.time,endCalendar.time)
+			totalNumberOfDays = counter
+		}
+		// count sundays within given month
+
+		// treat special case whereby employee enters the company, or leaves...
+		// special case: arrival month
+		if ((employeeInstance.arrivalDate.getAt(Calendar.MONTH) + 1) == month &&  (employeeInstance.arrivalDate.getAt(Calendar.YEAR)) == year){
+			// we need to count OPEN DAYS between dates and not consecutive days
+			counter = openDaysBetweenDates(employeeInstance.arrivalDate,endCalendar.time)
+		}
+		
+		//special case: departure month
+		def currentStatus = employeeInstance.status
+		if (currentStatus.date != null && currentStatus.date <= endCalendar.time){
+			if (currentStatus.type != StatusType.ACTIF){
+				if (currentStatus.date.getAt(Calendar.MONTH) == endCalendar.get(Calendar.MONTH) && currentStatus.date.getAt(Calendar.YEAR) == endCalendar.get(Calendar.YEAR) ){
+					log.error('departure month. recomputing days')
+					Calendar exitCalendar = Calendar.instance
+					exitCalendar.time = currentStatus.date
+					exitCalendar.roll(Calendar.DAY_OF_YEAR, -1)
+					counter = openDaysBetweenDates(calendar.time,exitCalendar.time)
+				}else{
+					counter = 0
+				}
+			}
+		}
+			
+		// special case: employee has not yet arrived in the company
+		if (employeeInstance.arrivalDate > currentCalendar.time ){
+			counter = 0
+		}
+
+		// get cumul RTT
+		Absence.withTransaction{
+			rtt = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.RTT])
+		}
+		
+		Absence.withTransaction{
+			pregnancy = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.GROSSESSE])
+			pregnancyCredit=30*60*pregnancy.size()
+		}
+		
+		Absence.withTransaction{
+			sickness = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.MALADIE])
+		}
+		
+		Absence.withTransaction{
+			holidays = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.VACANCE])
+		}
+
+		Absence.withTransaction{
+			exceptionnel = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.EXCEPTIONNEL])
+		}
+
+		Absence.withTransaction{
+			paternite = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.PATERNITE])
+		}
+		
+		Absence.withTransaction{
+			dif = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.DIF])
+		}
+		
+		Absence.withTransaction{
+			sansSolde = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.CSS])
+		}
+		
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		calendar.set(Calendar.DATE,1)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.MONTH,month-1)
+		def yearlyCartouche=getYearCartoucheDataMultiThread(employeeInstance,year,month)
+		
+		//def yearlyCartouche=getYearCartoucheData(employeeInstance,year,month)
+		// determine monthly theoritical time:
+		//	monthTheoritical=getMonthTheoritical(employeeInstance,  month, year)
+	
+		
+		def currentContract
+		Contract.withTransaction{
+			def contracts = Contract.findAllByEmployee(employeeInstance)			
+			for (Contract contract : contracts){
+				if (contract.endDate != null && contract.startDate < endCalendar.time && contract.endDate > endCalendar.time){currentContract = contract}
+				if (contract.endDate != null && contract.startDate < endCalendar.time && contract.endDate < endCalendar.time && contract.endDate.getAt(Calendar.MONTH)==endCalendar.time.getAt(Calendar.MONTH)){currentContract = contract}
+				if (currentContract == null && contract.endDate == null){currentContract = contract}
+			}
+		}
+
+		def cartoucheMap=[
+			isCurrentMonth:isCurrentMonth,
+			currentContract:currentContract,
+			employeeInstance:employeeInstance,
+			workingDays:counter,
+			holidays:holidays.size(),
+			exceptionnel:exceptionnel.size(),
+			paternite:paternite.size(),
+			dif:dif.size(),
+			rtt:rtt.size(),
+			sickness:sickness.size(),
+			sansSolde:sansSolde.size(),
+			monthTheoritical:monthTheoritical,
+			pregnancyCredit:pregnancyCredit,
+		//	monthTheoriticalHuman:getTimeAsText(computeHumanTime(monthTheoritical),false),
+			calendar:calendar
+		]
+		//def mergedMap = cartoucheMap << yearlyCartouche
+		return cartoucheMap
+	}
+	
+	
+	def getYearCartoucheDataMultiThread(Employee employee,int year,int month){
+		def monthNumber=0
+		def yearOpenDays = 0
+		def yearTheoritical = 0
+		def yearSupTime = 0
+		def data
+		def calendar = Calendar.instance
+		calendar.set(Calendar.YEAR,year)
+		def yearlyCounter = 0
+		def totalTime = 0
+		def bankHolidayCounter=0
+		def bankHolidayList
+		def monthTheoritical
+		def monthsAggregate
+		if (month > 5){
+			year = year + 1
+			monthNumber = month - 6 + 1
+		}else{
+			monthNumber = month + 1 + 6
+		}
+
+		// set the date end of may
+		calendar.set(Calendar.DAY_OF_MONTH,10)
+		calendar.set(Calendar.MONTH,month-1)
+		log.debug("month: "+calendar.get(Calendar.MONTH))
+		calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug("last day of the month: "+calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug("calendar: "+calendar)
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		def maxDate = calendar.time
+		log.debug("month: "+calendar.get(Calendar.MONTH))
+		log.debug("maxDate: "+maxDate)
+		calendar.set(Calendar.YEAR,year-1)
+		calendar.set(Calendar.MONTH,5)
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		calendar.clearTime()
+		def minDate = calendar.time
+		def yearlyHolidays = []
+		def yearlyExceptionnel = []
+		def yearlyPaternite = []
+		def yearlyDif = []
+		def yearlyRtt = []
+		def yearlySickness = []
+		def pregnancy = []
+		def yearlySansSolde = []
+		
+		/* create a loop over months and invoke getMonthTheoritical method */
+		// check if employee entered the company or left the company over the period.
+		def arrivalDate = employee.arrivalDate
+		def exitDate = employee.status == StatusType.TERMINE ? employee.status.date : null
+
+		// the employee arrived after the period started: resetting the minDate
+		if (arrivalDate > minDate){minDate = arrivalDate}
+
+		// the employee left before period's end:
+		if ((exitDate != null) && exitDate < maxDate){maxDate = exitDate}
+		
+		yearOpenDays = openDaysBetweenDates(minDate,maxDate)
+		// get cumul holidays
+		
+		Absence.withTransaction{
+			yearlyHolidays = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.VACANCE])
+		}
+		
+		Absence.withTransaction{
+			yearlyExceptionnel = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.EXCEPTIONNEL])
+		}
+
+		Absence.withTransaction{
+			yearlyPaternite = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.PATERNITE])
+		}
+
+		Absence.withTransaction{
+			yearlyDif = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.DIF])
+		}
+		
+		Absence.withTransaction{
+			yearlyRtt = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.RTT])
+		}
+
+		Absence.withTransaction{
+			yearlySickness = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.MALADIE])
+		}
+		
+		Absence.withTransaction{
+			pregnancy = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.GROSSESSE])
+		}
+		def yearlyPregnancyCredit=30*60*pregnancy.size()
+		
+		
+		Absence.withTransaction{
+			yearlySansSolde = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.CSS])
+		}
+		
+						
+		if (month>=6){			
+			MonthlyTotal.withTransaction{
+				monthsAggregate = MonthlyTotal.findAll("from MonthlyTotal where employee = :employee and month >= :minMonth and month <= :month  and year = :year",[employee:employee,minMonth:6,month:month,year:year-1])
+			}
+			for (MonthlyTotal monthIter:monthsAggregate){totalTime += monthIter.elapsedSeconds}
+		}else{
+			MonthlyTotal.withTransaction{
+				monthsAggregate = MonthlyTotal.findAll("from MonthlyTotal where employee = :employee and month >= :minMonth and month <= :month  and year = :year",[employee:employee,minMonth:6,month:12,year:year-1])
+			}
+		
+			for (MonthlyTotal monthIter:monthsAggregate){totalTime += monthIter.elapsedSeconds}
+			MonthlyTotal.withTransaction{
+				monthsAggregate = MonthlyTotal.findAll("from MonthlyTotal where employee = :employee and month <= :month  and year = :year",[employee:employee,month:month,year:year])
+			}
+			for (MonthlyTotal monthIter:monthsAggregate){totalTime += monthIter.elapsedSeconds}
+			
+		}
+
+		yearlyCounter = month > 5 ? utilService.getYearlyCounter(year-1,month,employee) : utilService.getYearlyCounter(year,month,employee)
+		
+		if (month < 6){		
+			BankHoliday.withTransaction{
+				bankHolidayList = BankHoliday.findAll("from BankHoliday where month >= :minMonth and month <= :month  and year = :year",[minMonth:1,month:month,year:year])
+			}
+			for (BankHoliday bankHoliday:bankHolidayList){
+				if ((bankHoliday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) && (bankHoliday.calendar.time > employee.arrivalDate) ){bankHolidayCounter ++}
+			}
+			
+			BankHoliday.withTransaction{
+				bankHolidayList = BankHoliday.findAll("from BankHoliday where month >= :minMonth and month <= :month  and year = :year",[minMonth:6,month:12,year:year-1])
+			}
+			for (BankHoliday bankHoliday:bankHolidayList){
+				if ((bankHoliday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) && (bankHoliday.calendar.time > employee.arrivalDate) ){bankHolidayCounter ++}
+			}
+
+		}
+		else{
+			BankHoliday.withTransaction{
+				bankHolidayList = BankHoliday.findAll("from BankHoliday where month >= :minMonth and month <= :month  and year = :year",[minMonth:6,month:month,year:year-1])
+			}
+			for (BankHoliday bankHoliday:bankHolidayList){
+				if ((bankHoliday.calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) && (bankHoliday.calendar.time > employee.arrivalDate) ){bankHolidayCounter ++}
+			}
+
+		}
+		def calendarIter = Calendar.instance
+		calendarIter.time = minDate
+
+		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
+		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
+			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
+				log.debug('calendarIter: '+calendarIter.time)
+				monthTheoritical = getMonthTheoriticalMultiThread(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTheoritical += monthTheoritical
+				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+		}else{
+			while(calendarIter.get(Calendar.MONTH) <= 11){
+				log.debug('calendarIter: '+calendarIter.time)
+				monthTheoritical = getMonthTheoriticalMultiThread(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTheoritical += monthTheoritical
+				if (calendarIter.get(Calendar.MONTH) == 11){
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+			calendarIter.set(Calendar.MONTH,0)
+			calendarIter.set(Calendar.YEAR,(calendarIter.get(Calendar.YEAR)+1))
+			
+			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
+				log.debug('calendarIter: '+calendarIter.time)
+				monthTheoritical = getMonthTheoriticalMultiThread(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTheoritical += monthTheoritical
+				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
+					break
+				}
+				calendarIter.roll(Calendar.MONTH, 1)
+			}
+		}
+		
+		yearlyCounter = openDaysBetweenDates(minDate,maxDate)
+		return [
+			yearOpenDays:yearOpenDays,
+			yearlyActualTotal:yearlyCounter,
+			yearlyHolidays:yearlyHolidays.size(),
+			yearlyExceptionnel:yearlyExceptionnel.size(),
+			yearlyPaternite:yearlyPaternite.size(),
+			yearlyDif:yearlyDif.size(),
+			yearlyRtt:yearlyRtt.size(),
+			yearlySickness:yearlySickness.size(),
+			yearlyTheoritical:yearTheoritical,
+			yearlyPregnancyCredit:yearlyPregnancyCredit,
+			yearlyTotalTime:totalTime,
+			yearlySansSolde:yearlySansSolde.size(),
+			yearSupTime:yearSupTime
+		]
+	}
+	
+	def getMonthTheoriticalMultiThread(Employee employee, int month,int year){
+		def monthTheoritical = 0
+		def counter = 0
+		def isOut = false
+		def totalNumberOfDays
+		def weeklyContractTime
+		def contract
+		def criteria
+		def previousContracts
+		def remainingDays
+		def currentStatus = employee.status
+		def realOpenDays
+		def departureDate
+		def startDate
+		def endDate
+		def startCalendar = Calendar.instance
+		def endCalendar = Calendar.instance
+		def calendarCompute = Calendar.instance
+		
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.set(Calendar.YEAR,year)
+		startCalendar.set(Calendar.MONTH,month-1)
+		startCalendar.clearTime()
+		log.debug('startCalendar: '+startCalendar.time)
+		
+		endCalendar.set(Calendar.YEAR,year)
+		endCalendar.set(Calendar.MONTH,month-1)
+		endCalendar.set(Calendar.HOUR_OF_DAY,23)
+		endCalendar.set(Calendar.MINUTE,59)
+		endCalendar.set(Calendar.SECOND,59)
+		endCalendar.set(Calendar.DAY_OF_MONTH,startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+		log.debug('endCalendar: '+endCalendar.time)
+		
+		previousContracts = []
+		Contract.withTransaction{
+			
+			def tmp = Contract.findAll("from Contract where employee = :employee and startDate <= :startDate and endDate >= :endDate and endDate is not null order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:startCalendar.time])
+			if (tmp != null && tmp.size() > 0)
+				previousContracts.addAll(tmp)
+			tmp = Contract.findAll("from Contract where employee = :employee and endDate >= :startDate and endDate <= :endDate and endDate is not null order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:endCalendar.time])
+			if (tmp != null && tmp.size() > 0)
+				previousContracts.addAll(tmp)
+			tmp = Contract.findAll("from Contract where employee = :employee and startDate <= :endDate and endDate is null order by startDate desc",[employee:employee,endDate:startCalendar.time])
+			if (tmp != null && tmp.size() > 0)
+				previousContracts.addAll(tmp)
+			tmp = Contract.findAll("from Contract where employee = :employee and startDate >= :startDate and startDate <= :endDate order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:endCalendar.time])	
+			if (tmp != null && tmp.size() > 0)
+				previousContracts.addAll(tmp)
+				
+			//previousContracts.addAll(Contract.findAll("from Contract where employee = :employee and endDate >= :startDate and endDate <= :endDate and endDate is not null order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:endCalendar.time]))
+			//previousContracts .addAll(Contract.findAll("from Contract where employee = :employee and startDate <= :endDate and endDate is null order by startDate desc",[employee:employee,endDate:startCalendar.time]))
+			//previousContracts.addAll(Contract.findAll("from Contract where employee = :employee and startDate >= :startDate and startDate <= :endDate order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:endCalendar.time]))
+			monthTheoritical = 0
+			for (Contract currentContract : previousContracts){
+				weeklyContractTime = currentContract.weeklyLength
+				if (weeklyContractTime == 0){
+					monthTheoritical += 0
+				}else{
+					startDate = currentContract.startDate
+		
+					//the contract was not started during the current month: we will take first day of the month as starting point.
+					if (startDate < startCalendar.time){
+						startDate = startCalendar.time
+					}
+					
+					//the contract did not end during the month: we will take the last day of the month as end point.
+					endDate = currentContract.endDate
+					if (endDate > endCalendar.time){
+						endDate = endCalendar.time
+					}
+									
+					// if the contract has no end date, set the end the end date to the end of the month.
+					if (currentContract.endDate ==  null){
+						def endContractCalendar = Calendar.instance
+						endContractCalendar.time = startDate
+						endContractCalendar.set(Calendar.HOUR_OF_DAY,23)
+						endContractCalendar.set(Calendar.MINUTE,59)
+						endContractCalendar.set(Calendar.SECOND,59)
+						endContractCalendar.set(Calendar.DAY_OF_MONTH,endContractCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+						endDate = endContractCalendar.time
+					}
+					
+					def absenceMap = getAbsencesBetweenDatesMultiThread( employee, startDate, endDate)
+					
+					//initialize day counters:
+					realOpenDays = openDaysBetweenDates(startDate,endDate)
+					totalNumberOfDays = openDaysBetweenDates(startDate,endDate)
+					
+					// special case: arrival month
+					if ((employee.arrivalDate.getAt(Calendar.MONTH) + 1) == month &&  (employee.arrivalDate.getAt(Calendar.YEAR)) == year){
+						// we need to count OPEN DAYS between dates and not consecutive days
+						realOpenDays = openDaysBetweenDates(employee.arrivalDate,endDate)
+					}
+		
+					// special case: employee has not yet arrived in the company
+					if (employee.arrivalDate > endCalendar.time ){
+						isOut = true
+					}
+					
+					//special case: departure month
+					if (currentStatus.date != null && currentStatus.date <= endCalendar.time){
+						if (currentStatus.type != StatusType.ACTIF){
+							if (currentStatus.date.getAt(Calendar.MONTH) == endCalendar.get(Calendar.MONTH) && currentStatus.date.getAt(Calendar.YEAR) == endCalendar.get(Calendar.YEAR) ){
+							log.debug('departure month. recomputing open days')
+								Calendar exitCalendar = Calendar.instance
+								exitCalendar.time = currentStatus.date
+								exitCalendar.roll(Calendar.DAY_OF_YEAR, -1)
+								realOpenDays = openDaysBetweenDates(startCalendar.time,exitCalendar.time)
+							}else{
+								realOpenDays = 0
+								isOut = true
+							}
+						}
+					}
+			
+					log.debug('open days: '+realOpenDays)
+					if (isOut){
+						monthTheoritical += 0
+					}else{
+						log.debug('realOpenDays*weeklyContractTime/Employee.WeekOpenedDays: '+realOpenDays*weeklyContractTime/Employee.WeekOpenedDays)
+						log.debug('realOpenDays: '+realOpenDays)
+						log.debug('absenceMap.get(AbsenceType.CSS): '+absenceMap.get(AbsenceType.CSS))
+						def tmpTheoritical = 0
+						tmpTheoritical += realOpenDays*weeklyContractTime/Employee.WeekOpenedDays as long
+						log.debug('1: tmpTheoritical: '+tmpTheoritical)
+						
+						tmpTheoritical += (Employee.Pentecote)*(((realOpenDays as long) - (absenceMap.get(AbsenceType.CSS) as long))/totalNumberOfDays)*((weeklyContractTime as long)/Employee.legalWeekTime)
+						log.debug('2: tmpTheoritical: '+tmpTheoritical)
+						
+						
+						
+						def multiplier = 0
+						if ( absenceMap.get(AbsenceType.MALADIE) != null )
+							multiplier += absenceMap.get(AbsenceType.MALADIE) as long
+
+							
+						if ( absenceMap.get(AbsenceType.VACANCE) != null )
+							multiplier += absenceMap.get(AbsenceType.VACANCE) as long
+							
+						if ( absenceMap.get(AbsenceType.CSS) != null )
+							multiplier += absenceMap.get(AbsenceType.CSS) as long
+
+						if ( absenceMap.get(AbsenceType.EXCEPTIONNEL) != null )
+							multiplier += absenceMap.get(AbsenceType.EXCEPTIONNEL) as long
+							
+						if ( absenceMap.get(AbsenceType.DIF) != null )
+							multiplier += absenceMap.get(AbsenceType.DIF)
+
+						tmpTheoritical -= (weeklyContractTime/Employee.WeekOpenedDays)*multiplier
+						log.debug('3: tmpTheoritical: '+tmpTheoritical)
+						
+						tmpTheoritical -= (35/7)*(absenceMap.get(AbsenceType.PATERNITE) as long)
+						log.debug('4: tmpTheoritical: '+tmpTheoritical)
+						
+						tmpTheoritical = 3600*tmpTheoritical
+						log.debug('5: tmpTheoritical: '+tmpTheoritical)
+						
+						tmpTheoritical -= (absenceMap.get(AbsenceType.GROSSESSE) as int)
+						log.debug('6: tmpTheoritical: '+tmpTheoritical)
+						
+						monthTheoritical = tmpTheoritical
+						log.debug('monthTheoritical: '+monthTheoritical)
+						
+						/*
+						monthTheoritical += (
+							3600*(
+									realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
+									+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
+									-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF))
+									- (35/7)*absenceMap.get(AbsenceType.PATERNITE)
+								)
+								- absenceMap.get(AbsenceType.GROSSESSE)) as int
+							*/
+					}
+				}
+				log.debug('monthTheoritical: '+monthTheoritical)
+			}
+			
+			}
+		/*
+		Contract.withTransaction{
+			previousContracts.add(Contract.findAll("from Contract where employee = :employee and endDate >= :startDate and endDate <= :endDate and endDate is not null order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:endCalendar.time]))
+		}
+
+		Contract.withTransaction{
+			previousContracts.add(Contract.findAll("from Contract where employee = :employee and startDate <= :endDate and endDate is null order by startDate desc",[employee:employee,endDate:startCalendar.time]))
+		}
+		
+		Contract.withTransaction{
+			previousContracts.add(Contract.findAll("from Contract where employee = :employee and startDate >= :startDate and startDate <= :endDate order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:endCalendar.time]))
+		}
+			*/	
+
+
+		return monthTheoritical
+		
+	}
+	
+	def getAbsencesBetweenDatesMultiThread(Employee employee,Date startDate,Date endDate){
+		def absenceMap = [:]
+		def sickness = []
+		def holidays = []
+		def exceptionnel = []
+		def paternite = []
+		def dif = []
+		def sansSolde = []
+		def pregnancy = []
+		def pregnancyCredit = 0
+		
+		
+		Absence.withTransaction{
+			sickness = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.MALADIE])
+			absenceMap.put(AbsenceType.MALADIE, sickness.size())
+		}
+
+		Absence.withTransaction{
+			holidays = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.VACANCE])
+			absenceMap.put(AbsenceType.MALADIE, holidays.size())
+		}
+
+		Absence.withTransaction{
+			exceptionnel = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.EXCEPTIONNEL])
+			absenceMap.put(AbsenceType.EXCEPTIONNEL, exceptionnel.size())
+		}
+		
+		Absence.withTransaction{
+			paternite = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.PATERNITE])
+			absenceMap.put(AbsenceType.PATERNITE, paternite.size())
+		}
+
+		Absence.withTransaction{
+			dif = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.DIF])
+			absenceMap.put(AbsenceType.DIF, dif.size())
+		}
+
+		Absence.withTransaction{
+			sansSolde = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.CSS])
+			absenceMap.put(AbsenceType.CSS, sansSolde.size())
+		}
+		
+		Absence.withTransaction{
+			pregnancy = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.GROSSESSE])
+			pregnancyCredit=30*60*pregnancy.size()	
+			absenceMap.put(AbsenceType.GROSSESSE, pregnancyCredit)		
+		}
+		return absenceMap
+	}
+		
+	
+	def getDailyTotalMultiThread(Employee employee,def year, def month, def day){
+		def elapsedSeconds = 0
+		def timeBefore7 = 0
+		def timeAfter20 = 0
+		def timeOffHours = 0
+		def tmpInOrOut
+		def timeDifference
+		def currentInOrOut
+		def previousInOrOut
+		def inOrOutList = []
+		def calendarAtSeven = Calendar.instance
+		def calendarAtNine = Calendar.instance
+		calendarAtSeven.set(Calendar.YEAR,year)
+		calendarAtSeven.set(Calendar.MONTH,month-1)
+		calendarAtSeven.set(Calendar.DAY_OF_MONTH,day)
+		calendarAtSeven.set(Calendar.HOUR_OF_DAY,7)
+		calendarAtSeven.set(Calendar.MINUTE,0)
+		calendarAtSeven.set(Calendar.SECOND,0)
+		calendarAtNine.set(Calendar.YEAR,year)
+		calendarAtNine.set(Calendar.MONTH,month-1)
+		calendarAtNine.set(Calendar.DAY_OF_MONTH,day)
+		calendarAtNine.set(Calendar.HOUR_OF_DAY,20)
+		calendarAtNine.set(Calendar.MINUTE,0)
+		calendarAtNine.set(Calendar.SECOND,0)
+		
+		InAndOut.withTransaction{
+			inOrOutList = InAndOut.findAll("from InAndOut as a where a.employee = :employee and year = :year and month = :month and day = :day order by time asc",[employee:employee,year:year,month:month,day:day])
+			for (InAndOut inOrOut:inOrOutList){
+				currentInOrOut = inOrOut
+				if (previousInOrOut == null){
+					// it is the first occurence
+					previousInOrOut = inOrOut
+				}else{
+					if (previousInOrOut.type.equals("E") && currentInOrOut.type.equals("S")){
+						use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+						elapsedSeconds += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						
+						// managing time before 7
+						if (currentInOrOut.time < calendarAtSeven.time){
+							use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+							timeBefore7 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						}
+						if (currentInOrOut.time > calendarAtSeven.time && previousInOrOut.time < calendarAtSeven.time){
+							use (TimeCategory){timeDifference = calendarAtSeven.time - previousInOrOut.time}
+							timeBefore7 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						}
+						
+						// managing time after 21
+						if (previousInOrOut.time > calendarAtNine.time){
+							use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+							timeAfter20 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						}
+						if (currentInOrOut.time > calendarAtNine.time && previousInOrOut.time < calendarAtNine.time){
+							use (TimeCategory){timeDifference = currentInOrOut.time - calendarAtNine.time}
+							timeAfter20 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						}
+					}
+					previousInOrOut = inOrOut
+				}
+			}		
+		}
+		//dailyTotal.elapsedSeconds=elapsedSeconds
+		timeOffHours = (timeBefore7 as long) + (timeAfter20 as long)
+		return [
+			elapsedSeconds:elapsedSeconds,
+			timeBefore7:timeBefore7,
+			timeAfter20:timeAfter20,
+			timeOffHours:timeOffHours
+		]
+	}
+	
+	def computeSupplementaryTimeMultiThread(Employee employee,int week, int year){
+		def dailySupplementarySeconds = 0
+		def weeklySupplementarySeconds = 0
+		def dailyTotalSum=0
+		def dailyTotals = []
+		def bankHolidays = []
+		def calendar = Calendar.instance
+		def bankHolidayCounter = 0
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.WEEK_OF_YEAR,week)	
+		
+		BankHoliday.withTransaction{
+			bankHolidays.addAll(BankHoliday.findAll("from BankHoliday where year = :year and month = :month",[year:year,month:calendar.get(Calendar.MONTH)+1]))
+			bankHolidays.addAll(BankHoliday.findAll("from BankHoliday where year = :year and week = :week",[year:year,week:calendar.get(Calendar.WEEK_OF_YEAR)]))
+			
+			for (BankHoliday bankHoliday:bankHolidays){
+				if (bankHoliday.calendar.get(Calendar.WEEK_OF_YEAR)==week){
+					bankHolidayCounter+=1
+				}
+			}
+		}
+
+		DailyTotal.withTransaction{
+			dailyTotals.addAll(DailyTotal.findAll("from DailyTotal where employee = :employee and week = :week and year = :year",[year:year,week:week,employee:employee]))		
+			for (DailyTotal tmpDaily:dailyTotals){
+				
+				def tmpElapsed = getDailyTotalMultiThread(tmpDaily.employee,tmpDaily.year, tmpDaily.month, tmpDaily.day).get("elapsedSeconds")
+				dailyTotalSum += tmpElapsed
+				dailySupplementarySeconds += Math.max(tmpElapsed-DailyTotal.maxWorkingTime, 0)
+			}
+		}
+		
+		if (dailyTotalSum<=1.2*3600*(WeeklyTotal.WeeklyLegalTime-bankHolidayCounter*(Employee.legalWeekTime/Employee.WeekOpenedDays))){
+			weeklySupplementarySeconds = dailySupplementarySeconds
+		}else {
+			weeklySupplementarySeconds = Math.max(dailySupplementarySeconds,dailyTotalSum-1.2*3600*(WeeklyTotal.WeeklyLegalTime-bankHolidayCounter*(Employee.legalWeekTime/Employee.WeekOpenedDays)))
+		}
+		return weeklySupplementarySeconds
+	}
 }

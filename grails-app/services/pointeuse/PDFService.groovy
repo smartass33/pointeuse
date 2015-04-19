@@ -145,15 +145,6 @@ class PDFService {
 		OutputStream outputStream
 		File file
 		def modelSiteTotal = [:]
-	//	def modelSiteTotal=timeManagerService.getSiteData(site,period)
-		
-		
-		
-		
-		
-		
-		////
-		////
 		def executionTime
 		def data
 		def annualReportMap =[:]
@@ -172,8 +163,7 @@ class PDFService {
 		def siteAnnualPayableSupTime = 0
 		def siteAnnualTheoriticalIncludingExtra = 0
 		def siteAnnualSupTimeAboveTheoritical = 0
-		def siteAnnualGlobalSupTimeToPay = 0
-		
+		def siteAnnualGlobalSupTimeToPay = 0	
 		def startDate = new Date()
 		def employeeList = Employee.findAllBySite(site)
 		
@@ -183,8 +173,8 @@ class PDFService {
 				 data = timeManagerService.getAnnualReportData(period.year, it)
 				 annualReportMap.put(it,data)
 				 siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
-				 siteAnnualTheoritical += timeManagerService.getTimeFromText(data.get('annualTheoritical'),false)
-				 siteAnnualTotal += timeManagerService.getTimeFromText(data.get('annualTotal'),false)
+				 siteAnnualTheoritical += data.get('annualTheoritical')
+				 siteAnnualTotal += data.get('annualTotal')
 				 siteAnnualHoliday += data.get('annualHoliday')
 				 siteRemainingCA += data.get('remainingCA')
 				 siteAnnualRTT += data.get('annualRTT')
@@ -193,16 +183,13 @@ class PDFService {
 				 siteAnnualDIF += data.get('annualDIF')
 				 siteAnnualExceptionnel += data.get('annualExceptionnel')
 				 siteAnnualPaternite += data.get('annualPaternite')
-				 siteAnnualPayableSupTime += timeManagerService.getTimeFromText(data.get('annualPayableSupTime'),false)
+				 siteAnnualPayableSupTime += data.get('annualPayableSupTime')
 				 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
 				 siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
 				 siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')
 			 }
 		 }
 		
-		def endDate = new Date()
-		use (TimeCategory){executionTime=endDate-startDate}
-		log.error('execution time: '+executionTime)
 		modelSiteTotal << [
 			employeeList:employeeList,
 			annualReportMap:annualReportMap,
@@ -222,11 +209,6 @@ class PDFService {
 			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
 			siteAnnualGlobalSupTimeToPay:siteAnnualGlobalSupTimeToPay
 		]
-		///
-		
-		
-		
-		
 		
 		modelSiteTotal << [site:site,period2:period]
 		def siteName = (site.name).replaceAll("\\s","").trim()
@@ -239,6 +221,9 @@ class PDFService {
 		if(outputStream)
 			outputStream.close()
 		file = new File(folder+'/'+filename)
+		def endDate = new Date()
+		use (TimeCategory){executionTime=endDate-startDate}
+		log.error('execution time for generateSiteTotalSheet: '+executionTime)
 		return [file.bytes,file.name]
 	}
 	
@@ -267,8 +252,6 @@ class PDFService {
 			if(outputStream)
 				outputStream.close()
 		}
-		
-
 		finalCopy = new PdfCopyFields(new FileOutputStream(folder+'/'+period.year+'-'+(period.year+1) +'-allSites'+'.pdf'));
 		finalCopy.open()
 		for (String tmpFile:fileNameList){

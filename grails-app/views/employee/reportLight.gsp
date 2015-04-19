@@ -61,7 +61,7 @@
 										<td style="font-weight: bold" >${employee.firstName} ${employee.lastName}</td>
 									</tr>
 									<tr>
-										<td>${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${employee.weeklyContractTime}</td>
+										<td>${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${currentContract.weeklyLength}</td>
 									</tr>
 									<tr>
 										<td>${message(code: 'employee.matricule.label', default: 'report')}: ${employee.matricule}</td>
@@ -74,13 +74,12 @@
 			</font>
 			</div>		
 			<BR/>
-			<table border="1" >
+			<table  style="table-layout: fixed;"  id="reportTable">
 				<thead>
-					<th class="eventTD" width="150px" align="center">date</th>
-					<th class="eventTD" width="60px">total jour</th>
-					<th class="eventTD" width="50px">absence</th>
-     				<th class="eventTD" align="center" colspan="80">${message(code: 'events.label', default: 'report')}</th>
-
+					<th width="120px" style="text-align:center">date</th>
+					<th width="60px" style="text-align:center">total jour</th>
+					<th width="50px" style="text-align:center">absence</th>
+     				<th style="text-align:center" colspan="80">${message(code: 'events.label', default: 'report')}</th>
 				</thead>
 				<tbody >	
 					<g:each in="${weeklyAggregate}" status="k" var="week">
@@ -89,7 +88,7 @@
 									<g:each in="${day.value}" status="m" var="entries">
 										<g:if test="${entries!=null}">
 										<tr>
-											<td class="eventTD" width="180px"><font size="2"><i>${entries.key.format('E dd MMM yyyy')}</i></font></td>
+											<td class="eventTD" width="120px"><font size="2"><i>${entries.key.format('E dd MMM yyyy')}</i></font></td>
 											<g:if test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0 || dailyTotalMap.get(entries.key).get(2)>0)}">									
 												<td class="eventTD" ><font size="2">${(dailyTotalMap.get(entries.key)).get(0)}:${(dailyTotalMap.get(entries.key)).get(1)}:${(dailyTotalMap.get(entries.key)).get(2)}</font></td>
 											</g:if>
@@ -109,26 +108,22 @@
 											<g:each in="${entries.value}" var="inOrOut">
 													<font size="2">
 															<g:if test="${inOrOut.type.equals('E')}">
-																<td class="eventTDEntry" bgcolor="98FB98" style="height:1px">
-																	<g:if test="${inOrOut.regularization==true || inOrOut.systemGenerated==true}">
-																		<g:textField id="myinput" name="cell" value="${inOrOut.time.format('H:mm')}" align="center" style="font-weight: bold"  style="background-color:#98FB98"/>	
-																	</g:if>
-																	<g:else>
-																		<g:textField  id="myinput" name="cell" value="${inOrOut.time.format('H:mm')}" align="center" style="background-color:#98FB98;"/>								
-																	</g:else>
-																</td>
+																<g:if test="${inOrOut.regularization==true || inOrOut.systemGenerated==true}">
+																	<td class="eventTDEntry" bgcolor="98FB98" style="font-weight: bold;background-color:#98FB98">${inOrOut.time.format('H:mm')}</td>																
+																</g:if>
+																<g:else>
+																	<td class="eventTDEntry" bgcolor="98FB98" style="background-color:#98FB98;">${inOrOut.time.format('H:mm')}</td>																	
+ 																</g:else>
 															</g:if>
 															<g:else>
-																<td class="eventTDExit" bgcolor="#FFC0CB" style="height:1px">
-																	<g:if test="${inOrOut.regularization==true || inOrOut.systemGenerated==true}">
-																		<g:textField id="myinput" name="cell" value="${inOrOut.time.format('H:mm')}" align="center" style="font-weight: bold" style="background-color:#FFC0CB;"/>	
-																	</g:if>
-																	<g:else>
-																		<g:textField  id="myinput" name="cell" value="${inOrOut.time.format('H:mm')}" align="center" style="background-color:#FFC0CB;"/>								
-																	</g:else>
-																</td>																
-															</g:else>
-													</font>
+																<g:if test="${inOrOut.regularization==true || inOrOut.systemGenerated==true}">
+																	<td class="eventTDExit" bgcolor="#FFC0CB" style="font-weight: bold;background-color:#FFC0CB">${inOrOut.time.format('H:mm')}</td>																
+																</g:if>
+																<g:else>
+																	<td class="eventTDExit" bgcolor="#FFC0CB" style="background-color:#FFC0CB;">${inOrOut.time.format('H:mm')}</td>																	
+ 																</g:else>
+ 															</g:else>
+ 													</font>
 											</g:each>
 										</tr>
 										</g:if>																			

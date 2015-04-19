@@ -51,7 +51,7 @@
 						${employeeInstance?.site.name}
 					</g:if>
 				</td>					
-				<td><g:if test="${employeeInstance?.function != null}">
+				<td class="principal"><g:if test="${employeeInstance?.function != null}">
 						${employeeInstance?.function.name}
 					</g:if>
 				</td>				

@@ -17,10 +17,12 @@ class Contract {
 		
     }
 	
+	/*
+	
 	String toString(){
 		return 'contract: '+ this.employee.lastName+', startDate: '+this.startDate+', endDate: '+this.endDate+', weeklyLength: '+this.weeklyLength
 	}
-	
+	*/
 	
 	public Contract(Date startDate,Employee employee) {
 		this.startDate = startDate
