@@ -12,7 +12,7 @@
 						${ajaxYearlySupTime} ou ${ajaxYearlySupTimeDecimal}
 				</g:if>
 				<g:else>
-					chargement...
+					${message(code: 'ajax.loading.label', default: 'report')}
 				</g:else>	  		
 			</td>			
 		</tr>
@@ -31,7 +31,7 @@
 						${timeBefore7} ou ${timeBefore7Decimal}
 	  			</g:if>
 				<g:else>
-					chargement...
+					${message(code: 'ajax.loading.label', default: 'report')}	
 				</g:else>	  		
 			</td>
 		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
@@ -39,7 +39,7 @@
 						${yearTimeBefore7} ou ${yearTimeBefore7Decimal}	  			
 				</g:if>
 				<g:else>
-					chargement...
+					${message(code: 'ajax.loading.label', default: 'report')}
 				</g:else>	  		
 		</td>				
 	</tr>
@@ -51,7 +51,7 @@
 						${timeAfter20} ou ${timeAfter20Decimal}	  			
 	  			</g:if>
 				<g:else>
-					chargement...
+					${message(code: 'ajax.loading.label', default: 'report')}
 				</g:else>	  		
 		</td>	
 		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
@@ -59,7 +59,7 @@
 						${yearTimeAfter20} ou ${yearTimeAfter20Decimal}	  			
 	  			</g:if>
 				<g:else>
-					chargement...
+					${message(code: 'ajax.loading.label', default: 'report')}
 				</g:else>	  		
 		</td>
 	</tr>
@@ -71,7 +71,7 @@
 						${timeOffHours} ou ${timeOffHoursDecimal}	  			
 	  			</g:if>
 				<g:else>
-					chargement...
+					${message(code: 'ajax.loading.label', default: 'report')}
 				</g:else>	  		
 			</td>	
 			
@@ -80,7 +80,7 @@
 						${yearTimeOffHours} ou ${yearTimeOffHoursDecimal}	  			
 	  			</g:if>
 				<g:else>
-					chargement...
+					${message(code: 'ajax.loading.label', default: 'report')}
 				</g:else>	  		
 		</td>
 	</tr>	

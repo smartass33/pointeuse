@@ -27,6 +27,8 @@ class GeocoderService {
 				jsonMap.lat = geoCodeResultJSON.results.geometry.location.lat[0]
 				jsonMap.lng = geoCodeResultJSON.results.geometry.location.lng[0]
 				jsonMap.address = geoCodeResultJSON.results.formatted_address[0]
+				
+				def tttt = geoCodeResultJSON.results.address_components[0].size()
 				jsonMap.postCode=geoCodeResultJSON.results.address_components[0].get(geoCodeResultJSON.results.address_components[0].size()-1).short_name as int
 			}
 			else{

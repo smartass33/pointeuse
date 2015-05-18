@@ -1849,6 +1849,9 @@ class TimeManagerService {
 		def annualGlobalSupTimeToPay = 0
 		def annualSundayTime = 0
 		def annualBankHolidayTime = 0
+	//	def annualBefore7Time = 0
+	//	def annualAfter20Time = 0
+		
 		def annualPaidHS = 0 as long
 		def calendar = Calendar.instance
 		def currentYear=year
@@ -1999,6 +2002,15 @@ class TimeManagerService {
 			annualPayableCompTime += payableCompTime
 			annualTotal += monthlyTotalTime
 			annualQuotaIncludingExtra += tmpQuota
+			
+			/*
+			def data = computeWeeklyTotals( employee,  currentMonth,  year)
+			def timeBefore7 = data.get('timeBefore7')
+			def timeAfter20 = data.get('timeAfter20')
+			
+			annualBefore7Time += timeBefore7
+			annualAfter20Time += timeAfter20
+			*/
 		}
 		
 		annualTheoriticalIncludingExtra = annualTheoritical + annualPayableSupTime
@@ -2044,6 +2056,8 @@ class TimeManagerService {
 			annualTotal:Math.round(annualTotal) as long,
 			annualSundayTime:Math.round(annualSundayTime) as long,
 			annualBankHolidayTime:Math.round(annualBankHolidayTime) as long,
+		//	annualAfter20Time: annualAfter20Time,
+		//	annualBefore7Time : annualBefore7Time,
 			lastYear:year,
 			thisYear:year+1,
 			yearMap:yearMap,
@@ -2058,11 +2072,31 @@ class TimeManagerService {
 		]
 	}	
 	
+	def getOffHoursTime(Employee employee, def year){
+		log.error('getOffHoursTime called with param: year= '+year+' and employee: '+employee)
+		def annualBefore7Time = 0
+		def annualAfter20Time = 0
+		def data
+		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
+		for (int currentMonth in monthList){
+			data = computeWeeklyTotals( employee,  currentMonth,  year)
+			def timeBefore7 = data.get('timeBefore7')
+			def timeAfter20 = data.get('timeAfter20')
+			annualBefore7Time += timeBefore7
+			annualAfter20Time += timeAfter20
+		}	
+		
+		
+		def annualOffHoursTime = annualBefore7Time + annualAfter20Time
+		def annualOffHoursTimeDecimal = computeHumanTime(annualOffHoursTime as long)
+		annualOffHoursTimeDecimal=(annualOffHoursTimeDecimal.get(0)+annualOffHoursTimeDecimal.get(1)/60).setScale(2,2)		
+		return [annualBefore7Time:annualBefore7Time,annualAfter20Time: annualAfter20Time,annualOffHoursTime:annualOffHoursTime,annualOffHoursTimeDecimal:annualOffHoursTimeDecimal]	
+	}
 	
 	def getAbsencesBetweenDates(Employee employee,Date startDate,Date endDate){
 		def absenceMap = [:]
 		def	criteria = Absence.createCriteria()
-		
+		def patSundayCount = 0
 		// get cumul sickness
 		def sickness = criteria.list {
 			and {
@@ -2103,6 +2137,15 @@ class TimeManagerService {
 				eq('type',AbsenceType.PATERNITE)
 			}
 		}
+		
+		for (Absence tmpPat : paternite){
+			//log.error('tmpPat: '+tmpPat)
+			if (tmpPat.date.getAt(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
+				//log.error('a sunday exists. ')
+				patSundayCount += 1
+			}
+		}
+		absenceMap.put("patSundayCount",patSundayCount)
 		absenceMap.put(AbsenceType.PATERNITE, paternite.size())		
 		criteria = Absence.createCriteria()
 		def dif = criteria.list {
@@ -2113,6 +2156,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.DIF)
 			}
 		}
+		
 		absenceMap.put(AbsenceType.DIF, dif.size())				
 		criteria = Absence.createCriteria()
 		def sansSolde = criteria.list {
@@ -2324,6 +2368,7 @@ class TimeManagerService {
 				log.debug('endDate: '+endDate)
 				
 				def absenceMap = getAbsencesBetweenDates( employee, startDate, endDate)
+				def paterniteSunday = absenceMap.get("patSundayCount")
 				
 				//initialize day counters:
 				realOpenDays = openDaysBetweenDates(startDate,endDate)
@@ -2365,7 +2410,8 @@ class TimeManagerService {
 								realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
 								+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
 								-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF))
-								- (35/7)*absenceMap.get(AbsenceType.PATERNITE)			
+								- (35/7)*absenceMap.get(AbsenceType.PATERNITE)
+								+ (weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday			
 							)
 							- absenceMap.get(AbsenceType.GROSSESSE)) as int			
 				}
@@ -3365,10 +3411,8 @@ class TimeManagerService {
 			sansSolde:sansSolde.size(),
 			monthTheoritical:monthTheoritical,
 			pregnancyCredit:pregnancyCredit,
-		//	monthTheoriticalHuman:getTimeAsText(computeHumanTime(monthTheoritical),false),
 			calendar:calendar
 		]
-		//def mergedMap = cartoucheMap << yearlyCartouche
 		return cartoucheMap
 	}
 	
@@ -3779,7 +3823,7 @@ class TimeManagerService {
 		def sansSolde = []
 		def pregnancy = []
 		def pregnancyCredit = 0
-		
+		def patSundayCount = 0
 		
 		Absence.withTransaction{
 			sickness = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.MALADIE])
@@ -3799,6 +3843,14 @@ class TimeManagerService {
 		Absence.withTransaction{
 			paternite = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.PATERNITE])
 			absenceMap.put(AbsenceType.PATERNITE, paternite.size())
+			for (Absence tmpPat : paternite){
+				//log.error('tmpPat: '+tmpPat)
+				if (tmpPat.date.getAt(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
+					//log.error('a sunday exists. ')
+					patSundayCount += 1
+				}
+			}
+			absenceMap.put("patSundayCount", patSundayCount)
 		}
 
 		Absence.withTransaction{
@@ -3816,6 +3868,8 @@ class TimeManagerService {
 			pregnancyCredit=30*60*pregnancy.size()	
 			absenceMap.put(AbsenceType.GROSSESSE, pregnancyCredit)		
 		}
+		
+		
 		return absenceMap
 	}
 		

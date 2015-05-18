@@ -127,8 +127,6 @@ class PaymentTagLib {
 			outputString = hours + decimal
 			if (hours < 10){
 				outputString = '0' + outputString	
-			}else{
-				outputString = '0' + outputString
 			}
 		}else{
 			outputString = Math.abs(hours) + decimal

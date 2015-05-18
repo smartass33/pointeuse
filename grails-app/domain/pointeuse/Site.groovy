@@ -19,7 +19,7 @@ class Site {
 	//static searchable = true//{ only: ['name'] } 
 	
     static constraints = {
-		cardTerminal blank:true
+		cardTerminal nullable:true	
 		name blank: false
 		name unique:true
 		//latitude blank: true

@@ -88,6 +88,9 @@ class PDFService {
 
 		def modelReport = timeManagerService.getAnnualReportData(year, employee)
 
+		//def offHoursTime = 
+		
+		modelReport << timeManagerService.getOffHoursTime(employee,year)
 		// Get the bytes
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeAnnualReportTemplate', model: modelReport)
 		filename = year.toString()+'-'+employee.lastName +'-annualReport' +'.pdf'

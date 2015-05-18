@@ -177,75 +177,10 @@ class SiteController {
 		[period2:period,year:year,month:month]
 	}
 	
-	/*
-	def completeSiteReport(){
-		log.error('entering monthlyTotalTime method')
-		params.each{i->log.error('parameter of list: '+i)}
-		def site 
-		def executionTime
-		def data
-		def siteId=params["site.id"]
-		def periodId = params.int('periodId')
-		def period = Period.get(params.int('periodId'))
-		def calendar = Calendar.instance
-		def year = calendar.get(Calendar.YEAR)
-		def annualReportMap =[:]
-		def model = [:]
-		
-		if (period != null){
-			year = period.year
-		} else{
-			period = Period.findByYear(year)
-		}
-		
-		if (params["siteId"]!=null && !params["siteId"].equals("")){
-			site = Site.get(params["siteId"])
-			siteId=site.id
-		}else{
-			if (params["site.id"]!=null && !params["site.id"].equals("")){
-				def tmpSite = params["site.id"]
-				if (tmpSite instanceof String[]){
-					if (tmpSite[0]!=""){
-						tmpSite=tmpSite[0]!=""?tmpSite[0].toInteger():tmpSite[1].toInteger()
-					}
-				}else {
-					tmpSite=tmpSite.toInteger()
-				}
-				site = Site.get(tmpSite)
-				siteId=site.id
-			}
-		}
-		
-		if (site == null){
-			flash.message = message(code: 'site.selection.error')
-			render template: "/site/template/siteMonthlyTemplate", model:[period2:period,annualReportMap:null,employeeList:null,site:site,siteId:siteId,flash:flash]
-			return
-		}else{
-			flash.message = null
-		}
-		def startDate = new Date()		
-		
-		
-	
-		
-		
-	//	data = timeManagerService.getSiteData(site,period)
-		def endDate = new Date()
-		use (TimeCategory){executionTime=endDate-startDate}
-		log.error('execution time: '+executionTime)
-		model << data
-		model << [flash:flash]
-		model << [period2:period,site:site,siteId:siteId]
-		render template: "/site/template/siteMonthlyTemplate", model:model
-		return
-	}
-	
-	*/
-	
 	
 	def completeSiteReport(){
 		log.error('entering monthlyTotalTime method')
-		params.each{i->log.error('parameter of list: '+i)}
+		//params.each{i->log.error('parameter of list: '+i)}
 		def site
 		def executionTime
 		def data

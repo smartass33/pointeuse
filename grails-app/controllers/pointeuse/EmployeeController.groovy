@@ -16,6 +16,7 @@ import grails.converters.JSON
 import org.apache.commons.logging.LogFactory
 
 import java.util.concurrent.*
+
 import groovyx.gpars.GParsConfig
 import groovyx.gpars.GParsPool
 
@@ -781,6 +782,27 @@ def vacationFollowup(){
 		render template: "/employee/template/yearSupplementaryTime", model: model
 		return 
 	}
+	
+	
+	
+	
+	def getAjaxOffHoursTime(Long id){
+		log.error('getOffHoursTime called')
+		def year = params.int('year')
+		def employee = Employee.get(id)
+		def data
+		def annualBefore7Time = 0
+		def annualAfter20Time = 0
+		def model = timeManagerService.getOffHoursTime(employee,year)
+		
+		log.error("getOffHoursTime has terminated")
+		
+		//model << [id:id,month:month,year:year]
+		render template: "/employee/template/offHoursTime", model: model
+		return 
+		
+	}
+	
 	
 	
 	def getSupplementaryTime(Long id) {

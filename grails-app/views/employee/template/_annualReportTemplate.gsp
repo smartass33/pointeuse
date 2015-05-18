@@ -1,3 +1,7 @@
+<script type="text/javascript">
+	$(function(){$('#timeOffHours').load('${createLink(controller:'employee', action:'getAjaxOffHoursTime',params:[id:employee?.id,year:lastYear])}');});
+</script>	
+
 <h1 style="padding:15px">
 	<g:message code="yearly.recap.label"/> ${lastYear} / ${thisYear} : <g:if test="${employee != null }">${employee.firstName} ${employee.lastName}</g:if>
 	<g:set var="calendar" value="${Calendar.instance}"/>
@@ -96,7 +100,7 @@
 <BR>
 
 <div>
-	<table>
+	<table >
 		<tr>
 			<td style="witdh: 300px;" class="annualReportTitleTD"><a id="HRA" href="#" style="text-decoration: none;color:#666;" title="${message(code: "annual.HRA.tooltip")}"><g:message code="annual.actual.intial"/>:</td>
 			<td style="witdh: 50px;text-align:right;" class="annualReportFiguresTD"><my:humanTimeTD id="annualTotal"  name="annualTotal" value="${annualTotal}"/></td>		
@@ -140,10 +144,8 @@
 			<td style="witdh: 200px;" class="annualReportTitleTD"><g:message code="supplementary.time.already.paid"/>:</td>
 			<td style="witdh: 60px;text-align:right;" class="annualReportFiguresTD"><my:humanTimeTD id="paidHS"  name="paidHS" value="${annualPaidHS}"/></td>
 		</tr>	
-		<tr>
-			<td style="witdh: 200px;" class="annualReportTitleTD"><g:message code="supplementary.time.to.pay"/>:</td>
-			<td style="witdh: 60px;text-align:right;" class="annualReportFiguresTD"><my:humanTimeTD id="HStoPay"  name="HStoPay" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/></td>
-			<td style="witdh: 60px;text-align:left;" class="annualReportFiguresTD"> ou <my:humanTimeDecimalTD id="HStoPayWithDecimal"  name="HStoPayWithDecimal" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/></td>
-		</tr>			
 	</table>
 </div>
+<div id="timeOffHours">  
+ 		<g:offHoursTime/>
+ </div>	

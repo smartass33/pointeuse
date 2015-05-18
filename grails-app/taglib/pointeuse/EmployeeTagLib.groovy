@@ -78,4 +78,9 @@ class EmployeeTagLib {
 		out<<render(template:"/employee/template/yearSupplementaryTime")
 		
 	}
+	
+	def offHoursTime = {attrs,body->
+		out<<render(template:"/employee/template/offHoursTime")
+		
+	}
 }
