@@ -1770,6 +1770,7 @@ class TimeManagerService {
 	}
 		
 	def getMonthlySupTime(Employee employee,int month, int year){
+		log.error('getMonthlySupTime called with month: '+month+' year: '+year)
 		int daysToWithdraw
 		def supTime = 0
 		Calendar calendar = Calendar.instance
@@ -1793,11 +1794,16 @@ class TimeManagerService {
 		Calendar calendarLoop = firstDayOfMonth.clone()
 		// now that we have the first day of the period, iterate over each week of the period to retrieve supplementary time
 		
-		log.debug('calendarLoop before special loop '+calendarLoop.time)
+		log.error('calendarLoop before special loop '+calendarLoop.time)
 		
 		// special case if hover 2 years
 		if (calendarLoop.get(Calendar.DAY_OF_YEAR)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
-			supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			log.error('calendarLoop.get(Calendar.WEEK_OF_YEAR) '+calendarLoop.get(Calendar.WEEK_OF_YEAR))
+			log.error('calendarLoop.get(Calendar.YEAR) '+calendarLoop.get(Calendar.YEAR))
+			def cccc = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			log.error('supTime: '+cccc)
+			supTime += cccc
+			//supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 			calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
 			calendarLoop.set(Calendar.YEAR,year)
 		}
@@ -1806,7 +1812,11 @@ class TimeManagerService {
 			if ((calendarLoop.get(Calendar.DAY_OF_YEAR)+7)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
 				break
 			}
-			supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			log.error('calendarLoop.get(Calendar.WEEK_OF_YEAR) '+calendarLoop.get(Calendar.WEEK_OF_YEAR))
+			log.error('calendarLoop.get(Calendar.YEAR) '+calendarLoop.get(Calendar.YEAR))
+			def cccc = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			log.error('supTime: '+cccc)	
+			supTime += cccc
 			calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
 		}
 		return supTime
@@ -1969,7 +1979,8 @@ class TimeManagerService {
 			
 			// computing totals.		
 			annualSupTimeAboveTheoritical += monthlyTotalTime
-			monthlySupTotalTime = getMonthlySupTime(employee,currentMonth, currentYear)
+			def  weeklyTotals =  computeWeeklyTotals( employee, currentMonth, currentYear)
+			monthlySupTotalTime = weeklyTotals.get('monthlySupTime')//getMonthlySupTime(employee,currentMonth, currentYear)
 			annualMonthlySupTime += monthlySupTotalTime
 			yearMonthlySupTime.put(currentMonth,Math.round(monthlySupTotalTime) as long)
 			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
@@ -2079,7 +2090,8 @@ class TimeManagerService {
 		def data
 		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
 		for (int currentMonth in monthList){
-			data = computeWeeklyTotals( employee,  currentMonth,  year)
+			
+			data = computeWeeklyTotals( employee,  currentMonth,  (currentMonth < 6) ? year + 1 : year)
 			def timeBefore7 = data.get('timeBefore7')
 			def timeAfter20 = data.get('timeAfter20')
 			annualBefore7Time += timeBefore7
@@ -2816,7 +2828,8 @@ class TimeManagerService {
 			supTime.value = monthlySupTime
 		}
 		supTime.save(flush: true)
-		
+		//log.error('timeBefore7 for month and year: '+timeBefore7+', month: '+month+',year: '+year)
+		//log.error('timeAfter20 for month and year: '+timeAfter20+', month: '+month+',year: '+year)
 		return [
 			timeBefore7:timeBefore7,
 			timeAfter20:timeAfter20,
@@ -2904,13 +2917,14 @@ class TimeManagerService {
 	
 	
 	def getYearSupTime(Employee employee,int year,int month){
+		log.error('getYearSupTime and year: '+year+' and month: '+month)
+		def data
 		def monthNumber=0
 		def yearSupTime = 0
 		def yearTimeBefore7 = 0
 		def yearTimeAfter20 = 0
 		def yearTimeOffHours = 0
 		def yearlyCounter = 0
-		def data
 		def monthlySupTime = 0
 		def timeBefore7 = 0
 		def timeAfter20 = 0

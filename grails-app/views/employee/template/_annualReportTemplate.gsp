@@ -144,6 +144,10 @@
 			<td style="witdh: 200px;" class="annualReportTitleTD"><g:message code="supplementary.time.already.paid"/>:</td>
 			<td style="witdh: 60px;text-align:right;" class="annualReportFiguresTD"><my:humanTimeTD id="paidHS"  name="paidHS" value="${annualPaidHS}"/></td>
 		</tr>	
+		<tr>
+			<td style="witdh: 200px;" class="annualReportTitleTD"><g:message code="supplementary.time.to.pay"/>:</td>
+			<td style="witdh: 60px;text-align:right;" class="annualReportFiguresTD"><my:humanTimeTD id="HStoPay"  name="HStoPay" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/> ou <my:humanTimeDecimalTD id="HStoPayWithDecimal"  name="HStoPayWithDecimal" value="${annualGlobalSupTimeToPay - (annualSundayTime + annualBankHolidayTime + annualPaidHS)}"/></td>
+		</tr>
 	</table>
 </div>
 <div id="timeOffHours">  
