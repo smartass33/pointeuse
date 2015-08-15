@@ -1766,7 +1766,6 @@ class TimeManagerService {
 			monthlySupTimeMapByEmployee:monthlySupTimeMapByEmployee,
 			ecartMinusRTTAndHSByEmployee:ecartMinusRTTAndHSByEmployee
 		]
-	
 	}
 		
 	def getMonthlySupTime(Employee employee,int month, int year){
@@ -1792,18 +1791,11 @@ class TimeManagerService {
 			firstDayOfMonth.set(Calendar.DAY_OF_YEAR, currentDayInYear - daysToWithdraw)
 		}
 		Calendar calendarLoop = firstDayOfMonth.clone()
-		// now that we have the first day of the period, iterate over each week of the period to retrieve supplementary time
-		
-		log.error('calendarLoop before special loop '+calendarLoop.time)
-		
+		// now that we have the first day of the period, iterate over each week of the period to retrieve supplementary time	
+		log.debug('calendarLoop before special loop '+calendarLoop.time)
 		// special case if hover 2 years
 		if (calendarLoop.get(Calendar.DAY_OF_YEAR)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
-			log.error('calendarLoop.get(Calendar.WEEK_OF_YEAR) '+calendarLoop.get(Calendar.WEEK_OF_YEAR))
-			log.error('calendarLoop.get(Calendar.YEAR) '+calendarLoop.get(Calendar.YEAR))
-			def cccc = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
-			log.error('supTime: '+cccc)
-			supTime += cccc
-			//supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
+			supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 			calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
 			calendarLoop.set(Calendar.YEAR,year)
 		}
@@ -1812,11 +1804,7 @@ class TimeManagerService {
 			if ((calendarLoop.get(Calendar.DAY_OF_YEAR)+7)>lastDayOfMonth.get(Calendar.DAY_OF_YEAR)){
 				break
 			}
-			log.error('calendarLoop.get(Calendar.WEEK_OF_YEAR) '+calendarLoop.get(Calendar.WEEK_OF_YEAR))
-			log.error('calendarLoop.get(Calendar.YEAR) '+calendarLoop.get(Calendar.YEAR))
-			def cccc = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
-			log.error('supTime: '+cccc)	
-			supTime += cccc
+			supTime += computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 			calendarLoop.roll(Calendar.DAY_OF_YEAR,7)
 		}
 		return supTime
@@ -1858,10 +1846,7 @@ class TimeManagerService {
 		def annualSupTimeAboveTheoritical = 0
 		def annualGlobalSupTimeToPay = 0
 		def annualSundayTime = 0
-		def annualBankHolidayTime = 0
-	//	def annualBefore7Time = 0
-	//	def annualAfter20Time = 0
-		
+		def annualBankHolidayTime = 0	
 		def annualPaidHS = 0 as long
 		def calendar = Calendar.instance
 		def currentYear=year
@@ -2013,15 +1998,6 @@ class TimeManagerService {
 			annualPayableCompTime += payableCompTime
 			annualTotal += monthlyTotalTime
 			annualQuotaIncludingExtra += tmpQuota
-			
-			/*
-			def data = computeWeeklyTotals( employee,  currentMonth,  year)
-			def timeBefore7 = data.get('timeBefore7')
-			def timeAfter20 = data.get('timeAfter20')
-			
-			annualBefore7Time += timeBefore7
-			annualAfter20Time += timeAfter20
-			*/
 		}
 		
 		annualTheoriticalIncludingExtra = annualTheoritical + annualPayableSupTime
@@ -2030,7 +2006,7 @@ class TimeManagerService {
 		//annualTheoriticalIncludingExtra = getTimeAsText(computeHumanTime(Math.round(annualTheoriticalIncludingExtra) as long),false)
 		annualTheoriticalIncludingExtra = Math.round(annualTheoriticalIncludingExtra) as long
 		
-				// if the total is less than 0, consider only above daily and weekly threshold HS
+		// if the total is less than 0, consider only above daily and weekly threshold HS
 		annualGlobalSupTimeToPay = (annualGlobalSupTimeToPay > 0 )? Math.round(annualGlobalSupTimeToPay) as long : Math.round(annualPayableSupTime) as long
 		// if the total is less than 0, set it to 0 as it makes no sens
 		annualSupTimeAboveTheoritical = (annualSupTimeAboveTheoritical > 0 ? Math.round(annualSupTimeAboveTheoritical) as long : Math.round(0) as long)
@@ -2067,8 +2043,6 @@ class TimeManagerService {
 			annualTotal:Math.round(annualTotal) as long,
 			annualSundayTime:Math.round(annualSundayTime) as long,
 			annualBankHolidayTime:Math.round(annualBankHolidayTime) as long,
-		//	annualAfter20Time: annualAfter20Time,
-		//	annualBefore7Time : annualBefore7Time,
 			lastYear:year,
 			thisYear:year+1,
 			yearMap:yearMap,

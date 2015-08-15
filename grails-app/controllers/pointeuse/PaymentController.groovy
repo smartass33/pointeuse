@@ -164,7 +164,7 @@ class PaymentController {
 	}
 	
 	def paymentReport() {
-		params.each{i-> log.error(i)}	
+	//	params.each{i-> log.error(i)}	
 		def fromIndex = (params['fromIndex'] != null) ? params.boolean('fromIndex') :false
 		def fromAnnualReport = (params['fromAnnualReport'] != null) ? params.boolean('fromAnnualReport') :false
 		def employee 
@@ -226,7 +226,7 @@ class PaymentController {
 	
 	@Transactional
 	def ajaxModifyPayment(){
-		params.each{i-> log.error(i)}
+		//params.each{i-> log.error(i)}
 		def newValue = params.value as double
 		def paymentId = (params["paymentId"].split(" ").getAt(0)) as long	
 		def month = (params["month"].split(" ").getAt(0)) as long		
@@ -259,7 +259,17 @@ class PaymentController {
 	@Transactional
 	def modifyPayment(){
 		def siteId = params["siteId"]
-		def site = Site.get(params["siteId"][1])
+		def site
+		if (siteId instanceof String){
+			site = Site.get(params["siteId"])		
+		}else{
+			site = Site.get(params["siteId"][1])	
+		}
+		if (site == null){
+			flash.message = message(code: 'unknown.site.message', default: 'Payment')	
+			redirect(action: "paymentReport",params:params)
+			return
+		}
 		def newValuesAsString=params["textField"]		
 		def paymentsAsLong=params["payment"]	
 		def periodList=params["periodList"]

@@ -29,8 +29,7 @@
 		</thead>
 		<tbody id='body_update' style="border:1px;">
 			<g:each in="${employeeInstanceList}" var='employee'>
-									<g:set var="total" value="${0 as long}"/>
-			
+				<g:set var="total" value="${0 as long}"/>
 				<g:hiddenField name="siteId" value="${employee.site.id}" /> 				
 				<tr style="height:25px;">			
 					<td style="vertical-align: middle;text-align: left;width:120px;" class="eventTD" ><g:link style="text-decoration: none;" controller="employee" action='annualReport'  id="${employee.id}" params="${[userId:employee?.id,siteId:siteId,isAjax:false,periodId:periodId]}">${employee.lastName} ${employee.firstName}</g:link></td>
