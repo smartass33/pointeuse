@@ -1550,6 +1550,7 @@ def vacationFollowup(){
 		def employee
 		def report = [:]
 		def currentContract
+		def calendar = Calendar.instance
 
 		if (myDate != null && myDate instanceof String){
 			dateFormat = new SimpleDateFormat('dd/MM/yyyy');
@@ -1559,6 +1560,7 @@ def vacationFollowup(){
 			dateFormat = new SimpleDateFormat('MM/yyyy');
 			myDate = dateFormat.parse(myDateFromEdit)
 		}	
+		
 		
 		if (userId==null && params["userId"] != null ){
 			employee = Employee.get(params["userId"])
@@ -1570,19 +1572,26 @@ def vacationFollowup(){
 			report = timeManagerService.getReportData(siteId, employee,  myDate, monthPeriod, yearPeriod)
 			currentContract = report.getAt('currentContract')
 			if (currentContract == null){
-				//Period period = ((employee.arrivalDate.getAt(Calendar.MONTH) + 1) > 5)?Period.findByYear(employee.arrivalDate.getAt(Calendar.YEAR)):Period.findByYear(employee.arrivalDate.getAt(Calendar.YEAR) - 1)
 				def lastContract = Contract.findByEmployee(employee,[max: 1, sort: "endDate", order: "desc"])
 				if (lastContract != null){
-					flash.message = message(code: 'employee.is.gone.error')								
-					report = timeManagerService.getReportData(siteId, employee,  null, lastContract.endDate.getAt(Calendar.MONTH)+1, lastContract.endDate.getAt(Calendar.YEAR))					
+					flash.message = message(code: 'employee.is.gone.error')	
+					report = timeManagerService.getReportData(siteId, employee,  null, lastContract.endDate.getAt(Calendar.MONTH)+1, lastContract.endDate.getAt(Calendar.YEAR))	
+					calendar.set(Calendar.MONTH,lastContract.endDate.getAt(Calendar.MONTH))
+					calendar.set(Calendar.YEAR,lastContract.endDate.getAt(Calendar.YEAR))				
 				}else{
-					flash.message = message(code: 'employee.not.arrived.error')					
+					flash.message = message(code: 'employee.not.arrived.error')	
 					report = timeManagerService.getReportData(siteId, employee,  null, employee.arrivalDate.getAt(Calendar.MONTH)+1, employee.arrivalDate.getAt(Calendar.YEAR))
+					calendar.set(Calendar.MONTH,employee.arrivalDate.getAt(Calendar.MONTH))
+					calendar.set(Calendar.YEAR,employee.arrivalDate.getAt(Calendar.YEAR))				
 				}					
 			}
-		}else {
-			return report
-		}			
+		}
+		
+		if (myDate != null){
+			calendar.time = myDate
+		}
+		report << [period:calendar.time]
+		return report			
 	}
 
 

@@ -170,6 +170,7 @@ class SiteController {
 	  }
 	
 	def siteTotalTime = {
+		log.error('siteTotalTime called')
 		Date currentDate = new Date()
 		def month = currentDate.getAt(Calendar.MONTH) + 1
 		def year = currentDate.getAt(Calendar.YEAR)
@@ -179,8 +180,8 @@ class SiteController {
 	
 	
 	def completeSiteReport(){
-		log.error('entering monthlyTotalTime method')
-		//params.each{i->log.error('parameter of list: '+i)}
+		log.error('entering completeSiteReport method')
+		params.each{i->log.error('parameter of list: '+i)}
 		def site
 		def executionTime
 		def data
@@ -243,7 +244,7 @@ class SiteController {
 		
 		GParsExecutorsPool.withPool {		 
 			 employeeList.iterator().eachParallel {
-				 data = timeManagerService.getAnnualReportData(period.year, it)
+				 data = timeManagerService.getAnnualReportDataNOHS(period.year, it)
 				 annualReportMap.put(it,data)			 
 				 siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
 				 siteAnnualTheoritical += data.get('annualTheoritical')
@@ -292,6 +293,97 @@ class SiteController {
 		return
 	}
 	
+	def getAjaxSiteData(){
+		log.error('entering getAjaxSiteData method')
+		def site = Site.get(params.int('site'))
+		def month = params.int('month')
+		def year = params.int('year')
+		def period = Period.get(params.int('period'))
+		
+		
+		params.each{i->log.error('parameter of list: '+i)}
+		
+		def executionTime
+		def data
+		def calendar = Calendar.instance
+		def annualReportMap =[:]
+		def model = [:]
+		def siteAnnualEmployeeWorkingDays = 0
+		def siteAnnualTheoritical = 0
+		def siteAnnualTotal = 0
+		def siteAnnualHoliday = 0
+		def siteRemainingCA = 0
+		def siteAnnualRTT = 0
+		def siteAnnualCSS = 0
+		def siteAnnualSickness = 0
+		def siteAnnualExceptionnel = 0
+		def siteAnnualPaternite = 0
+		def siteAnnualDIF = 0
+		def siteAnnualPayableSupTime = 0
+		def siteAnnualTheoriticalIncludingExtra = 0
+		def siteAnnualSupTimeAboveTheoritical = 0
+		def siteAnnualGlobalSupTimeToPay = 0
+
+
+		def startDate = new Date()
+		def employeeList = Employee.findAllBySite(site)
+		log.error('nb of employees: '+employeeList.size())
+		//for (Employee employee:employeeList){
+				
+		GParsExecutorsPool.withPool {
+			 employeeList.iterator().eachParallel {
+				 log.error('executing query for employee: '+it)
+				 
+				 data = timeManagerService.getAnnualReportData(period.year, it)
+				 annualReportMap.put(it,data)
+				 siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
+				 siteAnnualTheoritical += data.get('annualTheoritical')
+				 siteAnnualTotal += data.get('annualTotal')
+				 siteAnnualHoliday += data.get('annualHoliday')
+				 siteRemainingCA += data.get('remainingCA')
+				 siteAnnualRTT += data.get('annualRTT')
+				 siteAnnualCSS += data.get('annualCSS')
+				 siteAnnualSickness += data.get('annualSickness')
+				 siteAnnualDIF += data.get('annualDIF')
+				 siteAnnualExceptionnel += data.get('annualExceptionnel')
+				 siteAnnualPaternite += data.get('annualPaternite')
+				 siteAnnualPayableSupTime += data.get('annualPayableSupTime') as long
+				 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
+				 siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
+				 siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')
+			 }
+		 }
+		log.error('employee loop finished')
+		def endDate = new Date()
+		use (TimeCategory){executionTime=endDate-startDate}
+		log.error('execution time: '+executionTime)
+		model << [
+			period2:period,
+			site:site,
+			siteId:site.id,
+			employeeList:employeeList,
+			annualReportMap:annualReportMap,
+			siteAnnualEmployeeWorkingDays:siteAnnualEmployeeWorkingDays,
+			siteAnnualTheoritical:siteAnnualTheoritical,
+			siteAnnualTotal:siteAnnualTotal,
+			siteAnnualHoliday:siteAnnualHoliday,
+			siteRemainingCA:siteRemainingCA,
+			siteAnnualRTT:siteAnnualRTT,
+			siteAnnualCSS:siteAnnualCSS,
+			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualDIF:siteAnnualDIF,
+			siteAnnualExceptionnel:siteAnnualExceptionnel,
+			siteAnnualPaternite:siteAnnualPaternite,
+			siteAnnualPayableSupTime:siteAnnualPayableSupTime,
+			siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
+			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
+			siteAnnualGlobalSupTimeToPay:siteAnnualGlobalSupTimeToPay
+		]
+		render template: "/site/template/siteDetailTableTemplate", model:model
+		return
+		
+		
+	}
 	
 	def completeSiteReportPDF(){
 		log.error('entering completeSiteReportPDF method')

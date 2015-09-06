@@ -53,8 +53,6 @@ grails.project.dependency.resolution = {
 		runtime 'mysql:mysql-connector-java:5.1.21'
 		compile 'com.itextpdf:itextpdf:5.4.1'
 		build 'org.codehaus.gpars:gpars:1.2.1'
-		
-		
     }
 
     plugins {
@@ -77,16 +75,11 @@ grails.project.dependency.resolution = {
 		compile ":tooltip:0.8"		
 		runtime ":prototype:1.0"
 		compile ":spring-security-core:1.2.7.3"
-		//compile ":spring-security-rest:1.4.0.RC5"
-		//compile ":spring-security-core:2.0-RC4"
-
 		compile ":rendering:0.4.4"
 		compile ":quartz2:2.1.6.2"
 		compile ":richui:0.8"
 		runtime ":searchable:0.6.6"	
 		compile ":codenarc:0.20"
-		compile ":mail:1.0.4"
-		//compile ":executor:0.3"
-		
+		compile ":mail:1.0.4"		
     }
 }

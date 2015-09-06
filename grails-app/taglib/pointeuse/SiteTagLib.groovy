@@ -7,5 +7,9 @@ class SiteTagLib {
 		
 	}
 
-	
+	def siteDetailTable ={attrs,body->
+		out<<render(template:"/site/template/siteDetailTableTemplate")
+		
+	}
+
 }

@@ -201,6 +201,8 @@ environments {
 }
 
 grails {
+	
+	/*
 	mail {
 		host = "smtp.fr.oleane.com"
 		port = 587
@@ -211,6 +213,29 @@ grails {
 		props = ["mail.smtp.starttls.enable":"true", 
                   "mail.smtp.port":"587"]
 	  }
+	 
+	
+   mail {
+     host = "smtp.auth.orange-business.com"
+     port = 465
+     username = "pointeuse@biolab32.fr.fto"
+     password = "pasteur33"
+     props = ["mail.smtp.auth":"true", 					   
+              "mail.smtp.socketFactory.port":"587",
+              "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
+              "mail.smtp.socketFactory.fallback":"false"]
+   }
+    */
+   mail {
+	   host = "smtp.msa.orange-business.com"
+	   port = 587
+	   username = "pointeuse@biolab32.fr.fto"
+	   password = "pasteur33"
+	   grails.mail.default.from="pointeuse@biolab33.com"	   
+	   props = ["mail.smtp.starttls.enable":"true", 
+		   		"mail.smtp.auth":"true",
+                "mail.smtp.port":"587"]
+	 }
 }
 
 // Added by the Spring Security Core plugin:

@@ -1860,6 +1860,10 @@ class TimeManagerService {
 		def initialCA = employeeService.getInitialCA(employee,period)			
 		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
 
+		
+		
+	
+		
 		for (int currentMonth in monthList){		
 			def tmpSunDayTime = 0
 			def tmpBankHolidayTime = 0
@@ -2069,6 +2073,273 @@ class TimeManagerService {
 			employee:employee
 		]
 	}	
+	
+
+	def getAnnualReportDataNOHS(int year, Employee employee){
+		def criteria
+		def dailySeconds
+		def monthlyTotalTime
+		def monthlySupTotalTime
+		def yearMonthMap = [:]
+		def yearTotalMap = [:]
+		def yearMonthlySupTime = [:]
+		def yearMonthlyCompTime = [:]
+		def yearMap = [:]
+		def yearSundayMap = [:]
+		def yearBankHolidayMap =[:]
+		def cartoucheTable=[]
+		def firstWeekOfMonth
+		def lastWeekOfMonth
+		def payableCompTime
+		def annualMonthlySupTime = 0
+		def annualTheoritical = 0
+		def annualTotal = 0
+		def annualHoliday = 0
+		def annualRTT = 0
+		def annualCSS = 0
+		def annualDIF = 0
+		def annualSickness = 0
+		def annualExceptionnel = 0
+		def annualPaternite = 0
+		def annualPayableSupTime = 0
+		def annualPayableCompTime = 0
+		def annualWorkingDays = 0
+		def annualEmployeeWorkingDays = 0
+		def annualTotalIncludingHS = 0
+		def annualQuotaIncludingExtra = 0
+		def annualTheoriticalIncludingExtra = 0
+		def annualSupTimeAboveTheoritical = 0
+		def annualGlobalSupTimeToPay = 0
+		def annualSundayTime = 0
+		def annualBankHolidayTime = 0
+		def annualPaidHS = 0 as long
+		def calendar = Calendar.instance
+		def currentYear=year
+		def monthlyPresentDays = 0
+		def monthlyWorkingDays = [:]
+		def monthlyTakenHolidays = [:]
+		def monthlyQuotaIncludingExtra = [:]
+		def period = Period.findByYear(year)
+		def remainingCA = employeeService.getRemainingCA(employee,period)
+		def takenCA = employeeService.getTakenCA(employee,period)
+		def initialCA = employeeService.getInitialCA(employee,period)
+		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
+		
+		for (int currentMonth in monthList){
+			def tmpSunDayTime = 0
+			def tmpBankHolidayTime = 0
+			monthlyPresentDays = 0
+			if (currentMonth == 1){
+				currentYear = year + 1
+			}
+		
+			//finding time done during sundays
+			def tmpCal = Calendar.instance
+			tmpCal.set(Calendar.MONTH,currentMonth - 1)
+			tmpCal.set(Calendar.YEAR,currentYear)
+			tmpCal.clearTime()
+			tmpCal.set(Calendar.DATE,1)
+			
+			log.debug('current month: '+currentMonth)
+			log.debug('current year: ' +currentYear)
+			log.debug('tmpCal: '+tmpCal.time)
+			log.debug('last day of month: '+tmpCal.getActualMaximum(Calendar.DAY_OF_MONTH))
+					
+			while(tmpCal.get(Calendar.DAY_OF_MONTH) <= tmpCal.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				log.debug('tmpCal: '+tmpCal.time)
+				if (tmpCal.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY && tmpCal.get(Calendar.MONTH) == currentMonth - 1){
+					log.debug("sunday: "+tmpCal.time)
+					criteria = DailyTotal.createCriteria()
+					def sundayDaily = criteria.get {
+						and {
+							eq('employee',employee)
+							eq('month',tmpCal.get(Calendar.MONTH)+1)
+							eq('year',tmpCal.get(Calendar.YEAR))
+							eq('day',tmpCal.get(Calendar.DAY_OF_MONTH))
+						}
+					}
+					if (sundayDaily != null){
+						annualSundayTime += sundayDaily.elapsedSeconds
+						tmpSunDayTime += sundayDaily.elapsedSeconds
+					}
+				}
+				tmpCal.roll(Calendar.DAY_OF_YEAR, 1)
+				if (tmpCal.get(Calendar.DAY_OF_MONTH) == tmpCal.getActualMaximum(Calendar.DAY_OF_MONTH))	{
+					log.debug('adding sunday time: '+tmpCal.time)
+					log.debug('time added: '+annualSundayTime)
+					yearSundayMap.put(currentMonth,getTimeAsText(computeHumanTime(tmpSunDayTime as long),false))
+					break;
+				}
+			}
+			
+			// finding time spent during bank holidays:
+			criteria = BankHoliday.createCriteria()
+			def bankHolidayList = criteria.list {
+				and {
+					eq('month',currentMonth)
+					eq('year',currentYear)
+				}
+			}
+			
+			for (BankHoliday bankHoliday : bankHolidayList){
+				criteria = DailyTotal.createCriteria()
+				def bankHolidayDaily = criteria.list {
+					and {
+						eq('employee',employee)
+						eq('month',bankHoliday.month)
+						eq('year',bankHoliday.year)
+						eq('day',bankHoliday.day)
+					}
+				}
+				if (bankHolidayDaily != null && bankHolidayDaily.size() > 0){
+					annualBankHolidayTime += bankHolidayDaily.elapsedSeconds
+					tmpBankHolidayTime += bankHolidayDaily.elapsedSeconds
+				}
+			}
+			yearBankHolidayMap.put(currentMonth,getTimeAsText(computeHumanTime(tmpBankHolidayTime as long),false))
+			yearMap.put(currentMonth, currentYear)
+	
+			/*
+			cartoucheTable=getCartoucheData(employee,currentYear,currentMonth)
+			yearMonthMap.put(currentMonth, cartoucheTable)
+			monthlyTotalTime = 0
+			monthlySupTotalTime = 0
+			calendar.set(Calendar.MONTH,currentMonth-1)
+			calendar.set(Calendar.YEAR,year)
+			calendar.set(Calendar.DAY_OF_MONTH,1)
+			firstWeekOfMonth = calendar.get(Calendar.WEEK_OF_YEAR)
+			calendar.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+			lastWeekOfMonth = calendar.get(Calendar.WEEK_OF_YEAR)
+			
+			criteria = DailyTotal.createCriteria()
+			def dailyTotalList = criteria.list {
+				and {
+					eq('employee',employee)
+					eq('month',currentMonth)
+					eq('year',currentYear)
+				}
+			}
+			dailySeconds = 0
+			for (DailyTotal dailyTotal:dailyTotalList){
+				dailySeconds = (getDailyTotal(dailyTotal)).get("elapsedSeconds")
+				monthlyTotalTime += dailySeconds
+				annualEmployeeWorkingDays += 1
+				monthlyPresentDays += 1
+			}
+			monthlyWorkingDays.put(currentMonth,monthlyPresentDays)
+			yearTotalMap.put(currentMonth, getTimeAsText(computeHumanTime(monthlyTotalTime),false))
+			
+			// computing totals.
+			annualSupTimeAboveTheoritical += monthlyTotalTime
+			//def  weeklyTotals =  computeWeeklyTotals( employee, currentMonth, currentYear)
+			def currentPeriod = (currentMonth < 6) ? Period.findByYear(currentYear-1) : Period.findByYear(currentYear)
+			
+			criteria = SupplementaryTime.createCriteria()
+			monthlySupTotalTime = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('month',currentMonth)
+					eq('period',currentPeriod)
+				}
+			}
+			
+			
+			
+			//monthlySupTotalTime = weeklyTotals.get('monthlySupTime')//getMonthlySupTime(employee,currentMonth, currentYear)
+			annualMonthlySupTime += monthlySupTotalTime.value as long
+			yearMonthlySupTime.put(currentMonth,Math.round(monthlySupTotalTime.value) as long)
+			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
+			
+			// in order to compute complementary time, we are going to look for employees whose contract equal 35h over a sub-period of time during the month
+			if (utilService.getActiveFullTimeContract( currentMonth,  currentYear, employee)){
+				if (monthlyTotalTime > monthTheoritical){
+					payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime.value as long,0)
+					yearMonthlyCompTime.put(currentMonth, getTimeAsText(computeHumanTime(payableCompTime as long),false))
+				}else{
+					payableCompTime = 0
+					yearMonthlyCompTime.put(currentMonth, getTimeAsText(computeHumanTime(0),false))
+				}
+			}else{
+				payableCompTime = 0
+			}
+			def tmpQuota = monthlyTotalTime+(monthlySupTotalTime.value as long)+payableCompTime
+			monthlyQuotaIncludingExtra.put(currentMonth, computeHumanTime(Math.round(tmpQuota) as long))
+			annualTheoritical += cartoucheTable.getAt('monthTheoritical')
+			annualHoliday += cartoucheTable.getAt('holidays')
+			monthlyTakenHolidays.put(currentMonth, initialCA - annualHoliday)
+			annualRTT += cartoucheTable.getAt('rtt')
+			annualDIF += cartoucheTable.getAt('dif')
+			annualCSS += cartoucheTable.getAt('sansSolde')
+			annualSickness += cartoucheTable.getAt('sickness')
+			annualExceptionnel += cartoucheTable.getAt('exceptionnel')
+			annualPaternite += cartoucheTable.getAt('paternite')
+			annualWorkingDays += cartoucheTable.getAt('workingDays')
+			annualPayableSupTime += monthlySupTotalTime.value as long
+			annualPayableCompTime += payableCompTime
+			annualTotal += monthlyTotalTime
+			annualQuotaIncludingExtra += tmpQuota
+		}
+		
+		annualTheoriticalIncludingExtra = annualTheoritical + annualPayableSupTime
+		annualSupTimeAboveTheoritical = annualSupTimeAboveTheoritical - annualTheoriticalIncludingExtra
+		annualGlobalSupTimeToPay = (annualSupTimeAboveTheoritical > 0) ? (annualSupTimeAboveTheoritical + annualPayableSupTime) : annualPayableSupTime
+		//annualTheoriticalIncludingExtra = getTimeAsText(computeHumanTime(Math.round(annualTheoriticalIncludingExtra) as long),false)
+		annualTheoriticalIncludingExtra = Math.round(annualTheoriticalIncludingExtra) as long
+		
+		// if the total is less than 0, consider only above daily and weekly threshold HS
+		annualGlobalSupTimeToPay = (annualGlobalSupTimeToPay > 0 )? Math.round(annualGlobalSupTimeToPay) as long : Math.round(annualPayableSupTime) as long
+		// if the total is less than 0, set it to 0 as it makes no sens
+		annualSupTimeAboveTheoritical = (annualSupTimeAboveTheoritical > 0 ? Math.round(annualSupTimeAboveTheoritical) as long : Math.round(0) as long)
+
+		def paymentList = Payment.findAllByEmployeeAndPeriod(employee,period)
+		
+		for (Payment payment:paymentList){
+			annualPaidHS += payment.amountPaid as long
+		}
+		
+		*/
+		}
+		return [
+			monthlyQuotaIncludingExtra:monthlyQuotaIncludingExtra,
+			monthlyTakenHolidays:monthlyTakenHolidays,
+			monthlyWorkingDays:monthlyWorkingDays,
+			takenCA:takenCA,
+			initialCA:initialCA,
+			remainingCA:remainingCA,
+			annualEmployeeWorkingDays:annualEmployeeWorkingDays,
+			annualMonthlySupTime:Math.round(annualMonthlySupTime) as long,
+			annualTheoritical:Math.round(annualTheoritical) as long,
+			annualTheoriticalIncludingExtra:annualTheoriticalIncludingExtra,
+			annualSupTimeAboveTheoritical:annualSupTimeAboveTheoritical,
+			annualGlobalSupTimeToPay:annualGlobalSupTimeToPay,
+			annualPaidHS:annualPaidHS,
+			annualHoliday:annualHoliday,
+			annualRTT:annualRTT,
+			annualDIF:annualDIF,
+			annualCSS:annualCSS,
+			annualSickness:annualSickness,
+			annualExceptionnel:annualExceptionnel,
+			annualPaternite:annualPaternite,
+			annualWorkingDays:annualWorkingDays,
+			annualPayableSupTime:Math.round(annualPayableSupTime) as long,
+			annualPayableCompTime:getTimeAsText(computeHumanTime(Math.round(annualPayableCompTime) as long),false),
+			annualTotal:Math.round(annualTotal) as long,
+			annualSundayTime:Math.round(annualSundayTime) as long,
+			annualBankHolidayTime:Math.round(annualBankHolidayTime) as long,
+			lastYear:year,
+			thisYear:year+1,
+			yearMap:yearMap,
+			yearMonthlyCompTime:yearMonthlyCompTime,
+			yearMonthlySupTime:yearMonthlySupTime,
+			yearTotalMap:yearTotalMap,
+			yearMonthMap:yearMonthMap,
+			yearSundayMap:yearSundayMap,
+			yearBankHolidayMap:yearBankHolidayMap,
+			userId:employee.id,
+			employee:employee
+		]
+	}
+		
 	def getOffHoursTime(Employee employee, def year){
 		log.error('getOffHoursTime called with param: year= '+year+' and employee: '+employee)
 		def annualBefore7Time = 0
