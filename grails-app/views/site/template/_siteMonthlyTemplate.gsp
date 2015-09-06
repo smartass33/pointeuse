@@ -43,7 +43,7 @@
 					<td class="cartoucheRightTitleTD">${employee.lastName }</td>
 					<td style="width:50px;" class="cartoucheRightTitleTD">${(annualReportMap.get(employee)).get('annualWorkingDays')}</td>
 					<td style="width:50px;" class="cartoucheRightTitleTD">${(annualReportMap.get(employee)).get('annualEmployeeWorkingDays')}</td>
-					<td style="text-align:right;" class="cartoucheRightTitleTD"><my:humanTimeTD id="annualReportMap"  name="annualReportMap" value="${(annualReportMap.get(employee)).get('annualReportMap')}"/></td>
+					<td style="text-align:right;" class="cartoucheRightTitleTD"><my:humanTimeTD id="annualTheoritical"  name="annualTheoritical" value="${(annualReportMap.get(employee)).get('annualTheoritical')}"/></td>
 					<td style="text-align:right;"class="cartoucheRightTitleTD"><my:humanTimeTD id="annualTotal"  name="annualTotal" value="${(annualReportMap.get(employee)).get('annualTotal')}"/></td>
 					<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD">${(annualReportMap.get(employee)).get('annualHoliday')}</td>
 					<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD">${(annualReportMap.get(employee)).get('remainingCA')}</td>

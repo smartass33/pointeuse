@@ -1964,16 +1964,29 @@ class TimeManagerService {
 			
 			// computing totals.		
 			annualSupTimeAboveTheoritical += monthlyTotalTime
-			def  weeklyTotals =  computeWeeklyTotals( employee, currentMonth, currentYear)
-			monthlySupTotalTime = weeklyTotals.get('monthlySupTime')//getMonthlySupTime(employee,currentMonth, currentYear)
-			annualMonthlySupTime += monthlySupTotalTime
-			yearMonthlySupTime.put(currentMonth,Math.round(monthlySupTotalTime) as long)
+			//def  weeklyTotals =  computeWeeklyTotals( employee, currentMonth, currentYear)
+			def currentPeriod = (currentMonth < 6) ? Period.findByYear(currentYear-1) : Period.findByYear(currentYear)
+			
+			criteria = SupplementaryTime.createCriteria()
+			monthlySupTotalTime = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('month',currentMonth)
+					eq('period',currentPeriod)
+				}
+			}
+			
+			
+			
+			//monthlySupTotalTime = weeklyTotals.get('monthlySupTime')//getMonthlySupTime(employee,currentMonth, currentYear)
+			annualMonthlySupTime += monthlySupTotalTime.value as long
+			yearMonthlySupTime.put(currentMonth,Math.round(monthlySupTotalTime.value) as long)
 			def monthTheoritical = cartoucheTable.getAt('monthTheoritical')
 			
 			// in order to compute complementary time, we are going to look for employees whose contract equal 35h over a sub-period of time during the month
 			if (utilService.getActiveFullTimeContract( currentMonth,  currentYear, employee)){
 				if (monthlyTotalTime > monthTheoritical){
-					payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime,0)
+					payableCompTime = Math.max(monthlyTotalTime-monthTheoritical-monthlySupTotalTime.value as long,0)
 					yearMonthlyCompTime.put(currentMonth, getTimeAsText(computeHumanTime(payableCompTime as long),false))
 				}else{
 					payableCompTime = 0
@@ -1982,7 +1995,7 @@ class TimeManagerService {
 			}else{
 				payableCompTime = 0	
 			}
-			def tmpQuota = monthlyTotalTime+monthlySupTotalTime+payableCompTime
+			def tmpQuota = monthlyTotalTime+(monthlySupTotalTime.value as long)+payableCompTime
 			monthlyQuotaIncludingExtra.put(currentMonth, computeHumanTime(Math.round(tmpQuota) as long))		
 			annualTheoritical += cartoucheTable.getAt('monthTheoritical')
 			annualHoliday += cartoucheTable.getAt('holidays')
@@ -1994,7 +2007,7 @@ class TimeManagerService {
 			annualExceptionnel += cartoucheTable.getAt('exceptionnel')
 			annualPaternite += cartoucheTable.getAt('paternite')			
 			annualWorkingDays += cartoucheTable.getAt('workingDays')
-			annualPayableSupTime += monthlySupTotalTime
+			annualPayableSupTime += monthlySupTotalTime.value as long
 			annualPayableCompTime += payableCompTime
 			annualTotal += monthlyTotalTime
 			annualQuotaIncludingExtra += tmpQuota
@@ -2056,7 +2069,6 @@ class TimeManagerService {
 			employee:employee
 		]
 	}	
-	
 	def getOffHoursTime(Employee employee, def year){
 		log.error('getOffHoursTime called with param: year= '+year+' and employee: '+employee)
 		def annualBefore7Time = 0
@@ -2600,7 +2612,145 @@ class TimeManagerService {
 			]
 	}
 	
+	def computeWeeklyTotalsMultiThread(Employee employee, int month, int year){
+		def startDate = new Date()
+		def endDate
+		def executionTime
+		log.debug('computeWeeklyTotals called for employee: '+employee+', month: '+month+',year: '+year)
+		//variables
+		def weekName="semaine "
+		def criteria
+		def dailySeconds
+		def timeBefore7 = 0
+		def timeAfter20 = 0
+		def timeOffHours = 0
+		def yearlyBefore7 = 0
+		def yearlyAfter21 = 0
+		def yearlyTimeOffHours = 0
+		def monthlyTotalTime = 0
+		def monthlySupTime = 0
+		def dailyTotalId = 0
+		def weeklySupTime = 0
+		def currentWeek = 0
+		def weeklyTotal = 0
+
+		//maps
+		def mapByDay = [:]
+		def weeklyTotalTime = [:]
+		def weeklySuppTotalTime = [:]
+		def weeklySupTotalTimeByEmployee = [:]
+		def weeklyTotalTimeByEmployee = [:]
+		def dailyTotalMap = [:]
+		def dailySupTotalMap = [:]
+		def dailyBankHolidayMap = [:]
+		def holidayMap = [:]
+		def weeklyAggregate = [:]
+		
+		//calendars
+		def calendar = Calendar.instance
+		calendar.set(Calendar.MONTH,month - 1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.HOUR_OF_DAY,23)
+		calendar.set(Calendar.MINUTE,59)
+		calendar.set(Calendar.SECOND,59)
+		calendar.set(Calendar.DATE,1)
+		def calendarLoop = calendar
+
+		calendarLoop.getTime().clearTime()
+		
+		def lastWeekParam = utilService.getLastWeekOfMonth(month, year)
+		def isSunday = lastWeekParam.get(1)
+		def dailyTotalCriteria = DailyTotal.createCriteria()
+		def dailyTotalList = dailyTotalCriteria.list {
+			and {
+				eq('employee',employee)
+				//eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+				eq('month',month)
+				eq('year',year)
+			}
+		}
+		/*
+		for (DailyTotal dailyTotal : dailyTotalList){
+			// permet de récupérer le total hebdo
+			if (dailyTotal != null && dailyTotal != dailyTotalId){
+				def timing = getDailyTotal(dailyTotal)
+				dailySeconds = timing.get("elapsedSeconds")
+				timeBefore7 += timing.get("timeBefore7")
+				timeAfter20 +=  timing.get("timeAfter20")
+				timeOffHours = timeOffHours + timing.get("timeBefore7") + timing.get("timeAfter20")
+				monthlyTotalTime += dailySeconds
+				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
+				dailyTotalId=dailyTotal.id
+			}
+		}
+		*/
+
+	
+		def montlyTotalCriteria = MonthlyTotal.createCriteria()
+		def monthlyTotal = montlyTotalCriteria.get {
+			and {
+				eq('employee',employee)
+				eq('year',calendarLoop.get(Calendar.YEAR))
+				eq('month',calendarLoop.get(Calendar.MONTH)+1)
+			}
+		}
+		if (monthlyTotal != null){
+			monthlyTotal.elapsedSeconds=monthlyTotalTime
+			monthlyTotal.timeBefore7=timeBefore7
+			monthlyTotal.timeAfter20=timeAfter20
+			monthlyTotal.supplementarySeconds=monthlySupTime
+			monthlyTotal.save(flush:true,failOnError:true)
+		}
+		
+		
+		//here, we can proceed to the creation, or update of the SupplementaryTime object
+		criteria = SupplementaryTime.createCriteria()
+		Period period = (month < 6) ? Period.findByYear(year-1) : Period.findByYear(year)
+
+		def supTime = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('period',period)
+				eq('month',month)
+			}
+			maxResults(1)
+		}
+		if (supTime == null){
+			supTime = new SupplementaryTime( employee, period,  month,monthlySupTime)
+		}else{
+			supTime.value = monthlySupTime
+		}
+		supTime.save(flush: true)
+		endDate = new Date()
+		use (TimeCategory){executionTime=endDate-startDate}
+	//	log.error('computeWeeklyTotals executed in '+executionTime+' for employee: '+employee.lastName)
+		
+		//log.error('timeBefore7 for month and year: '+timeBefore7+', month: '+month+',year: '+year)
+		//log.error('timeAfter20 for month and year: '+timeAfter20+', month: '+month+',year: '+year)
+		return [
+			timeBefore7:timeBefore7,
+			timeAfter20:timeAfter20,
+			timeOffHours:timeOffHours,
+			monthlyTotalTime:monthlyTotalTime,
+			monthlySupTime:monthlySupTime,
+			mapByDay:mapByDay,
+			weeklyTotalTime:weeklyTotalTime,
+			weeklySuppTotalTime:weeklySuppTotalTime,
+			weeklySupTotalTimeByEmployee:weeklySupTotalTimeByEmployee,
+			weeklyTotalTimeByEmployee:weeklyTotalTimeByEmployee,
+			dailyTotalMap:dailyTotalMap,
+			dailySupTotalMap:dailySupTotalMap,
+			dailyBankHolidayMap:dailyBankHolidayMap,
+			holidayMap:holidayMap,
+			weeklyAggregate:weeklyAggregate,
+			monthlySupTime:monthlySupTime
+		]
+	}
+	
 	def computeWeeklyTotals(Employee employee, int month, int year){
+		def startDate = new Date()
+		def endDate
+		def executionTime
 		log.debug('computeWeeklyTotals called for employee: '+employee+', month: '+month+',year: '+year)
 		//variables
 		def weekName="semaine "
@@ -2802,6 +2952,10 @@ class TimeManagerService {
 			supTime.value = monthlySupTime
 		}
 		supTime.save(flush: true)
+		endDate = new Date()
+		use (TimeCategory){executionTime=endDate-startDate}
+		log.error('computeWeeklyTotals executed in '+executionTime+' for employee: '+employee.lastName)
+		
 		//log.error('timeBefore7 for month and year: '+timeBefore7+', month: '+month+',year: '+year)
 		//log.error('timeAfter20 for month and year: '+timeAfter20+', month: '+month+',year: '+year)
 		return [
@@ -3384,6 +3538,9 @@ class TimeManagerService {
 				if (currentContract == null && contract.endDate == null){currentContract = contract}
 			}
 		}
+		
+		monthTheoritical=getMonthTheoritical(employeeInstance,  month, year)
+		
 
 		def cartoucheMap=[
 			isCurrentMonth:isCurrentMonth,

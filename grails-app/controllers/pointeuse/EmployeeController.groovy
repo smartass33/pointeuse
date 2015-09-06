@@ -1393,10 +1393,10 @@ def vacationFollowup(){
 				monthlyTotalTime += dailySeconds
 				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
 				if (previousValue!=null){
-					def newValue=previousValue.get(0)*3600+previousValue.get(1)*60+previousValue.get(2)
-					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailySeconds+newValue))
+					//def newValue=previousValue.get(0)*3600+previousValue.get(1)*60+previousValue.get(2)
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), dailySeconds+previousValue)
 				}else{
-					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), timeManagerService.computeHumanTime(dailySeconds))
+					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), dailySeconds)
 				}
 				
 				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
@@ -1404,7 +1404,7 @@ def vacationFollowup(){
 				}else{
 					weeklySupTime = timeManagerService.computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 				}
-				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),timeManagerService.computeHumanTime(Math.round(weeklySupTime)))
+				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),Math.round(weeklySupTime))
 				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
 					monthlySupTime += weeklySupTime
 					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
@@ -1429,16 +1429,16 @@ def vacationFollowup(){
 			def tmpDate = calendarLoop.time
 			if 	(entriesByDay.size()>0){
 				if (dailyTotal!=null){
-					dailyTotalMap.put(tmpDate, timeManagerService.computeHumanTime(dailySeconds))
-					dailySupTotalMap.put(tmpDate, timeManagerService.computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)))
+					dailyTotalMap.put(tmpDate, dailySeconds)
+					dailySupTotalMap.put(tmpDate, Math.max(dailySeconds-DailyTotal.maxWorkingTime,0))
 				}else {
-					dailyTotalMap.put(tmpDate, timeManagerService.computeHumanTime(0))
-					dailySupTotalMap.put(tmpDate, timeManagerService.computeHumanTime(0))
+					dailyTotalMap.put(tmpDate, 0)
+					dailySupTotalMap.put(tmpDate, 0)
 				}		
 				mapByDay.put(tmpDate, entriesByDay)
 			}	
 			else{
-				dailyTotalMap.put(tmpDate, timeManagerService.computeHumanTime(0))
+				dailyTotalMap.put(tmpDate, 0)
 				mapByDay.put(tmpDate, null)
 			}		
 			
@@ -1476,61 +1476,65 @@ def vacationFollowup(){
 		}	
 		try {
 			if (userId != null){
-			def cartoucheTable = timeManagerService.getCartoucheData(employee,year,month)
-			def monthTheoritical = cartoucheTable.get('monthTheoritical')
-			def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('pregnancyCredit'))
-			def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyTheoritical'))
-			def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyPregnancyCredit'))
-			def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyActualTotal'))
-			def payableSupTime = timeManagerService.computeHumanTime(Math.round(monthlySupTime))
-			def payableCompTime = timeManagerService.computeHumanTime(0)
-			def currentContract = cartoucheTable.get('currentContract')
-						
-			if (currentContract.weeklyLength!=35){
-				if (monthlyTotalTime > monthTheoritical){
-					payableCompTime = timeManagerService.computeHumanTime(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0))
-				}
-			}
+				def cartoucheTable = timeManagerService.getCartoucheData(employee,year,month)
+				def monthTheoritical = cartoucheTable.get('monthTheoritical')
+				def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('pregnancyCredit'))
+				def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyTheoritical'))
+				def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyPregnancyCredit'))
 			
-			monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotalTime))
-			monthTheoritical = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical')),true)		
-
-			if (month>5){
-				yearInf=year
-				yearSup=year+1
-			}else{
-				yearInf=year-1
-				yearSup=year
+				
+				//def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyActualTotal'))
+				
+				
+				def payableSupTime = timeManagerService.computeHumanTime(Math.round(monthlySupTime))
+				def payableCompTime = timeManagerService.computeHumanTime(0)
+				def currentContract = cartoucheTable.get('currentContract')
+							
+				if (currentContract.weeklyLength!=35){
+					if (monthlyTotalTime > monthTheoritical){
+						payableCompTime = timeManagerService.computeHumanTime(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0))
+					}
+				}
+			
+				monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotalTime))
+				monthTheoritical = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical')),true)		
+	
+				if (month>5){
+					yearInf=year
+					yearSup=year+1
+				}else{
+					yearInf=year-1
+					yearSup=year
+				}
+	
+				def model=[
+					isAdmin:false,
+					siteId:siteId,
+					currentContract:currentContract,				
+					yearInf:yearInf,
+					yearSup:yearSup,
+					userId:userId,
+					yearlyActualTotal:cartoucheTable.get('yearlyActualTotal'),
+					monthTheoritical:monthTheoritical,
+					pregnancyCredit:pregnancyCredit,
+					yearlyPregnancyCredit:yearlyPregnancyCredit,
+					yearlyTheoritical:yearlyTheoritical,
+					monthlyTotal:monthlyTotalTimeByEmployee,
+					weeklyTotal:weeklyTotalTimeByEmployee,
+					weeklySupTotal:weeklySupTotalTimeByEmployee,
+					dailySupTotalMap:dailySupTotalMap,
+					dailyTotalMap:dailyTotalMap,
+					month:month,year:year,
+					period:calendarLoop.getTime(),
+					holidayMap:holidayMap,
+					weeklyAggregate:weeklyAggregate,
+					employee:employee,
+					payableSupTime:payableSupTime,
+					payableCompTime:payableCompTime
+				]
+				model << cartoucheTable
+				return model
 			}
-
-			def model=[
-				isAdmin:false,
-				siteId:siteId,
-				currentContract:currentContract,				
-				yearInf:yearInf,
-				yearSup:yearSup,
-				userId:userId,
-				yearlyActualTotal:yearlyActualTotal,
-				monthTheoritical:monthTheoritical,
-				pregnancyCredit:pregnancyCredit,
-				yearlyPregnancyCredit:yearlyPregnancyCredit,
-				yearlyTheoritical:yearlyTheoritical,
-				monthlyTotal:monthlyTotalTimeByEmployee,
-				weeklyTotal:weeklyTotalTimeByEmployee,
-				weeklySupTotal:weeklySupTotalTimeByEmployee,
-				dailySupTotalMap:dailySupTotalMap,
-				dailyTotalMap:dailyTotalMap,
-				month:month,year:year,
-				period:calendarLoop.getTime(),
-				holidayMap:holidayMap,
-				weeklyAggregate:weeklyAggregate,
-				employee:employee,
-				payableSupTime:payableSupTime,
-				payableCompTime:payableCompTime
-			]
-			model << cartoucheTable
-			return model
-		}
 		}catch (NullPointerException e){
 			log.error('error with application: '+e.toString())
 		}	
@@ -1566,12 +1570,19 @@ def vacationFollowup(){
 			report = timeManagerService.getReportData(siteId, employee,  myDate, monthPeriod, yearPeriod)
 			currentContract = report.getAt('currentContract')
 			if (currentContract == null){
-				flash.message = message(code: 'employee.not.arrived.error')
-				report = timeManagerService.getReportData(siteId, employee,  null, employee.arrivalDate.getAt(Calendar.MONTH)+1, employee.arrivalDate.getAt(Calendar.YEAR))
-			}else {
-				return report
-			}		
-		}
+				//Period period = ((employee.arrivalDate.getAt(Calendar.MONTH) + 1) > 5)?Period.findByYear(employee.arrivalDate.getAt(Calendar.YEAR)):Period.findByYear(employee.arrivalDate.getAt(Calendar.YEAR) - 1)
+				def lastContract = Contract.findByEmployee(employee,[max: 1, sort: "endDate", order: "desc"])
+				if (lastContract != null){
+					flash.message = message(code: 'employee.is.gone.error')								
+					report = timeManagerService.getReportData(siteId, employee,  null, lastContract.endDate.getAt(Calendar.MONTH)+1, lastContract.endDate.getAt(Calendar.YEAR))					
+				}else{
+					flash.message = message(code: 'employee.not.arrived.error')					
+					report = timeManagerService.getReportData(siteId, employee,  null, employee.arrivalDate.getAt(Calendar.MONTH)+1, employee.arrivalDate.getAt(Calendar.YEAR))
+				}					
+			}
+		}else {
+			return report
+		}			
 	}
 
 
@@ -2083,12 +2094,57 @@ def vacationFollowup(){
 	
 	
 	def sendMail (){	
-		mailService.sendMail {
-			to "henri.martin@gmail.com"
-			from "pointeuse@biolab33.com"
-			subject "Hello Fred"
-			body 'this is some text'
-		 }
+		def myDate = params["myDate"]
+		def site
+		def siteId = params["siteId"]
+		def timeDifference
+		def filename
+		Calendar calendar = Calendar.instance
+		def startTime = calendar.time
+		def folder = grailsApplication.config.pdf.directory
+		//SimpleDateFormat dateFormat = new SimpleDateFormat('MM/yyyy');
+		if (myDate==null || myDate.equals("")){
+			myDate=calendar.time
+		}else {
+			calendar.time=myDate
+		}
+		if (params["siteId"]!=null && !params["siteId"].equals('')){
+			site = Site.get(params["siteId"].toInteger())
+		}else{
+			flash.message = message(code: 'pdf.site.selection.error')
+			//redirect(action: "list")
+			return
+		}
+		
+		
+		def sites = Site.findAll()
+		
+		for(Site siteOccurence : sites){
+			
+			log.error("site: "+siteOccurence)
+		}
+		
+		filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
+		def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+		if (!file.exists()){
+			flash.message = message(code: 'pdf.site.report.not.available')
+			//redirect(action: "list")
+			return
+		}else{
+		//	render(file: file, fileName: file.name,contentType: "application/octet-stream")
+		log.error('file found')
+		
+			mailService.sendMail {
+				multipart true
+				to "henri.martin@gmail.com"
+				subject "Rapport Mensuel pour le mois de " + calendar.time.format("MMM yyyy")
+				body "Veuillez trouver ci-joint le rapport mensuel du site"
+				attachBytes filename,'application/pdf', file.readBytes()
+				
+			}
+			
+		}
+		
 		log.error('mail sent')
 	  }
 	

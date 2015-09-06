@@ -88,22 +88,10 @@
 									<g:each in="${day.value}" status="m" var="entries">
 										<g:if test="${entries!=null}">
 										<tr>
-											<td class="eventTD" width="120px"><font size="2"><i>${entries.key.format('E dd MMM yyyy')}</i></font></td>
-											<g:if test="${dailyTotalMap.get(entries.key) !=null && (dailyTotalMap.get(entries.key).get(0)>0 || dailyTotalMap.get(entries.key).get(1)>0 || dailyTotalMap.get(entries.key).get(2)>0)}">									
-												<td class="eventTD" ><font size="2">${(dailyTotalMap.get(entries.key)).get(0)}:${(dailyTotalMap.get(entries.key)).get(1)}:${(dailyTotalMap.get(entries.key)).get(2)}</font></td>
-											</g:if>
-											<g:else>
-												<td class="eventTD" ><font size="2">00:00</font></td>
-											</g:else>
-											
-											
+											<td class="eventTD" width="120px"><font size="2"><i>${entries.key.format('E dd MMM yyyy')}</i></font></td>								
+											<td class="eventTD" ><font size="2"><my:humanTimeTD id="dailyTotal"  name="dailyTotal" value="${dailyTotalMap.get(entries.key)}"/></font></td>
 											<td class="eventTD" >		
-											<g:if test="${holidayMap.get(entries.key) != null}">	
-													<font size="2">
-													${holidayMap.get(entries.key).type}
-									
-														</font>
-											</g:if>
+											<g:if test="${holidayMap.get(entries.key) != null}"><font size="2">${holidayMap.get(entries.key).type}</font></g:if>
 										</td>
 											<g:each in="${entries.value}" var="inOrOut">
 													<font size="2">
@@ -130,14 +118,7 @@
 									</g:each>
 									<tr>
 										<th class="eventTD">${day.key}</th>
-										<g:if test="${weeklyTotal.get(employee) != null && weeklyTotal.get(employee).get(day.key) !=null && (weeklyTotal.get(employee).get(day.key).get(2)>0 || weeklyTotal.get(employee).get(day.key).get(1)>0 || weeklyTotal.get(employee).get(day.key).get(0)>0)}">															
-											<th class="eventTD" colspan="15" scope="colgroup">
-												${message(code: 'weekly.total.label', default: 'Report')} : ${(weeklyTotal.get(employee).get(day.key)).get(0)}H${(weeklyTotal.get(employee).get(day.key)).get(1)==0?'':(weeklyTotal.get(employee).get(day.key)).get(1)}										   												
-											</th>																												
-										</g:if>
-										<g:else>
-											<th class="eventTD" colspan="15" scope="colgroup">Total fin de semaine: 00H00</TH>
-										</g:else>
+										<th class="eventTD" colspan="15" scope="colgroup">${message(code: 'weekly.total.label', default: 'Report')} : <my:humanTimeTD id="weeklyTotal"  name="weeklyTotal" value="${weeklyTotal.get(employee).get(day.key)}"/></th>
 									</tr>	
 								</g:each>
 							</form>
