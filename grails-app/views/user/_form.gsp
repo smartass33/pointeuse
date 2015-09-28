@@ -1,5 +1,6 @@
 <%@ page import="pointeuse.User" %>
 <%@ page import="pointeuse.Role" %>
+<%@ page import="pointeuse.Site" %>
 
 
 <div class="fieldcontain ${hasErrors(bean: userInstance, field: 'firstName', 'error')} required">
@@ -77,4 +78,36 @@
 	<g:checkBox name="passwordExpired" value="${userInstance?.passwordExpired}" />
 </div>
 
+<div class="fieldcontain ${hasErrors(bean: userInstance, field: 'email', 'error')}">
+	<label for="email">
+		<g:message code="user.email.label" default="Username" />
+	</label>
+		<g:textField name="email"  value="${userInstance?.email}"/>
+		<g:message code="user.receive.site.mail.label" default="Username" />
+		<g:checkBox name="hasMail" value="${userInstance.hasMail}" checked="${userInstance.hasMail}"/>
+</div>
+<div class="fieldcontain ${hasErrors(bean: userInstance, field: 'phoneNumber', 'error')}">
+	<label for="phoneNumber">
+		<g:message code="user.phone.number.label" default="Username" />
+	</label>
+	<g:textField name="phoneNumber"  value="${userInstance?.phoneNumber}"/>
+</div>
 
+
+<BR>
+<h1><g:message code="site.list" /></h1>
+
+
+<table>
+	<g:each var="site" in="${Site.list([sort:'name'])}">
+		   <tr>
+		   	<td class='eventTD'>${site.name}</td>
+		   	<g:if test="${site.users.contains(userInstance)}">
+		   		<td class='eventTD'><g:checkBox name="siteId" value="${site.id}" checked="${true}"> </g:checkBox></td>
+			</g:if>
+			<g:else>
+				<td class='eventTD'><g:checkBox name="siteId" value="${site.id}" checked="${false}"> </g:checkBox></td>
+			</g:else>
+		   </tr>
+	</g:each>
+</table>

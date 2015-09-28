@@ -29,7 +29,7 @@
 							<td></td>
 						</g:else>
 						<td class="cartoucheRightTitleTD">${employee.lastName }</td>
-						<td style="width:50px;" class="cartoucheRightTitleTD">${(annualReportMap.get(employee)).get('annualWorkingDays')}</td>
+						<td style="width:50px;" class="cartoucheRightTitleTD">${(annualReportMap.get(employee)).get('yearOpenDays')}</td>
 						<td style="width:50px;" class="cartoucheRightTitleTD">${(annualReportMap.get(employee)).get('annualEmployeeWorkingDays')}</td>
 					</tr>
 				</g:each>			

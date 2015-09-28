@@ -70,13 +70,19 @@ class SiteController {
 		result = geocoderService.geocodeAddress(params["address"],params["town"])
 		siteInstance.latitude = result.lat
 		siteInstance.longitude = result.lng
-		if (result.postCode)
+		if (result.postCode){
 			siteInstance.postCode= result.postCode
-
+		}
 		
 		siteInstance.loggingDate=new Date()
 		if (user != null){
-			siteInstance.user=user
+			if (siteInstance.users != null){
+				siteInstance.users.add(user)
+			}else{
+				def siteUsers = []
+				siteUsers.add(user)
+				siteInstance.users = siteUsers
+			}
 		}
         if (!siteInstance.save(flush: true)) {
             render(view: "create", model: [siteInstance: siteInstance])
@@ -434,4 +440,6 @@ class SiteController {
 		
 	}
 	
+	
+	 
 }

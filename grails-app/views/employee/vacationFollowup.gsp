@@ -63,6 +63,8 @@
 							style="vertical-align: middle;" />					
 					</li>
 					<li><g:actionSubmit class='displayButton' value="${message(code: 'default.search.label', default: 'List')}"  action="vacationFollowup"/></li>		
+					<li><g:actionSubmit class='displayButton' value="vue mensuelle"  action="monthlyVacationFollowup"/></li>		
+
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
 					<g:if test="${site!=null}">	
 						<g:hiddenField name="site.id" value="${site.id}" />		

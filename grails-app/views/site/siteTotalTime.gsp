@@ -13,7 +13,7 @@
 			if (document.getElementById("siteSelect") != null && document.getElementById("siteSelect") !== undefined && document.getElementById("periodSelect") != null && document.getElementById("periodSelect") !== undefined){
 				site = document.getElementById("siteSelect").value;
 				period = document.getElementById("periodSelect").value;
-				alert("site is not null: "+site);
+				//alert("site is not null: "+site);
 				$(function(){$('#details').load('${createLink(controller:'site', action:'getAjaxSiteData',params:[year:year,month:month])}&site='+site+'&period='+period);});
 			}
 		}

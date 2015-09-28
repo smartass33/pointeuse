@@ -3,8 +3,8 @@ package pointeuse
 
 class User {
 
+	
 	transient springSecurityService
-
 	String firstName
 	String lastName
 	String username
@@ -13,14 +13,22 @@ class User {
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
-
-	static hasMany = [userRoles:UserRole]
+	String phoneNumber
+	String email
+	boolean hasMail
+	
+	//static belongsTo = Site
+	static hasMany = [userRoles:UserRole]//,sites:Site]
 
 	static constraints = {
 		username blank: false, unique: true
 		password blank: false,display: false
 		firstName blank: false
 		lastName blank: false
+		//sites (blank: true,nullable:true)
+		phoneNumber (blank: true,nullable:true)
+		email (blank: true,nullable:true)
+
 	}
 	
 

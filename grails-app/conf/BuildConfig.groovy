@@ -68,7 +68,7 @@ grails.project.dependency.resolution = {
         runtime ":jquery:1.10.2.2"
         runtime ":resources:1.2.1"	
 		compile ":google-visualization:0.6.2"
-		compile ":excel-export:0.1.10"
+		//compile ":excel-export:0.1.10"
 		compile ":jquery-ui:1.10.3"
 		compile ":jquery-ui-timepicker:0.9.8.1"
 		compile ":jquery-date-time-picker:0.1.1"
@@ -81,5 +81,9 @@ grails.project.dependency.resolution = {
 		runtime ":searchable:0.6.6"	
 		compile ":codenarc:0.20"
 		compile ":mail:1.0.4"		
+		compile ":excel-export:0.2.1"
+		compile ":csv:0.3.1"
+		compile ":ajax-uploader:1.1"
+		
     }
 }

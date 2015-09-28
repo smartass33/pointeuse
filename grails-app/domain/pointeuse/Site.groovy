@@ -2,9 +2,7 @@ package pointeuse
 
 
 class Site {
-	
 	String name
-	User user
 	Date loggingDate
 	double longitude
 	double latitude
@@ -12,12 +10,9 @@ class Site {
 	String town
 	int postCode
 	CardTerminal cardTerminal
-	
-	
-	static hasMany = [employees: Employee]
-	
-	//static searchable = true//{ only: ['name'] } 
-	
+
+	static hasMany = [employees: Employee,users:User]
+
     static constraints = {
 		cardTerminal nullable:true	
 		name blank: false
@@ -29,4 +24,8 @@ class Site {
 		//postCode blank:true
 		
     }
+	
+	String toString(){
+		return this.name
+	}
 }

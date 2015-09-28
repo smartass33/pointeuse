@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException
 
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.Callable
 
@@ -14,6 +15,8 @@ import groovy.time.TimeCategory
 import grails.converters.JSON
 
 import org.apache.commons.logging.LogFactory
+
+import pl.touk.excel.export.WebXlsxExporter
 
 import java.util.concurrent.*
 
@@ -255,8 +258,152 @@ class EmployeeController {
         }
         [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]
     }
+	
+	
+	def vacationExcelExport(){
+		log.error('entering vacationExcelExport')
+		params.each{i->
+			log.error('param for update: '+i)
+		}
+		def site
+		def calendar = Calendar.instance
+		def result
+		
+		if (params["site.id"] != null && !params["site.id"].equals("")){		
+			if (params["site.id"] instanceof String[]){
+				if (params.("site.id")[0] != ""){
+					site = Site.get(params.("site.id")[0])
+				}
+			}else{
+				site = Site.get(params.("site.id"))
+			}
+		}
+		if (site == null && params["siteId"] != null && !params["siteId"].equals("")){
+			site = Site.get(params.int("siteId"))
+		}
 
-def vacationFollowup(){
+		if (params['myDate_month'] != null && params['myDate_year'] != null){
+			calendar.set(Calendar.MONTH,params.int("myDate_month") - 1)
+			calendar.set(Calendar.YEAR,params.int("myDate_year"))
+		}
+		
+		if (site != null){
+			result = employeeService.getMonthlyPresence(site,calendar)
+		}
+		
+		def lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		def dates = ['SALARIE']
+		for (int i = 1;i<lastDay + 1;i++){
+			dates.add(calendar.time.format('E dd MMM'))
+			calendar.roll(Calendar.DAY_OF_MONTH,1)
+		}
+		dates.add('VACANCE')
+		dates.add('RTT')
+		dates.add('MALADIE')
+		
+		
+		def employeeDailyMap = result.get('employeeDailyMap')
+		def employeeAbsenceMap = result.get('employeeAbsenceMap')
+		def employeeList = result.get('employeeList')
+		def dailyMap
+		def dailyList = []
+		def absenceList = []
+		def absenceMap
+		int i = 2
+			
+		new WebXlsxExporter().with {
+			setResponseHeaders(response)
+			fillHeader(dates)			
+			for(employee in employeeList) {
+				dailyList = [employee.lastName]
+				dailyMap = employeeDailyMap.get(employee)
+				dailyMap.each{ k, v -> 
+					dailyList.add(v)
+				}
+				absenceMap = employeeAbsenceMap.get(employee)
+				if (absenceMap.get(AbsenceType.VACANCE) != null){
+					dailyList.add(absenceMap.get(AbsenceType.VACANCE))
+				}else{
+					dailyList.add(0)
+				}
+				
+				if (absenceMap.get(AbsenceType.RTT) != null){
+					dailyList.add(absenceMap.get(AbsenceType.RTT))
+				}else{
+					dailyList.add(0)
+				}
+				if (absenceMap.get(AbsenceType.MALADIE) != null){
+					dailyList.add(absenceMap.get(AbsenceType.MALADIE))
+				}else{
+					dailyList.add(0)
+				}
+				
+	
+				fillRow(dailyList,i)
+				i+=1
+			}
+			save(response.outputStream)
+		}
+	}
+	
+	def monthlyVacationFollowup(){
+		log.error('entering monthlyVacationFollowup')
+		
+		def calendar = Calendar.instance
+		def thisMonthCalendar = Calendar.instance
+		def site
+		def month = params.int("myDate_month")
+		def year = params.int("myDate_year")
+		def result
+		def employeeList
+		def boolean isCurrentMonth = false
+		def criteria
+		
+		if (params["site.id"] != null && !params["site.id"].equals("")){
+			def coco = params["site.id"]
+			
+			if (params["site.id"] instanceof String[]){
+				if (params.("site.id")[0] != ""){
+					site = Site.get(params.("site.id")[0])
+				}
+			}else{
+				site = Site.get(params.("site.id"))
+			}
+		}
+		if (site == null && params["siteId"] != null && !params["siteId"].equals("")){
+			site = Site.get(params.int("siteId"))			
+		}
+
+		if (params['myDate_month'] != null && params['myDate_year'] != null){
+			calendar.set(Calendar.MONTH,params.int("myDate_month") - 1)
+			calendar.set(Calendar.YEAR,params.int("myDate_year"))
+		}
+		
+		//special case: requested month is not over: need to stop at current day
+		if (thisMonthCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) && thisMonthCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) ){
+			isCurrentMonth = true
+		}
+		
+		Period period = (calendar.get(Calendar.MONTH) < 5) ? Period.findByYear(calendar.get(Calendar.YEAR) - 1) : Period.findByYear(calendar.get(Calendar.YEAR))
+		def lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+		def tmpDay = lastDay
+		
+		if (site != null){
+			result = employeeService.getMonthlyPresence(site,calendar)
+		}
+		return [
+			lastDay:tmpDay,
+			employeeDailyMap:result.get('employeeDailyMap'),
+			employeeAbsenceMap:result.get('employeeAbsenceMap'),			
+			siteId:site.id,
+			site:site,
+			myDate:calendar.time
+		]
+		
+	}
+
+	def vacationFollowup(){
 		def year = params["year"]
 		def max = params["max"] != null ? params.int("max") : 20
 		def offset = params["offset"] != null ? params.int("offset") : 0
@@ -2126,9 +2273,8 @@ def vacationFollowup(){
 		}
 		
 		
-		def sites = Site.findAll()
+		def sites = Site.findAll(){
 		
-		for(Site siteOccurence : sites){
 			
 			log.error("site: "+siteOccurence)
 		}
@@ -2146,7 +2292,7 @@ def vacationFollowup(){
 			mailService.sendMail {
 				multipart true
 				to "henri.martin@gmail.com"
-				subject "Rapport Mensuel pour le mois de " + calendar.time.format("MMM yyyy")
+				subject "Rapport Mensuel du site de "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
 				body "Veuillez trouver ci-joint le rapport mensuel du site"
 				attachBytes filename,'application/pdf', file.readBytes()
 				
@@ -2569,8 +2715,11 @@ def vacationFollowup(){
 		def timeDifference
 		def folder = grailsApplication.config.pdf.directory
 		def retour
+		def siteAdmins
+		def userEmail
+		def siteNames = []
 		Date startDate = new Date()
-		Calendar calendar= Calendar.instance
+		Calendar calendar = Calendar.instance
 		log.error("createAllSitesPDF called at: "+calendar.time)
 		calendar.roll(Calendar.MONTH,-1)
 		def currentDate = calendar.time
@@ -2581,6 +2730,7 @@ def vacationFollowup(){
 		        def th = new Thread({	            				
 					log.error('generating PDF for site: '+site.name)
 					retour = PDFService.generateSiteMonthlyTimeSheet(currentDate,site,folder)
+					siteNames.add(retour[1])
 		        })
 		        println "putting thread in list"
 		        threads << th
@@ -2595,6 +2745,68 @@ def vacationFollowup(){
 			log.error("report createAllSitesPDF execution time"+timeDifference)
 		}
 		thTime.join()
+		
+		//if month is has ended, send reports to the admin by email
+		//if (calendar.get(Calendar.DAY_OF_MONTH) == 1){
+			log.error('this is the first day of the month: finding admin and sending to them')
+			sites.each{ site ->
+					siteAdmins = site.users
+					siteAdmins.each{ user ->
+						def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
+						def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+						if (!file.exists()){
+							return
+						}else{
+						//	render(file: file, fileName: file.name,contentType: "application/octet-stream")
+						log.error('file found for site '+site.name)						
+							mailService.sendMail {
+								multipart true
+								to "henri.martin@gmail.com"
+								subject "Rapport Mensuel du site "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
+								body "Veuillez trouver ci-joint le rapport mensuel du site"
+								attachBytes filename,'application/pdf', file.readBytes()
+								
+							}
+						
+						}	
+					}		
+			//}
+		}
+		
+	}
+	
+	def testMail(){
+		Calendar calendar = Calendar.instance
+		log.error("testMail called at: "+calendar.time)
+		calendar.roll(Calendar.MONTH,-1)
+		def sites = Site.findAll()
+		def siteAdmins
+		def folder = grailsApplication.config.pdf.directory
+		log.error('this is the first day of the month: finding admin and sending to them')
+		sites.each{ site ->
+			siteAdmins = site.users
+			siteAdmins.each{ user ->
+				def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
+				def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+				if (!file.exists()){
+					log.error('no file found for site '+site.name)
+					return
+				}else{
+					if (user.email != null){
+						log.error('file found for site '+site.name+', sending it to :'+user.email)
+						mailService.sendMail {
+							multipart true
+							to "henri.martin@gmail.com"
+							subject "Rapport Mensuel du site "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
+							body "Veuillez trouver ci-joint le rapport mensuel du site "+site.name
+							attachBytes filename,'application/pdf', file.readBytes()							
+						}
+					}else{
+						log.error('mail cannot be sent to user': user.lastName)
+					}
+				}
+			}
+		}
 	}
 
 	def computeMonthlyTotals() {

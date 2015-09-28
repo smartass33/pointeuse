@@ -115,5 +115,82 @@ class EmployeeService {
 			}
 		}		
 		return remainingCA=takenCA!=null?(initialCA.counter - takenCA.size()):initialCA.counter
+	}
+	
+	def getMonthlyPresence(Site site,Calendar calendar){
+		def employeeList
+		def dayMap
+		def absenceMap
+		def criteria
+		def lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+		def employeeDailyMap = [:]
+		def employeeAbsenceMap = [:]
+		
+		employeeList = Employee.findAllBySite(site)
+		if (employeeList != null){
+			for (Employee employee: employeeList){
+				dayMap = [:]
+				absenceMap = [:]
+				/*
+				if (isCurrentMonth){
+					lastDay = thisMonthCalendar.get(Calendar.DAY_OF_MONTH)
+				}
+				*/
+				for (int i=1;i<lastDay+1;i++){
+					criteria = DailyTotal.createCriteria()
+					def dailyTotal = criteria.get {
+						and {
+							eq('employee',employee)
+							eq('day',i)
+							eq('month',calendar.get(Calendar.MONTH) + 1)
+							eq('year',calendar.get(Calendar.YEAR) )
+						}
+					}
+					if (dailyTotal != null){
+						dayMap.put(i,'OK')
+					}else{
+						criteria = Absence.createCriteria()
+						def absence = criteria.get {
+							and {
+								eq('employee',employee)
+								eq('day',i)
+								eq('month',calendar.get(Calendar.MONTH) + 1)
+								eq('year',calendar.get(Calendar.YEAR) )
+							}
+						}
+						if (absence != null){
+							dayMap.put(i,absence.type)
+							if (absenceMap.get(absence.type) != null){
+								absenceMap.put(absence.type,absenceMap.get(absence.type)+1)
+							}else{
+								absenceMap.put(absence.type,0)
+							}
+							
+																			
+						}else{
+							criteria = BankHoliday.createCriteria()
+							def holiday = criteria.get {
+								and {
+									eq('day',i)
+									eq('month',calendar.get(Calendar.MONTH) + 1)
+									eq('year',calendar.get(Calendar.YEAR) )
+								}
+							}
+							if (holiday != null){
+								dayMap.put(i,'F')
+							}else{
+								dayMap.put(i,'n/a')
+							
+							}
+							
+						}
+					}
+				}
+				
+				employeeDailyMap.put(employee,dayMap)
+				employeeAbsenceMap.put(employee,absenceMap)
+			}
+		}
+		return [employeeDailyMap:employeeDailyMap,employeeAbsenceMap:employeeAbsenceMap,employeeList:employeeList]
 	}	
 }

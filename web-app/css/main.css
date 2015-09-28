@@ -399,8 +399,6 @@ img {
 	background-image: url(../images/skin/logout.png);
 }
 
-
-
 .nav a.create {
 	background-image: url(../images/skin/database_add.png);
 }
@@ -1407,15 +1405,13 @@ a.skip {
 }
 
 .adminLogin:focus {
-		background-image: url(../images/skin/login.png);
-	
+	background-image: url(../images/skin/login.png);
 	background-color: #666;
 	background-color: #999999;
 	color: #ffffff;
 	outline: none;
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
-
-	}
+}
 
 .indexLoginButton {
 		background-image: url(../images/skin/login.png);
@@ -1449,37 +1445,33 @@ a.skip {
 }
 
 .indexLoginButton:focus {
-		background-image: url(../images/skin/login.png);
-	
+	background-image: url(../images/skin/login.png);
 	background-color: #666;
 	background-color: #999999;
 	color: #ffffff;
 	outline: none;
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
-
-	}
+}
 
 .displayButton {
-		background-image: url(../images/skin/search_report.png);
-		background-position: 0.7em center;
-		background-repeat: no-repeat;
-		text-indent: 20px;
-	
-		color: #666666;
-		display: block;
-		padding: 0.25em 0.7em;
-		text-decoration: none;
-	   	-moz-border-radius: 0.3em;
-		-webkit-border-radius: 0.3em;
-	    border-radius: 0.3em;
-		background-position: 0.7em center;
-		background-repeat: no-repeat;
-		background-color: transparent;
-		outline: none;
-		border: none;
-		font-family: Verdana,Arial,sans-serif;
-    	font-size: 1em;
-
+	background-image: url(../images/skin/search_report.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 20px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+   	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+    border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+   	font-size: 1em;
 }
 
 .displayButton:hover {
@@ -1491,17 +1483,51 @@ a.skip {
 }
 
 .displayButton:focus {
-		background-image: url(../images/skin/search_report.png);
-	
+	background-image: url(../images/skin/search_report.png);
 	background-color: #666;
 	background-color: #999999;
 	color: #ffffff;
 	outline: none;
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
-
-	}
+}
 	
+.excelButton {
+	background-image: url(../images/skin/excel.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 30px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+   	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+    border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+   	font-size: 1em;
+}
 
+.excelButton:hover {
+	background-image: url(../images/skin/excel.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.excelButton:focus {
+	background-image: url(../images/skin/excel.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+	
 
 
 .addElementButton {
@@ -1799,13 +1825,100 @@ a.modalbox {
     background-color:#FFC0CB;
 }
 	
+.vacationTD {
+    font:1px Georgia, serif;
+    text-align:center;
+    valign:middle;
+    border: 1px solid #E7EFE0;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+	width: 60px;
+	font-size: 0.5em;
+	-moz-fit-content
+}
+
 	
-	/*  classes to handle popup (add time)*/
-		.panel {
-		background-color: #444;
-		height: 34px;
-		padding: 10px;
-	}
+	.vacationTH {
+    font:1px Georgia, serif;
+   /* padding:2px 2px;*/
+    text-align:center;
+   // background-color:#DEF3CA;
+    border: 1px solid #E7EFE0;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+	width: 20px;
+	font-size: 0.1em;
+	
+}
+
+
+
+.vacation-table-rotate th.rotate-45{
+  height: 110px;
+  width: 12px;
+  min-width: 10px;
+  max-width: 10px;
+  position: relative;
+  vertical-align: middle;
+  align: middle;
+  padding: 0;
+  font-size: 10px;
+  line-height: 0.8;
+  
+}
+
+
+.vacation-table-rotate th.rotate-45:first-child{
+	width: 50px;
+	max-width:50px;
+	min-width:50px;  
+}
+.vacationTD:first-child{
+	width: 50px;
+  	max-width:50px;
+	min-width:50px;
+}
+
+.vacation-table-rotate th.rotate-45 > div{
+  position: relative;
+  top: 0px;
+  left: 0px; /* 80 * tan(45) / 2 = 40 where 80 is the height on the cell and 45 is the transform angle*/
+  height: 100%;
+  -ms-transform:skew(-0deg,0deg);
+  -moz-transform:skew(-0deg,0deg);
+  -webkit-transform:skew(-0deg,0deg);
+  -o-transform:skew(-0deg,0deg);
+  transform:skew(-0deg,0deg);
+  overflow: hidden;
+  text-align: center;
+  border-left: 1px solid #dddddd;
+  vertical-align: middle; 
+}
+
+.vacation-table-rotate th.rotate-45 span {
+  -ms-transform:rotate(270deg);
+  -moz-transform:rotate(270deg);
+  -webkit-transform: rotate(270deg);
+  -o-transform: rotate(270deg);
+  transform:rotate(270deg);
+  position: absolute;
+  bottom: 50px; /* 40 cos(45) = 28 with an additional 2px margin*/
+  left: -25px; /*Because it looked good, but there is probably a mathematical link here as well*/
+  display: inline-block;
+  vertical-align: middle;  
+  width: 90px; /* 80 / cos(45) - 40 cos (45) = 85 where 80 is the height of the cell, 40 the width of the cell and 45 the transform angle*/
+  text-align: center;
+   white-space: pre-line; /*whether to display in one line or not*/
+}
+	
+	
+
 	
 	.panel a#login_pop,.panel a#join_pop {
 		border: 2px solid #aaa;

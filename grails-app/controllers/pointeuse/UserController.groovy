@@ -1,11 +1,23 @@
 package pointeuse
 
+import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
+
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.multipart.MultipartHttpServletRequest
+import uk.co.desirableobjects.ajaxuploader.exception.FileUploadException
+
+import java.io.File;
+import java.io.InputStream;
 import java.security.MessageDigest
+
+import javax.servlet.http.HttpServletRequest;
 class UserController {
 	def authenticateService
 	def springSecurityService
+	def ajaxUploaderService
+	
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
     def index() {
@@ -15,7 +27,18 @@ class UserController {
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        [userInstanceList: User.list(params), userInstanceTotal: User.count()]
+		def userInstanceList = User.list(params)
+		def sites = Site.list()
+		def userSiteMap = [:]
+		def userInstanceTotal = User.count()
+		for (User user : userInstanceList){
+			for (Site site : sites){
+				if (site.users.contains(user)){
+					userSiteMap.put(user,site)
+				}
+			}
+		}
+        [userInstanceList: userInstanceList, userInstanceTotal: userInstanceTotal,userSiteMap:userSiteMap]
     }
 
     def create() {
@@ -24,9 +47,8 @@ class UserController {
 	@Secured(['ROLE_SUPER_ADMIN'])
     def save() {
 		def role = params["role"].get('id')
-        def userInstance = new User(params)	
+        def userInstance = new User(params)			
         if (!userInstance.save(flush: true)) {
-
             render(view: "create", model: [userInstance: userInstance])
             return
         }
@@ -63,6 +85,7 @@ class UserController {
 
 	@Secured(['ROLE_SUPER_ADMIN'])
     def update(Long id, Long version) {
+		def site
         def userInstance = User.get(id)
         if (!userInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'user.label', default: 'User'), id])
@@ -81,6 +104,25 @@ class UserController {
         }
 
         userInstance.properties = params
+
+		if (params['siteId'] instanceof String){
+			site = Site.get(params['siteId'])
+			if (site.users == null){
+				site.users = []
+			}
+			site.users.add(userInstance)
+			site.save()
+		}else{
+			params['siteId'].each {
+				log.error('siteId: '+it)
+				site = Site.get(it)
+				if (site.users == null){
+					site.users = []
+				}
+				site.users.add(userInstance)
+				site.save()
+			  }
+		}
 
         if (!userInstance.save(flush: true)) {
             render(view: "edit", model: [userInstance: userInstance])
@@ -111,6 +153,78 @@ class UserController {
         }
     }
 	
+
+	
+	
+	def importUserList = {
+		log.error('importUserList called')
+		def lastName 
+		def user
+		def site
+		def settings = [separatorChar:';','charset':'windows-1252']
+		def criteria
+		try {
+			File uploaded = File.createTempFile('grails', 'ajaxupload')
+			InputStream inputStream = selectInputStream(request)
+
+			ajaxUploaderService.upload(inputStream, uploaded)
+			uploaded.toCsvReader(settings).eachLine { tokens ->
+				log.error("tokens: "+tokens)
+				lastName = tokens[0]
+				log.error("lastName: "+lastName)
+				
+				user = User.findByLastName(lastName)
+				log.error("tokens[3]: "+tokens[3])
+				
+				if (user != null && tokens[3].equals('1')){
+					log.error('user and admin are not null')
+					site = Site.findByName(tokens[2])
+					log.error('tokens[2]: '+tokens[2])
+					log.error('site: '+site)
+					if (site != null){
+						if (site.users == null){
+							site.users = []
+						}
+						log.error(site.users)
+						if (!site.users.contains(user)){
+							site.users.add(user)
+							site.save()
+						}
+					}		
+					user.email = tokens[4]
+					user.hasMail = true
+					//user.phoneNumber = 	
+					user.save()		
+				}
+				
+			/*	
+				criteria = User.createCriteria()
+				user = criteria.get{
+					and {
+						eq('lastName',tokens[0])
+						eq('firstName',tokens[1])
+					}
+				}
+				*/
+				
+				log.error("user: "+user)
+			}
+			return render(text: [success:true] as JSON, contentType:'text/json')
+		} catch (FileUploadException e) {
+			log.error("Failed to upload file.", e)
+			return render(text: [success:false] as JSON, contentType:'text/json')
+		}
+	}
+
+	private InputStream selectInputStream(HttpServletRequest request) {
+		if (request instanceof MultipartHttpServletRequest) {
+			MultipartFile uploadedFile = ((MultipartHttpServletRequest) request).getFile('qqfile')
+			return uploadedFile.inputStream
+		}
+		return request.inputStream
+	}
+
+		
 	def isAuthenticated(){
 		def username = params["username"]
 		def password = params["password"]
