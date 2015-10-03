@@ -1889,7 +1889,7 @@ a.modalbox {
   position: relative;
   top: 0px;
   left: 0px; /* 80 * tan(45) / 2 = 40 where 80 is the height on the cell and 45 is the transform angle*/
-  height: 100%;
+  height: 100%; 
   -ms-transform:skew(-0deg,0deg);
   -moz-transform:skew(-0deg,0deg);
   -webkit-transform:skew(-0deg,0deg);
@@ -1909,12 +1909,14 @@ a.modalbox {
   transform:rotate(270deg);
   position: absolute;
   bottom: 50px; /* 40 cos(45) = 28 with an additional 2px margin*/
-  left: -25px; /*Because it looked good, but there is probably a mathematical link here as well*/
+  left: -35px; /*Because it looked good, but there is probably a mathematical link here as well*/
   display: inline-block;
   vertical-align: middle;  
   width: 90px; /* 80 / cos(45) - 40 cos (45) = 85 where 80 is the height of the cell, 40 the width of the cell and 45 the transform angle*/
   text-align: center;
    white-space: pre-line; /*whether to display in one line or not*/
+ //    width:100%;
+  //display:block;
 }
 	
 	

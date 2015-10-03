@@ -42,11 +42,23 @@
 
 				<tbody>
 					<g:each in="${siteInstanceList}" status="i" var="siteInstance">
+						<g:set var="siteAdmin" value="0" />
+					
 						<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">			
 							<td><g:link action="show" id="${siteInstance.id}">${fieldValue(bean: siteInstance, field: "name")}</g:link></td>				
 							<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">
 								<td>${siteInstance.loggingDate.format('dd/MM/yyyy')}</td>
-								<td>${siteInstance.user.firstName} ${siteInstance.user.lastName}</td>
+								<td>
+									<g:each in="${siteInstance.users}" status="j" var="user">
+										<%siteAdmin++%>
+										<g:if test="${siteAdmin.toString().equals((siteInstance.users.size()).toString())}">									
+											${user.firstName} ${user.lastName}
+										</g:if>
+										<g:else>
+											${user.firstName} ${user.lastName},								
+										</g:else>
+									</g:each>
+								</td>
 							</sec:ifAnyGranted>
 							<td>${siteInstance.address}</td>				
 							<td>${siteInstance.town}</td>

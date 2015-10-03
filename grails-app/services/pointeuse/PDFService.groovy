@@ -16,40 +16,48 @@ class PDFService {
 	
 	
 	def generateSiteMonthlyTimeSheet(Date myDate,Site site,String folder){
+		log.error('generateSiteMonthlyTimeSheet called')
+		
 		def fileNameList=[]
 		def filename
 		PdfCopyFields finalCopy
 		Calendar calendar = Calendar.instance
 		calendar.time = myDate
 		OutputStream outputStream
-		File file
-		
+		File file	
 		def employeeList = Employee.findAllBySite(site)
-		for (Employee employee:employeeList){
-			log.error('method pdf siteMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', First Name= '+employee.firstName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
-			def modelReport=timeManagerService.getReportData((site.id).toString(),employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-			modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-			//log.error('getReportData and getYearSupTime finalized')		
-			// Get the bytes
-			ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeReportTemplate', model: modelReport)
-			filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
-			fileNameList.add(filename)
-			outputStream = new FileOutputStream (folder+'/'+filename);
-			bytes.writeTo(outputStream)
-			if(bytes)
-				bytes.close()
-			if(outputStream)
-				outputStream.close()
+		try {
+			for (Employee employee:employeeList){
+				log.error('method pdf siteMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', First Name= '+employee.firstName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
+				def modelReport=timeManagerService.getReportData((site.id).toString(),employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+				modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+				//log.error('getReportData and getYearSupTime finalized')		
+				// Get the bytes
+				ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeReportTemplate', model: modelReport)
+				filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
+				fileNameList.add(filename)
+				outputStream = new FileOutputStream (folder+'/'+filename);
+				bytes.writeTo(outputStream)
+				if(bytes)
+					bytes.close()
+				if(outputStream)
+					outputStream.close()
+			}
+			finalCopy = new PdfCopyFields(new FileOutputStream(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'));
+			finalCopy.open()
+			for (String tmpFile:fileNameList){
+				PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
+				finalCopy.addDocument(pdfReader)	
+			}
+			finalCopy.close();		
+		} catch( java.io.IOException ioe){
+			log.error(ioe)
+		}finally{
+			file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+			return [file.bytes,file.name]
 		}
-		finalCopy = new PdfCopyFields(new FileOutputStream(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'));
-		finalCopy.open()
-		for (String tmpFile:fileNameList){
-			PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
-			finalCopy.addDocument(pdfReader)	
-		}
-		finalCopy.close();		
-		file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')		
-		return [file.bytes,file.name]
+		
+		
 	}
 	
 

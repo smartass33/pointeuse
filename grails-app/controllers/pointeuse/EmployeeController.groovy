@@ -261,12 +261,10 @@ class EmployeeController {
 	
 	
 	def vacationExcelExport(){
+		def folder = grailsApplication.config.pdf.directory	
 		log.error('entering vacationExcelExport')
-		params.each{i->
-			log.error('param for update: '+i)
-		}
 		def site
-		def calendar = Calendar.instance
+		def calendar = Calendar.instance	
 		def result
 		
 		if (params["site.id"] != null && !params["site.id"].equals("")){		
@@ -298,11 +296,15 @@ class EmployeeController {
 			dates.add(calendar.time.format('E dd MMM'))
 			calendar.roll(Calendar.DAY_OF_MONTH,1)
 		}
-		dates.add('VACANCE')
-		dates.add('RTT')
-		dates.add('MALADIE')
-		
-		
+		dates.add(AbsenceType.VACANCE)
+		dates.add(AbsenceType.RTT)
+		dates.add(AbsenceType.AUTRE)
+		dates.add(AbsenceType.EXCEPTIONNEL)
+		dates.add(AbsenceType.PATERNITE)
+		dates.add(AbsenceType.CSS)
+		dates.add(AbsenceType.DIF)
+		dates.add(AbsenceType.GROSSESSE)		
+		dates.add(AbsenceType.MALADIE)				
 		def employeeDailyMap = result.get('employeeDailyMap')
 		def employeeAbsenceMap = result.get('employeeAbsenceMap')
 		def employeeList = result.get('employeeList')
@@ -310,9 +312,9 @@ class EmployeeController {
 		def dailyList = []
 		def absenceList = []
 		def absenceMap
-		int i = 2
+		int i = 1
 			
-		new WebXlsxExporter().with {
+		new WebXlsxExporter(folder+'/vacation_template.xlsx').with {
 			setResponseHeaders(response)
 			fillHeader(dates)			
 			for(employee in employeeList) {
@@ -332,14 +334,42 @@ class EmployeeController {
 					dailyList.add(absenceMap.get(AbsenceType.RTT))
 				}else{
 					dailyList.add(0)
+				}				
+				if (absenceMap.get(AbsenceType.AUTRE) != null){
+					dailyList.add(absenceMap.get(AbsenceType.AUTRE))
+				}else{
+					dailyList.add(0)
+				}
+				if (absenceMap.get(AbsenceType.EXCEPTIONNEL) != null){
+					dailyList.add(absenceMap.get(AbsenceType.EXCEPTIONNEL))
+				}else{
+					dailyList.add(0)
+				}
+				if (absenceMap.get(AbsenceType.PATERNITE) != null){
+					dailyList.add(absenceMap.get(AbsenceType.PATERNITE))
+				}else{
+					dailyList.add(0)
+				}
+				if (absenceMap.get(AbsenceType.CSS) != null){
+					dailyList.add(absenceMap.get(AbsenceType.CSS))
+				}else{
+					dailyList.add(0)
+				}
+				if (absenceMap.get(AbsenceType.DIF) != null){
+					dailyList.add(absenceMap.get(AbsenceType.DIF))
+				}else{
+					dailyList.add(0)
+				}
+				if (absenceMap.get(AbsenceType.GROSSESSE) != null){
+					dailyList.add(absenceMap.get(AbsenceType.GROSSESSE))
+				}else{
+					dailyList.add(0)
 				}
 				if (absenceMap.get(AbsenceType.MALADIE) != null){
 					dailyList.add(absenceMap.get(AbsenceType.MALADIE))
 				}else{
 					dailyList.add(0)
 				}
-				
-	
 				fillRow(dailyList,i)
 				i+=1
 			}
@@ -348,8 +378,7 @@ class EmployeeController {
 	}
 	
 	def monthlyVacationFollowup(){
-		log.error('entering monthlyVacationFollowup')
-		
+		log.error('entering monthlyVacationFollowup')		
 		def calendar = Calendar.instance
 		def thisMonthCalendar = Calendar.instance
 		def site
@@ -375,6 +404,12 @@ class EmployeeController {
 			site = Site.get(params.int("siteId"))			
 		}
 
+		if (site == null){
+			flash.message = message(code: 'site.cannot.be.null')
+			redirect(action: "vacationFollowup")
+			return
+		}
+		
 		if (params['myDate_month'] != null && params['myDate_year'] != null){
 			calendar.set(Calendar.MONTH,params.int("myDate_month") - 1)
 			calendar.set(Calendar.YEAR,params.int("myDate_year"))
@@ -406,8 +441,7 @@ class EmployeeController {
 	def vacationFollowup(){
 		def year = params["year"]
 		def max = params["max"] != null ? params.int("max") : 20
-		def offset = params["offset"] != null ? params.int("offset") : 0
-		
+		def offset = params["offset"] != null ? params.int("offset") : 0	
 		def site
 		def siteId
 		def employeeInstanceList
@@ -2747,7 +2781,7 @@ class EmployeeController {
 		thTime.join()
 		
 		//if month is has ended, send reports to the admin by email
-		//if (calendar.get(Calendar.DAY_OF_MONTH) == 1){
+		if (calendar.get(Calendar.DAY_OF_MONTH) == 1){
 			log.error('this is the first day of the month: finding admin and sending to them')
 			sites.each{ site ->
 					siteAdmins = site.users
@@ -2757,20 +2791,34 @@ class EmployeeController {
 						if (!file.exists()){
 							return
 						}else{
-						//	render(file: file, fileName: file.name,contentType: "application/octet-stream")
-						log.error('file found for site '+site.name)						
-							mailService.sendMail {
-								multipart true
-								to "henri.martin@gmail.com"
-								subject "Rapport Mensuel du site "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
-								body "Veuillez trouver ci-joint le rapport mensuel du site"
-								attachBytes filename,'application/pdf', file.readBytes()
-								
+							log.error('file found for site '+site.name)	
+							def phil = User.get(2)
+							if (user.email != null && file.length() > 0){
+								mailService.sendMail {
+									multipart true
+									to phil.email
+									subject "Rapport Mensuel du site "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
+									body "Veuillez trouver ci-joint le rapport mensuel du site"
+									attachBytes filename,'application/pdf', file.readBytes()
+									
+								}
 							}
-						
+							
+							/*	
+							if (user.email != null && file.length() > 0){				
+								mailService.sendMail {
+									multipart true
+									to user.email
+									subject "Rapport Mensuel du site "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
+									body "Veuillez trouver ci-joint le rapport mensuel du site"
+									attachBytes filename,'application/pdf', file.readBytes()
+									
+								}
+							}
+							*/
 						}	
 					}		
-			//}
+			}
 		}
 		
 	}

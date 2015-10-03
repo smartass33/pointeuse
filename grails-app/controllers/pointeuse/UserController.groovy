@@ -32,11 +32,13 @@ class UserController {
 		def userSiteMap = [:]
 		def userInstanceTotal = User.count()
 		for (User user : userInstanceList){
+			def userSiteList = []
 			for (Site site : sites){
 				if (site.users.contains(user)){
-					userSiteMap.put(user,site)
+					userSiteList.add(site)					
 				}
 			}
+			userSiteMap.put(user,userSiteList)
 		}
         [userInstanceList: userInstanceList, userInstanceTotal: userInstanceTotal,userSiteMap:userSiteMap]
     }

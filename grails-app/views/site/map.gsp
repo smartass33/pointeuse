@@ -24,7 +24,7 @@
 			</g:if>
 
 				<div>
-      				<gvisualization:map elementId="map" columns="${mapColumns}" data="${mapData}" showTip="${true}" zoomLevel="${80}" enableScrollWheel="${true}"/>
+      				<gvisualization:map elementId="map" columns="${mapColumns}" data="${mapData}" showTip="${true}" zoomLevel="${9}" enableScrollWheel="${true}"/>
                 	<div id="map" style="width: 1100px; height: 400px"></div>
 				</div>
 

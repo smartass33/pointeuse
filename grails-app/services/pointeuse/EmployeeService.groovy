@@ -164,9 +164,7 @@ class EmployeeService {
 								absenceMap.put(absence.type,absenceMap.get(absence.type)+1)
 							}else{
 								absenceMap.put(absence.type,0)
-							}
-							
-																			
+							}																	
 						}else{
 							criteria = BankHoliday.createCriteria()
 							def holiday = criteria.get {
@@ -181,8 +179,7 @@ class EmployeeService {
 							}else{
 								dayMap.put(i,'n/a')
 							
-							}
-							
+							}						
 						}
 					}
 				}
