@@ -2,6 +2,7 @@
 <%@ page import="pointeuse.Service" %>
 <%@ page import="pointeuse.Site" %>
 <%@ page import="pointeuse.Function" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 
 
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'firstName', 'error')} ">
@@ -123,4 +124,37 @@
 	</g:else>
 </div>
 
+<div id='cartouche_input_image'>
+	<button type='button' id="cartouche_toggle" ><img alt="toggle" src="${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
+	extra param
+</div>	
+<div id="cartouche_div">
+	<g:each in="${employeeDataListMapInstance.fieldMap}" status="i" var="fieldMap">
+		<div  class="fieldcontain"  id="${fieldMap.key}">
+			<label for="${fieldMap.key}"><g:message code="${fieldMap.key}" default="${fieldMap.key}" /></label>	
+			<g:if test = "${employeeInstance.extraData != null}">	
+				<g:if test = "${fieldMap.value.equals('DATE') }">
+					<g:if test="${(employeeInstance.extraData).get(fieldMap.key) != null }">
+						<g:datePicker name="${fieldMap.key}" precision="day" value="${(new SimpleDateFormat("yyyyMd", Locale.ENGLISH)).parse((employeeInstance.extraData).get(fieldMap.key))}"/>		
+					</g:if>
+					<g:else>
+						<g:datePicker name="${fieldMap.key}" precision="day" value="${new Date()}"/>		
+					
+					</g:else>
+				</g:if>	
+				<g:else>
+					<g:if test = "${fieldMap.value.equals('NUMBER') }">
+						<input type="number" class="code" id="${fieldMap.key}" name="${fieldMap.key}" value="${(employeeInstance.extraData).get(fieldMap.key)}"  /> 				
+					</g:if>
+					<g:else>
+						<g:textField name="${fieldMap.key}" value="${(employeeInstance.extraData).get(fieldMap.key)}"/>				
+					</g:else>		
+				</g:else>				
+			</g:if>		
+			<g:else>	
+				<g:textField name="${fieldMap.key}" value=""/>			
+			</g:else>
+		</div>
+	</g:each>
+</div>
 	          

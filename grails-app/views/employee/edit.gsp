@@ -26,6 +26,11 @@
 			#newContractForm {
     			display: none;
 			}
+			
+			
+			#cartouche_div {
+    			display: none;
+			}
 		</style>
 		<g:javascript library="application"/> 		
 		<r:require module="report"/>
@@ -36,6 +41,10 @@
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>		
   		<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 		<script>
+			function closePopup (){
+				window.location = $('#closeId').attr('href');
+			}		
+	
 			jQuery(function($){
 			   $.datepicker.regional['fr'] = {
 			      closeText: 'Fermer',
@@ -58,6 +67,12 @@
 			   $.datepicker.setDefaults($.datepicker.regional['fr']);
 
 			});
+			
+			$(document).ready(function() {
+	   			$('#cartouche_toggle').click( function() {
+	    		$('#cartouche_div').slideToggle(400);
+	   			});
+			});
 		</script>
 	</head>
 	<body>
@@ -71,9 +86,7 @@
 				</g:if>
 				<li><g:link class="list" action="list" params="${[isAdmin:isAdmin,siteId:siteId,back:true]}"><g:message code="default.list.label" args="[entityName]" /></g:link></li>			
 				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
-				<g:if test="${back}">
-					<li><g:link controller="employee" action='report' class="backButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId,myDateFromEdit:myDateFromEdit]}">${message(code: 'employee.monthly.report.back.label', default: 'Report')}</g:link></li>
-				</g:if>
+				<li><g:authorizationPopup fromReport="true" employeeInstanceId="${employeeInstance.id}"/></li>
 			</ul>
 		</div>
 		<div id="edit-employee" class="content scaffold-edit" role="main">
@@ -100,7 +113,13 @@
 					<g:actionSubmit class="save" action="update" value="${message(code: 'default.button.update.label', default: 'Update')}" />
 					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
 				</fieldset>
-			</g:form>	
+			</g:form>
+			
+			<div id="authorizationDiv">	
+				<g:if test="${authorizationInstanceList != null}">
+					<g:authorizationTable/>
+				</g:if>
+			</div>
 			<h1>gestion des contrats et du statut du salarié</H1>		
 			<BR>
 			<g:form method="post" >

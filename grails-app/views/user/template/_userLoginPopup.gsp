@@ -1,11 +1,10 @@
-<html>
-	<head>
-		<meta name='layout' content='main'/>
-		<title><g:message code="springSecurity.login.title"/></title>
-	</head>
-	<body>
+<%@ page import="pointeuse.User"%>
+
+
+<a href="#join_form" id="join_pop" class="addElementButton">TOTO</a>
+<a href="#x" class="overlay" id="join_form" style="background: transparent;"></a>
+<div id="popup" class="popup">
 		<div id='login'>
-			<div class='inner'>
 				<div class='fheader'><g:message code="springSecurity.login.header"/></div>
 				<g:if test='${flash.message}'>
 					<div class='login_message'>${flash.message}</div>
@@ -23,12 +22,11 @@
 						<label for='remember_me'>
 							<input type='checkbox' class='chk' name='${rememberMeParameter}' id='remember_me' <g:if test='${hasCookie}'>checked='checked'</g:if>/>   <g:message code="springSecurity.login.remember.me.label"/>
 							<BR><BR>							
-							<input type='submit'  class="adminLogin" id="submit" value='${message(code: "springSecurity.login.button")}'/>
+							<input type='submit' class="adminLogin" id="submit" value='${message(code: "springSecurity.login.button")}'/>
 						</label>
 					</p>
 	
 				</form>
-			</div>
 		</div>
-	</body>
-</html>
+	<a class="close" id="closeId" href="#close"></a>
+</div>

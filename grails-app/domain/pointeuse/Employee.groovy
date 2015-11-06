@@ -17,6 +17,7 @@ class Employee{
 	boolean hasError
 	Date arrivalDate
 	Status status
+	Map extraData 
 	
 	static hasMany = [contracts:Contract,vacationsCounters:Vacation,absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
 	static searchable = true	

@@ -1378,8 +1378,7 @@ a.skip {
 		background-size:16px 16px;
 		background-position: 0.7em center;
 		background-repeat: no-repeat;
-		text-indent: 35px;
-	
+		text-indent: 35px;	
 		color: #666666;
 		display: block;
 		padding: 0.6em 0.7em;
@@ -2214,7 +2213,7 @@ a.modalbox {
 		padding: 0;
 	}
 	#indexLeftMenu li:hover { 
-		transform: scale(1.2);		 
+		/*transform: scale(1.2);*/		 
 		list-style-type: none;
 		margin-bottom: 0.6em;
 		font-weight:bold;

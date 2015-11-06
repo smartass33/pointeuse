@@ -18,8 +18,7 @@
 	<style>
 		 th
 		{
-		    font:15px Georgia, serif;
-		
+		    font:15px Georgia, serif;	
 			color: rgb(102, 102, 102);
 		    border-style:solid;
 		    border-width:1px;

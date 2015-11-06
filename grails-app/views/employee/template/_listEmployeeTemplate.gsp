@@ -16,8 +16,6 @@
 			<g:sortableColumn property="status" style="text-align:center" class="principal"
 				title="${message(code: 'employee.entry.status', default: 'Entry')}" />
 			<th style="text-align:center" class="principal">${message(code: 'employee.lastTime.label', default: 'Entry')}</th>
-			<g:sortableColumn class="principal"  property="hasError" style="width:20px;text-align:center" class="principal"
-				title="${message(code: 'employee.hasErrors', default: 'Errors')}" />
 			<g:sortableColumn property="lastName" style="width:150px;text-align:center" class="admin"
 				title="${message(code: 'employee.username.label', default: 'User Name')}" />
 			<g:sortableColumn property="weeklyContractTime" style="width:90px;text-align:center" class="admin"
@@ -76,15 +74,6 @@
 						</g:if>
 						<g:else>
 							<td class="principal">N/A</td>						
-						</g:else>
-						<g:if test="${!employeeInstance?.hasError}">
-							<td class="principal" align="center" style="text-align:middle;" ondblclick="this.style.display = 'none';">
-								<div style="padding:2px 20px 2px 20px; "><img alt="tick" src="../images/skin/tick.png" style="align:middle;"></div>
-						</g:if>
-						<g:else>	
-							<td class="principal" align="center" style="text-align:middle;" ondblclick="this.style.display = 'none';">
-								<div style="padding:2px 20px 2px 20px; "><img alt="cross" src="../images/skin/cross.png" style="align:middle;"></div>
-							</td>
 						</g:else>
 					</g:form>
 					<g:if test="${employeeInstance?.userName}">

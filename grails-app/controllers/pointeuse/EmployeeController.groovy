@@ -63,7 +63,6 @@ class EmployeeController {
 	def dailyReport(){
 		def dailyMap = [:]
 		def dailySupMap = [:]
-		def dailyInAndOutMap = [:]
 		def siteId=params["site.id"]
 		def dailyTotal
 		def inAndOutList
@@ -918,7 +917,15 @@ class EmployeeController {
             return
         }
 		def arrivalDate = employeeInstance.arrivalDate
+		
+		def criteria = EmployeeDataListMap.createCriteria()
+		def employeeDataListMapInstance = criteria.get {
+			maxResults(1)
+		}
+		def authorizationInstanceList = Authorization.findAllByEmployee(employeeInstance)
+		
 		def retour = [
+			authorizationInstanceList:authorizationInstanceList,
 			back:back,
 			myDateFromEdit:myDate,
 			previousContracts:previousContracts,
@@ -926,7 +933,8 @@ class EmployeeController {
 			orderedVacationList:orderedVacationList,
 			orderedVacationListfromSite:fromSite,
 			employeeInstance: employeeInstance,
-			isAdmin:isAdmin,siteId:siteId
+			isAdmin:isAdmin,siteId:siteId,
+			employeeDataListMapInstance:employeeDataListMapInstance
 		]		
 		return retour
 	}
@@ -1251,6 +1259,29 @@ class EmployeeController {
 			function = Function.get(function)
 			employeeInstance.function=function
 		}
+		
+		/* dealing with employee extra data*/ 
+		def criteria = EmployeeDataListMap.createCriteria()
+		def employeeDataListMapInstance = criteria.get {
+			maxResults(1)
+		}
+		employeeDataListMapInstance.fieldMap.each{k,v->
+			
+			log.error('key: '+k)
+			log.error('value: '+v)
+			log.error('params[k]: '+params[k])
+			if (employeeInstance.extraData == null){
+				employeeInstance.extraData = [:]
+			}
+			if (v.equals('DATE')){			
+				employeeInstance.extraData.put(k,params[k+'_year']+params[k+'_month']+params[k+'_day'])
+			}else{
+				employeeInstance.extraData.put(k,params[k])
+			}
+				
+		}
+		
+		//employeeInstance.extraData
 		employeeInstance.status = employeeStatus		
         if (!employeeInstance.save(flush: true)) {
             render(view: "edit", model: [employeeInstance: employeeInstance])
