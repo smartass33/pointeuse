@@ -142,4 +142,21 @@ class EmployeeDataListMapController {
 		log.error('employeeDataListMap saved')
 		redirect(action: "index")		
 	}
+	
+	@Transactional
+	def trashEmployeeData(){
+		def user = springSecurityService.currentUser
+		log.error('removeNewEmployeeData called')
+		params.each{i->log.error('parameter of list: '+i)}
+		def criteria = EmployeeDataListMap.createCriteria()
+		def employeeDataListMap = criteria.get {
+			maxResults(1)
+		}
+		(employeeDataListMap.fieldMap).remove(params['fieldMap'])
+		employeeDataListMap.save flush:true
+		log.error(params["fieldMap"]+' removed from employeeDataListMap')
+		flash.message = message(code: 'default.deleted.message', args: [message(code: 'employeeDataListMap.label'), params["fieldMap"]])
+		render template: "/employeeDataListMap/template/employeeDataListTable",model:[employeeDataListMapInstance:employeeDataListMap,flash:flash]
+		//return
+	}
 }

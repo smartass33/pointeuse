@@ -52,8 +52,9 @@
 								<li class="controller"><g:link controller="employee" action='vacationFollowup' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="absence.followup" default="Last Name" /></g:link></li>	
 								<li class="controller"><g:link controller="employee" action='ecartFollowup' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="ecart.followup" default="Last Name" /></g:link></li>	
 								<li class="controller"><g:link controller="payment" action='paymentReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="payment.management" default="Last Name" /></g:link></li>	
-								<li class="controller"><g:link controller="authorization" action='index' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="authorization.management" default="Last Name" /></g:link></li>	
-
+								<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">								
+									<li class="controller"><g:link controller="authorization" action='index' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="authorization.management" default="Last Name" /></g:link></li>	
+								</sec:ifAnyGranted>
 								<li><BR></li>
 								<li class="controller"><g:link controller="logout" class="adminLogout"><g:message code="admin.logout.label" default="Last Name" /></g:link></li>							
 							</ul>
@@ -67,8 +68,11 @@
 							<ul>
 								<li class="controller"><g:link controller="user" style="text-decoration: none;"><g:message code="admin.list" default="Last Name" /></g:link></li>						
 								<li class="controller"><g:link controller="reason" style="text-decoration: none;"><g:message code="regularization.reasons" default="Last Name" /></g:link></li>			
-								<li class="controller"><g:link controller="authorizationType" style="text-decoration: none;"><g:message code="authorizationType.management.label" default="Last Name" /></g:link></li>			
-								<li class="controller"><g:link controller="authorizationNature" style="text-decoration: none;"><g:message code="authorizationNature.management.label" default="Last Name" /></g:link></li>			
+								<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">		
+									<li class="controller"><g:link controller="employeeDataListMap" style="text-decoration: none;"><g:message code="employeeDataListMap.management" default="Last Name" /></g:link></li>																							
+									<li class="controller"><g:link controller="authorizationType" style="text-decoration: none;"><g:message code="authorizationType.management.label" default="Last Name" /></g:link></li>			
+									<li class="controller"><g:link controller="authorizationNature" style="text-decoration: none;"><g:message code="authorizationNature.management.label" default="Last Name" /></g:link></li>			
+								</sec:ifAnyGranted>
 								<li><BR></li>
 								<li class="controller"><g:link controller="logout" class="adminLogout"><g:message code="admin.logout.label" default="Last Name" /></g:link></li>							
 							</ul>

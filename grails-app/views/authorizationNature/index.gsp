@@ -23,17 +23,17 @@
 			<table>
 				<thead>
 					<tr>
-						<g:sortableColumn property="creationDate" title="${message(code: 'authorizationNature.creationDate.label', default: 'Creation Date')}" />					
-						<g:sortableColumn property="nature" title="${message(code: 'authorizationNature.nature.label', default: 'Nature')}" />					
+						<g:sortableColumn property="creationDate" title="${message(code: 'creationDate.label', default: 'Creation Date')}" />					
+						<g:sortableColumn property="nature" title="${message(code: 'authorizationNature.user.label', default: 'Nature')}" />					
 						<th><g:message code="authorizationNature.user.label" default="User" /></th>					
 					</tr>
 				</thead>	
 				<tbody>
 					<g:each in="${authorizationNatureInstanceList}" status="i" var="authorizationNatureInstance">
 						<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">						
-							<td><g:formatDate date="${authorizationNatureInstance.creationDate}" /></td>						
-							<td>${fieldValue(bean: authorizationNatureInstance, field: "nature")}</td>						
-							<td>${fieldValue(bean: authorizationNatureInstance, field: "user")}</td>						
+							<td><g:formatDate date="${authorizationNatureInstance.creationDate}"  format="dd/MM/yyyy"/></td>						
+							<td>${authorizationNatureInstance.nature}</td>						
+							<td>${authorizationNatureInstance.user.firstName} ${authorizationNatureInstance.user.lastName}</td>						
 						</tr>
 					</g:each>
 				</tbody>

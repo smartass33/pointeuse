@@ -3,11 +3,10 @@
 <%@ page import="pointeuse.InAndOut"%>
 
 
-<table id="employee-table">
+<table id="employee-table" >
 	<thead>
 		<tr>
 			<g:sortableColumn property="lastName" style="width:150px;text-align:center" title="${message(code: 'employee.lastName.label', default: 'Last Name')}" />
-			<g:sortableColumn property="firstName" style="width:100px;text-align:center" title="${message(code: 'employee.firstName.label', default: 'First Name')}" />	
 			<g:sortableColumn property="site" style="text-align:center" title="${message(code: 'employee.site.label', default: 'Site')}" />
 			<th style="text-align:center" class="principal">${message(code: 'employee.function.label', default: 'Site')}</th>		
 			<th style="width:70px;text-align:center" class="principal">${message(code: 'employee.annualReport.label', default: 'Report')}</th>
@@ -32,19 +31,18 @@
 	<tbody id='body_update' style="border:1px;">
 		<g:each in="${employeeInstanceList}" status="i" var="employeeInstance">
 			<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-				<td style="width:120px" >
+				<td style="width:200px" >
 					<g:link action="edit" id="${employeeInstance.id}"
 							params="${[isAdmin:isAdmin,siteId:siteId]}"
 							style="text-decoration: none;">
 							${fieldValue(bean: employeeInstance, field: "lastName")}		
 					</g:link>
-				</td>
-				<td style="width:120px" >
 					<g:link action="edit" id="${employeeInstance.id}" style="text-decoration: none;"
 						params="${[isAdmin:isAdmin,siteId:siteId]}">
 						${fieldValue(bean: employeeInstance, field: "firstName")}
 					</g:link>
 				</td>
+
 				<td><g:if test="${employeeInstance?.site != null}">
 						${employeeInstance?.site.name}
 					</g:if>
@@ -53,9 +51,9 @@
 						${employeeInstance?.function.name}
 					</g:if>
 				</td>				
-				<td style="border:1px;width:200px;padding:2px 5px 2px 15px;" class="principal"><g:link controller="employee" action='annualReport' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId,isAjax:false]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
-				<td style="border:1px;width:200px;padding:2px 5px 2px 15px;" class="principal"><g:link controller="employee" action='report' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link></td>
-				<td style="border:1px;width:200px;padding:2px 5px 2px 15px;" class="principal"><g:link controller="employee" action='vacationDisplay' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'vacation.report.label', default: 'Report')}</g:link></td>
+				<td style="border:1px;width:70px;padding:2px 5px 2px 15px;" class="principal"><g:link controller="employee" action='annualReport' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId,isAjax:false]}">${message(code: 'employee.annualReport.label', default: 'Report')}</g:link></td>
+				<td style="border:1px;width:70px;padding:2px 5px 2px 15px;" class="principal"><g:link controller="employee" action='report' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link></td>
+				<td style="border:1px;width:70px;padding:2px 5px 2px 15px;" class="principal"><g:link controller="employee" action='vacationDisplay' class="listButton" id="${employeeInstance.id}" params="${[userId:employeeInstance?.id,siteId:siteId]}">${message(code: 'vacation.report.label', default: 'Report')}</g:link></td>
 					<g:form controller="employee">
 						<g:hiddenField name="userId" value="${employeeInstance?.id}" />
 						<td class="principal"><g:if test="${employeeInstance?.status}">

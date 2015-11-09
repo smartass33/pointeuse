@@ -336,6 +336,8 @@ class PDFService {
 	}
 	
 	
+	
+	
 	def generateAllSitesPaymentSheet(Period period,String folder){
 		log.error('generating paymentPDF for all sites with period: '+period)
 		def fileNameList=[]
@@ -366,6 +368,27 @@ class PDFService {
 		}
 		finalCopy.close();
 		file = new File(finalCopyName)
+		return [file.bytes,file.name]
+	}
+	
+	def generateSiteInfo(Date date,Site site,String folder){
+		def filename
+		OutputStream outputStream
+		File file
+		def calendar = Calendar.instance
+		calendar.time = date
+		def employeeInstanceList = Employee.findAllBySite(site)
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/siteInfoTemplate', model: [employeeInstanceList:employeeInstanceList])
+		
+		
+		filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-INFO-'+site.name+'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
 		return [file.bytes,file.name]
 	}
 }

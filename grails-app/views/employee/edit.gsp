@@ -26,8 +26,7 @@
 			#newContractForm {
     			display: none;
 			}
-			
-			
+					
 			#cartouche_div {
     			display: none;
 			}
@@ -65,7 +64,6 @@
 			      showMonthAfterYear: false,
 			      yearSuffix: ''};
 			   $.datepicker.setDefaults($.datepicker.regional['fr']);
-
 			});
 			
 			$(document).ready(function() {
@@ -86,7 +84,9 @@
 				</g:if>
 				<li><g:link class="list" action="list" params="${[isAdmin:isAdmin,siteId:siteId,back:true]}"><g:message code="default.list.label" args="[entityName]" /></g:link></li>			
 				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
-				<li><g:authorizationPopup fromReport="true" employeeInstanceId="${employeeInstance.id}"/></li>
+				<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">											
+					<li><g:authorizationPopup fromReport="${false}" fromEditEmployee="${true}" showEmployee="${false}" employeeInstanceId="${employeeInstance.id}"/></li>
+				</sec:ifAnyGranted>
 			</ul>
 		</div>
 		<div id="edit-employee" class="content scaffold-edit" role="main">
@@ -114,13 +114,14 @@
 					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
 				</fieldset>
 			</g:form>
-			
-			<div id="authorizationDiv">	
-				<g:if test="${authorizationInstanceList != null}">
-					<g:authorizationTable/>
-				</g:if>
-			</div>
-			<h1>gestion des contrats et du statut du salarié</H1>		
+			<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">								
+				<div id="authorizationDiv" style="padding-left:1.5em;">	
+					<g:if test="${authorizationInstanceList != null}">
+						<g:authorizationTable showEmployee="${false}"/>
+					</g:if>
+				</div>
+			</sec:ifAnyGranted>
+			<h1><g:message code="contract.and.status.management"/></H1>		
 			<BR>
 			<g:form method="post" >
 				<g:hiddenField name="id" value="${employeeInstance?.id}" />

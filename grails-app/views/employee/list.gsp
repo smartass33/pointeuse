@@ -15,22 +15,12 @@
 				font-family: Verdana, Arial, sans-serif;
 				font-size: 0.9em;
 			}
-			table {
-				border-collapse: collapse;
-			}
-			thead {
-				background-color: #DDD;
-			}
-			td {
-				padding: 2px 4px 2px 4px;
-			}
-			th {
-				padding: 2px 4px 2px 4px;
-			}
-			
+			table {border-collapse: collapse;}
+			thead {background-color: #DDD;}
+			td {padding: 2px 4px 2px 4px;}
+			th {padding: 2px 4px 2px 4px;}		
 			#detailSelector { display: none; }
-			th.admin { display: none; } td.admin { display: none; }
-	
+			th.admin { display: none; } td.admin { display: none; }	
 			table.showDetail th.admin { display: table-cell;  } 
 			table.showDetail th.principal { display: none; } 
 			table.showDetail td.admin { display: table-cell;  }
@@ -59,8 +49,7 @@
 		<div class="nav" id="nav">
 			<g:headerMenu />
 		</div>
-		<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
-		
+		<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>		
 		<div id="list-employee" class="standardNav">
 			<h1>
 				<g:message code="default.list.label" args="[entityName]" />
@@ -97,6 +86,14 @@
 					<li style="vertical-align: middle;">
 						<g:actionSubmit disabled="${period!=null}"  value="PDF" action="getSitePDF" class="${period!=null ? 'pdfButtonDisabled':'pdfButton'}" />
 					</li>	
+					
+					<!-- li style="vertical-align: middle;"><g:actionSubmit disabled="${period!=null}"  value="imprimer les détails" action="getSiteInfoPDF" class="${period!=null ? 'pdfButtonDisabled':'pdfButton'}" /></li-->	
+					<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">								
+						<li>
+							<g:actionSubmit class='excelButton' value="export excel"  action="employeeExcelExport"/>
+						</li>		
+					</sec:ifAnyGranted>
+					
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
 					<g:hiddenField name="siteId" value="${siteId}" />
 				</ul>

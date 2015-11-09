@@ -2,8 +2,8 @@
 <html>
 	<head>
 		<meta name="layout" content="main">
-		<g:set var="entityName" value="${message(code: 'authorization.label', default: 'Authorization')}" />
-		<title><g:message code="default.create.label" args="[entityName]" /></title>
+		<g:set var="entityName" value="${message(code: 'default.authorization.label', default: 'Authorization')}" />
+		<title><g:message code="default.feminine.new.label" args="[entityName]" /></title>		
 	</head>
 	<body>
 		<a href="#create-authorization" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
@@ -14,7 +14,9 @@
 			</ul>
 		</div>
 		<div id="create-authorization" class="content scaffold-create" role="main">
-			<h1><g:message code="default.create.label" args="[entityName]" /> pour ${employeeInstance.lastName} ${employeeInstance.firstName}</h1>
+			<g:if test="${employeeInstance != null}">
+				<h1><g:message code="default.create.label" args="[entityName]" /> pour ${employeeInstance.lastName} ${employeeInstance.firstName}</h1>
+			</g:if>
 			<g:if test="${flash.message}">
 			<div class="message" role="status">${flash.message}</div>
 			</g:if>

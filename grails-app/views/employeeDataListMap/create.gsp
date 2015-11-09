@@ -65,8 +65,8 @@
 					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">				
 						<td><g:link action="show" id="${employeeDataListMapInstance.id}">${fieldValue(bean: employeeDataListMapInstance, field: "creationDate")}</g:link></td>
 						<g:each in="${employeeDataListMapInstance.fieldMap}" var="fieldMap">
-							<td>${fieldMap.key}</td>
-							<td>${fieldMap.value}</td>
+							<td>${fieldMap != null ? fieldMap.key : '-'}</td>
+							<td>${fieldMap != null ? fieldMap.value : '-'}</td>
 						</g:each>					
 						<td>${employeeDataListMapInstance.creationUser.lastName} ${employeeDataListMapInstance.creationUser.firstName}</td>				
 						<td><g:formatDate date="${employeeDataListMapInstance.lastModification}" /></td>					

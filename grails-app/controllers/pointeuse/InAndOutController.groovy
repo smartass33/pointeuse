@@ -56,11 +56,7 @@ class InAndOutController {
 		def second = params["myTime_second"]!=null ? params.int("myTime_second") :0
 		def fromReport = params["fromReport"].equals('true') ? true:false
 		if (userId != null && userId != "" && userId.size()>0){
-		//	if (fromReport){
-				employee=Employee.get(userId)
-		//	}else{
-		//		employee=Employee.get(userId[0])
-		//	}
+			employee=Employee.get(userId)
 			employeeId=employee.id
 		}else{
 			flash.message = message(code: 'employee.not.null')
@@ -98,8 +94,6 @@ class InAndOutController {
 				def report = timeManagerService.getPointageData(employee)
 				report << [userId: employee.id,employee: employee]
 				render template: "/employee/template/last5DaysTemplate", model: report
-			
-				//redirect(action: "pointage", controller:"employee", id: employee.id)
 			}
 			return
 		}
@@ -161,7 +155,6 @@ class InAndOutController {
 				def report = timeManagerService.getReportData(null, employee,  null, calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR))
 				render template: "/employee/template/reportTableTemplate", model: report
 				return
-				//redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])				
 			}else{
 				log.error('entry created from pointage: '+inAndOutInstance)		
 				def report = timeManagerService.getPointageData(employee)

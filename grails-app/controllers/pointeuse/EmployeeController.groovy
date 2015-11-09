@@ -8,6 +8,7 @@ import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.Callable
 
 import groovy.time.TimeDuration
@@ -15,6 +16,7 @@ import groovy.time.TimeCategory
 import grails.converters.JSON
 
 import org.apache.commons.logging.LogFactory
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
 
 import pl.touk.excel.export.WebXlsxExporter
 
@@ -140,6 +142,7 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
+		log.error('entering list for employee')
 		params.each{i->log.debug('parameter of list: '+i)}
 		params.sort='site'
 		params.max = Math.min(max ?: 20, 100)
@@ -185,7 +188,7 @@ class EmployeeController {
 				employeeInstanceList=Employee.list(params)
 				employeeInstanceTotal = employeeInstanceList.totalCount
 			}
-		}
+		}	
 		[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
     }
 	
@@ -259,10 +262,99 @@ class EmployeeController {
     }
 	
 	
+	def employeeExcelExport(){
+		def folder = grailsApplication.config.pdf.directory
+		log.error('entering employeeExcelExport')
+		def site = Site.get(params.int("site.id"))
+		def calendar = Calendar.instance
+		def result
+		def employeeList
+		def value
+		if (site != null){
+			employeeList = Employee.findAllBySite(site)
+		}else{
+			employeeList = Employee.list()
+		}
+		def headers = ['LAST NAME','FIRSTNAME','USERNAME','MATRICULE','FUNCTION','SITE','SERVICE','WEEKLY TIME','ARRIVAL']
+		int i = 1
+		def employeeValue = []	
+		def criteria = EmployeeDataListMap.createCriteria()
+		def employeeDataListMap = criteria.get {
+			maxResults(1)
+		}
+
+		def fieldMap = (employeeDataListMap != null) ? employeeDataListMap.fieldMap : [:]
+		fieldMap.each{k,v->
+			headers.add(k)
+		}
+		
+		def authorizationTypes = AuthorizationType.list()
+		for (AuthorizationType authorizationType : authorizationTypes){
+			headers.add('habilitation: '+authorizationType.type)
+			headers.add("début d'habilitation")
+			headers.add("fin d'habilitation")
+		}
+		
+		
+		def authorizations
+		
+		
+		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/employee_list_template.xlsx').with {
+			setResponseHeaders(response)		
+			fillHeader(headers)
+			for(employee in employeeList) {			
+				employeeValue = []
+				employeeValue.add(employee.lastName != null ? employee.lastName :'-')
+				employeeValue.add(employee.firstName != null ? employee.firstName :'-')
+				employeeValue.add(employee.userName != null ? employee.userName :'-')
+				employeeValue.add(employee.matricule != null ? employee.matricule :'-')
+				employeeValue.add(employee.function != null ? employee.function.name :'-')
+				employeeValue.add(employee.site != null ? employee.site.name :'-')
+				employeeValue.add(employee.service != null ? employee.service.name :'-')				
+				employeeValue.add(employee.weeklyContractTime != null ? employee.weeklyContractTime :'-')
+				employeeValue.add(employee.arrivalDate != null ? employee.arrivalDate.format('dd/MM/yyyy') :'-')
+				fieldMap.each{k,v->
+					value = employee.extraData.get(k)	
+					if (value == null || value.equals('')){
+						value = '-'
+					}			
+					if (v.equals('DATE')){
+						if (value != null && !value.equals('-')){
+							value = (new Date().parse("yyyyMd", value)).format('dd/MM/yyyy')
+						}
+					}				
+					employeeValue.add(value)
+				}			
+				
+				authorizations = Authorization.findByEmployee(employee)
+				
+				for (AuthorizationType authorizationType :  authorizationTypes){									
+					for (Authorization authorization : authorizations){
+						log.error(authorization.type.type)
+						if ((authorization.type.type).equals(authorizationType.type)){
+							log.error('types are equal')
+							employeeValue.add(authorization.isAuthorized)	
+							employeeValue.add(authorization.startDate != null ? authorization.startDate.format('dd/MM/yyyy') :'-')
+							employeeValue.add(authorization.endDate != null ? authorization.endDate.format('dd/MM/yyyy') :'-')							
+						}else{
+							employeeValue.add('-')				
+						}
+					}
+					
+				}
+				fillRow(employeeValue,i)
+				i+=1
+
+			}		
+			save(response.outputStream)
+		}	
+	}
+	
 	def vacationExcelExport(){
+		log.error()
 		def folder = grailsApplication.config.pdf.directory	
 		log.error('entering vacationExcelExport')
-		def site
+		def site = params['site']
 		def calendar = Calendar.instance	
 		def result
 		
@@ -906,18 +998,14 @@ class EmployeeController {
 			for (Vacation vacation:vacations){
 				orderedVacationList.add(vacation)
 			}			
-		}		
-		
+		}				
 		previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'startDate',order:'desc'])
-		
-		
         if (!employeeInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'employee.label', default: 'Employee'), id])
             redirect(action: "list")
             return
         }
-		def arrivalDate = employeeInstance.arrivalDate
-		
+		def arrivalDate = employeeInstance.arrivalDate		
 		def criteria = EmployeeDataListMap.createCriteria()
 		def employeeDataListMapInstance = criteria.get {
 			maxResults(1)
@@ -926,6 +1014,7 @@ class EmployeeController {
 		
 		def retour = [
 			authorizationInstanceList:authorizationInstanceList,
+			fromEditEmployee:true,
 			back:back,
 			myDateFromEdit:myDate,
 			previousContracts:previousContracts,
@@ -934,7 +1023,7 @@ class EmployeeController {
 			orderedVacationListfromSite:fromSite,
 			employeeInstance: employeeInstance,
 			isAdmin:isAdmin,siteId:siteId,
-			employeeDataListMapInstance:employeeDataListMapInstance
+			employeeDataListMapInstance:employeeDataListMapInstance			
 		]		
 		return retour
 	}
@@ -2761,10 +2850,6 @@ class EmployeeController {
 			redirect(action: "list")
 			return
 		}
-				
-		//log.error("calendar is: "+calendar.time)
-		//calendar.roll(Calendar.MONTH,-1)
-		
 		def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')		
 		if (!file.exists()){
 			flash.message = message(code: 'pdf.site.report.not.available')
@@ -2775,7 +2860,42 @@ class EmployeeController {
 		}
 	}
 	
+	def getSiteInfoPDF(Long id){
+		def myDate = params["myDate"]
+		def site
+		def siteId
+		def timeDifference
+		Calendar calendar = Calendar.instance
+		def startTime = calendar.time
+		def folder = grailsApplication.config.pdf.directory
+		
+		if (myDate==null || myDate.equals("")){
+			myDate=calendar.time
+		}else {
+			calendar.time=myDate
+		}
+
+		if (params["site.id"]!=null && !params["site.id"].equals('')){
+			site = Site.get(params["site.id"].toInteger())
+		}else{
+			flash.message = message(code: 'pdf.site.selection.error')
+			redirect(action: "list")
+			return
+		}
 	
+		def retour = PDFService.generateSiteInfo(myDate,site,folder)
+		def file = new File(folder+'/'+retour[1])
+		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
+		
+		
+		if (!file.exists()){
+			flash.message = message(code: 'pdf.site.report.not.available')
+			redirect(action: "list")
+			return
+		}else{
+			render(file: file, fileName: file.name,contentType: "application/octet-stream")
+		}
+	}
 	def createAllSitesPDF() {
 		def timeDifference
 		def folder = grailsApplication.config.pdf.directory
