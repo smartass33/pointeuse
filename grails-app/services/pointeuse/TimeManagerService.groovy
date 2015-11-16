@@ -2652,8 +2652,14 @@ class TimeManagerService {
 						}
 					}
 				}
-		
 				log.debug('open days: '+realOpenDays)
+				log.debug('realOpenDays*weeklyContractTime/Employee.WeekOpenedDays: '+realOpenDays*weeklyContractTime/Employee.WeekOpenedDays)
+				log.debug('(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime): '+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime))
+				log.debug('(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)): '+(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)))
+				log.debug('(35/7)*absenceMap.get(AbsenceType.PATERNITE): '+(35/7)*absenceMap.get(AbsenceType.PATERNITE))
+				log.debug('(weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday: '+(weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday)
+				log.debug('absenceMap.get(AbsenceType.GROSSESSE)): '+absenceMap.get(AbsenceType.GROSSESSE))
+			
 				if (isOut){
 					monthTheoritical += 0
 				}else{
@@ -2668,7 +2674,7 @@ class TimeManagerService {
 							- absenceMap.get(AbsenceType.GROSSESSE)) as int			
 				}
 			}
-			log.debug('monthTheoritical: '+monthTheoritical)		
+			log.debug('monthTheoritical with month: '+month+' and year: '+year+' is: '+monthTheoritical)		
 		}
 		return monthTheoritical
 	}
@@ -3526,7 +3532,7 @@ class TimeManagerService {
 		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
 		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
 			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
-				log.error('calendarIter: '+calendarIter.time)
+				log.debug('calendarIter: '+calendarIter.time)
 				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				
 				criteria = MonthlyTotal.createCriteria()
@@ -3554,7 +3560,7 @@ class TimeManagerService {
 			}
 		}else{
 			while(calendarIter.get(Calendar.MONTH) <= 11){
-				log.error('calendarIter: '+calendarIter.time)
+				log.debug('calendarIter: '+calendarIter.time)
 				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				
 				
@@ -3587,7 +3593,7 @@ class TimeManagerService {
 			calendarIter.set(Calendar.YEAR,(calendarIter.get(Calendar.YEAR)+1))
 			
 			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
-				log.error('calendarIter: '+calendarIter.time)
+				log.debug('calendarIter: '+calendarIter.time)
 				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				criteria = MonthlyTotal.createCriteria()
 				 monthlyTotal = criteria.get {

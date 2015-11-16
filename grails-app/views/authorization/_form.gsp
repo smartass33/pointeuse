@@ -37,5 +37,5 @@
 		<g:message code="authorization.type.label" default="Type" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:select id="type" name="type" from="${AuthorizationType.findAll()}" optionKey="id" required="" optionValue="type" value="${authorizationTypeInstance?.nature?.id}" class="many-to-one"         />
+	<g:select id="type" name="type" from="${AuthorizationType.findAll()}" optionKey="id" required="" optionValue="name" value="${authorizationTypeInstance?.nature?.id}" class="many-to-one"         />
 </div>

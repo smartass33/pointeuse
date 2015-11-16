@@ -27,29 +27,35 @@ class AuthorizationTypeController {
 
     @Transactional
     def save(AuthorizationType authorizationTypeInstance) {
-		def user = springSecurityService.currentUser
-		authorizationTypeInstance.user = user
-		authorizationTypeInstance.creationDate = new Date()
-        if (authorizationTypeInstance == null) {
-            notFound()
-            return
-        }
-
-		authorizationTypeInstance.validate()
-        if (authorizationTypeInstance.hasErrors()) {
-            respond authorizationTypeInstance.errors, view:'create'
-            return
-        }
-
-        authorizationTypeInstance.save flush:true
-
-        request.withFormat {
-            form {
-                flash.message = message(code: 'default.created.message', args: [message(code: 'authorizationTypeInstance.label', default: 'AuthorizationType'), authorizationTypeInstance.id])
-                redirect authorizationTypeInstance
-            }
-            '*' { respond authorizationTypeInstance, [status: CREATED] }
-        }
+		try  {
+			def user = springSecurityService.currentUser
+			authorizationTypeInstance.user = user
+			authorizationTypeInstance.creationDate = new Date()
+	        if (authorizationTypeInstance == null) {
+	            notFound()
+	            return
+	        }
+	
+			authorizationTypeInstance.validate()
+	        if (authorizationTypeInstance.hasErrors()) {
+	            respond authorizationTypeInstance.errors, view:'create'
+	            return
+	        }
+	
+	        authorizationTypeInstance.save flush:true
+	
+	        request.withFormat {
+	            form {
+	                flash.message = message(code: 'default.created.message', args: [message(code: 'authorizationType.label', default: 'AuthorizationType'), authorizationTypeInstance.name])
+	                redirect authorizationTypeInstance
+	            }
+	            '*' { respond authorizationTypeInstance, [status: CREATED] }
+	        }
+		}catch (Exception e){
+			flash.message = message('impossible.delete.message', args: [authorizationTypeInstance.name])
+			redirect authorizationTypeInstance
+			return
+		}
     }
 
     def edit(AuthorizationType authorizationTypeInstance) {
@@ -101,7 +107,7 @@ class AuthorizationTypeController {
     protected void notFound() {
         request.withFormat {
             form {
-                flash.message = message(code: 'default.not.found.message', args: [message(code: 'authorizationTypeInstance.label', default: 'AuthorizationType'), params.id])
+                flash.message = message(code: 'default.not.found.message', args: [message(code: 'authorizationType.label', default: 'AuthorizationType'), params.id])
                 redirect action: "index", method: "GET"
             }
             '*'{ render status: NOT_FOUND }

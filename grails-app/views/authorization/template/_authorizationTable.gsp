@@ -32,7 +32,7 @@
 								</g:else>
 							</td>							
 							<td style="align:center;"><g:formatDate date="${authorizationInstance.endDate}" format="dd/MM/yyyy"/></td>					
-							<td style="align:center;">${authorizationInstance.type.type}</td>	
+							<td style="align:center;">${authorizationInstance.type.name}</td>	
 							<td style="align:center;">
 						    	<g:remoteLink action="trashAuthorization" controller="authorization" id="trashAuthorization" params="[authorizationInstanceId:authorizationInstance.id,showEmployee:showEmployee,fromEditEmployee:fromEditEmployee]"
 				                    	update="authorizationDiv"

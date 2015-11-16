@@ -9,10 +9,7 @@ class Vacation {
 	VacationType type
 	Period period
 	
-	//static belongsTo = [employee:Employee]
-    static constraints = {
-	//	period(unique:['type','employee','period'])
-    }
+	static belongsTo = [employee:Employee]
 	
 	String toString(){
 		return (this.period).toString() +' - ' + this.type+' : '+this.counter

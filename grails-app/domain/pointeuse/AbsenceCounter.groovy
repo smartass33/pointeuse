@@ -7,6 +7,7 @@ class AbsenceCounter {
 	User user
 	int year
 	float counter
+	static belongsTo = [employee:Employee]
 	
     static constraints = {
     }

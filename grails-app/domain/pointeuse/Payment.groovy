@@ -9,13 +9,11 @@ class Payment {
 	int month
 	double amountPaid
 	
+	static belongsTo = [employee: Employee]
     static constraints = {
 		amountPaid (unique:['employee','period','month'])
 		amountPaid (blank: true,nullable:true)
     }
-	
-	String toString(){
-	}
 	
 	
 	Payment(Employee employee,Period period, int month,double amountPaid){

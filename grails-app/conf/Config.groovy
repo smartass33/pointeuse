@@ -81,7 +81,7 @@ environments {
 			
 				appenders {
 					//appender new EventLogAppender(source:'pointeuse', name: 'eventLogAppender', layout:new EnhancedPatternLayout(conversionPattern: '%d{DATE} %5p %c{1}:%L - %m%n %throwable{500}'), threshold: org.apache.log4j.Level.ERROR)		
-					rollingFile name:'rollingFileAppender',file:"/Users/henri/Documents/workspace/pointeuse/logs/pointeuse.log", maxFileSize:1024,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					rollingFile name:'rollingFileAppender',file:"/Users/henri/Documents/workspace/pointeuse/logs/pointeuse.log", maxFileSize:1024,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
 			
 				//warn  rollingFileAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
@@ -117,7 +117,7 @@ environments {
 		log4j = {
 				'null' name:'stacktrace'
 				appenders {
-					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
 			
 				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
@@ -132,7 +132,7 @@ environments {
 					   'net.sf.ehcache.hibernate'
 				
 				root {
-					warn 'myAppender','rollingFile'
+					warn 'myAppender'//,'rollingFile'
 				}
 			}
 	}

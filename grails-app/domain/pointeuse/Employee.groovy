@@ -19,7 +19,7 @@ class Employee{
 	Status status
 	Map extraData 
 	
-	static hasMany = [contracts:Contract,vacationsCounters:Vacation,absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
+	static hasMany = [payments:Payment,supplementary_time:SupplementaryTime,contracts:Contract,vacations:Vacation,vacationsCounters:Vacation,absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
 	static searchable = true	
 	static constraints = {
 		matricule (blank: true,nullable:true)

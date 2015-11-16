@@ -22,36 +22,26 @@
 			<div class="message" role="status">${flash.message}</div>
 			</g:if>
 			<ol class="property-list authorizationNature">
-			
-
-			
 				<g:if test="${authorizationNatureInstance?.creationDate}">
 				<li class="fieldcontain">
-					<span id="creationDate-label" class="property-label"><g:message code="authorizationNature.creationDate.label" default="Creation Date" /></span>
-					
-						<span class="property-value" aria-labelledby="creationDate-label"><g:formatDate date="${authorizationNatureInstance?.creationDate}" /></span>
-					
+					<span id="creationDate-label" class="property-label"><g:message code="creation.date.label" default="Creation Date" /></span>				
+					<span class="property-value" aria-labelledby="creationDate-label"><g:formatDate date="${authorizationNatureInstance?.creationDate}" format='dd/MM/yyyy' /></span>				
 				</li>
 				</g:if>
 			
-				<g:if test="${authorizationNatureInstance?.nature}">
+				<g:if test="${authorizationNatureInstance?.name}">
 				<li class="fieldcontain">
-					<span id="nature-label" class="property-label"><g:message code="authorizationNature.nature.label" default="Nature" /></span>
-					
-						<span class="property-value" aria-labelledby="nature-label"><g:fieldValue bean="${authorizationNatureInstance}" field="nature"/></span>
-					
+					<span id="namelabel" class="property-label"><g:message code="authorizationNature.label" default="Nature" /></span>		
+					<span class="property-value" aria-labelledby="name-label"><g:fieldValue bean="${authorizationNatureInstance}" field="name"/></span>					
 				</li>
 				</g:if>
 			
 				<g:if test="${authorizationNatureInstance?.user}">
 				<li class="fieldcontain">
 					<span id="user-label" class="property-label"><g:message code="authorizationNature.user.label" default="User" /></span>
-					
-						<span class="property-value" aria-labelledby="user-label"><g:link controller="user" action="show" id="${authorizationNatureInstance?.user?.id}">${authorizationNatureInstance?.user?.encodeAsHTML()}</g:link></span>
-					
+					<span class="property-value" aria-labelledby="user-label"><g:link controller="user" action="show" id="${authorizationNatureInstance?.user?.id}">${authorizationNatureInstance?.user?.firstName} ${authorizationNatureInstance?.user?.lastName}</g:link></span>				
 				</li>
-				</g:if>
-			
+				</g:if>			
 			</ol>
 			<g:form url="[resource:authorizationNatureInstance, action:'delete']" method="DELETE">
 				<fieldset class="buttons">

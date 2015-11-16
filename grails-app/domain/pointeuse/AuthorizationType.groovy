@@ -5,7 +5,7 @@ import java.util.Date;
 
 class AuthorizationType {
 
-	String type
+	String name
 	AuthorizationNature nature
 	Date creationDate
 	User user

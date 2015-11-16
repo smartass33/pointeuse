@@ -65,6 +65,7 @@ class EmployeeController {
 	def dailyReport(){
 		def dailyMap = [:]
 		def dailySupMap = [:]
+		def dailyInAndOutMap = [:]
 		def siteId=params["site.id"]
 		def dailyTotal
 		def inAndOutList
@@ -1432,20 +1433,21 @@ class EmployeeController {
 	
     def delete(Long id) {
         def employeeInstance = Employee.get(id)
+		def employeeName = employeeInstance.firstName + ' ' +employeeInstance.lastName
         if (!employeeInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'employee.label', default: 'Employee'), id])
+            flash.message = message(code: 'default.not.found.message', args: [message(code: 'employee.label', default: 'Employee'), employeeName])
             redirect(action: "list")
             return
         }
 
         try {
             employeeInstance.delete(flush: true)
-            flash.message = message(code: 'default.deleted.message', args: [message(code: 'employee.label', default: 'Employee'), id])
+            flash.message = message(code: 'default.deleted.message', args: [message(code: 'employee.label', default: 'Employee'), employeeName])
             redirect(action: "list")
         }
         catch (DataIntegrityViolationException e) {
 			log.error('error with application: '+e.toString())
-            flash.message = message(code: 'default.not.deleted.message', args: [message(code: 'employee.label', default: 'Employee'), id])
+            flash.message = message(code: 'default.not.deleted.message', args: [message(code: 'employee.label', default: 'Employee'), employeeName])
             redirect(action: "show", id: id)
         }
     }
@@ -3094,4 +3096,57 @@ class EmployeeController {
 		thTime.join()
 	}
 	
+	def recreateEmployeeData(Long id){
+		params.each{i->log.error(i)}
+		def employee = Employee.get(id)
+		def criteria = InAndOut.createCriteria()
+		def calendar = Calendar.instance
+		def executionTime
+		//calendar.clearTime()
+		def iteratorCal = Calendar.instance
+		iteratorCal.clearTime()
+		//find first day of work
+		def first_in_and_out = criteria.get{
+			and {
+				eq('employee',employee)
+				order('time')
+			}
+			maxResults(1)
+		}
+		iteratorCal.set(Calendar.DAY_OF_MONTH,first_in_and_out.day)
+		iteratorCal.set(Calendar.MONTH,first_in_and_out.month - 1)
+		iteratorCal.set(Calendar.YEAR,first_in_and_out.year)
+		log.error('calendar starts at: '+calendar.time)
+		
+		
+		def inAndOuts=InAndOut.findAllByEmployee(employee)
+		for (InAndOut inAndOut : inAndOuts){
+			iteratorCal.set(Calendar.DAY_OF_MONTH,inAndOut.day)
+			iteratorCal.set(Calendar.MONTH,inAndOut.month - 1)
+			iteratorCal.set(Calendar.YEAR,inAndOut.year)
+			
+			timeManagerService.initializeTotals(employee, iteratorCal.time)
+			timeManagerService. recomputeDailyTotals(employee.id as int,inAndOut.day as int,inAndOut.month as int,inAndOut.year as int)
+				
+			
+		}
+		def endDate = new Date()
+		use (TimeCategory){executionTime=endDate-calendar.time}
+		
+		log.error('recreateEmployeeData executed in '+executionTime+' for employee: '+employee.lastName)
+	
+	}
+	
+	def executeScript(){
+		def folder = grailsApplication.config.pdf.directory
+		def scriptName = 'my_script.sh'
+		def file = folder+'/'+scriptName
+		log.error('file: '+file)
+	//	[file, 'arg1', 'arg2'].execute()
+		def employeeId=2
+		
+		('/usr/local/mysql/bin/mysqldump -u root --no-create-info --where="employee_id=\'2\'" --ignore-table=pointeuse.absence_type_config --ignore-table=pointeuse.authorization_nature --ignore-table=pointeuse.authorization_type --ignore-table=pointeuse.bank_holiday --ignore-table=pointeuse.card_terminal --ignore-table=pointeuse.employee_data_list_map --ignore-table=pointeuse.employee_data_list_map_field_map --ignore-table=pointeuse.employee_data_list_map_hidden_field_map --ignore-table=pointeuse.employee_extra_data --ignore-table=pointeuse.event_log --ignore-table=pointeuse.exception_logger --ignore-table=pointeuse.function --ignore-table=pointeuse.period --ignore-table=pointeuse.reason --ignore-table=pointeuse.role --ignore-table=pointeuse.service --ignore-table=pointeuse.site --ignore-table=pointeuse.site_user --ignore-table=pointeuse.status --ignore-table=pointeuse.user --ignore-table=pointeuse.user_role --ignore-table=pointeuse.year --ignore-table=pointeuse.employee --ignore-table=pointeuse.dummy --ignore-table=pointeuse.monthly_total_weekly_total -C pointeuse --result-file=/Users/henri/alldatabases.sql').execute()
+		
+		
+	}
 }

@@ -36,8 +36,6 @@ class AuthorizationNatureController {
             return
         }
 		authorizationNatureInstance.validate()
-		log.error('authorizationNatureInstance.validate(): '+authorizationNatureInstance.validate())
-		log.error('authorizationNatureInstance.hasErrors(): '+authorizationNatureInstance.hasErrors())
         if (authorizationNatureInstance.hasErrors()) {
             respond authorizationNatureInstance.errors, view:'create'
             return
@@ -47,7 +45,7 @@ class AuthorizationNatureController {
 
         request.withFormat {
             form {
-                flash.message = message(code: 'default.created.message', args: [message(code: 'authorizationNatureInstance.label', default: 'AuthorizationNature'), authorizationNatureInstance.id])
+                flash.message = message(code: 'default.created.message', args: [message(code: 'authorizationNature.label', default: 'AuthorizationNature'), authorizationNatureInstance.name])
                 redirect authorizationNatureInstance
             }
             '*' { respond authorizationNatureInstance, [status: CREATED] }
@@ -83,27 +81,33 @@ class AuthorizationNatureController {
 
     @Transactional
     def delete(AuthorizationNature authorizationNatureInstance) {
-
-        if (authorizationNatureInstance == null) {
-            notFound()
-            return
+		try{
+	        if (authorizationNatureInstance == null) {
+	            notFound()
+	            return
+	        }
+			
+	        authorizationNatureInstance.delete flush:true
+	
+	        request.withFormat {
+	            form {
+	                flash.message = message(code: 'default.deleted.message', args: [message(code: 'AuthorizationNature.label', default: 'AuthorizationNature'), authorizationNatureInstance.id])
+	                redirect action:"index", method:"GET"
+	            }
+	            '*'{ render status: NO_CONTENT }
         }
-
-        authorizationNatureInstance.delete flush:true
-
-        request.withFormat {
-            form {
-                flash.message = message(code: 'default.deleted.message', args: [message(code: 'AuthorizationNature.label', default: 'AuthorizationNature'), authorizationNatureInstance.id])
-                redirect action:"index", method:"GET"
-            }
-            '*'{ render status: NO_CONTENT }
-        }
+		}catch (Exception e){
+			flash.message = message('impossible.delete.message', args: [authorizationNatureInstance.name])
+			redirect AuthorizationNature
+			return
+		}
+		
     }
 
     protected void notFound() {
         request.withFormat {
             form {
-                flash.message = message(code: 'default.not.found.message', args: [message(code: 'authorizationNatureInstance.label', default: 'AuthorizationNature'), params.id])
+                flash.message = message(code: 'default.not.found.message', args: [message(code: 'authorizationNature.label', default: 'AuthorizationNature'), params.id])
                 redirect action: "index", method: "GET"
             }
             '*'{ render status: NOT_FOUND }

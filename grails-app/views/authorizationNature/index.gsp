@@ -23,16 +23,16 @@
 			<table>
 				<thead>
 					<tr>
-						<g:sortableColumn property="creationDate" title="${message(code: 'creationDate.label', default: 'Creation Date')}" />					
-						<g:sortableColumn property="nature" title="${message(code: 'authorizationNature.user.label', default: 'Nature')}" />					
+						<g:sortableColumn property="creationDate" title="${message(code: 'creation.date.label', default: 'Creation Date')}" />					
+						<g:sortableColumn property="nature" title="${message(code: 'authorizationType.nature.label', default: 'Nature')}" />					
 						<th><g:message code="authorizationNature.user.label" default="User" /></th>					
 					</tr>
 				</thead>	
 				<tbody>
 					<g:each in="${authorizationNatureInstanceList}" status="i" var="authorizationNatureInstance">
 						<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">						
-							<td><g:formatDate date="${authorizationNatureInstance.creationDate}"  format="dd/MM/yyyy"/></td>						
-							<td>${authorizationNatureInstance.nature}</td>						
+							<td><g:formatDate date="${authorizationNatureInstance.creationDate}"  format="dd/MM/yyyy"/></td>													
+							<td><g:link controller="authorizationNature" action="show" id="${authorizationNatureInstance?.id}">${authorizationNatureInstance.name}</g:link></td>											
 							<td>${authorizationNatureInstance.user.firstName} ${authorizationNatureInstance.user.lastName}</td>						
 						</tr>
 					</g:each>

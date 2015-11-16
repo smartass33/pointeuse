@@ -23,14 +23,14 @@
 			<ol class="property-list authorizationType">		
 				<g:if test="${authorizationTypeInstance?.creationDate}">
 				<li class="fieldcontain">
-					<span id="creationDate-label" class="property-label"><g:message code="creationDate.label" default="Creation Date" /></span>
+					<span id="creationDate-label" class="property-label"><g:message code="creation.date.label" default="Creation Date" /></span>
 					<span class="property-value" aria-labelledby="creationDate-label"><g:formatDate date="${authorizationTypeInstance?.creationDate}" format='dd/MM/yyyy'/></span>					
 				</li>
 				</g:if>		
 				<g:if test="${authorizationTypeInstance?.nature}">
 				<li class="fieldcontain">
 					<span id="nature-label" class="property-label"><g:message code="authorizationType.nature.label" default="Nature" /></span>
-					<span class="property-value" aria-labelledby="nature-label"><g:link controller="authorizationNature" action="show" id="${authorizationTypeInstance?.nature?.id}">${authorizationTypeInstance?.nature?.nature}</g:link></span>
+					<span class="property-value" aria-labelledby="nature-label"><g:link controller="authorizationNature" action="show" id="${authorizationTypeInstance?.nature?.id}">${authorizationTypeInstance?.nature?.name}</g:link></span>
 				</li>
 				</g:if>
 				<g:if test="${authorizationTypeInstance?.type}">

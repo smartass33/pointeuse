@@ -14,7 +14,12 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="cartoucheLeftTD" >${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${currentContract.weeklyLength}</td>
+			<g:if test='${currentContract != null}'>
+				<td class="cartoucheLeftTD" >${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${currentContract.weeklyLength}</td>
+			</g:if>
+			<g:else>
+				<td class="cartoucheLeftTD" >${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: -</td>
+			</g:else>
 		</tr>
 		<tr>
 			<td class="cartoucheLeftTD" >${message(code: 'employee.matricule.label', default: 'report')}: ${fieldValue(bean: employee, field: "matricule")}</td>

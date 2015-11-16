@@ -10,6 +10,7 @@ class SupplementaryTime {
 	int month
 	double amountPaid
 	Date lastPayment
+	static belongsTo = [employee: Employee]
 	
     static constraints = {
 		month (unique:['employee','period'])
