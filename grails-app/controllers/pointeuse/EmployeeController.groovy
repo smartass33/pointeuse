@@ -34,9 +34,7 @@ class EmployeeController {
 	def springSecurityService
 	def timeManagerService 
 	def supplementaryTimeService
-	def employeeService
-	//def executorService
-	
+	def employeeService	
 	def dataSource
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 	long secondInMillis = 1000;
@@ -122,16 +120,15 @@ class EmployeeController {
 				return [site:site,fromIndex:fromIndex,currentDate:calendar.time]
 			}
 			
-			dailyInAndOutMap.put(employee, inAndOutList)
-			if (dailyTotal != null){
-				elapsedSeconds = (timeManagerService.getDailyTotal(dailyTotal)).get('elapsedSeconds')
-			}
+			dailyInAndOutMap.put(employee, inAndOutList)	
+			elapsedSeconds = dailyTotal != null ? (timeManagerService.getDailyTotal(dailyTotal)).get('elapsedSeconds') : 0
+	
 			if (elapsedSeconds > DailyTotal.maxWorkingTime){
-				dailySupMap.put(employee,timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(elapsedSeconds-DailyTotal.maxWorkingTime),false))
+				dailySupMap.put(employee,elapsedSeconds-DailyTotal.maxWorkingTime)
 			}else{
-				dailySupMap.put(employee,timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(0),false))
+				dailySupMap.put(employee,0)
 			}
-			dailyMap.put(employee,timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(elapsedSeconds),false))
+			dailyMap.put(employee,elapsedSeconds)
 		}		
 		if (site!=null){
 			render template: "/employee/template/listDailyTimeTemplate", model:[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
@@ -262,23 +259,18 @@ class EmployeeController {
         [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]
     }
 	
-	
 	def employeeExcelExport(){
 		def folder = grailsApplication.config.pdf.directory
 		log.error('entering employeeExcelExport')
 		def site = Site.get(params.int("site.id"))
 		def calendar = Calendar.instance
 		def result
-		def employeeList
+		def authorizations
 		def value
-		if (site != null){
-			employeeList = Employee.findAllBySite(site)
-		}else{
-			employeeList = Employee.list()
-		}
-		def headers = ['LAST NAME','FIRSTNAME','USERNAME','MATRICULE','FUNCTION','SITE','SERVICE','WEEKLY TIME','ARRIVAL']
+		def headers = ['LAST NAME','FIRSTNAME','USERNAME','MATRICULE','FUNCTION','SITE','SERVICE','WEEKLY TIME','ARRIVAL']		
 		int i = 1
 		def employeeValue = []	
+		def employeeList = (site != null) ? Employee.findAllBySite(site) : Employee.list()	
 		def criteria = EmployeeDataListMap.createCriteria()
 		def employeeDataListMap = criteria.get {
 			maxResults(1)
@@ -295,10 +287,6 @@ class EmployeeController {
 			headers.add("début d'habilitation")
 			headers.add("fin d'habilitation")
 		}
-		
-		
-		def authorizations
-		
 		
 		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/employee_list_template.xlsx').with {
 			setResponseHeaders(response)		
@@ -1432,6 +1420,7 @@ class EmployeeController {
 	}
 	
     def delete(Long id) {
+		
         def employeeInstance = Employee.get(id)
 		def employeeName = employeeInstance.firstName + ' ' +employeeInstance.lastName
         if (!employeeInstance) {
@@ -1439,9 +1428,45 @@ class EmployeeController {
             redirect(action: "list")
             return
         }
-
         try {
-            employeeInstance.delete(flush: true)
+			def folder = grailsApplication.config.pdf.directory
+			def mysqldump_folder = grailsApplication.config.mysqldump.directory
+			def file = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'.sql'
+			def file1 = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'1.sql'
+			def file2 = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'2.sql'
+			
+			def threads = []
+			def dump1_thread = new Thread({
+				log.error('creating thread for mysqldump 1 ')
+				(mysqldump_folder+'/mysqldump -u root --no-create-info --where=id='+employeeInstance.id+' -C pointeuse employee --result-file='+file1).execute()
+			})
+			threads << dump1_thread
+			
+			def dump2_thread = new Thread({
+				log.error('creating thread for mysqldump 2 ')
+				(mysqldump_folder+'/mysqldump -u root --no-create-info --where=employee_id='+employeeInstance.id+' --ignore-table=pointeuse.absence_type_config --ignore-table=pointeuse.authorization_nature --ignore-table=pointeuse.authorization_type --ignore-table=pointeuse.bank_holiday --ignore-table=pointeuse.card_terminal --ignore-table=pointeuse.employee_data_list_map --ignore-table=pointeuse.employee_data_list_map_field_map --ignore-table=pointeuse.employee_data_list_map_hidden_field_map --ignore-table=pointeuse.employee_extra_data --ignore-table=pointeuse.event_log --ignore-table=pointeuse.exception_logger --ignore-table=pointeuse.function --ignore-table=pointeuse.period --ignore-table=pointeuse.reason --ignore-table=pointeuse.role --ignore-table=pointeuse.service --ignore-table=pointeuse.site --ignore-table=pointeuse.site_user --ignore-table=pointeuse.status --ignore-table=pointeuse.user --ignore-table=pointeuse.user_role --ignore-table=pointeuse.year --ignore-table=pointeuse.employee --ignore-table=pointeuse.dummy --ignore-table=pointeuse.monthly_total_weekly_total -C pointeuse --result-file='+file2).execute()
+			})
+			threads << dump2_thread		
+	
+			threads.each { it.start() }
+			threads.each { it.join() }
+			def delete_thread = new Thread({
+					new File(file).withWriter { w ->				
+					[file1,file2].each{ f ->	
+						// Get a reader for the input file
+						new File(f).withReader { r ->					
+						  // And write data from the input into the output
+						 w << r << '\n'
+						}
+					}
+				}
+				boolean file1SuccessfullyDeleted =  new File(file1).delete()
+				boolean file2SuccessfullyDeleted =  new File(file2).delete()
+			})
+			delete_thread.sleep((long)(2000))
+			delete_thread.start()
+				
+			employeeInstance.delete()//(flush: true)
             flash.message = message(code: 'default.deleted.message', args: [message(code: 'employee.label', default: 'Employee'), employeeName])
             redirect(action: "list")
         }
@@ -2066,19 +2091,9 @@ class EmployeeController {
 		def endTime = calendar.time
 		use (TimeCategory){timeDifference = endTime - startTime}
 		log.error("le rapport a pris: "+timeDifference)
-		//response.setContentType("application/pdf")
-		//response.setHeader("Content-disposition", "filename=${retour[1]}")
-		//response.outputStream << retour[0]
-		
+
 		def file = new File(folder+'/'+retour[1])
-		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
-		/*
-		response.setContentType("application/octet-stream")
-		response.setHeader("Content-disposition", "attachment;filename=${file.getName()}")
-		
-		response.outputStream << file.newInputStream()
-		*/
-		
+		render(file: file, fileName: retour[1],contentType: "application/octet-stream")		
 	}
 	
 	def allSiteMonthlyPDF(){
@@ -2414,7 +2429,6 @@ class EmployeeController {
 		Calendar calendar = Calendar.instance
 		def startTime = calendar.time
 		def folder = grailsApplication.config.pdf.directory
-		//SimpleDateFormat dateFormat = new SimpleDateFormat('MM/yyyy');
 		if (myDate==null || myDate.equals("")){
 			myDate=calendar.time
 		}else {
@@ -2944,36 +2958,22 @@ class EmployeeController {
 						if (!file.exists()){
 							return
 						}else{
-							log.error('file found for site '+site.name)	
-							def phil = User.get(2)
-							if (user.email != null && file.length() > 0){
-								mailService.sendMail {
-									multipart true
-									to phil.email
-									subject "Rapport Mensuel du site "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
-									body "Veuillez trouver ci-joint le rapport mensuel du site"
-									attachBytes filename,'application/pdf', file.readBytes()
-									
-								}
-							}
-							
-							/*	
 							if (user.email != null && file.length() > 0){				
+								log.error('file found for site '+site.name+', sending it to :'+user.email)
 								mailService.sendMail {
 									multipart true
 									to user.email
-									subject "Rapport Mensuel du site "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
-									body "Veuillez trouver ci-joint le rapport mensuel du site"
-									attachBytes filename,'application/pdf', file.readBytes()
-									
+									subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+									html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])											 
+									attachBytes filename,'application/pdf', file.readBytes()		
+									inline 'biolab33', 'image/png', new File('./web-app/images/biolab3.png')
 								}
-							}
-							*/
-						}	
-					}		
-			}
-		}
+							}	
+						}		
+					}
+				}
 		
+			}
 	}
 	
 	def testMail(){
@@ -2993,14 +2993,15 @@ class EmployeeController {
 					log.error('no file found for site '+site.name)
 					return
 				}else{
-					if (user.email != null){
+					if (user.email != null && site.id == 17){
 						log.error('file found for site '+site.name+', sending it to :'+user.email)
 						mailService.sendMail {
 							multipart true
 							to "henri.martin@gmail.com"
-							subject "Rapport Mensuel du site "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
-							body "Veuillez trouver ci-joint le rapport mensuel du site "+site.name
-							attachBytes filename,'application/pdf', file.readBytes()							
+							subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+							html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])											 
+							attachBytes filename,'application/pdf', file.readBytes()						
+							inline 'biolab33', 'image/png', new File('./web-app/images/biolab3.png')			
 						}
 					}else{
 						log.error('mail cannot be sent to user': user.lastName)
@@ -3102,7 +3103,6 @@ class EmployeeController {
 		def criteria = InAndOut.createCriteria()
 		def calendar = Calendar.instance
 		def executionTime
-		//calendar.clearTime()
 		def iteratorCal = Calendar.instance
 		iteratorCal.clearTime()
 		//find first day of work
@@ -3116,37 +3116,83 @@ class EmployeeController {
 		iteratorCal.set(Calendar.DAY_OF_MONTH,first_in_and_out.day)
 		iteratorCal.set(Calendar.MONTH,first_in_and_out.month - 1)
 		iteratorCal.set(Calendar.YEAR,first_in_and_out.year)
-		log.error('calendar starts at: '+calendar.time)
-		
+		log.error('calendar starts at: '+calendar.time)		
 		
 		def inAndOuts=InAndOut.findAllByEmployee(employee)
 		for (InAndOut inAndOut : inAndOuts){
 			iteratorCal.set(Calendar.DAY_OF_MONTH,inAndOut.day)
 			iteratorCal.set(Calendar.MONTH,inAndOut.month - 1)
-			iteratorCal.set(Calendar.YEAR,inAndOut.year)
-			
+			iteratorCal.set(Calendar.YEAR,inAndOut.year)		
 			timeManagerService.initializeTotals(employee, iteratorCal.time)
 			timeManagerService. recomputeDailyTotals(employee.id as int,inAndOut.day as int,inAndOut.month as int,inAndOut.year as int)
-				
-			
 		}
 		def endDate = new Date()
-		use (TimeCategory){executionTime=endDate-calendar.time}
-		
+		use (TimeCategory){executionTime=endDate-calendar.time}	
 		log.error('recreateEmployeeData executed in '+executionTime+' for employee: '+employee.lastName)
-	
 	}
 	
-	def executeScript(){
+	def executeDump(Long id){
+		def employeeInstance = Employee.get(id)
 		def folder = grailsApplication.config.pdf.directory
-		def scriptName = 'my_script.sh'
-		def file = folder+'/'+scriptName
+		def file = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'.sql'
+		def file1 = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'1.sql'
+		def file2 = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'2.sql'
+		
 		log.error('file: '+file)
-	//	[file, 'arg1', 'arg2'].execute()
-		def employeeId=2
-		
-		('/usr/local/mysql/bin/mysqldump -u root --no-create-info --where="employee_id=\'2\'" --ignore-table=pointeuse.absence_type_config --ignore-table=pointeuse.authorization_nature --ignore-table=pointeuse.authorization_type --ignore-table=pointeuse.bank_holiday --ignore-table=pointeuse.card_terminal --ignore-table=pointeuse.employee_data_list_map --ignore-table=pointeuse.employee_data_list_map_field_map --ignore-table=pointeuse.employee_data_list_map_hidden_field_map --ignore-table=pointeuse.employee_extra_data --ignore-table=pointeuse.event_log --ignore-table=pointeuse.exception_logger --ignore-table=pointeuse.function --ignore-table=pointeuse.period --ignore-table=pointeuse.reason --ignore-table=pointeuse.role --ignore-table=pointeuse.service --ignore-table=pointeuse.site --ignore-table=pointeuse.site_user --ignore-table=pointeuse.status --ignore-table=pointeuse.user --ignore-table=pointeuse.user_role --ignore-table=pointeuse.year --ignore-table=pointeuse.employee --ignore-table=pointeuse.dummy --ignore-table=pointeuse.monthly_total_weekly_total -C pointeuse --result-file=/Users/henri/alldatabases.sql').execute()
+		log.error('file1: '+file1)
 		
 		
+		def threads = []
+		def dump1_thread = new Thread({
+			log.error('creating thread for mysqldump 1 ')
+			('/usr/local/mysql/bin/mysqldump -u root --no-create-info --where=id='+employeeInstance.id+' -C pointeuse employee --result-file='+file1).execute()
+		})
+		threads << dump1_thread
+		
+		def dump2_thread = new Thread({
+			log.error('creating thread for mysqldump 2 ')
+			('/usr/local/mysql/bin/mysqldump -u root --no-create-info --where=employee_id='+employeeInstance.id+' --ignore-table=pointeuse.absence_type_config --ignore-table=pointeuse.authorization_nature --ignore-table=pointeuse.authorization_type --ignore-table=pointeuse.bank_holiday --ignore-table=pointeuse.card_terminal --ignore-table=pointeuse.employee_data_list_map --ignore-table=pointeuse.employee_data_list_map_field_map --ignore-table=pointeuse.employee_data_list_map_hidden_field_map --ignore-table=pointeuse.employee_extra_data --ignore-table=pointeuse.event_log --ignore-table=pointeuse.exception_logger --ignore-table=pointeuse.function --ignore-table=pointeuse.period --ignore-table=pointeuse.reason --ignore-table=pointeuse.role --ignore-table=pointeuse.service --ignore-table=pointeuse.site --ignore-table=pointeuse.site_user --ignore-table=pointeuse.status --ignore-table=pointeuse.user --ignore-table=pointeuse.user_role --ignore-table=pointeuse.year --ignore-table=pointeuse.employee --ignore-table=pointeuse.dummy --ignore-table=pointeuse.monthly_total_weekly_total -C pointeuse --result-file='+file2).execute()
+		})
+		threads << dump2_thread
+		
+
+		threads.each { it.start() }
+		threads.each { it.join() }
+		def delete_thread = new Thread({
+				new File(file).withWriter { w ->
+				
+				[file1,file2].each{ f ->
+	
+					// Get a reader for the input file
+					new File(f).withReader { r ->
+				
+					  // And write data from the input into the output
+					 w << r << '\n'
+					}
+				}
+			}
+			boolean file1SuccessfullyDeleted =  new File(file1).delete()
+			boolean file2SuccessfullyDeleted =  new File(file2).delete()
+		})
+		delete_thread.sleep((long)(10000))
+		delete_thread.start()
+		//delete_thread.join()
+		
+		/*
+			new File( file ).withWriter { w ->
+			
+			[file1,file2].each{ f ->
+
+				// Get a reader for the input file
+				new File( f ).withReader { r ->
+			
+				  // And write data from the input into the output
+				 w << r << '\n'
+				}
+			}
+		}
+		boolean file1SuccessfullyDeleted =  new File(file1).delete()
+		boolean file2SuccessfullyDeleted =  new File(file2).delete()
+*/
 	}
 }

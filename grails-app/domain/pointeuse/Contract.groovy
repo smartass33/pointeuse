@@ -13,7 +13,7 @@ class Contract {
 	static belongsTo = [employee:Employee]
 	
     static constraints = {
-		endDate(blank:true,nullable:true)
+		endDate(nullable:true)
 		
     }
 	

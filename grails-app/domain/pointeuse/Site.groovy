@@ -17,12 +17,8 @@ class Site {
 		cardTerminal nullable:true	
 		name blank: false
 		name unique:true
-		//latitude blank: true
-		//longitude blank:true
 		address blank:true
-		town blank:true
-		//postCode blank:true
-		
+		town blank:true	
     }
 	
 	String toString(){

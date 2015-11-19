@@ -11,8 +11,4 @@ class Absence {
 	AbsenceType type
 	static belongsTo = [employee:Employee]
 	Period period
-	
-	
-    static constraints = {
-    }
 }

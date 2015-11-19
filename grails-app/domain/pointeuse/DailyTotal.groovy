@@ -17,8 +17,6 @@ class DailyTotal {
 	static hasMany = [inAndOuts:InAndOut]
 	static belongsTo = [weeklyTotal:WeeklyTotal]
 	
-	
-	
 	DailyTotal(Employee employee,Date currentDate){
 		this.employee=employee
 		this.week=currentDate.getAt(Calendar.WEEK_OF_YEAR)
@@ -34,7 +32,5 @@ class DailyTotal {
 	String toString(){
 		return 'employee: '+ this.employee.lastName+' '+this.year+'-'+this.month+'-'+this.day+' elapsed seconds: '+this.elapsedSeconds
 	}
-	
-    static constraints = {
-    }
+
 }

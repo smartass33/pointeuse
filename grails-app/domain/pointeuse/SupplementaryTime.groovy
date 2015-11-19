@@ -5,17 +5,17 @@ import java.util.Date;
 class SupplementaryTime {
 	Employee employee
 	Date loggingTime
-	double value
+	Double value
 	Period period
 	int month
-	double amountPaid
+	Double amountPaid
 	Date lastPayment
 	static belongsTo = [employee: Employee]
 	
     static constraints = {
 		month (unique:['employee','period'])
-		amountPaid (blank: true,nullable:true)
-		lastPayment(blank: true,nullable:true)
+		amountPaid (nullable:true)
+		lastPayment(nullable:true)
     }
 	
 	String toString(){

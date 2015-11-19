@@ -16,8 +16,7 @@ class PDFService {
 	
 	
 	def generateSiteMonthlyTimeSheet(Date myDate,Site site,String folder){
-		log.error('generateSiteMonthlyTimeSheet called')
-		
+		log.error('generateSiteMonthlyTimeSheet called for site: '+site.name)	
 		def fileNameList=[]
 		def filename
 		PdfCopyFields finalCopy
@@ -25,16 +24,15 @@ class PDFService {
 		calendar.time = myDate
 		OutputStream outputStream
 		File file	
+
 		def employeeList = Employee.findAllBySite(site)
 		try {
 			for (Employee employee:employeeList){
-				log.error('method pdf siteMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', First Name= '+employee.firstName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
+				log.error('method pdf siteMonthlyTimeSheet with parameters: site: '+site.name+',  last name='+employee.lastName+', first name= '+employee.firstName+', year= '+calendar.get(Calendar.YEAR)+', month= '+(calendar.get(Calendar.MONTH)+1))
 				def modelReport=timeManagerService.getReportData((site.id).toString(),employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 				modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-				//log.error('getReportData and getYearSupTime finalized')		
-				// Get the bytes
 				ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeReportTemplate', model: modelReport)
-				filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
+				filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName +'-'+employee.firstName+'.pdf'
 				fileNameList.add(filename)
 				outputStream = new FileOutputStream (folder+'/'+filename);
 				bytes.writeTo(outputStream)
@@ -56,52 +54,22 @@ class PDFService {
 			file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
 			return [file.bytes,file.name]
 		}
-		
-		
 	}
 	
-
 	def generateUserMonthlyTimeSheet(Date myDate,Employee employee,String folder){
-		log.error('generateUserMonthlyTimeSheet called')
-		
+		log.error('generateUserMonthlyTimeSheet called for employee: '+employee.firstName+' '+employee.lastName)	
 		def filename
 		Calendar calendar = Calendar.instance
 		calendar.time = myDate
 		OutputStream outputStream
 		File file
-
 		log.error('method pdf generateUserMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
 		def modelReport=timeManagerService.getReportData(employee.site.id as String,employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 		modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
 		log.error('getReportData and getYearSupTime finalized with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
 		// Get the bytes
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeReportTemplate', model: modelReport)
-		filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName + '.pdf'
-		outputStream = new FileOutputStream (folder+'/'+filename);
-		bytes.writeTo(outputStream)
-		if(bytes)
-			bytes.close()
-		if(outputStream)
-			outputStream.close()
-		file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName+'.pdf')
-		return [file.bytes,file.name]
-	}
-
-	def generateUserAnnualTimeSheet(int year,int month,Employee employee,String folder){
-		def filename
-		OutputStream outputStream
-		File file
-
-		log.error('method pdf generateUserAnnualTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+year+', Month= '+month)
-
-		def modelReport = timeManagerService.getAnnualReportData(year, employee)
-
-		//def offHoursTime = 
-		
-		modelReport << timeManagerService.getOffHoursTime(employee,year)
-		// Get the bytes
-		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeAnnualReportTemplate', model: modelReport)
-		filename = year.toString()+'-'+employee.lastName +'-annualReport' +'.pdf'
+		filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString()+'-'+employee.lastName+'-'+employee.firstName+'.pdf'
 		outputStream = new FileOutputStream (folder+'/'+filename);
 		bytes.writeTo(outputStream)
 		if(bytes)
@@ -112,6 +80,25 @@ class PDFService {
 		return [file.bytes,file.name]
 	}
 
+	def generateUserAnnualTimeSheet(int year,int month,Employee employee,String folder){
+		def filename
+		OutputStream outputStream
+		File file
+		log.error('method pdf generateUserAnnualTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+year+', Month= '+month)
+		def modelReport = timeManagerService.getAnnualReportData(year, employee)		
+		modelReport << timeManagerService.getOffHoursTime(employee,year)
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeAnnualReportTemplate', model: modelReport)
+		filename = year.toString()+'-'+employee.lastName +'-'+employee.firstName +'-annualReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
 
 	def generateEcartSheet(Site site,String folder,def monthList,def period){
 		def filename
@@ -378,9 +365,7 @@ class PDFService {
 		def calendar = Calendar.instance
 		calendar.time = date
 		def employeeInstanceList = Employee.findAllBySite(site)
-		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/siteInfoTemplate', model: [employeeInstanceList:employeeInstanceList])
-		
-		
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/siteInfoTemplate', model: [employeeInstanceList:employeeInstanceList])	
 		filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-INFO-'+site.name+'.pdf'
 		outputStream = new FileOutputStream (folder+'/'+filename);
 		bytes.writeTo(outputStream)

@@ -7,12 +7,12 @@ class Payment {
 	Date loggingTime
 	Period period
 	int month
-	double amountPaid
+	Double amountPaid
 	
 	static belongsTo = [employee: Employee]
     static constraints = {
 		amountPaid (unique:['employee','period','month'])
-		amountPaid (blank: true,nullable:true)
+		amountPaid (nullable:true)
     }
 	
 	

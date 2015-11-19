@@ -39,8 +39,7 @@
 					<td class="cartoucheRightTitleTD"><g:message code="annual.total"/></td>
 					<td></td>
 					<td class="cartoucheRightTitleTD">n/a</td>
-					<td class="cartoucheRightTitleTD">n/a</td>
-					
+					<td class="cartoucheRightTitleTD">n/a</td>			
 				</tr>
 			</g:if>
 		</tbody>

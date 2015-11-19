@@ -18,6 +18,7 @@ environments {
 		    dbCreate = "update"
 			url = "jdbc:mysql://localhost:3306/pointeuse"
 		    driverClassName = "com.mysql.jdbc.Driver"
+			dialect = "org.hibernate.dialect.MySQL5InnoDBDialect"
 		    //username = "pointeuse"
 		    username = "root"
 			password = ""
