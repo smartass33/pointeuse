@@ -383,6 +383,96 @@ class SiteController {
 		return
 	}
 	
+	def createAllSiteData(){
+		def criteria
+		def data
+		def employeeList 
+		def siteList = Site.findAll()
+		def annualReportMap =[:]
+		def calendar = Calendar.instance
+		def executionTime
+		def annualEmployeeData
+		def threads
+		
+		Period period = (calendar.get(Calendar.MONTH) < 5) ? Period.findByYear(calendar.get(Calendar.YEAR)-1) : Period.findByYear(calendar.get(Calendar.YEAR))
+		
+		for (Site site:siteList){
+			log.error('starting computation for site: '+site.name + 'and period: '+period)
+			employeeList = Employee.findAllBySite(site)
+			
+			/*
+			GParsExecutorsPool.withPool {
+				employeeList.iterator().eachParallel {
+					log.error('executing query for employee: '+it)
+					data = timeManagerService.getAnnualReportData(period.year, it)
+					annualReportMap.put(it,data)
+				}
+			}
+			*/
+			
+			threads = []
+			employeeList.each{ employee ->
+				def th = new Thread({
+					log.error('executing query for employee: '+employee)
+					data = timeManagerService.getAnnualReportData(period.year, employee)
+					annualReportMap.put(employee,data)
+				})
+				threads << th
+			}
+			threads.each { it.start() }
+			threads.each { it.join() }
+			
+			
+			
+			
+			for (Employee employee:employeeList){
+				criteria = AnnualEmployeeData.createCriteria()
+				annualEmployeeData = criteria.get {
+					and{
+						eq('period',period)
+						eq('employee',employee)
+					}
+					maxResults(1)
+				}
+				if (annualEmployeeData == null){
+					annualEmployeeData = new AnnualEmployeeData(employee,period)
+				}
+				if (annualEmployeeData.valueMap == null){
+					annualEmployeeData.valueMap = [:]
+				}
+				def valueMap = [:]
+				if (annualReportMap != null){
+					valueMap << ['yearOpenDays':String.valueOf(annualReportMap.get(employee).get('yearOpenDays'))]
+					valueMap << ['annualEmployeeWorkingDays':String.valueOf(annualReportMap.get(employee).get('annualEmployeeWorkingDays'))]
+					valueMap << ['annualTotal':String.valueOf(annualReportMap.get(employee).get('annualTotal'))]
+					valueMap << ['annualTheoritical':String.valueOf(annualReportMap.get(employee).get('annualTheoritical'))]
+					valueMap << ['annualTotal':String.valueOf(annualReportMap.get(employee).get('annualTotal'))]
+					valueMap << ['annualHoliday':String.valueOf(annualReportMap.get(employee).get('annualHoliday'))]
+					valueMap << ['remainingCA':String.valueOf(annualReportMap.get(employee).get('remainingCA'))]
+					valueMap << ['annualRTT':String.valueOf(annualReportMap.get(employee).get('annualRTT'))]
+					valueMap << ['annualCSS':String.valueOf(annualReportMap.get(employee).get('annualCSS'))]
+					valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
+					valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
+					valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
+					valueMap << ['annualPaternite':String.valueOf(annualReportMap.get(employee).get('annualPaternite'))]
+					valueMap << ['annualPayableSupTime':String.valueOf(annualReportMap.get(employee).get('annualPayableSupTime'))]
+					valueMap << ['annualTheoriticalIncludingExtra':String.valueOf(annualReportMap.get(employee).get('annualTheoriticalIncludingExtra'))]
+					valueMap << ['annualSupTimeAboveTheoritical':String.valueOf(annualReportMap.get(employee).get('annualSupTimeAboveTheoritical'))]
+					valueMap << ['annualGlobalSupTimeToPay':String.valueOf(annualReportMap.get(employee).get('annualGlobalSupTimeToPay'))]
+				}else{
+					log.error('annualReportMap is null for employee: '+employee)
+				}
+				annualEmployeeData.valueMap = valueMap
+				annualEmployeeData.save(flush : true)
+			}
+			log.error('all loops finished')
+			use (TimeCategory){executionTime=new Date()-calendar.time}
+			log.error('execution time: '+executionTime)
+		}
+		
+
+	}
+	
 	def getAjaxSiteData(){
 		log.error('entering getAjaxSiteData method')
 		def site = Site.get(params.int('site'))
@@ -413,12 +503,11 @@ class SiteController {
 		def timeDifference
 		def employeeList = Employee.findAllBySite(site)
 		log.error('nb of employees: '+employeeList.size())		
-		
-		/*
-		def threads = []
+				
+		def  threads = []
 		employeeList.each{ employee ->
 			def th = new Thread({
-				log.error('executing query for employee: '+employee)		
+				log.error('executing query for employee: '+employee)
 				data = timeManagerService.getAnnualReportData(period.year, employee)
 				annualReportMap.put(employee,data)
 				siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
@@ -436,21 +525,41 @@ class SiteController {
 				siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
 				siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
 				siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')
-				println "putting thread in list"
 			})
 			threads << th
-		}	
+		}
 		threads.each { it.start() }
 		threads.each { it.join() }
-		def thTime = Thread.start{
-			def endDate = new Date()
-			log.error('end time= '+endDate)
-			use (TimeCategory){timeDifference = endDate - startDate}
-			log.error("report createAllSitesPDF execution time"+timeDifference)
+
+		/*
+				employeeList.each{ employee ->
+			def th = new Thread({
+				log.error('executing query for employee: '+employee)
+			//	data = timeManagerService.getAnnualReportData(period.year, employee)
+			//	annualReportMap.put(employee,data)
+			})
+			threads << th
+			siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
+			siteAnnualTheoritical += data.get('annualTheoritical')
+			siteAnnualTotal += data.get('annualTotal')
+			siteAnnualHoliday += data.get('annualHoliday')
+			siteRemainingCA += data.get('remainingCA')
+			siteAnnualRTT += data.get('annualRTT')
+			siteAnnualCSS += data.get('annualCSS')
+			siteAnnualSickness += data.get('annualSickness')
+			siteAnnualDIF += data.get('annualDIF')
+			siteAnnualExceptionnel += data.get('annualExceptionnel')
+			siteAnnualPaternite += data.get('annualPaternite')
+			siteAnnualPayableSupTime += data.get('annualPayableSupTime') as long
+			siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
+			siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
+			siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')		
 		}
-		thTime.join()
-		*/
+		threads.each { it.start() }
+		threads.each { it.join() }
 		
+		*/
+		/*
 		GParsExecutorsPool.withPool {
 			 employeeList.iterator().eachParallel {
 				 log.error('executing query for employee: '+it)
@@ -473,6 +582,7 @@ class SiteController {
 				 siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')
 			 }
 		 }
+		 */
 		
 		log.error('employee loop finished')
 		use (TimeCategory){executionTime=new Date()-startDate}
@@ -519,27 +629,29 @@ class SiteController {
 				annualEmployeeData.valueMap = [:]
 			}
 			def valueMap = [:]	
-			valueMap << ['yearOpenDays':String.valueOf(annualReportMap.get(employee).get('yearOpenDays'))]			
-			valueMap << ['annualEmployeeWorkingDays':String.valueOf(annualReportMap.get(employee).get('annualEmployeeWorkingDays'))]
-			valueMap << ['annualTotal':String.valueOf(annualReportMap.get(employee).get('annualTotal'))]
-			valueMap << ['annualTheoritical':String.valueOf(annualReportMap.get(employee).get('annualTheoritical'))]
-			valueMap << ['annualTotal':String.valueOf(annualReportMap.get(employee).get('annualTotal'))]
-			valueMap << ['annualHoliday':String.valueOf(annualReportMap.get(employee).get('annualHoliday'))]
-			valueMap << ['remainingCA':String.valueOf(annualReportMap.get(employee).get('remainingCA'))]
-			valueMap << ['annualRTT':String.valueOf(annualReportMap.get(employee).get('annualRTT'))]
-			valueMap << ['annualCSS':String.valueOf(annualReportMap.get(employee).get('annualCSS'))]
-			valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
-			valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
-			valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
-			valueMap << ['annualPaternite':String.valueOf(annualReportMap.get(employee).get('annualPaternite'))]
-			valueMap << ['annualPayableSupTime':String.valueOf(annualReportMap.get(employee).get('annualPayableSupTime'))]
-			valueMap << ['annualTheoriticalIncludingExtra':String.valueOf(annualReportMap.get(employee).get('annualTheoriticalIncludingExtra'))]
-			valueMap << ['annualSupTimeAboveTheoritical':String.valueOf(annualReportMap.get(employee).get('annualSupTimeAboveTheoritical'))]
-			valueMap << ['annualGlobalSupTimeToPay':String.valueOf(annualReportMap.get(employee).get('annualGlobalSupTimeToPay'))]
-		
-			annualEmployeeData.valueMap = valueMap
-			annualEmployeeData.save(flush : true)	
+			if (annualReportMap != null && annualReportMap.get(employee) != null){
+				valueMap << ['yearOpenDays':String.valueOf(annualReportMap.get(employee).get('yearOpenDays'))]			
+				valueMap << ['annualEmployeeWorkingDays':String.valueOf(annualReportMap.get(employee).get('annualEmployeeWorkingDays'))]
+				valueMap << ['annualTotal':String.valueOf(annualReportMap.get(employee).get('annualTotal'))]
+				valueMap << ['annualTheoritical':String.valueOf(annualReportMap.get(employee).get('annualTheoritical'))]
+				valueMap << ['annualTotal':String.valueOf(annualReportMap.get(employee).get('annualTotal'))]
+				valueMap << ['annualHoliday':String.valueOf(annualReportMap.get(employee).get('annualHoliday'))]
+				valueMap << ['remainingCA':String.valueOf(annualReportMap.get(employee).get('remainingCA'))]
+				valueMap << ['annualRTT':String.valueOf(annualReportMap.get(employee).get('annualRTT'))]
+				valueMap << ['annualCSS':String.valueOf(annualReportMap.get(employee).get('annualCSS'))]
+				valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
+				valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
+				valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
+				valueMap << ['annualPaternite':String.valueOf(annualReportMap.get(employee).get('annualPaternite'))]
+				valueMap << ['annualPayableSupTime':String.valueOf(annualReportMap.get(employee).get('annualPayableSupTime'))]
+				valueMap << ['annualTheoriticalIncludingExtra':String.valueOf(annualReportMap.get(employee).get('annualTheoriticalIncludingExtra'))]
+				valueMap << ['annualSupTimeAboveTheoritical':String.valueOf(annualReportMap.get(employee).get('annualSupTimeAboveTheoritical'))]
+				valueMap << ['annualGlobalSupTimeToPay':String.valueOf(annualReportMap.get(employee).get('annualGlobalSupTimeToPay'))]
+				annualEmployeeData.valueMap = valueMap
+				annualEmployeeData.save(flush : true)
+			}
 		}
+		
 		
 		render template: "/site/template/siteDetailTableTemplate", model:model
 		return		

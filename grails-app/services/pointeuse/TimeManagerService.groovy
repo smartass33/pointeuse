@@ -1968,6 +1968,7 @@ class TimeManagerService {
 			def currentPeriod = (currentMonth < 6) ? Period.findByYear(currentYear-1) : Period.findByYear(currentYear)
 			
 			criteria = SupplementaryTime.createCriteria()
+			log.debug('getting monthlySupTotalTime for: '+employee+' and month: '+currentMonth+' and period: '+currentPeriod)
 			monthlySupTotalTime = criteria.get {
 				and {
 					eq('employee',employee)
@@ -1975,7 +1976,7 @@ class TimeManagerService {
 					eq('period',currentPeriod)
 				}
 			}
-			
+			log.debug('monthlySupTotalTime: '+monthlySupTotalTime)
 			//monthlySupTotalTime = weeklyTotals.get('monthlySupTime')//getMonthlySupTime(employee,currentMonth, currentYear)
 			if (monthlySupTotalTime != null){
 				annualMonthlySupTime += monthlySupTotalTime.value as long
@@ -2899,23 +2900,6 @@ class TimeManagerService {
 				eq('year',year)
 			}
 		}
-		/*
-		for (DailyTotal dailyTotal : dailyTotalList){
-			// permet de récupérer le total hebdo
-			if (dailyTotal != null && dailyTotal != dailyTotalId){
-				def timing = getDailyTotal(dailyTotal)
-				dailySeconds = timing.get("elapsedSeconds")
-				timeBefore7 += timing.get("timeBefore7")
-				timeAfter20 +=  timing.get("timeAfter20")
-				timeOffHours = timeOffHours + timing.get("timeBefore7") + timing.get("timeAfter20")
-				monthlyTotalTime += dailySeconds
-				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
-				dailyTotalId=dailyTotal.id
-			}
-		}
-		*/
-
-	
 		def montlyTotalCriteria = MonthlyTotal.createCriteria()
 		def monthlyTotal = montlyTotalCriteria.get {
 			and {
@@ -2930,8 +2914,7 @@ class TimeManagerService {
 			monthlyTotal.timeAfter20=timeAfter20
 			monthlyTotal.supplementarySeconds=monthlySupTime
 			monthlyTotal.save(flush:true,failOnError:true)
-		}
-		
+		}	
 		
 		//here, we can proceed to the creation, or update of the SupplementaryTime object
 		criteria = SupplementaryTime.createCriteria()

@@ -117,11 +117,13 @@ class EmployeeService {
 		return remainingCA=takenCA!=null?(initialCA.counter - takenCA.size()):initialCA.counter
 	}
 	
-	def getMonthlyPresence(Site site,Calendar calendar){
+	def getMonthlyPresence(Site site,Date date){
 		def employeeList
 		def dayMap
 		def absenceMap
 		def criteria
+		def calendar = Calendar.instance
+		calendar.time = date
 		def lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 		def employeeDailyMap = [:]
 		def employeeAbsenceMap = [:]
@@ -131,11 +133,6 @@ class EmployeeService {
 			for (Employee employee: employeeList){
 				dayMap = [:]
 				absenceMap = [:]
-				/*
-				if (isCurrentMonth){
-					lastDay = thisMonthCalendar.get(Calendar.DAY_OF_MONTH)
-				}
-				*/
 				for (int i=1;i<lastDay+1;i++){
 					criteria = DailyTotal.createCriteria()
 					def dailyTotal = criteria.get {
@@ -163,7 +160,7 @@ class EmployeeService {
 							if (absenceMap.get(absence.type) != null){
 								absenceMap.put(absence.type,absenceMap.get(absence.type)+1)
 							}else{
-								absenceMap.put(absence.type,0)
+								absenceMap.put(absence.type,1)
 							}																	
 						}else{
 							criteria = BankHoliday.createCriteria()

@@ -13,7 +13,7 @@ class SupplementaryTime {
 	static belongsTo = [employee: Employee]
 	
     static constraints = {
-		month (unique:['employee','period'])
+		month (unique:['employee','period','month'])
 		amountPaid (nullable:true)
 		lastPayment(nullable:true)
     }

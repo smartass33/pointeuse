@@ -340,51 +340,39 @@ class EmployeeController {
 	}
 	
 	def vacationExcelExport(){
-		log.error()
+		params.each{i-> log.debug('param: '+i)}
+		log.error('entering vacationExcelExport with params: site: '+params['site'])
 		def folder = grailsApplication.config.pdf.directory	
-		log.error('entering vacationExcelExport')
-		def site = params['site']
+		def siteId = params['siteId']
 		def calendar = Calendar.instance	
 		def result
-		
-		if (params["site.id"] != null && !params["site.id"].equals("")){		
-			if (params["site.id"] instanceof String[]){
-				if (params.("site.id")[0] != ""){
-					site = Site.get(params.("site.id")[0])
-				}
-			}else{
-				site = Site.get(params.("site.id"))
-			}
-		}
-		if (site == null && params["siteId"] != null && !params["siteId"].equals("")){
-			site = Site.get(params.int("siteId"))
-		}
-
+		def site = Site.get(params.int("siteId"))
 		if (params['myDate_month'] != null && params['myDate_year'] != null){
 			calendar.set(Calendar.MONTH,params.int("myDate_month") - 1)
 			calendar.set(Calendar.YEAR,params.int("myDate_year"))
 		}
 		
 		if (site != null){
-			result = employeeService.getMonthlyPresence(site,calendar)
+			result = employeeService.getMonthlyPresence(site,calendar.time)
 		}
 		
 		def lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 		calendar.set(Calendar.DAY_OF_MONTH,1)
-		def dates = ['SALARIE']
+		def headers = [message(code: 'laboratory.label'), message(code: 'employee.label')]
 		for (int i = 1;i<lastDay + 1;i++){
-			dates.add(calendar.time.format('E dd MMM'))
+			headers.add(calendar.time.format('E dd MMM'))
 			calendar.roll(Calendar.DAY_OF_MONTH,1)
 		}
-		dates.add(AbsenceType.VACANCE)
-		dates.add(AbsenceType.RTT)
-		dates.add(AbsenceType.AUTRE)
-		dates.add(AbsenceType.EXCEPTIONNEL)
-		dates.add(AbsenceType.PATERNITE)
-		dates.add(AbsenceType.CSS)
-		dates.add(AbsenceType.DIF)
-		dates.add(AbsenceType.GROSSESSE)		
-		dates.add(AbsenceType.MALADIE)				
+		
+		headers.add(AbsenceType.VACANCE)
+		headers.add(AbsenceType.RTT)
+		headers.add(AbsenceType.AUTRE)
+		headers.add(AbsenceType.EXCEPTIONNEL)
+		headers.add(AbsenceType.PATERNITE)
+		headers.add(AbsenceType.CSS)
+		headers.add(AbsenceType.DIF)
+		headers.add(AbsenceType.GROSSESSE)		
+		headers.add(AbsenceType.MALADIE)				
 		def employeeDailyMap = result.get('employeeDailyMap')
 		def employeeAbsenceMap = result.get('employeeAbsenceMap')
 		def employeeList = result.get('employeeList')
@@ -396,9 +384,9 @@ class EmployeeController {
 			
 		new WebXlsxExporter(folder+'/vacation_template.xlsx').with {
 			setResponseHeaders(response)
-			fillHeader(dates)			
+			fillHeader(headers)			
 			for(employee in employeeList) {
-				dailyList = [employee.lastName]
+				dailyList = [employee.site,employee.lastName]
 				dailyMap = employeeDailyMap.get(employee)
 				dailyMap.each{ k, v -> 
 					dailyList.add(v)
@@ -505,7 +493,7 @@ class EmployeeController {
 		def tmpDay = lastDay
 		
 		if (site != null){
-			result = employeeService.getMonthlyPresence(site,calendar)
+			result = employeeService.getMonthlyPresence(site,calendar.time)
 		}
 		return [
 			lastDay:tmpDay,
