@@ -37,7 +37,7 @@ grails.mime.types = [
     xml:           ['text/xml', 'application/xml']
 ]
 
-// URL Mapping Cache Max Size, defaults to 5000
+// URL Mafolping Cache Max Size, defaults to 5000
 //grails.urlmapping.cache.maxsize = 1000
 
 // What URL patterns should be processed by the resources plugin
@@ -135,7 +135,7 @@ environments {
 		log4j = {
 			'null' name:'stacktrace'
 			appenders {
-				rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+				rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 			}			
 			warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
 			warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
@@ -187,31 +187,6 @@ environments {
 }
 
 grails {
-	
-	/*
-	mail {
-		host = "smtp.fr.oleane.com"
-		port = 587
-		//username = "pointeuse@biol33.fr.fto
-		username = "pointeuse@biolab33.com"
-		
-		password = "SzVFO8KT"
-		props = ["mail.smtp.starttls.enable":"true", 
-                  "mail.smtp.port":"587"]
-	  }
-	 
-	
-   mail {
-     host = "smtp.auth.orange-business.com"
-     port = 465
-     username = "pointeuse@biolab32.fr.fto"
-     password = "pasteur33"
-     props = ["mail.smtp.auth":"true", 					   
-              "mail.smtp.socketFactory.port":"587",
-              "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
-              "mail.smtp.socketFactory.fallback":"false"]
-   }
-    */
    mail {
 	   host = "smtp.msa.orange-business.com"
 	   port = 587
@@ -242,28 +217,3 @@ prototype {
 	version = '1.0'
 }
 
-
-
-// Uncomment and edit the following lines to start using Grails encoding & escaping improvements
-
-/* remove this line 
-// GSP settings
-grails {
-    views {
-        gsp {
-            encoding = 'UTF-8'
-            htmlcodec = 'xml' // use xml escaping instead of HTML4 escaping
-            codecs {
-                expression = 'html' // escapes values inside null
-                scriptlet = 'none' // escapes output from scriptlets in GSPs
-                taglib = 'none' // escapes output from taglibs
-                staticparts = 'none' // escapes output from static template parts
-            }
-        }
-        // escapes all not-encoded output at final stage of outputting
-        filteringCodecForContentType {
-            //'text/html' = 'html'
-        }
-    }
-}
-remove this line */

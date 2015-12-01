@@ -29,5 +29,6 @@ class SupplementaryTime {
 		this.month = month
 		this.value = value
 		this.loggingTime = new Date()
+		this.amountPaid = 0
 	}
 }

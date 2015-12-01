@@ -1090,6 +1090,8 @@ class EmployeeController {
 			updatedSelection = AbsenceType.GROSSESSE
 		if (updatedSelection.equals('-'))
 			updatedSelection = AbsenceType.ANNULATION
+		if (updatedSelection.equals('M'))
+			updatedSelection = AbsenceType.MALADIE
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 		Date date = dateFormat.parse(day)
 		def cal= Calendar.instance
@@ -1111,7 +1113,7 @@ class EmployeeController {
 	
 			if (absence != null){
 				if (updatedSelection.equals(AbsenceType.ANNULATION.key)){
-					// annulation n�cessaire: il faut effacer le tupple
+					// annulation nécessaire: il faut effacer le tupple
 					absence.delete(flush: true)
 				}else{
 					absence.type=updatedSelection
@@ -2534,9 +2536,10 @@ class EmployeeController {
 	}
 	
 	def logEmployee(){
+		log.error('logEmployee called with param: '+params['username'])
 		def cal = Calendar.instance
 		def currentDate = cal.time
-		def userName = params['username']
+		def userName = (params['username']).trim()
 		def isOutSideSite=params["isOutSideSite"].equals("true") ? true : false
 		def employee = Employee.findByUserName(userName)
 		def timeDiff
@@ -2954,7 +2957,7 @@ class EmployeeController {
 									subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
 									html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])											 
 									attachBytes filename,'application/pdf', file.readBytes()		
-									inline 'biolab33', 'image/png', new File('./web-app/images/biolab3.png')
+									inline 'biolab33', 'image/png', new File('/images/biolab3.png')
 								}
 							}	
 						}		
@@ -2963,6 +2966,44 @@ class EmployeeController {
 		
 			}
 	}
+	
+	def sendMailToAll(){
+		log.error('sendMailToAll called: sending email to all admins')
+		def sites = Site.findAll()
+		def folder = grailsApplication.config.pdf.directory
+		
+		Calendar calendar = Calendar.instance
+		calendar.roll(Calendar.MONTH,-1)
+		def siteAdmins
+		sites.each{ site ->
+				log.debug('site: '+site)
+				siteAdmins = site.users
+				siteAdmins.each{ user ->
+					log.debug('user: '+user)
+					def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
+					def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+					if (!file.exists()){
+						log.debug('there is no file found')
+						return
+					}else{
+						if (user.email != null && file.length() > 0){
+							log.error('file found for site '+site.name+', sending it to :'+user.email)
+							mailService.sendMail {
+								multipart true
+								to user.email
+								subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+								html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+								attachBytes filename,'application/pdf', file.readBytes()
+								inline 'biolab33', 'image/png', new File(folder+'/biolab3.png')
+							}
+						}
+					}
+				}
+		}
+	
+	}
+	
+	
 	
 	def testMail(){
 		Calendar calendar = Calendar.instance

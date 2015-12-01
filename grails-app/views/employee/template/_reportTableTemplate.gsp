@@ -56,8 +56,7 @@
 	                        </g:if>
 	                      </g:else>
 	                  </font></td>             
-	                  <td class="eventTD">
-	                  
+	                  <td class="eventTD">	                  
 	                  <g:if test="${departureDate != null && entries.key > departureDate}">
 	                  	-
 	                  </g:if>     
@@ -68,31 +67,27 @@
 			                  	</g:if>
 			                  	<g:else>
 			                  		-
-			                  	</g:else>
-		                  	
+			                  	</g:else>	                  	
 		                  	</g:if>
 	                  		<g:else>
-		   	                    <g:if test="${entries == null || entries.value ==null}">           
-		   	                    
+		   	                    <g:if test="${entries == null || entries.value == null}">           	   	                    
 				                  	<g:if test="${holidayMap.get(entries.key) != null}">
 				                      <font size="2"> 
 				                      <g:select width="50px"
 				                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
 											  params:'\'employeeId=' + employee.id 						  
-											  + '&day=' + entries.key.format("dd/MM/yyyy")
-							
-											  + '&updatedSelection=\' + this.value'								  )}"
+											  + '&day=' + entries.key.format("dd/MM/yyyy")						
+											  + '&updatedSelection=\' + this.value'	)}"
 				                          name="absenceType" from="${AbsenceType.values()}"
 				                          value="${AbsenceType}" optionKey="key"
-				                          noSelection="${['-':holidayMap.get(entries.key).type]}" />
-				
+				                          noSelection="${['-':holidayMap.get(entries.key).type]}" />	
 				                      </font>
-				                    </g:if> <g:else>
+				                    </g:if>
+				                    <g:else>
 				                      <font size="2"> <g:select width="50px"
 				                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div',		  
 											  params:'\'employeeId=' + employee.id 						  
-											  + '&day=' + entries.key.format("dd/MM/yyyy")
-						
+											  + '&day=' + entries.key.format("dd/MM/yyyy")				
 											  + '&updatedSelection=\' + this.value'
 											   )}"
 				                          name="absenceType" from="${AbsenceType.values()}"
@@ -104,25 +99,37 @@
 								<g:else>
 									<g:if test="${holidayMap.get(entries.key) != null}">
 					                      <font size="2"> 
-					                      <g:select width="50px"
+					                      <g:if test="${holidayMap.get(entries.key).type == AbsenceType.MALADIE || holidayMap.get(entries.key).type == AbsenceType.GROSSESSE}">
+					                    	<g:select width="50px"
 					                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
 												  params:'\'employeeId=' + employee.id 						  
-												  + '&day=' + entries.key.format("dd/MM/yyyy")
-					
-												  + '&updatedSelection=\' + this.value'								  )}"
-					                          name="absenceType" from="${AbsenceType.values()}"
-					                          value="${AbsenceType}" optionKey="key"
-					                          noSelection="${['-':holidayMap.get(entries.key).type]}" />	
+												  + '&day=' + entries.key.format("dd/MM/yyyy")					
+												  + '&updatedSelection=\' + this.value'								  
+												  )}"
+					                          name="absenceType" from="${['-',AbsenceType.GROSSESSE,AbsenceType.MALADIE]}"
+					                          noSelection="${['':holidayMap.get(entries.key).type]}" />
+					                      </g:if>
+					                      <g:else>
+						                      <g:select width="50px"
+						                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
+													  params:'\'employeeId=' + employee.id 						  
+													  + '&day=' + entries.key.format("dd/MM/yyyy")				
+													  + '&updatedSelection=\' + this.value'								  
+													  )}"
+						                          name="absenceType" from="${AbsenceType.values()}"
+						                          value="${AbsenceType}"
+						                          noSelection="${['-':holidayMap.get(entries.key).type]}" />	
+					                          </g:else>
 					                      </font>
 					                </g:if> 
 					                <g:else>
 					                      <g:select width="50px"
 					                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
 												  params:'\'employeeId=' + employee.id 						  
-												  + '&day=' + entries.key.format("dd/MM/yyyy")
-							
-												  + '&updatedSelection=\' + this.value'								  )}"
-					                          name="absenceType" from="${['-',AbsenceType.GROSSESSE]}"
+												  + '&day=' + entries.key.format("dd/MM/yyyy")					
+												  + '&updatedSelection=\' + this.value'								  
+												  )}"
+					                          name="absenceType" from="${['-',AbsenceType.GROSSESSE,AbsenceType.MALADIE]}"
 					                          noSelection="${['':'-']}" />
 					                 </g:else>
 			                  	</g:else>

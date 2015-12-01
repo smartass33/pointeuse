@@ -3159,11 +3159,16 @@ class TimeManagerService {
 			}
 			maxResults(1)
 		}
+		
 		if (supTime == null){
 			supTime = new SupplementaryTime( employee, period,  month,monthlySupTime)
 		}else{
 			supTime.value = monthlySupTime
+			if (supTime.amountPaid == null){
+				supTime.amountPaid = 0
+			}
 		}
+
 		supTime.save(flush: true)
 		endDate = new Date()
 		use (TimeCategory){executionTime=endDate-startDate}
