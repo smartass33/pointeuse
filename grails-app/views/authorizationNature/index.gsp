@@ -24,7 +24,7 @@
 				<thead>
 					<tr>
 						<g:sortableColumn property="creationDate" title="${message(code: 'creation.date.label', default: 'Creation Date')}" />					
-						<g:sortableColumn property="nature" title="${message(code: 'authorizationType.nature.label', default: 'Nature')}" />					
+						<g:sortableColumn property="name" title="${message(code: 'authorizationType.nature.label', default: 'Nature')}" />					
 						<th><g:message code="authorizationNature.user.label" default="User" /></th>					
 					</tr>
 				</thead>	

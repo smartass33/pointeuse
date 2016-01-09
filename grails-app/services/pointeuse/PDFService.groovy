@@ -16,12 +16,14 @@ class PDFService {
 	
 	
 	def generateSiteMonthlyTimeSheet(Date myDate,Site site,String folder){
-		log.error('generateSiteMonthlyTimeSheet called for site: '+site.name)	
+		log.error('generateSiteMonthlyTimeSheet called for site: '+site.name+' and date: '+myDate)		
 		def fileNameList=[]
 		def filename
 		PdfCopyFields finalCopy
 		Calendar calendar = Calendar.instance
 		calendar.time = myDate
+		log.debug('calendar MONTH: '+calendar.get(Calendar.MONTH))
+		log.debug('calendar YEAR: '+calendar.get(Calendar.YEAR))
 		OutputStream outputStream
 		File file	
 

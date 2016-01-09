@@ -59,7 +59,7 @@ class UserController {
 			UserRole.create(userInstance,roleObject)
 		}
 
-        flash.message = message(code: 'default.created.message', args: [message(code: 'user.label', default: 'User'), userInstance.id])
+        flash.message = message(code: 'default.created.message', args: [message(code: 'user.label', default: 'User'), userInstance.firstName+' '+userInstance.lastName])
         redirect(action: "show", id: userInstance.id)
     }
 
@@ -154,10 +154,7 @@ class UserController {
             redirect(action: "show", id: id)
         }
     }
-	
-
-	
-	
+		
 	def importUserList = {
 		log.error('importUserList called')
 		def lastName 
@@ -195,20 +192,9 @@ class UserController {
 					}		
 					user.email = tokens[4]
 					user.hasMail = true
-					//user.phoneNumber = 	
+					user.reportSendDay=1
 					user.save()		
 				}
-				
-			/*	
-				criteria = User.createCriteria()
-				user = criteria.get{
-					and {
-						eq('lastName',tokens[0])
-						eq('firstName',tokens[1])
-					}
-				}
-				*/
-				
 				log.error("user: "+user)
 			}
 			return render(text: [success:true] as JSON, contentType:'text/json')

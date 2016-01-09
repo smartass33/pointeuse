@@ -140,10 +140,11 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
-		log.error('entering list for employee')
+		log.debug('entering list for employee')
 		params.each{i->log.debug('parameter of list: '+i)}
 		params.sort='site'
 		params.max = Math.min(max ?: 20, 100)
+		def offset = params["offset"] != null ? params.int("offset") : 0
 		log.debug('browser version: '+request.getHeader('User-Agent') )
 		def employeeInstanceList
 		def employeeInstanceTotal
@@ -154,6 +155,8 @@ class EmployeeController {
 		
 		def user = springSecurityService.currentUser
 		def username = user?.getUsername()
+		def criteria = Employee.createCriteria()
+
 					
 		if (params["site"]!=null && !params["site"].equals('') && !params["site"].equals('[id:]')){
 			site = Site.get(params.int('site'))
@@ -165,29 +168,47 @@ class EmployeeController {
 			if (site != null)
 				siteId=site.id
 		}		
+		
 		if (back){
 			if (site!=null){
-				employeeInstanceList=Employee.findAllBySite(site)
-				employeeInstanceTotal = employeeInstanceList.size()
-				employeeInstanceList=Employee.findAllBySite(site,[max:  20,offset: 0,sort:'site'])
-				
-			}else {
-				employeeInstanceList=Employee.findAll("from Employee")	
-				employeeInstanceTotal = employeeInstanceList.size()		
-				employeeInstanceList=Employee.findAll("from Employee order by site",[max:  20,offset: 0])
-			}
-		}else{
-			if (site!=null){
-				employeeInstanceList = Employee.findAllBySite(site)
-				employeeInstanceTotal = employeeInstanceList.size()
+				employeeInstanceList = Employee.findAllBySite(site,['sort':'lastName'])
+				employeeInstanceTotal = employeeInstanceList.size()			
 				render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]
 				return
-			}else{
-				employeeInstanceList=Employee.list(params)
-				employeeInstanceTotal = employeeInstanceList.totalCount
+			}else {	
+				def sites = Site.findAll("from Site")
+				employeeInstanceList = []
+				for (Site siteTmp : sites){
+					employeeInstanceList.add(Employee.findAllBySite(site,[max:  20,offset: 0]))				
+				}
+				employeeInstanceTotal = employeeInstanceList.size()
 			}
+		}else{
+		
+		if (site!=null){
+			employeeInstanceList = Employee.findAllBySite(site,['sort':'lastName','offset':offset])
+			employeeInstanceTotal = employeeInstanceList.size()
+			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+			return
+		}else{
+			def sites = Site.findAll("from Site")
+			employeeInstanceList = []
+			for (Site siteTmp : sites){
+				employeeInstanceList.addAll(Employee.findAllBySite(siteTmp,[offset: 0]))				
+			}
+			employeeInstanceTotal = employeeInstanceList.size()
+		}
 		}	
-		[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+		
+		log.debug('employee list returned')
+		def newList = employeeInstanceList.take(20+offset)
+		def newList2 = newList.drop(offset)
+		if (params["offset"] != null){
+			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+			return
+		}
+		[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+		
     }
 	
     def create() {
@@ -283,7 +304,7 @@ class EmployeeController {
 		
 		def authorizationTypes = AuthorizationType.list()
 		for (AuthorizationType authorizationType : authorizationTypes){
-			headers.add('habilitation: '+authorizationType.type)
+			headers.add('habilitation: '+authorizationType.name)
 			headers.add("début d'habilitation")
 			headers.add("fin d'habilitation")
 		}
@@ -319,8 +340,8 @@ class EmployeeController {
 				
 				for (AuthorizationType authorizationType :  authorizationTypes){									
 					for (Authorization authorization : authorizations){
-						log.error(authorization.type.type)
-						if ((authorization.type.type).equals(authorizationType.type)){
+						log.error(authorization.type.name)
+						if ((authorization.type.name).equals(authorizationType.name)){
 							log.error('types are equal')
 							employeeValue.add(authorization.isAuthorized)	
 							employeeValue.add(authorization.startDate != null ? authorization.startDate.format('dd/MM/yyyy') :'-')
@@ -2915,6 +2936,15 @@ class EmployeeController {
 		log.error("createAllSitesPDF called at: "+calendar.time)
 		calendar.roll(Calendar.MONTH,-1)
 		def currentDate = calendar.time
+		
+		
+		if (calendar.get(Calendar.MONTH) == 11){
+			log.error('this is the first month of the year: need to get december instead')
+			calendar.roll(Calendar.YEAR,-1)
+			log.error('the new date is:  '+calendar.time)
+			currentDate = calendar.time
+		}
+		
 		def sites = Site.findAll()
 		def threads = []	
 	    def thr = sites.each{ site ->
@@ -2938,33 +2968,41 @@ class EmployeeController {
 		}
 		thTime.join()
 		
-		//if month is has ended, send reports to the admin by email
-		if (calendar.get(Calendar.DAY_OF_MONTH) == 1){
-			log.error('this is the first day of the month: finding admin and sending to them')
-			sites.each{ site ->
-					siteAdmins = site.users
-					siteAdmins.each{ user ->
-						def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
-						def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
-						if (!file.exists()){
-							return
-						}else{
-							if (user.email != null && file.length() > 0){				
-								log.error('file found for site '+site.name+', sending it to :'+user.email)
-								mailService.sendMail {
-									multipart true
-									to user.email
-									subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
-									html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])											 
-									attachBytes filename,'application/pdf', file.readBytes()		
-									inline 'biolab33', 'image/png', new File('/images/biolab3.png')
-								}
-							}	
-						}		
-					}
-				}
 		
+		sites = Site.findAll()
+		sites.each{site ->
+			def userList = site.users
+			userList.each {user ->
+				log.debug('userList: '+user)
+				log.debug('user.reportSendDay: '+user.reportSendDay)
+				log.debug('calendar.time: '+calendar.time)
+				log.debug('calendar.get(Calendar.DAY_OF_MONTH): '+calendar.get(Calendar.DAY_OF_MONTH))
+				log.debug('user.email: '+user.email)
+				if (user.reportSendDay == (calendar.get(Calendar.DAY_OF_MONTH)) && user.email != null){
+					log.error('user reportSendDay has come: will fire report to him')
+					def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
+					def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+					if (!file.exists()){
+						log.error('no file found: '+filename)
+						return
+					}else{
+						if (file.length() > 0 && user.hasMail){
+							log.error('file found for site '+site.name+', sending it to :'+user.email)
+							mailService.sendMail {
+								multipart true
+								to user.email
+								subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+								html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+								attachBytes filename,'application/pdf', file.readBytes()
+								inline 'biolab33', 'image/png', new File('/images/biolab3.png')
+							}
+						}
+					}
+					
+				}
+				
 			}
+		}
 	}
 	
 	def sendMailToAll(){
@@ -2974,71 +3012,45 @@ class EmployeeController {
 		
 		Calendar calendar = Calendar.instance
 		calendar.roll(Calendar.MONTH,-1)
-		def siteAdmins
-		sites.each{ site ->
-				log.debug('site: '+site)
-				siteAdmins = site.users
-				siteAdmins.each{ user ->
-					log.debug('user: '+user)
+		
+		sites = Site.findAll()
+		sites.each{site ->
+			def userList = site.users
+			userList.each {user ->
+				log.error('userList: '+user)
+				log.error('user.reportSendDay: '+user.reportSendDay)
+				log.error('calendar.time: '+calendar.time)
+				log.error('calendar.get(Calendar.DAY_OF_MONTH)+1: '+calendar.get(Calendar.DAY_OF_MONTH))
+				log.error('user.email: '+user.email)
+				if (user.reportSendDay == (calendar.get(Calendar.DAY_OF_MONTH)) && user.email != null){
+					log.error('user reportSendDay has come: will fire report to him')
 					def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
 					def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
 					if (!file.exists()){
-						log.debug('there is no file found')
+						log.error('no file found: '+filename)
 						return
 					}else{
-						if (user.email != null && file.length() > 0){
+						if (file.length() > 0 && user.hasMail){
 							log.error('file found for site '+site.name+', sending it to :'+user.email)
+							/*
 							mailService.sendMail {
 								multipart true
 								to user.email
 								subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
 								html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
 								attachBytes filename,'application/pdf', file.readBytes()
-								inline 'biolab33', 'image/png', new File(folder+'/biolab3.png')
+								inline 'biolab33', 'image/png', new File('/images/biolab3.png')
 							}
+							*/
 						}
 					}
+					
 				}
-		}
-	
-	}
-	
-	
-	
-	def testMail(){
-		Calendar calendar = Calendar.instance
-		log.error("testMail called at: "+calendar.time)
-		calendar.roll(Calendar.MONTH,-1)
-		def sites = Site.findAll()
-		def siteAdmins
-		def folder = grailsApplication.config.pdf.directory
-		log.error('this is the first day of the month: finding admin and sending to them')
-		sites.each{ site ->
-			siteAdmins = site.users
-			siteAdmins.each{ user ->
-				def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
-				def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
-				if (!file.exists()){
-					log.error('no file found for site '+site.name)
-					return
-				}else{
-					if (user.email != null && site.id == 17){
-						log.error('file found for site '+site.name+', sending it to :'+user.email)
-						mailService.sendMail {
-							multipart true
-							to "henri.martin@gmail.com"
-							subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
-							html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])											 
-							attachBytes filename,'application/pdf', file.readBytes()						
-							inline 'biolab33', 'image/png', new File('./web-app/images/biolab3.png')			
-						}
-					}else{
-						log.error('mail cannot be sent to user': user.lastName)
-					}
-				}
+				
 			}
 		}
 	}
+	
 
 	def computeMonthlyTotals() {
 		def timeDifference

@@ -118,4 +118,17 @@
 		</g:each>
 	</tbody>
 </table>
+<g:if test="${employeeInstanceTotal!=null}">
+	<div class="pagination" id="pagination">
+		<g:hiddenField name="isAdmin" value="${isAdmin}" />
+		<g:if test="${site != null }">
+			<util:remotePaginate controller="employee" action="list" total="${employeeInstanceTotal}"
+	                                   update="divId" max="20"  params="${[isAdmin:isAdmin,site:site.id]}"/>
+			</g:if>
+		<g:else>
+			<util:remotePaginate controller="employee" action="list" total="${employeeInstanceTotal}"
+	                                   update="divId" max="20"  params="${[isAdmin:isAdmin]}"/>
+		</g:else>
+	</div>
+</g:if>
 

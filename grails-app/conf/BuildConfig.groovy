@@ -53,6 +53,7 @@ grails.project.dependency.resolution = {
 		runtime 'mysql:mysql-connector-java:5.1.21'
 		compile 'com.itextpdf:itextpdf:5.4.1'
 		build 'org.codehaus.gpars:gpars:1.2.1'
+		
     }
 
     plugins {
@@ -84,6 +85,7 @@ grails.project.dependency.resolution = {
 		//compile ":export:1.6"
 		compile ":csv:0.3.1"
 		compile ":ajax-uploader:1.1"
+		compile "org.grails.plugins:remote-pagination:0.4.8"
 		
     }
 }

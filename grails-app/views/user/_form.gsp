@@ -92,6 +92,12 @@
 	</label>
 	<g:textField name="phoneNumber"  value="${userInstance?.phoneNumber}"/>
 </div>
+<div class="fieldcontain ${hasErrors(bean: userInstance, field: 'reportSendDay', 'error')}">
+	<label for="reportSendDay">
+		<g:message code="user.report.send.day.label" default="Username" />
+	</label>
+	<g:select id="reportSendDay" name="reportSendDay" from="${1..30}" value="${userInstance.reportSendDay}" />
+</div>
 
 
 <BR>

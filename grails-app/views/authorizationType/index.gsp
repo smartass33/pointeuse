@@ -24,7 +24,7 @@
 			<thead>
 					<tr>				
 						<g:sortableColumn property="creationDate" title="${message(code: 'creation.date.label', default: 'Creation Date')}" />					
-						<g:sortableColumn property="type" title="${message(code: 'authorizationType.type.label', default: 'Type')}" />
+						<g:sortableColumn property="name" title="${message(code: 'authorizationType.type.label', default: 'Type')}" />
 						<th><g:message code="authorizationType.nature.label" default="Nature" /></th>					
 						<th><g:message code="authorizationType.user.label" default="User" /></th>				
 					</tr>
@@ -34,7 +34,7 @@
 					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">					
 						<td>${authorizationTypeInstance.creationDate.format('dd/MM/yyyy')}</td>					
 						<td><g:link action="show" id="${authorizationTypeInstance.id}">${authorizationTypeInstance.name}</g:link></td>					
-						<td>${authorizationTypeInstance.nature.nature}</td>					
+						<td>${authorizationTypeInstance.nature.name}</td>					
 						<td>${authorizationTypeInstance.user.firstName} ${authorizationTypeInstance.user.lastName}</td>				
 					</tr>
 				</g:each>

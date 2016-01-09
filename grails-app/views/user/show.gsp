@@ -82,7 +82,7 @@
 				<li class="fieldcontain">
 					<span id="enabled-label" class="property-label"><g:message code="user.enabled.label" default="Enabled" /></span>
 					
-						<span class="property-value" aria-labelledby="enabled-label"><g:formatBoolean boolean="${userInstance?.enabled}" /></span>
+						<span class="property-value" aria-labelledby="enabled-label"><g:checkBox name="enabled" value="${userInstance?.enabled}" checked="${userInstance?.enabled}"/></span>
 					
 				</li>
 				</g:if>

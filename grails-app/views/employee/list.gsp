@@ -29,8 +29,7 @@
 		</style>
 	</head>
 	<body>
-		<g:hiddenField name="detail" value="0" />
-		
+		<g:hiddenField name="detail" value="0" />		
 		<script>
 		function showVal() {
 			if (document.getElementById("detail").value == "1"){
@@ -86,8 +85,6 @@
 					<li style="vertical-align: middle;">
 						<g:actionSubmit disabled="${period!=null}"  value="PDF" action="getSitePDF" class="${period!=null ? 'pdfButtonDisabled':'pdfButton'}" />
 					</li>	
-					
-					<!-- li style="vertical-align: middle;"><g:actionSubmit disabled="${period!=null}"  value="imprimer les détails" action="getSiteInfoPDF" class="${period!=null ? 'pdfButtonDisabled':'pdfButton'}" /></li-->	
 					<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">								
 						<li>
 							<g:actionSubmit class='excelButton' value="export excel"  action="employeeExcelExport"/>
@@ -108,11 +105,5 @@
 		<br>
 		<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
 		<div id="divId"><g:listEmployee /></div>
-		<g:if test="${employeeInstanceTotal!=null}">
-			<div class="pagination" id="pagination">
-				<g:hiddenField name="isAdmin" value="${isAdmin}" />
-				<g:paginate total="${employeeInstanceTotal}" params="${[isAdmin:isAdmin]}" />
-			</div>
-		</g:if>
 	</body>
 </html>

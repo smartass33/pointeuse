@@ -68,6 +68,10 @@ grails.exceptionresolver.params.exclude = ['password']
 // configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
 grails.hibernate.cache.queries = false
 
+//In Config.groovy
+grails.plugins.remotepagination.max=20
+//EnableBootstrap here when using twitter bootstrap, default is set to false.
+grails.plugins.remotepagination.enableBootstrap=false
 
 environments {
     development {
