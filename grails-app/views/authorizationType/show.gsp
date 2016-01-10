@@ -33,11 +33,11 @@
 					<span class="property-value" aria-labelledby="nature-label"><g:link controller="authorizationNature" action="show" id="${authorizationTypeInstance?.nature?.id}">${authorizationTypeInstance?.nature?.name}</g:link></span>
 				</li>
 				</g:if>
-				<g:if test="${authorizationTypeInstance?.type}">
-				<li class="fieldcontain">
-					<span id="type-label" class="property-label"><g:message code="authorizationType.type.label" default="Type" /></span>
-					<span class="property-value" aria-labelledby="type-label"><g:fieldValue bean="${authorizationTypeInstance}" field="type"/></span>
-				</li>
+				<g:if test="${authorizationTypeInstance?.name}">
+					<li class="fieldcontain">
+						<span id="type-label" class="property-label"><g:message code="authorizationType.type.label" default="Type" /></span>
+						<span class="property-value" aria-labelledby="type-label"><g:fieldValue bean="${authorizationTypeInstance}" field="name"/></span>
+					</li>
 				</g:if>		
 				<g:if test="${authorizationTypeInstance?.user}">
 				<li class="fieldcontain">

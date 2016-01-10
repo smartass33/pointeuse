@@ -84,5 +84,9 @@ class EmployeeTagLib {
 		
 	}
 	
+	def fieldUpdatePopup ={attrs,body->		
+		out<<render(template:"/employeeDataListMap/template/fieldUpdatePopup",model:[fieldName:attrs.fieldName,type:attrs.type])
+	}
+	
 
 }

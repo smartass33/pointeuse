@@ -18,23 +18,22 @@ class EmployeeDataListMapController {
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
 		
-		def criteria = EmployeeDataListMap.createCriteria()
-		def employeeDataListMapInstance = criteria.get {
-			maxResults(1)
-		}
-		/*
-		def increment = 1
-		employeeDataListMapInstance.fieldMap.each{k,v->
-			def dataRank = new EmployeeDataListRank()
-			dataRank.rank = increment
-			dataRank.fieldName = k
-			increment ++
-			dataRank.save(flush:true)
-		}
-		*/
+		def employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
 		def dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
-
-        [employeeDataListMapInstance: employeeDataListMapInstance,dataListRank:dataListRank]
+		def employeeList = Employee.findAll()
+		def hasEmployeeMap = [:]
+		dataListRank.each{rank->
+			hasEmployeeMap.put(rank.fieldName,0)
+			for (Employee employee : employeeList){
+				def extraData = employee.extraData
+				if ((employee.extraData).get(rank.fieldName)){
+					hasEmployeeMap.put(rank.fieldName,hasEmployeeMap.get(rank.fieldName) + 1)
+					
+				}
+			}
+		}
+	
+        [employeeDataListMapInstance: employeeDataListMap,dataListRank:dataListRank,hasEmployeeMap:hasEmployeeMap]
 		
     }
 
@@ -130,15 +129,12 @@ class EmployeeDataListMapController {
 		log.error('addNewEmployeeData called')
 		params.each{i->log.error('parameter of list: '+i)}
 		def fieldName = params['fieldname']
-		def rank = params.int('rank')
+		def rank = 1
 		def type = params['type']
 		def isHiddenField = false
 		
-		def criteria = EmployeeDataListMap.createCriteria()
-		def employeeDataListMap = criteria.get {
-			maxResults(1)
-		}
-		
+		def employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
+
 		if (employeeDataListMap == null){
 			employeeDataListMap = new EmployeeDataListMap(new Date(),user)
 			employeeDataListMap.fieldMap = [:]
@@ -166,18 +162,51 @@ class EmployeeDataListMapController {
 	def trashEmployeeData(){
 		def user = springSecurityService.currentUser
 		log.error('removeNewEmployeeData called')
-		params.each{i->log.error('parameter of list: '+i)}
-		def criteria = EmployeeDataListMap.createCriteria()
-		def employeeDataListMap = criteria.get {
-			maxResults(1)
-		}
+		params.each{i->log.debug('parameter of list: '+i)}
+		def employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
+
 		(employeeDataListMap.fieldMap).remove(params['fieldMap'])
 		def rank= EmployeeDataListRank.findByFieldName(params['fieldMap'])
 		employeeDataListMap.save flush:true
 		rank.delete flush:true
 		log.error(params["fieldMap"]+' removed from employeeDataListMap')
+		def dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
+		employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
+		
+		
+		def dataListRankCount = dataListRank.size()
+		def j = 1
+		// recompute the ranks to avoid holes
+		for (EmployeeDataListRank rankTmp in dataListRank){
+			rankTmp.rank = j
+			rankTmp.save(flush:true)
+			j++
+		}
+		dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
+		
+		def employeeList = Employee.findAll()
+		def extraData
+		for (Employee employee : employeeList){
+			extraData = employee.extraData
+			def value = extraData.get(params['fieldMap'])
+			if (value != null){
+				extraData.remove(params['fieldMap'])
+				employee.save()
+			}
+		}
+		def hasEmployeeMap = [:]
+		dataListRank.each{i->
+			hasEmployeeMap.put(i.fieldName,0)
+			for (Employee employee : employeeList){
+				if ((employee.extraData).get(i.fieldName)){
+					hasEmployeeMap.put(i.fieldName,hasEmployeeMap.get(i.fieldName) + 1)
+					
+				}
+			}
+		}
 		flash.message = message(code: 'default.deleted.message', args: [message(code: 'employeeDataListMap.label'), params["fieldMap"]])
-		render template: "/employeeDataListMap/template/employeeDataListTable",model:[employeeDataListMapInstance:employeeDataListMap,flash:flash]
+		render template: "/employeeDataListMap/template/employeeDataListTable",model:[employeeDataListMapInstance:employeeDataListMap,dataListRank:dataListRank,hasEmployeeMap:hasEmployeeMap,flash:flash]
+		return
 		//return
 	}
 	
@@ -186,34 +215,43 @@ class EmployeeDataListMapController {
 		log.error('modify called')
 		params.each{i->log.error('parameter of list: '+i)}
 		def extraData
-		def parameters = params.oldKey.split(' value=')
-		def oldKey = parameters[0]
-		def newKey = params['newKey']
+		def type = params['type']
+		def fieldName = params['fieldName']
+		def oldFieldName = params['oldFieldName']
+		def employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
+		def oldFieldValue = (employeeDataListMap.fieldMap).get(oldFieldName)
+		(employeeDataListMap.fieldMap).remove(oldFieldName)
+		(employeeDataListMap.fieldMap).put(fieldName,type)
+		employeeDataListMap.save(flush:true)
+		def dataListRank= EmployeeDataListRank.findByFieldName(oldFieldName)
+		dataListRank.fieldName = fieldName
+		dataListRank.save(flush:true)
+		
+		
+
 		def employeeList = Employee.findAll()
 		for (Employee employee : employeeList){
 			extraData = employee.extraData 
-			def value = extraData.get(oldKey)
+			def value = extraData.get(oldFieldName)
 			if (value != null){
 				log.error(value)
-				extraData.remove(oldKey)
-				extraData.put(newKey,value)
+				extraData.remove(oldFieldName)
+				extraData.put(fieldName,value)
 				employee.save()
 			}
 		}
-		def criteria = EmployeeDataListMap.createCriteria()
-		def employeeDataListMap = criteria.get {
-			maxResults(1)
-		}
-		def oldFieldValue = (employeeDataListMap.fieldMap).get(oldKey)
-		(employeeDataListMap.fieldMap).remove(oldKey)
-		(employeeDataListMap.fieldMap).put(newKey,oldFieldValue)
+		employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
+		dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
+		
 		log.error('done')
+		render template: "/employeeDataListMap/template/employeeDataListTable",model:[employeeDataListMapInstance:employeeDataListMap,dataListRank:dataListRank,flash:flash]
+		return
 
 	}
 	
 	@Transactional
 	def changeRank(){
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		def elements = params['Element[]']
 		def dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
 		
@@ -229,6 +267,22 @@ class EmployeeDataListMapController {
 			dataRank.save(flush:true)
 			i++
 		}
+		dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
+
+		def hasEmployeeMap = [:]
+		def employeeList = Employee.findAll()
+		dataListRank.each{rank->
+			hasEmployeeMap.put(rank.fieldName,0)
+			for (Employee employee : employeeList){
+				if ((employee.extraData).get(rank.fieldName)){
+					hasEmployeeMap.put(rank.fieldName,hasEmployeeMap.get(rank.fieldName) + 1)
+					
+				}
+			}
+		}
+		def employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
+		render template: "/employeeDataListMap/template/employeeDataListTable",model:[employeeDataListMapInstance:employeeDataListMap,dataListRank:dataListRank,hasEmployeeMap:hasEmployeeMap,flash:flash]
+		return
 
 	}
 }

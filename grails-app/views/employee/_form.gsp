@@ -116,30 +116,30 @@
 </div>	
 <g:if test="${employeeDataListMapInstance != null && employeeDataListMapInstance.fieldMap != null}">
 	<div id="cartouche_div">
-		<g:each in="${employeeDataListMapInstance.fieldMap}" status="i" var="fieldMap">
-			<div  class="fieldcontain"  id="${fieldMap.key}">
-				<label for="${fieldMap.key}"><g:message code="${fieldMap.key}" default="${fieldMap.key}" /></label>	
+		<g:each in="${dataListRank}" status="i" var="rank">
+			<div  class="fieldcontain"  id="${rank.rank}">
+				<label for="${rank.fieldName}"><g:message code="${rank.fieldName}" default="${rank.fieldName}" /></label>	
 				<g:if test = "${employeeInstance.extraData != null}">	
-					<g:if test = "${fieldMap.value.equals('DATE') }">
-						<g:if test="${(employeeInstance.extraData).get(fieldMap.key) != null }">
-							<g:datePicker name="${fieldMap.key}" precision="day" value="${(new SimpleDateFormat("yyyyMd", Locale.ENGLISH)).parse((employeeInstance.extraData).get(fieldMap.key))}"/>		
+					<g:if test = "${((employeeDataListMapInstance.fieldMap).get(rank.fieldName)).equals('DATE') }">
+						<g:if test="${(employeeInstance.extraData).get(rank.fieldName) != null }">
+							<g:datePicker name="${rank.fieldName}" precision="day" value="${(new SimpleDateFormat("yyyyMd", Locale.ENGLISH)).parse((employeeInstance.extraData).get(rank.fieldName))}"/>		
 						</g:if>
 						<g:else>
-							<g:datePicker name="${fieldMap.key}" precision="day" value="${new Date()}"/>		
+							<g:datePicker name="${rank.fieldName}" precision="day" value="${new Date()}"/>		
 						
 						</g:else>
 					</g:if>	
 					<g:else>
-						<g:if test = "${fieldMap.value.equals('NUMBER') }">
-							<input type="number" class="code" id="${fieldMap.key}" name="${fieldMap.key}" value="${(employeeInstance.extraData).get(fieldMap.key)}"  /> 				
+						<g:if test = "${((employeeDataListMapInstance.fieldMap).get(rank.fieldName)).equals('NUMBER')}">
+							<input type="number" class="code" id="${rank.fieldName}" name="${rank.fieldName}" value="${(employeeInstance.extraData).get(rank.fieldName)}"  /> 				
 						</g:if>
 						<g:else>
-							<g:textField name="${fieldMap.key}" value="${(employeeInstance.extraData).get(fieldMap.key)}"/>				
+							<g:textField name="${rank.fieldName}" value="${(employeeInstance.extraData).get(rank.fieldName)}"/>				
 						</g:else>		
 					</g:else>				
 				</g:if>		
 				<g:else>	
-					<g:textField name="${fieldMap.key}" value=""/>			
+					<g:textField name="${rank.fieldName}" value=""/>			
 				</g:else>
 			</div>
 		</g:each>

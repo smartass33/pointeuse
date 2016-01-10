@@ -171,37 +171,37 @@ class EmployeeController {
 		
 		if (back){
 			if (site!=null){
-				employeeInstanceList = Employee.findAllBySite(site,['sort':'lastName'])
-				employeeInstanceTotal = employeeInstanceList.size()			
-				render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]
-				return
+				employeeInstanceList = Employee.findAllBySite(site,['sort':'lastName','offset':offset])
+				employeeInstanceTotal = employeeInstanceList.size()		
+				[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]	
 			}else {	
 				def sites = Site.findAll("from Site")
 				employeeInstanceList = []
+				sites.each{siteTmp -> 
+					employeeInstanceList.addAll(Employee.findAllBySite(siteTmp,['sort':'lastName','offset':offset]))			
+				}
+	
+				employeeInstanceTotal = employeeInstanceList.size()
+				[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin]		
+			}
+		}else{
+			if (site != null){
+				employeeInstanceList = Employee.findAllBySite(site,['sort':'lastName','offset':offset])
+				employeeInstanceTotal = employeeInstanceList.size()
+				render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+				return
+			}else{
+				def sites = Site.findAll("from Site")
+				employeeInstanceList = []
 				for (Site siteTmp : sites){
-					employeeInstanceList.add(Employee.findAllBySite(site,[max:  20,offset: 0]))				
+					employeeInstanceList.addAll(Employee.findAllBySite(siteTmp,[offset: 0]))				
 				}
 				employeeInstanceTotal = employeeInstanceList.size()
 			}
-		}else{
-		
-		if (site!=null){
-			employeeInstanceList = Employee.findAllBySite(site,['sort':'lastName','offset':offset])
-			employeeInstanceTotal = employeeInstanceList.size()
-			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]
-			return
-		}else{
-			def sites = Site.findAll("from Site")
-			employeeInstanceList = []
-			for (Site siteTmp : sites){
-				employeeInstanceList.addAll(Employee.findAllBySite(siteTmp,[offset: 0]))				
-			}
-			employeeInstanceTotal = employeeInstanceList.size()
-		}
 		}	
 		
 		log.debug('employee list returned')
-		def newList = employeeInstanceList.take(20+offset)
+		def newList = employeeInstanceList.take(20 + offset)
 		def newList2 = newList.drop(offset)
 		if (params["offset"] != null){
 			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
@@ -293,13 +293,13 @@ class EmployeeController {
 		def employeeValue = []	
 		def employeeList = (site != null) ? Employee.findAllBySite(site) : Employee.list()	
 		def criteria = EmployeeDataListMap.createCriteria()
-		def employeeDataListMap = criteria.get {
-			maxResults(1)
-		}
+		def employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
 
-		def fieldMap = (employeeDataListMap != null) ? employeeDataListMap.fieldMap : [:]
-		fieldMap.each{k,v->
-			headers.add(k)
+		def dataListRank = EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
+		
+		def fieldMap = (dataListRank != null) ? dataListRank : [:]
+		dataListRank.each{rank->
+			headers.add(rank.fieldName)
 		}
 		
 		def authorizationTypes = AuthorizationType.list()
@@ -308,6 +308,7 @@ class EmployeeController {
 			headers.add("début d'habilitation")
 			headers.add("fin d'habilitation")
 		}
+		
 		
 		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/employee_list_template.xlsx').with {
 			setResponseHeaders(response)		
@@ -323,12 +324,13 @@ class EmployeeController {
 				employeeValue.add(employee.service != null ? employee.service.name :'-')				
 				employeeValue.add(employee.weeklyContractTime != null ? employee.weeklyContractTime :'-')
 				employeeValue.add(employee.arrivalDate != null ? employee.arrivalDate.format('dd/MM/yyyy') :'-')
-				fieldMap.each{k,v->
-					value = employee.extraData.get(k)	
+				
+				fieldMap.each{rank->
+					value = employee.extraData.get(rank.fieldName)	
 					if (value == null || value.equals('')){
 						value = '-'
 					}			
-					if (v.equals('DATE')){
+					if ((employeeDataListMap.fieldMap.get(rank.fieldName)).equals('DATE')){
 						if (value != null && !value.equals('-')){
 							value = (new Date().parse("yyyyMd", value)).format('dd/MM/yyyy')
 						}
@@ -1005,12 +1007,14 @@ class EmployeeController {
         }
 		def arrivalDate = employeeInstance.arrivalDate		
 		def criteria = EmployeeDataListMap.createCriteria()
-		def employeeDataListMapInstance = criteria.get {
-			maxResults(1)
-		}
+		def employeeDataListMap= EmployeeDataListMap.find("from EmployeeDataListMap")
+		def dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
+		
 		def authorizationInstanceList = Authorization.findAllByEmployee(employeeInstance)
+		def authorizationTypes = AuthorizationType.findAll("from AuthorizationType")
 		
 		def retour = [
+			authorizationTypes:authorizationTypes,
 			authorizationInstanceList:authorizationInstanceList,
 			fromEditEmployee:true,
 			back:back,
@@ -1021,7 +1025,8 @@ class EmployeeController {
 			orderedVacationListfromSite:fromSite,
 			employeeInstance: employeeInstance,
 			isAdmin:isAdmin,siteId:siteId,
-			employeeDataListMapInstance:employeeDataListMapInstance			
+			employeeDataListMapInstance:employeeDataListMap,
+			dataListRank:dataListRank
 		]		
 		return retour
 	}
@@ -1320,9 +1325,9 @@ class EmployeeController {
         }
 		
 		
-		def employeeStatus = employeeInstance.status
+		//def employeeStatus = employeeInstance.status
 		
-		log.error('employee status: '+employeeInstance.status)
+		log.debug('employee status: '+employeeInstance.status)
 		
         employeeInstance.properties = params
 		
@@ -1351,9 +1356,8 @@ class EmployeeController {
 		
 		/* dealing with employee extra data*/ 
 		def criteria = EmployeeDataListMap.createCriteria()
-		def employeeDataListMapInstance = criteria.get {
-			maxResults(1)
-		}
+		def employeeDataListMapInstance = EmployeeDataListMap.find("from EmployeeDataListMap")
+
 		employeeDataListMapInstance.fieldMap.each{k,v->
 			
 			log.error('key: '+k)
@@ -1362,16 +1366,21 @@ class EmployeeController {
 			if (employeeInstance.extraData == null){
 				employeeInstance.extraData = [:]
 			}
-			if (v.equals('DATE')){			
-				employeeInstance.extraData.put(k,params[k+'_year']+params[k+'_month']+params[k+'_day'])
-			}else{
-				employeeInstance.extraData.put(k,params[k])
+			if (params[k] != null){
+				if (v.equals('DATE')){			
+					employeeInstance.extraData.put(k,params[k+'_year']+params[k+'_month']+params[k+'_day'])
+				}else{
+					employeeInstance.extraData.put(k,params[k])
+				}
+				if (params[k] == ''){
+					employeeInstance.extraData.remove(k)
+				}
 			}
 				
 		}
 		
 		//employeeInstance.extraData
-		employeeInstance.status = employeeStatus		
+		//employeeInstance.status = employeeStatus		
         if (!employeeInstance.save(flush: true)) {
             render(view: "edit", model: [employeeInstance: employeeInstance])
             return
