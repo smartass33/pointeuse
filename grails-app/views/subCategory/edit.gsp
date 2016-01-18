@@ -1,13 +1,13 @@
-<%@ page import="pointeuse.AuthorizationType" %>
+<%@ page import="pointeuse.SubCategory" %>
 <!DOCTYPE html>
 <html>
 	<head>
 		<meta name="layout" content="main">
-		<g:set var="entityName" value="${message(code: 'authorizationType.label', default: 'AuthorizationType')}" />
+		<g:set var="entityName" value="${message(code: 'subCategory.label', default: 'SubCategory')}" />
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>
 	</head>
 	<body>
-		<a href="#edit-authorizationType" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
+		<a href="#edit-subCategory" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div class="nav" role="navigation">
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
@@ -15,20 +15,20 @@
 				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
 			</ul>
 		</div>
-		<div id="edit-authorizationType" class="content scaffold-edit" role="main">
+		<div id="edit-subCategory" class="content scaffold-edit" role="main">
 			<h1><g:message code="default.edit.label" args="[entityName]" /></h1>
 			<g:if test="${flash.message}">
 			<div class="message" role="status">${flash.message}</div>
 			</g:if>
-			<g:hasErrors bean="${authorizationTypeInstance}">
+			<g:hasErrors bean="${subCategoryInstance}">
 			<ul class="errors" role="alert">
-				<g:eachError bean="${authorizationTypeInstance}" var="error">
+				<g:eachError bean="${subCategoryInstance}" var="error">
 				<li <g:if test="${error in org.springframework.validation.FieldError}">data-field-id="${error.field}"</g:if>><g:message error="${error}"/></li>
 				</g:eachError>
 			</ul>
 			</g:hasErrors>
-			<g:form url="[resource:authorizationTypeInstance, action:'update']" method="PUT" >
-				<g:hiddenField name="version" value="${authorizationTypeInstance?.version}" />
+			<g:form url="[resource:subCategoryInstance, action:'update']" method="PUT" >
+				<g:hiddenField name="version" value="${subCategoryInstance?.version}" />
 				<fieldset class="form">
 					<g:render template="form"/>
 				</fieldset>

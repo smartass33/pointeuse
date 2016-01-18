@@ -70,8 +70,8 @@
 								<li class="controller"><g:link controller="reason" style="text-decoration: none;"><g:message code="regularization.reasons" default="Last Name" /></g:link></li>			
 								<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">		
 									<li class="controller"><g:link controller="employeeDataListMap" style="text-decoration: none;"><g:message code="employeeDataListMap.management" default="Last Name" /></g:link></li>																							
-									<li class="controller"><g:link controller="authorizationType" style="text-decoration: none;"><g:message code="authorizationType.management.label" default="Last Name" /></g:link></li>			
-									<li class="controller"><g:link controller="authorizationNature" style="text-decoration: none;"><g:message code="authorizationNature.management.label" default="Last Name" /></g:link></li>			
+									<li class="controller"><g:link controller="category" style="text-decoration: none;"><g:message code="authorizationType.management.label" default="Last Name" /></g:link></li>			
+									<li class="controller"><g:link controller="subCategory" style="text-decoration: none;"><g:message code="authorizationNature.management.label" default="Last Name" /></g:link></li>			
 								</sec:ifAnyGranted>
 								<li><BR></li>
 								<li class="controller"><g:link controller="logout" class="adminLogout"><g:message code="admin.logout.label" default="Last Name" /></g:link></li>							

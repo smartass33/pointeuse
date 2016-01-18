@@ -5,6 +5,7 @@
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'authorization.label', default: 'Authorization')}" />
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>
+		<g:javascript library="jquery" plugin="jquery" />
 		<script type="text/javascript">
 			function closePopup ( ){
 				window.location = $('#closeId').attr('href');

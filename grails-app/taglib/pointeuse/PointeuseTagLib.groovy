@@ -12,4 +12,8 @@ class PointeuseTagLib {
 	def authorizationTable ={attrs,body->
 		out<<render(template:"/authorization/template/authorizationTable",model:[showEmployee:attrs.showEmployee])
 	}
+	
+	def authorizationCategoryTable ={attrs,body->
+		out<<render(template:"/authorization/template/authorizationCategoryTable",model:[showEmployee:attrs.showEmployee])
+	}
 }

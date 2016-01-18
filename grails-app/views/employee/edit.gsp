@@ -30,6 +30,9 @@
 			#cartouche_div {
     			display: none;
 			}
+			#authorizationDiv {
+    			display: none;
+			}
 		</style>
 		<g:javascript library="application"/> 		
 		<r:require module="report"/>
@@ -71,6 +74,12 @@
 	    		$('#cartouche_div').slideToggle(400);
 	   			});
 			});
+			
+			$(document).ready(function() {
+	   			$('#authorization_toggle').click( function() {
+	    		$('#authorizationDiv').slideToggle(400);
+	   			});
+			});
 		</script>
 	</head>
 	<body>
@@ -84,9 +93,6 @@
 				</g:if>
 				<li><g:link class="list" action="list" params="${[isAdmin:isAdmin,siteId:siteId,back:true]}"><g:message code="default.list.label" args="[entityName]" /></g:link></li>			
 				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
-				<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">											
-					<li><g:authorizationPopup fromReport="${false}" fromEditEmployee="${true}" showEmployee="${false}" employeeInstanceId="${employeeInstance.id}"/></li>
-				</sec:ifAnyGranted>
 			</ul>
 		</div>
 		<div id="edit-employee" class="content scaffold-edit" role="main">
@@ -114,11 +120,13 @@
 					<g:actionSubmit class="delete" action="delete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" onclick="return confirm('${message(code: 'default.employee.button.delete.confirm.message', default: 'Are you sure?')}');" />
 				</fieldset>
 			</g:form>
+			<div id='authorization_input_image' style='padding-left:2.7em;'>
+				<button type='button' id="authorization_toggle" ><img alt="toggle" src="${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
+				${message(code: 'authorization.management', default: 'Gestion des habilitations')}
+			</div>	
 			<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">								
 				<div id="authorizationDiv" style="padding-left:1.5em;">	
-					<g:if test="${authorizationInstanceList != null}">
-						<g:authorizationTable showEmployee="${false}"/>
-					</g:if>
+					<g:authorizationCategoryTable showEmployee="${false}"/>
 				</div>
 			</sec:ifAnyGranted>
 			<h1><g:message code="contract.and.status.management"/></H1>		

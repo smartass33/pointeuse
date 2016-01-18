@@ -9,10 +9,15 @@ class Authorization {
 	Date startDate
 	Date endDate
 	Boolean isAuthorized
-	AuthorizationType type
+	Category category
+	SubCategory subCategory
 	static belongsTo = [employee:Employee]
 
     static constraints = {
+		category (blank: true, nullable: true, unique:true)
+		subCategory (blank: true, nullable: true, unique:true)	
+		startDate (blank:true, nullable:true)
+		endDate (blank:true, nullable:true)
     }
 	
 	Authorization(Date startDate,Date endDate,Employee employee){
@@ -21,4 +26,6 @@ class Authorization {
 		this.employee = employee
 		this.isAuthorized = true
 	}
+	
+
 }

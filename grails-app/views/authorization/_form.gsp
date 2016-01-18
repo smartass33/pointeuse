@@ -37,12 +37,5 @@
 		<g:message code="authorizationType.type.label" default="Type" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:select id="cat" name="type" from="${AuthorizationType.findAll()}" optionKey="id" required="" optionValue="name" value="${authorizationTypeInstance?.nature?.id}" class="many-to-one"         />
-</div>
-<div class="fieldcontain ${hasErrors(bean: authorizationInstance, field: 'type', 'error')} required">
-	<label for="type" style="width:160px;">
-		<g:message code="authorizationType.nature.label" default="Nature" />
-		<span class="required-indicator">*</span>
-	</label>
-	<g:select id="subCat" name="type" from ="${cat.nature}" optionKey="id" required="" optionValue="name" value="tbd" class="many-to-one"         />
+	<g:select id="cat" name="type" from="${AuthorizationType.findAll()}" optionKey="id" required="" optionValue="name" value="${authorizationTypeInstance?.name?.id}" class="many-to-one"         />
 </div>
