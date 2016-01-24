@@ -37,13 +37,10 @@
 					<th style="width:200px;text-align: center;"><g:message code="employeeDataListMap.fieldName.label" default="Field name" /></th>					
 					<th style="width:100px;text-align: center;"><g:message code="employeeDataListMap.fieldType.label" default="Field type" /></th>		
 					<th style="width:80px;text-align: center;"><g:message code="default.button.delete.label" default="Field type" /></th>
-					<th style="width:250px;text-align: center;">employés utilisant ce champ</th>																				
-																									
+					<th style="width:250px;text-align: center;"><g:message code="employeeDataListMap.using.field.label" default="Field type" /></th>																																								
 				</tr>
 			</thead>
 	     </table>
-	         
-	         
 	   	<g:each in="${dataListRank}" status="i" var="rank">	
 				<li id="Element_${i}" >
 					<table>
@@ -62,12 +59,9 @@
 							</td>	
 							<td style="width:250px;text-align: center;">${hasEmployeeMap.get(rank.fieldName)}</td>
 						</tr>	
-					</table>
-					
+					</table>					
 				</li>		
-		</g:each>     
-	         
-
+		</g:each>     	         
 	</ul>
 </div>
 

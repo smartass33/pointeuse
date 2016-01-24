@@ -10,27 +10,16 @@
 				font-family: Verdana, Arial, sans-serif;
 				font-size: 0.9em;
 			}
-			table {
-				border-collapse: collapse;
-			}
-			thead {
-				background-color: #DDD;
-			}
-			td {
-				padding: 2px 4px 2px 4px;
-				text-align:center;
-			}
-			th {
-				padding: 2px 4px 2px 4px;
-			}
+
 			#newContractForm {
     			display: none;
 			}
-					
-			#cartouche_div {
+
+			#authorizationDiv {
     			display: none;
 			}
-			#authorizationDiv {
+			
+			#authorization_collapse {
     			display: none;
 			}
 		</style>
@@ -68,21 +57,27 @@
 			      yearSuffix: ''};
 			   $.datepicker.setDefaults($.datepicker.regional['fr']);
 			});
-			
+						
 			$(document).ready(function() {
-	   			$('#cartouche_toggle').click( function() {
-	    		$('#cartouche_div').slideToggle(400);
+	   			$('#authorization_toggle').click( function() {
+	    			$('#authorizationDiv').slideToggle(400);
+	    			$('#authorization_collapse').show();
+	    			$('#authorization_toggle').hide();
+	    		
 	   			});
 			});
 			
 			$(document).ready(function() {
-	   			$('#authorization_toggle').click( function() {
-	    		$('#authorizationDiv').slideToggle(400);
+	   			$('#authorization_collapse').click( function() {
+	    			$('#authorizationDiv').slideToggle(400);
+	    			$('#authorization_collapse').hide();
+	    			$('#authorization_toggle').show();
+	    		
 	   			});
 			});
 		</script>
 	</head>
-	<body>
+	<body style="">
 		<a href="#edit-employee" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div class="nav" role="navigation">
 			<ul>
@@ -121,7 +116,8 @@
 				</fieldset>
 			</g:form>
 			<div id='authorization_input_image' style='padding-left:2.7em;'>
-				<button type='button' id="authorization_toggle" ><img alt="toggle" src="${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
+				<button type='button' id="authorization_toggle" ><img alt="toggle" src="${grailsApplication.config.context}/images/expand.png"></button>
+				<button type='button' id="authorization_collapse" ><img alt="toggle" src="${grailsApplication.config.context}/images/collapse.png"></button>
 				${message(code: 'authorization.management', default: 'Gestion des habilitations')}
 			</div>	
 			<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">								

@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.Callable
 
+import groovy.json.JsonSlurper
 import groovy.time.TimeDuration
 import groovy.time.TimeCategory
 import grails.converters.JSON
@@ -287,26 +288,43 @@ class EmployeeController {
 		def calendar = Calendar.instance
 		def result
 		def authorizations
+		def authorization
 		def value
-		def headers = ['LAST NAME','FIRSTNAME','USERNAME','MATRICULE','FUNCTION','SITE','SERVICE','WEEKLY TIME','ARRIVAL']		
+		def headers = [
+						message(code: 'employee.title.label'),
+						message(code: 'employee.firstName.label'),
+						message(code: 'employee.lastName.label'),
+						message(code: 'employee.birthName.label'),
+						message(code: 'employee.username.label'),						
+						message(code: 'employee.matricule.label'),							
+						message(code: 'employee.function.label'),						
+						message(code: 'laboratory.label'),						
+						message(code: 'service.label'),							
+						message(code: 'employee.weekly.hour.label'),						
+						message(code: 'employee.arrivalDate.short.label')]
 		int i = 1
 		def employeeValue = []	
 		def employeeList = (site != null) ? Employee.findAllBySite(site) : Employee.list()	
 		def criteria = EmployeeDataListMap.createCriteria()
 		def employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
-
 		def dataListRank = EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
 		
 		def fieldMap = (dataListRank != null) ? dataListRank : [:]
 		dataListRank.each{rank->
 			headers.add(rank.fieldName)
 		}
-		
-		def authorizationTypes = AuthorizationType.list()
-		for (AuthorizationType authorizationType : authorizationTypes){
-			headers.add('habilitation: '+authorizationType.name)
-			headers.add("début d'habilitation")
-			headers.add("fin d'habilitation")
+
+		def categoryList = Category.findAll()		
+		for (Category category : categoryList){
+			headers.add(message(code: 'default.authorization.label')+': \n'+category.name)
+			headers.add(message(code: 'authorization.startDate.label'))
+			headers.add(message(code: 'authorization.endDate.label'))
+			def subCategoryList = category.subCategories
+			for (SubCategory subCategory:subCategoryList){
+				headers.add(message(code: 'default.authorization.label')+': \n'+subCategory.name)
+				headers.add(message(code: 'authorization.startDate.label'))
+				headers.add(message(code: 'authorization.endDate.label'))
+			}
 		}
 		
 		
@@ -315,8 +333,10 @@ class EmployeeController {
 			fillHeader(headers)
 			for(employee in employeeList) {			
 				employeeValue = []
+				employeeValue.add(employee.title != null ? employee.title :'-')
 				employeeValue.add(employee.lastName != null ? employee.lastName :'-')
 				employeeValue.add(employee.firstName != null ? employee.firstName :'-')
+				employeeValue.add((employee.birthName != null && !employee.birthName.equals('') ) ? employee.birthName :'-')				
 				employeeValue.add(employee.userName != null ? employee.userName :'-')
 				employeeValue.add(employee.matricule != null ? employee.matricule :'-')
 				employeeValue.add(employee.function != null ? employee.function.name :'-')
@@ -340,20 +360,39 @@ class EmployeeController {
 				
 				authorizations = Authorization.findByEmployee(employee)
 				
-				for (AuthorizationType authorizationType :  authorizationTypes){									
-					for (Authorization authorization : authorizations){
-						log.error(authorization.type.name)
-						if ((authorization.type.name).equals(authorizationType.name)){
-							log.error('types are equal')
-							employeeValue.add(authorization.isAuthorized)	
-							employeeValue.add(authorization.startDate != null ? authorization.startDate.format('dd/MM/yyyy') :'-')
-							employeeValue.add(authorization.endDate != null ? authorization.endDate.format('dd/MM/yyyy') :'-')							
-						}else{
-							employeeValue.add('-')				
-						}
+				for (Category category : categoryList){
+					
+					
+					authorization = Authorization.findByCategoryAndEmployee(category,employee)
+					if (authorization != null){
+						employeeValue.add(authorization.isAuthorized)
+						employeeValue.add(authorization.startDate != null ? authorization.startDate.format('dd/MM/yyyy') :'-')
+						employeeValue.add(authorization.endDate != null ? authorization.endDate.format('dd/MM/yyyy') :'-')
+						
+					}else{
+						employeeValue.add('-')
+						employeeValue.add('-')
+						employeeValue.add('-')
 					}
 					
+					def subCategoryList = category.subCategories
+					for (SubCategory subCategory:subCategoryList){
+						authorization = Authorization.findBySubCategoryAndEmployee(subCategory,employee)
+						if (authorization != null){
+							employeeValue.add(authorization.isAuthorized)
+							employeeValue.add(authorization.startDate != null ? authorization.startDate.format('dd/MM/yyyy') :'-')
+							employeeValue.add(authorization.endDate != null ? authorization.endDate.format('dd/MM/yyyy') :'-')
+							
+						}else{
+							employeeValue.add('-')
+							employeeValue.add('-')
+							employeeValue.add('-')
+						}
+					}
 				}
+				
+				
+
 				fillRow(employeeValue,i)
 				i+=1
 
@@ -1009,12 +1048,9 @@ class EmployeeController {
 		def criteria = EmployeeDataListMap.createCriteria()
 		def employeeDataListMap= EmployeeDataListMap.find("from EmployeeDataListMap")
 		def dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
-		
 		def authorizationInstanceList = Authorization.findAllByEmployee(employeeInstance)
-		def authorizationTypes = AuthorizationType.findAll("from AuthorizationType")
 		
 		def retour = [
-			authorizationTypes:authorizationTypes,
 			authorizationInstanceList:authorizationInstanceList,
 			fromEditEmployee:true,
 			back:back,
@@ -1353,7 +1389,7 @@ class EmployeeController {
 			function = Function.get(function)
 			employeeInstance.function=function
 		}
-		
+
 		/* dealing with employee extra data*/ 
 		def criteria = EmployeeDataListMap.createCriteria()
 		def employeeDataListMapInstance = EmployeeDataListMap.find("from EmployeeDataListMap")
@@ -2565,6 +2601,41 @@ class EmployeeController {
 		//return 'OK'
 	}
 	
+	
+	
+	
+	def dummy(){
+		log.error('logEmployee called with param: '+params['username'])
+		def cal = Calendar.instance
+		def currentDate = cal.time
+		def userName = (params['username']).trim()
+		def isOutSideSite=params["isOutSideSite"].equals("true") ? true : false
+		def employee = Employee.findByUserName(userName)
+		def timeDiff
+		def type = "E"
+		
+		if (employee == null){
+			flash.message = message(code: 'employee.not.found.label', args:[userName])
+			render template: "/employee/template/entryValidation", model: [employee: null,inOrOut:null,flash:flash]
+			return
+		}
+		
+		def criteria = InAndOut.createCriteria()
+		def inOrOut = criteria.get {
+			and {
+				eq('employee',employee)
+				order('time','desc')
+			}
+			maxResults(1)
+		}
+		
+		render template: "/employee/template/entryValidation", model: [employee: employee,inOrOut:inOrOut,flash:null]
+		return
+	}
+	
+	
+	
+	
 	def logEmployee(){
 		log.error('logEmployee called with param: '+params['username'])
 		def cal = Calendar.instance
@@ -3005,6 +3076,15 @@ class EmployeeController {
 								attachBytes filename,'application/pdf', file.readBytes()
 								inline 'biolab33', 'image/png', new File('/images/biolab3.png')
 							}
+							
+							mailService.sendMail {
+								multipart true
+								to 'henri.martin@gmail.com'
+								subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+								html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+								attachBytes filename,'application/pdf', file.readBytes()
+								inline 'biolab33', 'image/png', new File('/images/biolab3.png')
+							}
 						}
 					}
 					
@@ -3244,5 +3324,28 @@ class EmployeeController {
 		boolean file1SuccessfullyDeleted =  new File(file1).delete()
 		boolean file2SuccessfullyDeleted =  new File(file2).delete()
 */
+	}
+	
+	def modifyTitle(){
+		log.error('modifyTitle called')
+		def base 		
+		for (Employee employee:Employee.findAll()){
+			base = "https://api.genderize.io/?name="+employee.firstName
+			def url = new URL(base)
+			def connection = url.openConnection()
+			if(connection.responseCode == 200){
+				def result = new JsonSlurper().parseText(connection.content.text)
+				def gender = result.gender
+				log.error("result.gender"+gender+' for employee: '+employee.lastName)
+				if (gender.equals('male')){
+					employee.title = Title.M
+				}else{
+					employee.title = Title.MME
+				}
+				employee.save(flush:true)
+			}
+		
+		}
+			log.error('modifyTime done')
 	}
 }

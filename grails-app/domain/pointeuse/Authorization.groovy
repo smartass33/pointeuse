@@ -14,8 +14,8 @@ class Authorization {
 	static belongsTo = [employee:Employee]
 
     static constraints = {
-		category (blank: true, nullable: true, unique:true)
-		subCategory (blank: true, nullable: true, unique:true)	
+		category (blank: true, nullable: true)
+		subCategory (blank: true, nullable: true)	
 		startDate (blank:true, nullable:true)
 		endDate (blank:true, nullable:true)
     }

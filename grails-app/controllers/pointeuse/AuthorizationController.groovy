@@ -35,7 +35,6 @@ class AuthorizationController {
 		def typeId = params.int('type')
 		def fromEditEmployee = params.boolean('fromEditEmployee')
 		def showEmployee = params.boolean('showEmployee')
-		def authorizationType = AuthorizationType.get(typeId)
 		def employeeInstanceId = params.int('employeeInstanceId')
 		def employee = Employee.get(employeeInstanceId)
 		if (employee == null){
@@ -44,9 +43,7 @@ class AuthorizationController {
 		if (employee != null){
 			authorizationInstance.employee = employee
 		}
-		if (authorizationType != null){
-			authorizationInstance.type = authorizationType
-		}
+
 		
         if (authorizationInstance == null) {
             notFound()

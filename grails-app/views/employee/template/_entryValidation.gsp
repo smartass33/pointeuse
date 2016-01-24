@@ -64,10 +64,10 @@
 						<tr>
 							<g:if test="${inOrOut != null}">
 								<g:if test="${inOrOut.type.equals('E')}">
-			                       	<td style="height: 1px;text-align:center;" class="eventTDEntry" >ENTREE validée<BR><g:formatDate format="dd/MM/yyyy HH:mm'" date="${Calendar.instance.time}" /></td>
+			                       	<td style="height: 1px;text-align:center;" class="eventTDEntry"><g:message code="employee.entry.validated" default="ENTRY" /><BR><g:formatDate format="dd/MM/yyyy HH:mm'" date="${Calendar.instance.time}" /></td>
 								</g:if>
 								<g:else>
-						        	<td style="height: 1px;text-align:center;" class="eventTDExit" >SORTIE validée<BR><g:formatDate format="dd/MM/yyyy HH:mm'" date="${Calendar.instance.time}" /></td>			
+						        	<td style="height: 1px;text-align:center;" class="eventTDExit" ><g:message code="employee.exit.validated" default="ENTRY" /><BR><g:formatDate format="dd/MM/yyyy HH:mm'" date="${Calendar.instance.time}" /></td>			
 								</g:else>	
 							</g:if>				
 						</tr>						

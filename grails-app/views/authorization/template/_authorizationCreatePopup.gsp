@@ -1,5 +1,3 @@
-<%@ page import="pointeuse.AuthorizationType"%>
-
 <a href="#join_form" id="join_pop" class="addElementButton"><g:message code="add.authorization.label"/></a>
 <a href="#x" class="overlay" id="join_form" style="background: transparent;"></a>
 <div id="popup" class="popup">

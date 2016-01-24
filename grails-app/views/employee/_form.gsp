@@ -3,14 +3,42 @@
 <%@ page import="pointeuse.Site" %>
 <%@ page import="pointeuse.Function" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="pointeuse.Title" %>
 
+<style>
+			#extra_param_div {
+    			display: none;
+			}
+			
+			#extra_param_collapse {
+    			display: none;
+			}
+</style>
 
-<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'firstName', 'error')} ">
-	<label for="firstName">
-		<g:message code="employee.firstName.label" default="First Name" />
+<script>
+	$(document).ready(function() {
+  			$('#extra_param_expand').click( function() {
+	   			$('#extra_param_div').slideToggle(400);
+	   			$('#extra_param_collapse').show();
+	   			$('#extra_param_expand').hide();
+  			});
+	});
+	
+	$(document).ready(function() {
+  			$('#extra_param_collapse').click( function() {
+	   			$('#extra_param_div').slideToggle(400);
+	   			$('#extra_param_collapse').hide();
+	   			$('#extra_param_expand').show();
+  			});
+	});
+
+</script>
+<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'title', 'title')} ">
+	<label for="title">
+		<g:message code="employee.title.label" default="Title" />
 		
 	</label>
-	<g:textField name="firstName" value="${employeeInstance?.firstName}"/>
+	<g:select name="title" from="${pointeuse.Title?.values()}" keys="${pointeuse.Title.values()*.name()}" valueMessagePrefix="enum.value" required="" value="${employeeInstance?.title?.name()}"/>
 </div>
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'lastName', 'error')} ">
 	<label for="lastName">
@@ -18,6 +46,20 @@
 		
 	</label>
 	<g:textField name="lastName" value="${employeeInstance?.lastName}"/>
+</div>
+<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'firstName', 'error')} ">
+	<label for="firstName">
+		<g:message code="employee.firstName.label" default="First Name" />
+		
+	</label>
+	<g:textField name="firstName" value="${employeeInstance?.firstName}"/>
+</div>
+<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'birthName', 'error')} ">
+	<label for="birthName">
+		<g:message code="employee.birthName.label" default="Birth Name" />
+		
+	</label>
+	<g:textField name="birthName" value="${employeeInstance?.birthName}"/>
 </div>
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'userName', 'error')} ">
 	<label for="userName">
@@ -110,12 +152,13 @@
 	          />
 	</g:else>
 </div>
-<div id='cartouche_input_image'>
-	<button type='button' id="cartouche_toggle" ><img alt="toggle" src="${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
+<div id='extra_param_image'>
+	<button type='button' id="extra_param_expand" ><img alt="toggle" src="${grailsApplication.config.context}/images/expand.png"></button>
+	<button type='button' id="extra_param_collapse" ><img alt="toggle" src="${grailsApplication.config.context}/images/collapse.png"></button>
 	${message(code: 'extra.param', default: 'Update')}
 </div>	
 <g:if test="${employeeDataListMapInstance != null && employeeDataListMapInstance.fieldMap != null}">
-	<div id="cartouche_div">
+	<div id=extra_param_div>
 		<g:each in="${dataListRank}" status="i" var="rank">
 			<div  class="fieldcontain"  id="${rank.rank}">
 				<label for="${rank.fieldName}"><g:message code="${rank.fieldName}" default="${rank.fieldName}" /></label>	

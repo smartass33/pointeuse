@@ -127,9 +127,9 @@ class EmployeeDataListMapController {
 	def addNewEmployeeData(){
 		def user = springSecurityService.currentUser
 		log.error('addNewEmployeeData called')
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		def fieldName = params['fieldname']
-		def rank = 1
+		def rank 
 		def type = params['type']
 		def isHiddenField = false
 		
@@ -141,6 +141,7 @@ class EmployeeDataListMapController {
 			employeeDataListMap.hiddenFieldMap = [:]
 		}
 		
+		
 		if (isHiddenField){
 			employeeDataListMap.hiddenFieldMap.put(fieldName,type)
 		}else{
@@ -151,8 +152,9 @@ class EmployeeDataListMapController {
 		employeeDataListMap.save(flush:true)
 		
 		def employeeDataListRank = new EmployeeDataListRank()
+		def dataListRankAll = EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
 		employeeDataListRank.fieldName = fieldName
-		employeeDataListRank.rank = rank 
+		employeeDataListRank.rank = (dataListRankAll.size() as int) + 1 
 		employeeDataListRank.save()
 		log.error('employeeDataListMap saved')
 		redirect(action: "index")		
@@ -221,30 +223,47 @@ class EmployeeDataListMapController {
 		def employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
 		def oldFieldValue = (employeeDataListMap.fieldMap).get(oldFieldName)
 		(employeeDataListMap.fieldMap).remove(oldFieldName)
-		(employeeDataListMap.fieldMap).put(fieldName,type)
+		if (type != null && !(type.equals('-'))){
+			(employeeDataListMap.fieldMap).put(fieldName,type)
+		}else{
+		(employeeDataListMap.fieldMap).put(fieldName,oldFieldValue)
+		
+		}
 		employeeDataListMap.save(flush:true)
 		def dataListRank= EmployeeDataListRank.findByFieldName(oldFieldName)
 		dataListRank.fieldName = fieldName
+		def hasEmployeeMap = [:]
 		dataListRank.save(flush:true)
-		
-		
-
+	
 		def employeeList = Employee.findAll()
 		for (Employee employee : employeeList){
 			extraData = employee.extraData 
-			def value = extraData.get(oldFieldName)
-			if (value != null){
-				log.error(value)
+			if (extraData != null && extraData.get(oldFieldName) != null){
+				log.error(extraData.get(oldFieldName))
 				extraData.remove(oldFieldName)
-				extraData.put(fieldName,value)
+				extraData.put(fieldName,extraData.get(oldFieldName))
 				employee.save()
 			}
 		}
+		
+		
+		def dataListRankAll = EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
+		
+		dataListRankAll.each{rank->
+			hasEmployeeMap.put(rank.fieldName,0)
+			for (Employee employee : employeeList){
+				if ((employee.extraData).get(rank.fieldName)){
+					hasEmployeeMap.put(rank.fieldName,hasEmployeeMap.get(rank.fieldName) + 1)
+					
+				}
+			}
+		}
+		
 		employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
 		dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
 		
 		log.error('done')
-		render template: "/employeeDataListMap/template/employeeDataListTable",model:[employeeDataListMapInstance:employeeDataListMap,dataListRank:dataListRank,flash:flash]
+		render template: "/employeeDataListMap/template/employeeDataListTable",model:[employeeDataListMapInstance:employeeDataListMap,dataListRank:dataListRank,flash:flash,hasEmployeeMap:hasEmployeeMap]
 		return
 
 	}

@@ -56,6 +56,12 @@
 		.outTR{
 				background-color: #ddd;
 		}
+		
+		#cartouche_expand{
+    			display: none;
+		}
+		
+		
 
 	</style>
 
@@ -66,11 +72,26 @@
 	}
 	
 	 $(document).ready(function() {
-	   $('#cartouche_toggle').click( function() {
+	   $('#cartouche_expand').click( function() {
 	    $('#cartouche_div').slideToggle(400);
+	    $('#cartouche_collapse').show();
+	    $('#cartouche_expand').hide();
 	   });
 
 	});
+	
+	
+		 
+	$(document).ready(function() {
+	   $('#cartouche_collapse').click( function() {
+	    $('#cartouche_div').slideToggle(400);
+	    $('#cartouche_expand').show();
+	    $('#cartouche_collapse').hide();
+	   });
+
+	});
+	
+
 	
 	function datePickerLaunch (){
 		$.datepicker.regional['fr'] = {
@@ -140,29 +161,28 @@
 			</g:form>
 			<li>
 				<a  class='legend' id="legend" title="
-				<table>
-					<tr><td ><g:message code='legend.NORMAL_EVENT' default='Régul' /></td></tr>
-					<tr><td style='color : red;font-weight: bold;'><g:message code='legend.INITIALE_SALARIE' default='Régul' /></td></tr>
+				<table  id='legendTable'>
+					<tr><td><g:message code='legend.NORMAL_EVENT' default='Régul' /></td></tr>
+					<tr style='border: 0px;'><td style='color : red;font-weight: bold;'><g:message code='legend.INITIALE_SALARIE' default='Régul' /></td></tr>
 					<tr><td style='color : orange;font-weight: bold;'><g:message code='legend.MODIFIEE_SALARIE' default='Régul' /></td></tr>
 					<tr><td style='color : blue;font-weight: bold;'><g:message code='legend.INITIALE_ADMIN' default='Régul' /></td></tr>
 					<tr><td style='color : green;font-weight: bold;'><g:message code='legend.MODIFIEE_ADMIN' default='Régul' /></td></tr>
 					<tr><td style='font-weight: bold;'><g:message code='legend.SYSTEM_GENERATED' default='Régul' /></td></tr>
-					</table>">Légende</a> <richui:tooltip id="legend" />
+					</table>"><g:message code='legend.label' default='Régul' /></a> <richui:tooltip id="legend" />
 			</li>	
 			<li><g:link class="logout" action="" controller="logout"><g:message code='admin.logout.label' default='Régul' />  </g:link></li>			
 		</ul>
 		<g:if test="${flash.message}"><div class="message">${flash.message}</div></g:if>
 	</div>
 	<div id='cartouche_input_image'>
-		<button type='button' id="cartouche_toggle" ><img alt="toggle" src="${grailsApplication.config.context}/images/glyphicons_190_circle_plus.png"></button>
-		Récapitulatifs mensuels et annuels
+		<button type='button' id="cartouche_collapse" ><img alt="toggle" src="${grailsApplication.config.context}/images/collapse.png"></button>
+		<button type='button' id="cartouche_expand" ><img alt="toggle" src="${grailsApplication.config.context}/images/expand.png"></button>		
+		<g:message code='report.recap.labels' default='Régul' />
 	</div>	
 	<div id="cartouche_div">
 		<g:cartouche />
 	</div> 
 	<BR>	
-
-			
 	<BR>
 	<div style='float:none' id="report_table_div">
 		<g:reportTable />

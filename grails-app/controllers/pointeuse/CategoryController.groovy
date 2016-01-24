@@ -32,7 +32,7 @@ class CategoryController {
         }
 		categoryInstance.creationDate = new Date()
 		categoryInstance.user = springSecurityService.currentUser
-		
+		categoryInstance.validate()
         if (categoryInstance.hasErrors()) {
             respond categoryInstance.errors, view:'create'
             return

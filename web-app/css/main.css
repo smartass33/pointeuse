@@ -224,26 +224,24 @@ img {
 }
 
 #legend {
-		background-image: url(../images/skin/list.png);
-	
-		background-position: 0.7em center;
+	background-image: url(../images/skin/list.png);	
+	background-position: 0.7em center;
 	background-repeat: no-repeat;
 	text-indent: 20px;
-	
-		color: #666666;
+	color: #666666;
 	display: block;
 	padding: 0.25em 0.7em;
 	text-decoration: none;
-	   -moz-border-radius: 0.3em;
+   -moz-border-radius: 0.3em;
 	-webkit-border-radius: 0.3em;
-	        border-radius: 0.3em;
-		background-position: 0.7em center;
+    border-radius: 0.3em;
+	background-position: 0.7em center;
 	background-repeat: no-repeat;
-		background-color: transparent;
-		outline: none;
-			border: none;
-		font-family: Verdana,Arial,sans-serif;
-    font-size: 1em;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+   	font-size: 1em;
 }
 
 #legend:active {
@@ -1001,6 +999,15 @@ a.skip {
 	border: 1px solid #000000;
 	/*/*/line-height: 1.5em; /* */
  }
+ 
+ 
+#legendTable {
+	border: 0px;
+	line-height:0.9em;
+	background-color:#DFDFDF;
+	opacity: 0.6;
+ }
+ 
  
  
 #mainTable td {

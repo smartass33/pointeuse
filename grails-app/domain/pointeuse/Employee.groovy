@@ -8,6 +8,7 @@ class Employee{
 	static final int entryPerDay=6
 	String firstName
 	String lastName
+	String birthName
 	String userName
 	String matricule
 	Function function
@@ -18,6 +19,8 @@ class Employee{
 	Date arrivalDate
 	Status status
 	Map extraData 
+	Title title
+	
 	
 	static hasMany = [annualEmployeeData:AnnualEmployeeData,payments:Payment,supplementary_time:SupplementaryTime,contracts:Contract,vacations:Vacation,vacationsCounters:Vacation,absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
 	static searchable = true	
@@ -26,6 +29,7 @@ class Employee{
 		firstName blank: false
 		lastName blank: false 
 		userName (unique: true,blank: false)
+		birthName (blank: true,nullable:true)
 	}
 
 	
