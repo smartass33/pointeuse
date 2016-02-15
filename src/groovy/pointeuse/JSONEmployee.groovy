@@ -6,14 +6,13 @@ public class JSONEmployee {
 
 	String firstName;
 	String lastName;
-	Boolean status;
-	def inOrOuts;
+	String userName;
 
-	JSONEmployee(Employee employee,Boolean status){
+
+	JSONEmployee(Employee employee){
 		this.firstName = employee.firstName
 		this.lastName = employee.lastName
-		this.status = status
-		this.inOrOuts = new ArrayList()
+		this.userName = employee.userName
 	}
 	
 }

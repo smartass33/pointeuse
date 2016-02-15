@@ -75,6 +75,8 @@ class EmployeeController {
 		def currentDate
 		def calendar = Calendar.instance
 		def fromIndex=params.boolean('fromIndex')
+		def inAndOutsForEmployee = []
+		def inAndOutsForEmployeeMap = [:]
 		
 		if (!fromIndex && (siteId == null || siteId.size() == 0)){
 			flash.message = message(code: 'ecart.site.selection.error')
@@ -83,6 +85,8 @@ class EmployeeController {
 			return
 		}
 		
+		
+		def maxSize = 0
 		def date_picker =params["date_picker"]
 		if (date_picker != null && date_picker.size()>0){
 			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
@@ -95,7 +99,8 @@ class EmployeeController {
 		}else{
 			employeeInstanceList = Employee.findAll("from Employee")	
 		}
-		for (Employee employee:employeeInstanceList){		
+		for (Employee employee:employeeInstanceList){	
+			inAndOutsForEmployee = []
 			criteria = DailyTotal.createCriteria()
 			dailyTotal= criteria.get{
 				and {
@@ -106,7 +111,7 @@ class EmployeeController {
 				}				
 			}
 			criteria = InAndOut.createCriteria()			
-			inAndOutList= criteria.list{
+			inAndOutList = criteria.list{
 				and {
 						eq('employee',employee)
 						eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
@@ -116,6 +121,22 @@ class EmployeeController {
 						order('time')				
 					}
 			}
+			
+			
+			
+			maxSize = (inAndOutList != null && inAndOutList.size() > maxSize) ? inAndOutList.size() : maxSize
+			
+			for (InAndOut inOrOut : inAndOutList){
+				inAndOutsForEmployee.add("'"+inOrOut.time.format('YYYY-MM-dd HH:mm:SS')+"'")
+			}
+		
+			if (inAndOutList.size() < maxSize){
+				def difference = maxSize - inAndOutList.size()
+				for (int j = 0 ;j < difference ; j++){
+					inAndOutsForEmployee.add(null)
+				}
+			}
+			
 			
 			if (fromIndex){
 				return [site:site,fromIndex:fromIndex,currentDate:calendar.time]
@@ -130,12 +151,21 @@ class EmployeeController {
 				dailySupMap.put(employee,0)
 			}
 			dailyMap.put(employee,elapsedSeconds)
+			
+			inAndOutsForEmployeeMap.put(employee,inAndOutsForEmployee)
 		}		
+		//maxSize = maxSize / 2
+		log.error('maxSize: '+maxSize)
+		
+		
+		
+		
 		if (site!=null){
-			render template: "/employee/template/listDailyTimeTemplate", model:[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap]
+			render template: "/employee/template/listDailyTimeTemplate", model:[inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,maxSize:maxSize]
 			return	
 		}
-		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:calendar.time]
+
+		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:calendar.time,maxSize:maxSize]
 	}
 	
 	
@@ -2594,8 +2624,8 @@ class EmployeeController {
 		}
 		def inOrOut = timeManagerService.initializeTotals(employee,currentDate,type,null,isOutSideSite)
 		def jsonEmployee = new JSONEmployee(employee,entranceStatus)
-		def jsonInAndOut = new JSONInAndOut(inOrOut,jsonEmployee)
-		jsonEmployee.inOrOuts.add(jsonInAndOut)
+		//def jsonInAndOut = new JSONInAndOut(inOrOut,jsonEmployee)
+		//jsonEmployee.inOrOuts.add(jsonInAndOut)
 		response.contentType = "application/json"
 		render jsonEmployee as JSON
 		//return 'OK'
@@ -2615,21 +2645,49 @@ class EmployeeController {
 		def type = "E"
 		
 		if (employee == null){
-			flash.message = message(code: 'employee.not.found.label', args:[userName])
-			render template: "/employee/template/entryValidation", model: [employee: null,inOrOut:null,flash:flash]
+			render(contentType: 'text/json') {[
+				'status':'Employé inconnu'
+			]}
+			
 			return
 		}
 		
 		def criteria = InAndOut.createCriteria()
-		def inOrOut = criteria.get {
+		def lastIn = criteria.get {
 			and {
 				eq('employee',employee)
+				eq('pointed',false)
+				eq('day',cal.get(Calendar.DATE))
+				eq('month',cal.get(Calendar.MONTH)+1)
+				eq('year',cal.get(Calendar.YEAR))
 				order('time','desc')
 			}
 			maxResults(1)
 		}
 		
-		render template: "/employee/template/entryValidation", model: [employee: employee,inOrOut:inOrOut,flash:null]
+		if (lastIn != null){
+			def LIT = lastIn.time
+			use (TimeCategory){timeDiff=currentDate-LIT}
+			//empecher de represser le bouton pendant 30 seconds
+			if ((timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)<30){
+				render(contentType: 'text/json') {[
+					'status':'impossible de pointer 2 fois en moins de 30 secondes'
+				]}
+				return
+			}
+			type=lastIn.type.equals("S") ? "E" :"S"
+		}
+
+		
+		def inOrOut = timeManagerService.initializeTotals(employee,currentDate,type,null,isOutSideSite)
+		log.error('inOrOut: '+inOrOut)
+		render(contentType: 'text/json') {[
+		    'firstName': employee.firstName,
+			'lastName': employee.lastName,
+			'loggingTime' : inOrOut.loggingTime.format('HH:mm dd/MM/yyyy'),
+			'type':inOrOut.type,
+			'status':'OK'
+		]}		
 		return
 	}
 	
@@ -2737,10 +2795,86 @@ class EmployeeController {
 		}else{
 			employeeInstanceList=Employee.list(params)
 		}
-	//	response.contentType = "application/json"
-		render employeeInstanceList// as JSON
+		
+		def employeeJSONList = []
+		for (Employee employee : employeeInstanceList){
+			employeeJSONList.add(new JSONEmployee(employee))
+		}
+		
+		response.contentType = "application/json"
+		render employeeJSONList as JSON
 	}
 	
+	
+	def searchAllEmployees() {
+		params.sort='site'
+		def username=params["username"]
+		def password=params["password"]
+		def name=(params["name"].replaceAll("\\s","")).replaceAll("\\W","")
+
+		def employeeInstanceList
+		def site
+		byte[] hash
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		def hashAsString
+		def user
+		
+		
+		if (username == null){
+			log.error('authentication failed!')
+			response.status = 401;
+			return
+		}
+		else{
+			user = User.findByUsername(username)
+		}
+		
+		if (password == null){
+			log.error('authentication failed!')
+			response.status = 401;
+			return
+		}
+		else{
+			hash = digest.digest(password.getBytes("UTF-8"));
+			hashAsString = hash.encodeHex()
+		}
+		
+		if (user != null && !user.password.equals(hashAsString.toString())){
+			log.error('authentication failed!')
+			response.status = 401;
+			return
+		}
+		
+		if (params["site"]!=null && !params["site"].equals('') && !params["site"].equals('[id:]')){
+			site = Site.get(params.int('site'))
+			if (site != null)
+				siteId=site.id
+		}
+		if (params["siteId"]!=null && !params["siteId"].equals("")){
+			site = Site.get(params.int('siteId'))
+			if (site != null)
+				siteId=site.id
+		}
+
+	
+
+		def criteria = Employee.createCriteria()
+		employeeInstanceList = criteria.list {
+			or {
+				like('firstName','%'+name+'%')
+				like('lastName','%'+name+'%')
+				}
+
+		}
+		
+		def employeeJSONList = []
+		for (Employee employee : employeeInstanceList){
+			employeeJSONList.add(new JSONEmployee(employee))
+		}
+		
+		response.contentType = "application/json"
+		render employeeJSONList as JSON
+	}
 	
 	def getEmployee(Long id) {
 
@@ -2783,6 +2917,53 @@ class EmployeeController {
 			employee=Employee.findByUserName(employeeLogin)
 		}
 		render employee// as JSON
+	}
+	
+	
+	def getJSONEmployee() {
+		def employee
+		def employeeUsername = params["username"].replaceAll("\\s","")
+		employeeUsername = employeeUsername.replaceAll("\\W","")
+		if (employeeUsername != null){
+			employee = Employee.findByUserName(employeeUsername)
+		}
+		
+		render(contentType: 'text/json') {[
+			'firstName': employee.firstName,
+			'lastName': employee.lastName,
+			'userName':employee.userName,
+			'status':'OK'
+		]}
+		return
+	}
+			
+	def searchJSONEmployee() {
+		def firstName=params["firstName"].replaceAll("\\W","")
+		def lastName=params["lastName"].replaceAll("\\W","")
+		def employee
+		if (lastName != null){
+			employee = Employee.findByLastName(lastName)
+		}else{
+			if (firstName != null){
+				employee = Employee.findByFirstName(firstName)
+			}
+		}
+		
+		if (employee != null){
+			render(contentType: 'text/json') {[
+
+				'status':'NOK'
+			]}
+			return
+		}
+		
+		render(contentType: 'text/json') {[
+			'firstName': employee.firstName,
+			'lastName': employee.lastName,
+			'userName':employee.userName,
+			'status':'OK'
+		]}
+		return
 	}
 	
 	

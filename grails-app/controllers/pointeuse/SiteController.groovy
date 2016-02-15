@@ -478,7 +478,12 @@ class SiteController {
 		def site = Site.get(params.int('site'))
 		def month = params.int('month')
 		def year = params.int('year')
-		def period = Period.get(params.int('period'))
+		def period
+		if (params['period'] != null && params['period'].size() > 0){
+			period = Period.get(params.int('period'))
+		}else{
+			period = (month > 5) ? Period.findByYear(year) : Period.findByYear(year - 1)
+		}
 		def executionTime
 		def data
 		def calendar = Calendar.instance

@@ -10,6 +10,7 @@ class GeocoderService {
 
 	def geocodeAddress(String address,String town) {
 		def jsonMap = [:]
+		//def isPartialMatch = false
 
 		if (address==null || address.size()==0){
 			jsonMap.lat = 0
@@ -24,11 +25,10 @@ class GeocoderService {
 			def connection = url.openConnection()
 			if(connection.responseCode == 200){
 				def geoCodeResultJSON = new JsonSlurper().parseText(connection.content.text)
+				//isPartialMatch = geoCodeResultJSON.results.partial_match[0]
 				jsonMap.lat = geoCodeResultJSON.results.geometry.location.lat[0]
 				jsonMap.lng = geoCodeResultJSON.results.geometry.location.lng[0]
-				jsonMap.address = geoCodeResultJSON.results.formatted_address[0]
-				
-				def tttt = geoCodeResultJSON.results.address_components[0].size()
+				jsonMap.address = geoCodeResultJSON.results.formatted_address[0]			
 				jsonMap.postCode=geoCodeResultJSON.results.address_components[0].get(geoCodeResultJSON.results.address_components[0].size()-1).short_name as int
 			}
 			else{

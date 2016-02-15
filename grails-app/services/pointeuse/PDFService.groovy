@@ -169,24 +169,36 @@ class PDFService {
 		
 		GParsExecutorsPool.withPool {
 			 employeeList.iterator().eachParallel {
-				 println it
-				 data = timeManagerService.getAnnualReportData(period.year, it)
-				 annualReportMap.put(it,data)
-				 siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
-				 siteAnnualTheoritical += data.get('annualTheoritical')
-				 siteAnnualTotal += data.get('annualTotal')
-				 siteAnnualHoliday += data.get('annualHoliday')
-				 siteRemainingCA += data.get('remainingCA')
-				 siteAnnualRTT += data.get('annualRTT')
-				 siteAnnualCSS += data.get('annualCSS')
-				 siteAnnualSickness += data.get('annualSickness')
-				 siteAnnualDIF += data.get('annualDIF')
-				 siteAnnualExceptionnel += data.get('annualExceptionnel')
-				 siteAnnualPaternite += data.get('annualPaternite')
-				 siteAnnualPayableSupTime += data.get('annualPayableSupTime')
-				 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
-				 siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
-				 siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')
+				 try{
+					 log.debug(it)
+					 log.debug(' and period: ' + period.year)
+					 data = timeManagerService.getAnnualReportData(period.year, it)
+					 annualReportMap.put(it,data)
+					 if (data != null){
+						 siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
+						 siteAnnualTheoritical += data.get('annualTheoritical')
+						 siteAnnualTotal += data.get('annualTotal')
+						 siteAnnualHoliday += data.get('annualHoliday')
+						 siteRemainingCA += data.get('remainingCA')
+						 siteAnnualRTT += data.get('annualRTT')
+						 siteAnnualCSS += data.get('annualCSS')
+						 siteAnnualSickness += data.get('annualSickness')
+						 siteAnnualDIF += data.get('annualDIF')
+						 siteAnnualExceptionnel += data.get('annualExceptionnel')
+						 siteAnnualPaternite += data.get('annualPaternite')
+						 siteAnnualPayableSupTime += data.get('annualPayableSupTime')
+						 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
+						 siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
+						 siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')
+				 	}else{
+					 	log.debug('data is null for: ')
+						log.debug(it)
+				 	}
+				 }catch (Exception e){
+					 log.debug('error with application: '+e.toString())
+					 log.debug(it)
+				 }
+
 			 }
 		 }
 		

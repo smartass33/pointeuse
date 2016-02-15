@@ -58,24 +58,25 @@
 							<g:else>
 								<td></td>
 							</g:else>
-							<td>${employee.lastName }</td>
-							<td style="width:50px;">${(annualReportMap.get(employee)).get('annualWorkingDays')}</td>
-							<td style="width:50px;">${(annualReportMap.get(employee)).get('annualEmployeeWorkingDays')}</td>
-							<td style="text-align:right;" ><my:humanTimeTD id="annualReportMap"  name="annualReportMap" value="${(annualReportMap.get(employee)).get('annualReportMap')}"/></td>
-							<td style="text-align:right;"><my:humanTimeTD id="annualTotal"  name="annualTotal" value="${(annualReportMap.get(employee)).get('annualTotal')}"/></td>
-							<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualHoliday')}</td>
-							<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('remainingCA')}</td>
-							<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualRTT')}</td>
-							<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualCSS')}</td>
-							<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualDIF')}</td>
-							<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualSickness')}</td>
-							<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualExceptionnel')}</td>
-							<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualPaternite')}</td>
-							<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualPayableSupTime"  name="annualPayableSupTime" value="${(annualReportMap.get(employee)).get('annualPayableSupTime')}"/></td>
-							<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualTheoriticalIncludingExtra"  name="annualTheoriticalIncludingExtra" value="${(annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra')}"/></td>
-							<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualSupTimeAboveTheoritical"  name="annualSupTimeAboveTheoritical" value="${(annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical')}"/></td>
-							<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualGlobalSupTimeToPay"  name="annualGlobalSupTimeToPay" value="${(annualReportMap.get(employee)).get('annualGlobalSupTimeToPay')}"/></td>
-
+							<td>${employee.lastName}</td>
+							<g:if test="${annualReportMap.get(employee) != null}">
+								<td style="width:50px;">${(annualReportMap.get(employee)).get('annualWorkingDays')}</td>
+								<td style="width:50px;">${(annualReportMap.get(employee)).get('annualEmployeeWorkingDays')}</td>
+								<td style="text-align:right;" ><my:humanTimeTD id="annualReportMap"  name="annualReportMap" value="${(annualReportMap.get(employee)).get('annualReportMap')}"/></td>
+								<td style="text-align:right;"><my:humanTimeTD id="annualTotal"  name="annualTotal" value="${(annualReportMap.get(employee)).get('annualTotal')}"/></td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualHoliday')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('remainingCA')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualRTT')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualCSS')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualDIF')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualSickness')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualExceptionnel')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualPaternite')}</td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualPayableSupTime"  name="annualPayableSupTime" value="${(annualReportMap.get(employee)).get('annualPayableSupTime')}"/></td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualTheoriticalIncludingExtra"  name="annualTheoriticalIncludingExtra" value="${(annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra')}"/></td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualSupTimeAboveTheoritical"  name="annualSupTimeAboveTheoritical" value="${(annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical')}"/></td>
+								<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualGlobalSupTimeToPay"  name="annualGlobalSupTimeToPay" value="${(annualReportMap.get(employee)).get('annualGlobalSupTimeToPay')}"/></td>
+							</g:if>
 						</tr>
 					</g:each>
 						<g:if test="${site !=null}">

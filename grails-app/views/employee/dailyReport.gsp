@@ -4,6 +4,8 @@
 <!doctype html>
 <html>
 <head>
+	<g:javascript src="moment.js" />
+	
 	<g:javascript library="application"/> 		
 	<r:require module="report"/>		
 	<r:layoutResources/>		
@@ -31,6 +33,7 @@
 			}
 
 		</style>
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 		
 		<script>
 			jQuery(function($){
@@ -56,6 +59,10 @@
 			   $("#date_picker").datepicker({dateFormat: "dd/mm/yy"}).datepicker("setDate", "${currentDate}");
 			});
 		</script>
+		<script>
+		     google.charts.load('current', {'packages':['timeline']});
+
+     	</script>
 		
 </head>
 <body>
@@ -107,6 +114,10 @@
 		</g:if>
 	</div>	
 	<div id="dailyTable">
+
+	
+	
+	
 		<g:listDailyTime/>
 	</div>
 </body>
