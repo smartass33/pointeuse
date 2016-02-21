@@ -73,9 +73,8 @@
 								   		
 								   		if ( (j % 2) === 0){
 								   			(dataTable_${entry.key.id}).addRows(1);
-								   			(dataTable_${entry.key.id}).setValue(rowCount,1,momentDate.toDate());							   			
-								   			
-								   			(dataTable_${entry.key.id}).setValue(rowCount,0,'toto');	
+								   			(dataTable_${entry.key.id}).setValue(rowCount,1,momentDate.toDate());							   			   			
+								   			(dataTable_${entry.key.id}).setValue(rowCount,0,'t');	
 								   			
 								   			
 								   		}else{
