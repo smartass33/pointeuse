@@ -157,11 +157,14 @@ class EmployeeController {
 		//maxSize = maxSize / 2
 		log.error('maxSize: '+maxSize)
 		
-		
+		def startDate=calendar.time
+		startDate.putAt(Calendar.HOUR_OF_DAY,6)
+		startDate.putAt(Calendar.MINUTE,0)
+
 		
 		
 		if (site!=null){
-			render template: "/employee/template/listDailyTimeTemplate", model:[inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,maxSize:maxSize]
+			render template: "/employee/template/listDailyTimeTemplate", model:[startDate:"'"+startDate.format('YYYY-MM-dd HH:mm:SS')+"'",inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,maxSize:maxSize]
 			return	
 		}
 
@@ -2662,7 +2665,7 @@ class EmployeeController {
 				eq('year',cal.get(Calendar.YEAR))
 				order('time','desc')
 			}
-			maxResults(1)
+			//maxResults(1)
 		}
 		
 		if (lastIn != null){

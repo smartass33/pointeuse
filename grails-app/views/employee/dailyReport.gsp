@@ -10,6 +10,10 @@
 	<r:require module="report"/>		
 	<r:layoutResources/>		
   	<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+	<link href="${grailsApplication.config.context}/css/timeslider.css" rel="stylesheet">
+
+	<script src="${grailsApplication.config.context}/js/timeslider.js"></script>
+  	
 	<meta name="layout" content="main" id="mainLayout">
 	<g:set var="isNotSelected" value="true" />	
 	<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
