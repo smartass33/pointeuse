@@ -118,10 +118,6 @@
 		</g:if>
 	</div>	
 	<div id="dailyTable">
-
-	
-	
-	
 		<g:listDailyTime/>
 	</div>
 </body>

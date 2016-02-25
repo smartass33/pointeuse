@@ -77,6 +77,7 @@ class EmployeeController {
 		def fromIndex=params.boolean('fromIndex')
 		def inAndOutsForEmployee = []
 		def inAndOutsForEmployeeMap = [:]
+
 		
 		if (!fromIndex && (siteId == null || siteId.size() == 0)){
 			flash.message = message(code: 'ecart.site.selection.error')
@@ -122,12 +123,10 @@ class EmployeeController {
 					}
 			}
 			
-			
-			
 			maxSize = (inAndOutList != null && inAndOutList.size() > maxSize) ? inAndOutList.size() : maxSize
 			
 			for (InAndOut inOrOut : inAndOutList){
-				inAndOutsForEmployee.add("'"+inOrOut.time.format('YYYY-MM-dd HH:mm:SS')+"'")
+				inAndOutsForEmployee.add("'"+inOrOut.time.format('yyyy-MM-dd HH:mm:SS')+"'")
 			}
 		
 			if (inAndOutList.size() < maxSize){
@@ -154,17 +153,21 @@ class EmployeeController {
 			
 			inAndOutsForEmployeeMap.put(employee,inAndOutsForEmployee)
 		}		
-		//maxSize = maxSize / 2
-		log.error('maxSize: '+maxSize)
 		
 		def startDate=calendar.time
 		startDate.putAt(Calendar.HOUR_OF_DAY,6)
 		startDate.putAt(Calendar.MINUTE,0)
-
-		
 		
 		if (site!=null){
-			render template: "/employee/template/listDailyTimeTemplate", model:[startDate:"'"+startDate.format('YYYY-MM-dd HH:mm:SS')+"'",inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,maxSize:maxSize]
+			render template: "/employee/template/listDailyTimeTemplate", model:[
+				inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,
+				startDate:"'"+startDate.format('yyyy-MM-dd HH:mm:SS')+"'",
+				inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,
+				dailyMap: dailyMap,
+				site:site,
+				dailySupMap:dailySupMap,
+				dailyInAndOutMap:dailyInAndOutMap,
+				maxSize:maxSize]
 			return	
 		}
 
