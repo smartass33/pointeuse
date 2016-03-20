@@ -39,6 +39,7 @@
 				<th  style="width:80px;"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.RTT.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
+				<th  style="width:80px;"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.DIF.label"/></span></div></th>	
 				<th  style="width:80px;"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>		
 				<th  style="width:80px;"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
@@ -68,6 +69,7 @@
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('remainingCA')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualRTT')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualCSS')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualINJUSTIFIE')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualDIF')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualSickness')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualExceptionnel')}</td>
@@ -91,6 +93,7 @@
 								<td style="width:50px;text-align:center;">${siteRemainingCA}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualRTT}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualCSS}</td>
+								<td style="width:50px;text-align:center;">${siteAnnualINJUSTIFIE}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualDIF}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualSickness}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualExceptionnel}</td>

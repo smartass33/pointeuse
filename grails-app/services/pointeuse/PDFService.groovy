@@ -140,6 +140,25 @@ class PDFService {
 		return [file.bytes,file.name]
 	}
 	
+	def generateDailySheetWithStyle(Site site,String folder,Date currentDate){
+		def filename
+		OutputStream outputStream
+		File file
+		def modelDaily=timeManagerService.getDailyInAndOutsData(site,currentDate)
+		modelDaily << [site:site]
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/listDailyTimePDFWithStyleTemplate', model: modelDaily)
+		def siteName = (site.name).replaceAll("\\s","").trim()
+		filename = (currentDate.format('yyyy-mm-dd')).toString()+'-'+siteName +'-dailyReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
 	def generateSiteTotalSheet(Site site,String folder,Period period){
 		def filename
 		OutputStream outputStream
@@ -156,6 +175,7 @@ class PDFService {
 		def siteRemainingCA = 0
 		def siteAnnualRTT = 0
 		def siteAnnualCSS = 0
+		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
@@ -182,6 +202,7 @@ class PDFService {
 						 siteRemainingCA += data.get('remainingCA')
 						 siteAnnualRTT += data.get('annualRTT')
 						 siteAnnualCSS += data.get('annualCSS')
+						 siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
 						 siteAnnualSickness += data.get('annualSickness')
 						 siteAnnualDIF += data.get('annualDIF')
 						 siteAnnualExceptionnel += data.get('annualExceptionnel')
@@ -212,6 +233,7 @@ class PDFService {
 			siteRemainingCA:siteRemainingCA,
 			siteAnnualRTT:siteAnnualRTT,
 			siteAnnualCSS:siteAnnualCSS,
+			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
 			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,

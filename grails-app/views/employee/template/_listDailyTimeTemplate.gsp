@@ -1,12 +1,11 @@
-<%@ page import="pointeuse.Site"%>
 <%@ page import="pointeuse.Employee"%>
-<%@ page import="pointeuse.InAndOut"%>
 
 	<table id="employee-table" style="font-family: Helvetica;font-size: 14px;">
 	<thead>
 		<tr>
 			<th style="width:90px;text-align:center">${message(code: 'employee.lastName.label', default: 'Report')}</th>
 			<th style="width:120px;text-align:center">${message(code: 'employee.function.label', default: 'Report')}</th>
+			<th style="width:120px;text-align:center">${message(code: 'service.label', default: 'Report')}</th>
 			<th style="width:90px;text-align:center">${message(code: 'employee.daily.time.short', default: 'Report')}</th>
 			<th  style="width:800px;text-align:center" title="Evènements">${message(code: 'events.label', default: 'Site')}</th>
 		</tr>
@@ -14,21 +13,17 @@
 	<tbody id='body_update' style="border:1px;">
 		<g:each in="${dailyMap}" status="i" var="entry">
 			<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-				<td style="width:90px;text-align:center;valign:middle;">${entry.key.lastName} <BR>${entry.key.firstName}</td>
+				<td style="width:90px;text-align:center;valign:middle;">${entry.key.lastName}<BR>${entry.key.firstName}</td>
 				<td style="width:120px;text-align:center;valign:middle;">${entry.key.function.name}</td>
-				<td style="width:90px;text-align:center"><my:humanTimeTD id="dailyTime"  name="dailyTime" value="${entry.value}"/><BR>(HS:<my:humanTimeTD id="supTime"  name="supTime" value="${dailySupMap.get(entry.key)}"/>)</td>
-				
+				<td style="width:120px;text-align:center;valign:middle;">${entry.key.service.name}</td>
+				<td style="width:90px;text-align:center"><my:humanTimeTD id="dailyTime"  name="dailyTime" value="${entry.value}"/><BR>(HS:<my:humanTimeTD id="supTime"  name="supTime" value="${dailySupMap.get(entry.key)}"/>)</td>				
 				<g:if test="${maxSize != null && maxSize > 0 }">
-					<td style="height: 50px;valign:middle;">
+					<td style="height: 25px;valign:middle;">
 						<g:if test="${inAndOutsForEmployeeMap.get(entry.key) != null}">
 							<div id="timeline-${entry.key.id}"  class="time-slider"></div>
 							
 							<script>
-
-						
-						
-						
-						        var current_time = (new Date()).getTime() + ((new Date()).getTimezoneOffset() * 60 * 1000 * -1);
+					        var current_time = (new Date()).getTime() + ((new Date()).getTimezoneOffset() * 60 * 1000 * -1);
 								$(document).ready(function () {
 								
 									
@@ -44,7 +39,7 @@
 										var start_date = moment(${startDate}).toDate();
 										start_date.setHours(5);
 										start_date.setMinutes(0);
-										alert('inAndOutsForEmployeeTable_${entry.key.id}')
+										//alert('inAndOutsForEmployeeTable_${entry.key.id}')
 										for (j = 0; j < (inAndOutsForEmployeeTable_${entry.key.id}).length;j++){
 											
 										   if (inAndOutsForEmployeeTable_${entry.key.id}[j] !== null){
@@ -76,6 +71,7 @@
 											timecell_enable_resize:false,
 											ruler_enable_move:false,
 											hours_per_ruler:20,
+											distance_between_gtitle:40,
 											graduation_step:20,
 											init_cells: init_cells_${entry.key.id}
 										});
@@ -83,10 +79,6 @@
 						
 								    })();
 								});
-												
-						
-						
-			
 							</script>
 						</g:if>
 					</td>

@@ -5,7 +5,7 @@
 }
 
 .time-slider {
-    height: 50px;
+    height: 35px;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -24,7 +24,7 @@
 .time-slider .ruler .bg {
     left: 0;
     width: 100%;
-    height: 50px;
+    height: 35px;
     background-color: #fff;
     border: 1px #cccccc solid;
     position: absolute;
@@ -34,7 +34,7 @@
 .time-slider .ruler .bg-event {
     left: 0;
     width: 100%;
-    height: 50px;
+    height: 35px;
     cursor: move;
     background-color: transparent;
     position: absolute;
@@ -47,7 +47,7 @@
 
 .time-slider .ruler .current-time-caret {
     width: 2px;
-    height: 50px;
+    height: 35px;
     background-color: #ff0000;
     position: absolute;
     z-index: 5;
@@ -56,22 +56,22 @@
 /* ----- graduations ----- */
 
 .time-slider .ruler .graduation {
-    top: 38px;
+    top: 34px;
     width: 1px;
-    height: 12px;
+    height: 6px;
     background-color: #cccccc;
     position: absolute;
     z-index: 3;
 }
 
 .time-slider .ruler .graduation-title {
-    top: 52px;
+    top: 38px;
     width: 80px;
     cursor: default;
     color: #555555;
     text-align: center;
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size: 12px;
+    font-size: 10px;
     font-style: normal;
     font-weight: 400;
     position: absolute;
@@ -79,22 +79,22 @@
 }
 
 .time-slider .ruler .graduation.middle {
-    top: 25px;
+    top: 24x;
     width: 1px;
-    height: 25px;
+    height: 15px;
 }
 
 .time-slider .ruler .graduation.big {
     top: 0;
     width: 2px;
-    height: 50px;
+    height: 40px;
 }
 
 /* ----- timecells  ----- */
 
 .time-slider .ruler .timecell {
     top: 7px;
-    height: 36px;
+    height: 20px;
     padding: 1px;
     position: absolute;
     text-align: center;
@@ -117,7 +117,7 @@
 
 .time-slider .ruler .timecell-event {
     top: 7px;
-    height: 36px;
+    height: 20px;
     background-color: transparent;
     position: absolute;
     cursor: default;
@@ -143,7 +143,7 @@
 /* ----- prompts ----- */
 
 .time-slider .prompts {
-    top: 0;
+    top: 20px;
     left: 0;
     position: relative;
     overflow: hidden;
@@ -181,10 +181,11 @@
     text-align: center;
     background-color: #000;
     border-radius: 4px;
+    
 }
 
 .time-slider .prompts .prompt .triangle-up {
-    top: -5px;
+    top: -35px;
     left: 39px;
     position: absolute;
     width: 0;

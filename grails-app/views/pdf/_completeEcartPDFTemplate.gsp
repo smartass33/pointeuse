@@ -59,7 +59,126 @@
 					<%= calendar.set(Calendar.MONTH,month_th_2-1) %>
 					<td class="eventTD" style="vertical-align: middle;">${calendar.time.format('MMM') }</td>
 				</g:each>
-			</tr>										
+			</tr>	
+			
+			<g:if test="${employeeInstanceList != null}">
+				<th colspan='13' class="eventTD" style="text-align:left;font-weight:bold;text-transform: uppercase;">${message(code: 'ecart.totals', default: 'report')}</th>			
+					<tr>
+						<td class="eventTD" style="text-align:left;">${message(code: 'ecart.total.theoritical', default: 'report')}</td>	
+						<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
+							<g:if test='${totalMonthlyTheoritical != null}'>
+								<g:if test="${monthList != null && monthList.contains(month_th)}">										
+									<td class="eventTD"><my:humanTimeTD id="totalMonthlyTheoritical"  name="totalMonthlyTheoritical" value="${totalMonthlyTheoritical.get(month_th)}"/></td>	
+								</g:if>
+								<g:else>
+									<td class="eventTD" style="background-color:#CCCCCE"/>						
+								</g:else>
+							</g:if>
+							<g:else>
+								<td class="eventTD" style="background-color:#CCCCCE"/>
+							</g:else>
+						</g:each>
+					</tr>
+					<tr>
+						<td class="eventTD" style="text-align:left;">${message(code: 'ecart.total.actuals', default: 'report')}</td>	
+						<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
+							<g:if test='${totalMonthlyActual != null}'>
+								<g:if test="${monthList != null && monthList.contains(month_th)}">										
+									<td class="eventTD"><my:humanTimeTD id="totalMonthlyActual"  name="totalMonthlyActual" value="${totalMonthlyActual.get(month_th)}"/></td>	
+								</g:if>
+								<g:else>
+									<td class="eventTD" style="background-color:#CCCCCE"/>						
+								</g:else>
+							</g:if>
+							<g:else>
+								<td class="eventTD" style="background-color:#CCCCCE"/>
+							</g:else>
+						</g:each>
+					</tr>				
+					<tr>
+						<td class="eventTD" style="text-align:left;">${message(code: 'ecart.total.delta', default: 'report')}</td>	
+						<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
+							<g:if test='${totalEcart != null}'>
+								<g:if test="${monthList != null && monthList.contains(month_th)}">										
+									<td class="eventTD"><my:humanTimeTD id="totalEcart"  name="totalEcart" value="${totalEcart.get(month_th)}"/></td>	
+								</g:if>
+								<g:else>
+									<td class="eventTD" style="background-color:#CCCCCE"/>						
+								</g:else>
+							</g:if>
+							<g:else>
+								<td class="eventTD" style="background-color:#CCCCCE"/>
+							</g:else>
+						</g:each>
+					</tr>	
+					<tr>
+						<td class="eventTD" style="text-align:left;">${message(code: 'ecart.total.rtt', default: 'report')}</td>	
+						<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
+							<g:if test='${totalTakenRTT != null}'>
+								<g:if test="${monthList != null && monthList.contains(month_th)}">										
+									<td class="eventTD">${totalTakenRTT.get(month_th)}</td>	
+								</g:if>
+								<g:else>
+									<td class="eventTD" style="background-color:#CCCCCE"/>						
+								</g:else>
+							</g:if>
+							<g:else>
+								<td class="eventTD" style="background-color:#CCCCCE"/>
+							</g:else>
+						</g:each>
+					</tr>
+				
+					<tr>
+						<td class="eventTD" style="text-align:left;">${message(code: 'ecart.total.delta.minus.rtt', default: 'report')}</td>	
+						<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
+							<g:if test='${totalEcartMinusRTT != null}'>
+								<g:if test="${monthList != null && monthList.contains(month_th)}">										
+									<td class="eventTD"><my:humanTimeTD id="totalEcartMinusRTT"  name="totalEcartMinusRTT" value="${totalEcartMinusRTT.get(month_th)}"/></td>	
+								</g:if>
+								<g:else>
+									<td class="eventTD" style="background-color:#CCCCCE"/>						
+								</g:else>
+							</g:if>
+							<g:else>
+								<td class="eventTD" style="background-color:#CCCCCE"/>
+							</g:else>
+						</g:each>
+					</tr>
+					<tr>
+						<td class="eventTD" style="text-align:left;">${message(code: 'ecart.total.suptime', default: 'report')}</td>	
+						<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
+							<g:if test='${totalSupTime != null}'>
+								<g:if test="${monthList != null && monthList.contains(month_th)}">										
+									<td class="eventTD"><my:humanTimeTD id="totalSupTime"  name="totalSupTime" value="${totalSupTime.get(month_th)}"/></td>	
+								</g:if>
+								<g:else>
+									<td class="eventTD" style="background-color:#CCCCCE"/>						
+								</g:else>
+							</g:if>
+							<g:else>
+								<td class="eventTD" style="background-color:#CCCCCE"/>
+							</g:else>
+						</g:each>
+					</tr>
+					<tr>
+						<td class="eventTD" style="text-align:left;">${message(code: 'ecart.total.delta.minus.rtt.suptime', default: 'report')}</td>	
+						<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
+							<g:if test='${totalEcartMinusRTTAndHS != null}'>
+								<g:if test="${monthList != null && monthList.contains(month_th)}">										
+									<td class="eventTD"><my:humanTimeTD id="totalEcartMinusRTTAndHS"  name="totalEcartMinusRTTAndHS" value="${totalEcartMinusRTTAndHS.get(month_th)}"/></td>	
+								</g:if>
+								<g:else>
+									<td class="eventTD" style="background-color:#CCCCCE"/>						
+								</g:else>
+							</g:if>
+							<g:else>
+								<td class="eventTD" style="background-color:#CCCCCE"/>
+							</g:else>
+						</g:each>
+					</tr>
+			</g:if>	
+			
+												
 			<g:each in="${employeeInstanceList}" status="i" var="employee">
 				<th colspan='13' class="eventTD" style="text-align:left;font-weight:bold;">${employee.firstName} ${employee.lastName}</th>
 				<tr>

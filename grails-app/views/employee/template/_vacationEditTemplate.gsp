@@ -15,10 +15,11 @@
 			</tr>
 		</thead>
 		<tbody>
-		<%def firstYear = (Period.findAll("from Period as p order by year asc",[max:1])).year
-		def lastYear = (Period.findAll("from Period as p order by year desc",[max:1])).year 
-		def iterator = firstYear.get(0) as int
-		def sameLine=false
+		<%
+			def firstYear = (Period.findAll("from Period as p order by year asc",[max:1])).year
+			def lastYear = (Period.findAll("from Period as p order by year desc",[max:1])).year 
+			def iterator = firstYear.get(0) as int
+			def sameLine=false
 		%>
 			<g:each in="${orderedVacationList}" status="i" var="vacationInstance">
 				<% if (iterator==vacationInstance.period.year){

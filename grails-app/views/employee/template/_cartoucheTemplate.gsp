@@ -70,6 +70,12 @@
 		    			<td class="cartoucheRightFiguresTD">${yearlySansSolde as java.lang.Float}</td>
 		    			<td class="cartoucheRightFiguresTD">
 					</tr>
+					<tr>
+						<td class="cartoucheRightTitleTD" >${message(code: 'employee.injustifie.count', default: 'report')} :</td>
+						<td class="cartoucheRightFiguresTD">${injustifie as java.lang.Float}</td>
+		    			<td class="cartoucheRightFiguresTD">${yearlyInjustifie as java.lang.Float}</td>
+		    			<td class="cartoucheRightFiguresTD">
+					</tr>
 					<tr>		
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.exceptionnel.count', default: 'report')} :</td>	
 						<td class="cartoucheRightFiguresTD">${exceptionnel as java.lang.Float}</td>        					

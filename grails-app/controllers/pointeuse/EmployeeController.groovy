@@ -77,7 +77,7 @@ class EmployeeController {
 		def fromIndex=params.boolean('fromIndex')
 		def inAndOutsForEmployee = []
 		def inAndOutsForEmployeeMap = [:]
-
+		def employeeSubList 
 		
 		if (!fromIndex && (siteId == null || siteId.size() == 0)){
 			flash.message = message(code: 'ecart.site.selection.error')
@@ -93,12 +93,46 @@ class EmployeeController {
 			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
 			calendar.time=currentDate
 		}
-			
+	
+		
+		def functionList = Function.list([sort: "ranking", order: "asc"])
+		def serviceList = Service.list([sort: "name", order: "asc"])
+		
 		if (siteId!=null && !siteId.equals("")){
 			 site = Site.get(params.int('site.id'))
-			 employeeInstanceList = Employee.findAllBySite(site)
+			 employeeInstanceList = []
+			 /*
+			 for (Function function:functionList){
+				 employeeInstanceList.addAll(Employee.findAllBySiteAndFunction(site,function))
+			 }
+			 */
+			 
+			for (Function function:functionList){
+					// employeeInstanceList.addAll(Employee.findAllByFunctionAndServiceAndSite(function,service,[sort: "lastName", order: "asc"]))
+				for (Service service:serviceList){					 
+					 criteria = Employee.createCriteria()
+					 employeeSubList= criteria.list{
+						 and {
+							 eq('function',function)
+							 eq('service',service)
+							 eq('site',site)
+						 }
+						 order('lastName','asc')
+					 }
+					 employeeInstanceList.addAll(employeeSubList)					 
+				 }
+			 }
+			 
 		}else{
-			employeeInstanceList = Employee.findAll("from Employee")	
+		
+			//employeeInstanceList = Employee.findAll("from Employee")
+			employeeInstanceList = []
+			for (Service service:serviceList){
+				for (Function function:functionList){
+					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
+				}
+			}
+				
 		}
 		for (Employee employee:employeeInstanceList){	
 			inAndOutsForEmployee = []
@@ -2209,11 +2243,8 @@ class EmployeeController {
 		
 		def date_picker =params["date_picker"]
 		if (date_picker != null && date_picker.size()>0){
-			
-
 			calendar.time = new Date().parse("dd/MM/yyyy", date_picker)
 		}
-
 
 		if (params["site.id"]!=null && !params["site.id"].equals('')){
 			siteId = params["site.id"].toInteger()
@@ -2230,6 +2261,57 @@ class EmployeeController {
 		response.outputStream << retour[0]
 		
 	}
+	
+	def dailyTotalWithStylePDF(){
+		def site
+		def siteId
+		Calendar calendar = Calendar.instance
+		def folder = grailsApplication.config.pdf.directory
+		
+		def date_picker =params["date_picker"]
+		if (date_picker != null && date_picker.size()>0){
+			calendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+		}
+
+		if (params["site.id"]!=null && !params["site.id"].equals('')){
+			siteId = params["site.id"].toInteger()
+			site = Site.get(params.int("site.id"))
+		}else{
+			flash.message = message(code: 'pdf.site.selection.error')
+			redirect(action: "list")
+			return
+		}
+			
+		def retour = PDFService.generateDailySheetWithStyle(site,folder,calendar.time)
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.outputStream << retour[0]
+		
+	}
+	
+	def downloadPdf() {
+		String pathToPhantomJS = "/usr/local/bin/phantomjs" //path to your phantom js
+		String pathToRasterizeJS = "/usr/local/bin/rasterize.js" //path to your rasterize.js
+		String paperSize = "A4"
+		String url = "http://localhost:8080/pointeuse/employee/dailyReport?isAdmin=false&max=20&fromIndex=true" //url of your web page to which you want to convert into pdf
+		File outputFile = File.createTempFile("sample", ".pdf") //file in which you want to save your pdf
+		 
+		//TODO: also do exception handling stuff . i am not doing this for simplicity
+		 
+		Process process = Runtime.getRuntime().exec(pathToPhantomJS + " " + pathToRasterizeJS + " " + url + " " + outputFile.absolutePath + " " + paperSize);
+		int exitStatus = process.waitFor(); //do a wait here to prevent it running for ever
+		if (exitStatus != 0) {
+		log.error("EXIT-STATUS - " + process.toString());
+		}
+		response.setContentType("application/octet-stream")
+		
+		//response.contentType = "application/pdf"
+		response.setHeader("Content-Disposition", "filename=sample.pdf");
+		response.outputStream << outputFile.bytes
+		response.outputStream.flush()
+		response.outputStream.close()
+		}
+	
 	
 	def userPDF(){
 		def myDate = params["myDate"]

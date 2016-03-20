@@ -10,3 +10,11 @@
 	<g:textField name="name" value="${functionInstance?.name}"/>
 </div>
 
+<div class="fieldcontain ${hasErrors(bean: functionInstance, field: 'ranking', 'error')} required">
+	<label for="ranking">
+		<g:message code="function.ranking.label" default="Ranking" />
+		<span class="required-indicator">*</span>
+	</label>
+	<g:field name="ranking" type="number" value="${functionInstance.ranking}" required=""/>
+</div>
+

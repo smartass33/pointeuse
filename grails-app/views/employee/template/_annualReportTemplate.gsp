@@ -21,6 +21,7 @@
 		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>	
 		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.RTT.label"/></span></div></th>
 		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
+		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
 		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>
 		<th class='rotate-45'  style="width:75px"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
 		<th class='rotate-45'  style="width:70px"><div><span><g:message code="employee.paternite.count"/></span></div></th>		
@@ -55,6 +56,7 @@
 				<td style="vertical-align: middle;text-align:center;">${monthlyTakenHolidays.get(cartouche.key)}</td>				
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('rtt')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sansSolde')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('injustifie')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sickness')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('exceptionnel')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('paternite')}</td>
@@ -84,6 +86,7 @@
 		<td style="vertical-align: middle;text-align:center;">${remainingCA}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualRTT}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualCSS}</td>
+		<td style="vertical-align: middle;text-align:center;">${annualINJUSTIFIE}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualSickness}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualExceptionnel}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualPaternite}</td>

@@ -103,11 +103,12 @@
 		                onComplete="document.getElementById('spinner').style.display = 'none';"
 						url="[controller:'employee', action:'dailyReport']"
 					/>	
-				</li>		
+				</li>						
 				<li>	
-					<g:actionSubmit value="PDF" action="dailyTotalPDF" controller="employee"  class="pdfButton"/>	</li>				
-					<g:hiddenField name="isAdmin" value="${isAdmin}" />
-					<g:hiddenField name="siteId" value="${siteId}" />
+					<g:actionSubmit value="PDF" action="dailyTotalPDF" controller="employee"  class="pdfButton"/>	
+				</li>				
+				<g:hiddenField name="isAdmin" value="${isAdmin}" />
+				<g:hiddenField name="siteId" value="${siteId}" />
 				</ul>
 			</g:form>			
 		</h1>

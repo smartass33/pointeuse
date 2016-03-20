@@ -330,8 +330,8 @@ if (typeof jQuery === 'undefined') {
             var width = (stop - start) * this.px_per_ms;
             var left = (start - this.options.start_timestamp) * this.px_per_ms;
             this.$prompts.append(
-                '<div id="r-prompt-' + timecell_id + '" class="prompt" style="top:101px;left: ' + (left + width - 44).toString() + 'px;">' +
-                    '<div class="triangle-up"></div>' +
+                '<div id="r-prompt-' + timecell_id + '" class="prompt" style="top:66px;left: ' + (left + width - 44).toString() + 'px;">' +
+                    '<div class="prompt" style="top:100px;left: ' + (left + width - 44).toString() + 'px;">' +
                     '<div class="body">' + this.timestamp_to_date(stop) + '</div>' +
                 '</div>');
             running_timecell.removeClass('current');
@@ -640,8 +640,8 @@ if (typeof jQuery === 'undefined') {
                     '<div class="body">' + this.timestamp_to_date(timecell['start']) + '</div>' +
                 '</div>' +
                 (timecell['stop'] ?
-                    '<div id="r-prompt-' + timecell['_id'] + '" class="prompt" style="top:101px;left: ' + (left + width - 44).toString() + 'px;">' +
-                        '<div class="triangle-up"></div>' +
+                    '<div id="r-prompt-' + timecell['_id'] + '" class="prompt" style="top:66px;left: ' + (left + width - 44).toString() + 'px;">' +
+                        '<div class="triangle-up" style="top:-5px;"></div>' +
                         '<div class="body">' + this.timestamp_to_date(timecell['stop']) + '</div>' +
                     '</div>'
                     : '')

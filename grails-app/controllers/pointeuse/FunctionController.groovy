@@ -1,102 +1,105 @@
 package pointeuse
 
-import org.springframework.dao.DataIntegrityViolationException
 
+
+import static org.springframework.http.HttpStatus.*
+import grails.transaction.Transactional
+
+@Transactional(readOnly = true)
 class FunctionController {
 
-    static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
+    static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
-    def index() {
-        redirect(action: "list", params: params)
+    def index(Integer max) {
+        params.max = Math.min(max ?: 10, 100)
+		params << [sort: "ranking", order: "asc"]
+        respond Function.list(params), model:[functionInstanceCount: Function.count()]
     }
 
-    def list(Integer max) {
-        params.max = Math.min(max ?: 10, 100)
-        [functionInstanceList: Function.list(params), functionInstanceTotal: Function.count()]
+    def show(Function functionInstance) {
+        respond functionInstance
     }
 
     def create() {
-        [functionInstance: new Function(params)]
+        respond new Function(params)
     }
 
-    def save() {
-        def functionInstance = new Function(params)
-        if (!functionInstance.save(flush: true)) {
-            render(view: "create", model: [functionInstance: functionInstance])
+    @Transactional
+    def save(Function functionInstance) {
+        if (functionInstance == null) {
+            notFound()
             return
         }
 
-        flash.message = message(code: 'default.created.message', args: [message(code: 'function.label', default: 'Function'), functionInstance.name])
-        redirect(action: "show", id: functionInstance.id)
-    }
-
-    def show(Long id) {
-        def functionInstance = Function.get(id)
-        if (!functionInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'function.label', default: 'Function'), id])
-            redirect(action: "list")
+        if (functionInstance.hasErrors()) {
+            respond functionInstance.errors, view:'create'
             return
         }
 
-        [functionInstance: functionInstance]
-    }
+        functionInstance.save flush:true
 
-    def edit(Long id) {
-        def functionInstance = Function.get(id)
-        if (!functionInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'function.label', default: 'Function'), id])
-            redirect(action: "list")
-            return
-        }
-
-        [functionInstance: functionInstance]
-    }
-
-    def update(Long id, Long version) {
-        def functionInstance = Function.get(id)
-        if (!functionInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'function.label', default: 'Function'), id])
-            redirect(action: "list")
-            return
-        }
-
-        if (version != null) {
-            if (functionInstance.version > version) {
-                functionInstance.errors.rejectValue("version", "default.optimistic.locking.failure",
-                          [message(code: 'function.label', default: 'Function')] as Object[],
-                          "Another user has updated this Function while you were editing")
-                render(view: "edit", model: [functionInstance: functionInstance])
-                return
+        request.withFormat {
+            form {
+                flash.message = message(code: 'default.feminine.created.message', args: [message(code: 'function.label', default: 'Function'), functionInstance.name])
+                redirect functionInstance
             }
+            '*' { respond functionInstance, [status: CREATED] }
         }
-
-        functionInstance.properties = params
-
-        if (!functionInstance.save(flush: true)) {
-            render(view: "edit", model: [functionInstance: functionInstance])
-            return
-        }
-
-        flash.message = message(code: 'default.updated.message', args: [message(code: 'function.label', default: 'Function'), functionInstance.id])
-        redirect(action: "show", id: functionInstance.id)
     }
 
-    def delete(Long id) {
-        def functionInstance = Function.get(id)
-        if (!functionInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'function.label', default: 'Function'), id])
-            redirect(action: "list")
+    def edit(Function functionInstance) {
+        respond functionInstance
+    }
+
+    @Transactional
+    def update(Function functionInstance) {
+        if (functionInstance == null) {
+            notFound()
             return
         }
 
-        try {
-            functionInstance.delete(flush: true)
-            flash.message = message(code: 'default.deleted.message', args: [message(code: 'function.label', default: 'Function'), id])
-            redirect(action: "list")
+        if (functionInstance.hasErrors()) {
+            respond functionInstance.errors, view:'edit'
+            return
         }
-        catch (DataIntegrityViolationException e) {
-            flash.message = message(code: 'default.not.deleted.message', args: [message(code: 'function.label', default: 'Function'), id])
-            redirect(action: "show", id: id)
+
+        functionInstance.save flush:true
+
+        request.withFormat {
+            form {
+                flash.message = message(code: 'default.feminine.updated.message', args: [message(code: 'function.label', default: 'Function'), functionInstance.name])
+                redirect functionInstance
+            }
+            '*'{ respond functionInstance, [status: OK] }
+        }
+    }
+
+    @Transactional
+    def delete(Function functionInstance) {
+
+        if (functionInstance == null) {
+            notFound()
+            return
+        }
+
+        functionInstance.delete flush:true
+
+        request.withFormat {
+            form {
+                flash.message = message(code: 'default.feminine.deleted.message', args: [message(code: 'function.label', default: 'Function'), functionInstance.name])
+                redirect action:"index", method:"GET"
+            }
+            '*'{ render status: NO_CONTENT }
+        }
+    }
+
+    protected void notFound() {
+        request.withFormat {
+            form {
+                flash.message = message(code: 'default.not.found.message', args: [message(code: 'function.label', default: 'Function'), params.id])
+                redirect action: "index", method: "GET"
+            }
+            '*'{ render status: NOT_FOUND }
         }
     }
 }

@@ -1090,6 +1090,16 @@ class TimeManagerService {
 				eq('type',AbsenceType.CSS)
 			}
 		}
+		
+		criteria = Absence.createCriteria()
+		def yearlyInjustifie = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.INJUSTIFIE)
+			}
+		}
 						
 		if (month>=6){
 			criteria = MonthlyTotal.createCriteria()	
@@ -1212,6 +1222,7 @@ class TimeManagerService {
 			yearlyPregnancyCredit:yearlyPregnancyCredit,
 			yearlyTotalTime:totalTime,
 			yearlySansSolde:yearlySansSolde.size(),
+			yearlyInjustifie:yearlyInjustifie.size(),
 			yearSupTime:yearSupTime
 		]
 	}
@@ -1364,6 +1375,16 @@ class TimeManagerService {
 				eq('type',AbsenceType.CSS)
 			}
 		}
+		
+		criteria = Absence.createCriteria()
+		def injustifie = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.INJUSTIFIE)
+			}
+		}
 		calendar.set(Calendar.HOUR_OF_DAY,23)
 		calendar.set(Calendar.MINUTE,59)
 		calendar.set(Calendar.SECOND,59)
@@ -1405,6 +1426,7 @@ class TimeManagerService {
 			rtt:rtt.size(),
 			sickness:sickness.size(),
 			sansSolde:sansSolde.size(),
+			injustifie:injustifie.size(),
 			monthTheoritical:monthTheoritical,
 			pregnancyCredit:pregnancyCredit,
 			monthTheoriticalHuman:getTimeAsText(computeHumanTime(monthTheoritical),false),
@@ -1450,6 +1472,7 @@ class TimeManagerService {
 		def isCurrentMonth=cartoucheTable.get('isCurrentMonth')	
 		def sickness=cartoucheTable.get('sickness')
 		def sansSolde=cartoucheTable.get('sansSolde')
+		def injustifie=cartoucheTable.get('injustifie')	
 		def monthTheoritical = cartoucheTable.get('monthTheoritical')
 		def pregnancyCredit = computeHumanTimeAsString(cartoucheTable.get('pregnancyCredit'))
 		def yearlyHoliday=cartoucheTable.get('yearlyHolidays')
@@ -1462,6 +1485,7 @@ class TimeManagerService {
 		def yearlyPregnancyCredit = computeHumanTimeAsString(cartoucheTable.get('yearlyPregnancyCredit'))
 		def yearlyActualTotal = computeHumanTimeAsString(cartoucheTable.get('yearlyTotalTime'))
 		def yearlySansSolde=cartoucheTable.get('yearlySansSolde')
+		def yearlyInjustifie=cartoucheTable.get('yearlyInjustifie')
 		def yearlySupTime = cartoucheTable.get('yearSupTime')
 		def yearOpenDays = cartoucheTable.get('yearOpenDays')
 		
@@ -1531,7 +1555,8 @@ class TimeManagerService {
 			holiday:holiday,
 			rtt:rtt,
 			sickness:sickness,
-			sansSolde:sansSolde,
+			sansSolde:sansSolde,			
+			injustifie:injustifie,
 			yearlyActualTotal:yearlyActualTotal,
 			monthTheoritical:monthTheoritical,
 			monthlyTheoriticalAsString:monthlyTheoriticalAsString,
@@ -1541,6 +1566,7 @@ class TimeManagerService {
 			yearlyRtt:yearlyRtt,
 			yearlySickness:yearlySickness,
 			yearlySansSolde:yearlySansSolde,
+			yearlyInjustifie:yearlyInjustifie,
 			yearlySupTime:computeHumanTimeAsString(yearlySupTime as long),
 			dif:dif,
 			yearlyDif:yearlyDif,	
@@ -1568,30 +1594,30 @@ class TimeManagerService {
 		def referenceRTT
 		def takenRTT
 		def data
+		Contract currentContract
 		def monthlyTheoriticalMap = [:]
 		def monthlyActualMap = [:]
 		def monthlyTakenRTTMap = [:]
 		def ecartMap = [:]
-		def ecartMinusRTTMap = [:]
 		def ecartMinusRTTAndHSMap = [:]
 		def monthlyTheoriticalByEmployee = [:]
 		def monthlyActualByEmployee = [:]
+		def ecartMinusRTTMap = [:]
 		def ecartMinusRTTByEmployee = [:]
 		def ecartMinusRTTAndHSByEmployee = [:]
 		def ecartByEmployee = [:]
 		def rttByEmployee = [:]
 		def monthlySupTimeMap = [:]
-		def monthlySupTimeMapByEmployee =[:]
+		def monthlySupTimeMapByEmployee =[:]	
+		def employeeInstanceList = (site != null) ? Employee.findAllBySite(site) : Employee.findAll("from Employee")
+		def totalMonthlyTheoritical = [:]
+		def totalMonthlyActual = [:]
+		def totalTakenRTT = [:]
+		def totalSupTime = [:]
+		def totalEcart = [:]
+		def totalEcartMinusRTT = [:]
+		def totalEcartMinusRTTAndHS = [:]
 
-		def employeeInstanceList
-		Contract currentContract
-		
-		if (site){
-			employeeInstanceList = Employee.findAllBySite(site)
-		}else{
-			employeeInstanceList=Employee.findAll("from Employee")
-		}
-		
 		for (Employee employee:employeeInstanceList){
 			monthlySupTimeMap = [:]
 			monthlyTheoriticalMap = [:]
@@ -1602,7 +1628,7 @@ class TimeManagerService {
 			ecartMinusRTTAndHSMap = [:]
 			
 			for (month in monthList){
-				tmpYear=(month<6)?period.year+1:period.year
+				tmpYear = (month < 6) ? period.year + 1 : period.year
 	   
 				criteria = MonthlyTotal.createCriteria()
 				def monthlyTotalInstance = criteria.get {
@@ -1637,7 +1663,7 @@ class TimeManagerService {
 					monthlySupTimeMap.put(month,supTime.value as long)
 				}
 				
-				//special case for employees for which vacations were not properly instanciated
+				//special case for employees for which vacations were not properly instantiated
 				if (referenceRTT == null && employee.weeklyContractTime == Employee.legalWeekTime){
 						utilService.initiateVacations(employee)
 						criteria = Vacation.createCriteria()
@@ -1659,10 +1685,6 @@ class TimeManagerService {
 					}
 				}
 				data = getCartoucheData(employee,tmpYear,month)
-				//def totals = computeWeeklyTotals( employee,  month,  tmpYear)
-				
-				//def monthlyTotalTime = totals.get('monthlyTotalTime')
-				
 				
 				def theoricalTime2add = 0
 				def actualTime2add = 0
@@ -1692,26 +1714,49 @@ class TimeManagerService {
 				}
 				
 				monthlyTheoriticalMap.put(month, data.get('monthTheoritical') + theoricalTime2add)
+				if (totalMonthlyTheoritical.get(month) == null){
+					totalMonthlyTheoritical.put(month, monthlyTheoriticalMap.get(month))
+				}else{
+					totalMonthlyTheoritical.put(month, totalMonthlyTheoritical.get(month) + monthlyTheoriticalMap.get(month))			
+				}
 				if (monthlyTotalInstance!=null){				
 					monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds + actualTime2add)
-					//monthlyActualMap.put(month, monthlyTotalTime + actualTime2add)
 				}else{
 					monthlyActualMap.put(month, actualTime2add)
 				}
+				if (totalMonthlyActual.get(month) == null){
+					totalMonthlyActual.put(month, monthlyActualMap.get(month))
+				}else{
+					totalMonthlyActual.put(month, totalMonthlyActual.get(month) + monthlyActualMap.get(month))
+				}
+				
 				if (takenRTT!=null){
 					monthlyTakenRTTMap.put(month,takenRTT2add - takenRTT.size())
 				}else{
 					monthlyTakenRTTMap.put(month,takenRTT2add)
-				}		
-							
+				}
+				if (totalTakenRTT.get(month) == null){
+					totalTakenRTT.put(month, monthlyTakenRTTMap.get(month))
+				}else{
+					totalTakenRTT.put(month, totalTakenRTT.get(month) + monthlyTakenRTTMap.get(month))
+				}							
 				if (supTime != null){
-					monthlySupTimeMap.put(month,(supTime.value as long) + actualSupTime2add)
-					
+					monthlySupTimeMap.put(month,(supTime.value as long) + actualSupTime2add)				
 				}else{
 					monthlySupTimeMap.put(month,actualSupTime2add)		
 				}
+				if (totalSupTime.get(month) == null){
+					totalSupTime.put(month, monthlySupTimeMap.get(month))
+				}else{
+					totalSupTime.put(month, totalSupTime.get(month) + monthlySupTimeMap.get(month))
+				}
 						
-				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))	
+				ecartMap.put(month, monthlyActualMap.get(month)-monthlyTheoriticalMap.get(month))
+				if (totalEcart.get(month) == null){
+					totalEcart.put(month, ecartMap.get(month))
+				}else{
+					totalEcart.put(month, totalEcart.get(month) + ecartMap.get(month))
+				}
 				currentContract = data.get('currentContract')	
 				if (currentContract != null){
 					ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(currentContract.weeklyLength/Employee.WeekOpenedDays)) as long)
@@ -1720,14 +1765,26 @@ class TimeManagerService {
 				}else{
 					log.error('currentContract is null for employee  '+employee+ ' and month= '+month)
 					ecartMinusRTTMap.put(month, ecartMap.get(month) as long)
-					ecartMinusRTTAndHSMap.put(month, (ecartMap.get(month) - monthlySupTimeMap.get(month))as long)
-					
-				}			
+					ecartMinusRTTAndHSMap.put(month, (ecartMap.get(month) - monthlySupTimeMap.get(month))as long)				
+				}		
+				
+				if (totalEcartMinusRTT.get(month) == null){
+					totalEcartMinusRTT.put(month, ecartMinusRTTMap.get(month))
+				}else{
+					totalEcartMinusRTT.put(month, totalEcartMinusRTT.get(month) + ecartMinusRTTMap.get(month))
+				}
+				if (totalEcartMinusRTTAndHS.get(month) == null){
+					totalEcartMinusRTTAndHS.put(month, ecartMinusRTTAndHSMap.get(month))
+				}else{
+					totalEcartMinusRTTAndHS.put(month, totalEcartMinusRTTAndHS.get(month) + ecartMinusRTTAndHSMap.get(month))
+				}
 			}
-		
+			
+			
+		/*
 			monthlyTheoriticalMap.each() {
 				it.value=getTimeAsText(computeHumanTime(it.value),false)
-				}
+			}
 			monthlyActualMap.each() {
 				it.value=getTimeAsText(computeHumanTime(it.value),false)
 		   }
@@ -1745,6 +1802,7 @@ class TimeManagerService {
 				it.value=getTimeAsText(computeHumanTime(it.value),false)
 			}
 			
+			*/
 			monthlySupTimeMapByEmployee.put(employee,monthlySupTimeMap)
 			monthlyTheoriticalByEmployee.put(employee,monthlyTheoriticalMap)
 			monthlyActualByEmployee.put(employee,monthlyActualMap)
@@ -1764,7 +1822,14 @@ class TimeManagerService {
 			ecartMinusRTTByEmployee:ecartMinusRTTByEmployee,
 			monthList:monthList,
 			monthlySupTimeMapByEmployee:monthlySupTimeMapByEmployee,
-			ecartMinusRTTAndHSByEmployee:ecartMinusRTTAndHSByEmployee
+			ecartMinusRTTAndHSByEmployee:ecartMinusRTTAndHSByEmployee,
+			totalMonthlyTheoritical:totalMonthlyTheoritical,
+			totalMonthlyActual:totalMonthlyActual,
+			totalSupTime:totalSupTime,
+			totalEcart:totalEcart,
+			totalEcartMinusRTT:totalEcartMinusRTT,
+			totalEcartMinusRTTAndHS:totalEcartMinusRTTAndHS,
+			totalTakenRTT:totalTakenRTT
 		]
 	}
 		
@@ -1832,6 +1897,7 @@ class TimeManagerService {
 		def annualHoliday = 0
 		def annualRTT = 0
 		def annualCSS = 0
+		def annualINJUSTIFIE = 0
 		def annualDIF = 0
 		def annualSickness = 0
 		def annualExceptionnel = 0	
@@ -2008,6 +2074,7 @@ class TimeManagerService {
 			annualRTT += cartoucheTable.getAt('rtt')
 			annualDIF += cartoucheTable.getAt('dif')			
 			annualCSS += cartoucheTable.getAt('sansSolde')
+			annualINJUSTIFIE += cartoucheTable.getAt('injustifie')
 			annualSickness += cartoucheTable.getAt('sickness')
 			annualExceptionnel += cartoucheTable.getAt('exceptionnel')
 			annualPaternite += cartoucheTable.getAt('paternite')			
@@ -2053,6 +2120,7 @@ class TimeManagerService {
 			annualRTT:annualRTT,
 			annualDIF:annualDIF,
 			annualCSS:annualCSS,
+			annualINJUSTIFIE:annualINJUSTIFIE,
 			annualSickness:annualSickness,
 			annualExceptionnel:annualExceptionnel,
 			annualPaternite:annualPaternite,
@@ -2099,6 +2167,7 @@ class TimeManagerService {
 		def annualHoliday = 0
 		def annualRTT = 0
 		def annualCSS = 0
+		def annualINJUSTIFIE = 0
 		def annualDIF = 0
 		def annualSickness = 0
 		def annualExceptionnel = 0
@@ -2235,6 +2304,7 @@ class TimeManagerService {
 			annualRTT += cartoucheTable.getAt('yearlyRtt')
 			annualDIF += cartoucheTable.getAt('yearlyDif')
 			annualCSS += cartoucheTable.getAt('yearlySansSolde')
+			annualINJUSTIFIE += cartoucheTable.getAt('yearlyInjustifie')			
 			annualSickness += cartoucheTable.getAt('yearlySickness')
 			annualExceptionnel += cartoucheTable.getAt('yearlyExceptionnel')
 			annualPaternite += cartoucheTable.getAt('yearlyPaternite')
@@ -2273,6 +2343,7 @@ class TimeManagerService {
 			annualRTT:annualRTT,
 			annualDIF:annualDIF,
 			annualCSS:annualCSS,
+			annualINJUSTIFIE:annualINJUSTIFIE,
 			annualSickness:annualSickness,
 			annualExceptionnel:annualExceptionnel,
 			annualPaternite:annualPaternite,
@@ -2390,7 +2461,19 @@ class TimeManagerService {
 				eq('type',AbsenceType.CSS)
 			}
 		}
-		absenceMap.put(AbsenceType.CSS, sansSolde.size())				
+		absenceMap.put(AbsenceType.CSS, sansSolde.size())
+		
+		criteria = Absence.createCriteria()
+		def injustifie = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',startDate)
+				le('date',endDate)
+				eq('type',AbsenceType.INJUSTIFIE)
+			}
+		}
+		absenceMap.put(AbsenceType.INJUSTIFIE, injustifie.size())
+		
 		criteria = Absence.createCriteria()
 		def pregnancy = criteria.list {
 			and {
@@ -2457,6 +2540,16 @@ class TimeManagerService {
 		}
 		absenceMap.put(AbsenceType.CSS, sansSolde.size())
 		
+		criteria = Absence.createCriteria()
+		def injustifie = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.INJUSTIFIE)
+			}
+		}
+		absenceMap.put(AbsenceType.INJUSTIFIE, injustifie.size())
 		
 		criteria = Absence.createCriteria()
 		def paternite = criteria.list {
@@ -2480,7 +2573,6 @@ class TimeManagerService {
 			}
 		}
 		def pregnancyCredit=30*60*pregnancy.size()
-
 		absenceMap.put(AbsenceType.GROSSESSE, pregnancyCredit)
 		
 		return absenceMap
@@ -2637,8 +2729,8 @@ class TimeManagerService {
 					monthTheoritical += (
 						3600*(
 								realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
-								+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
-								-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF))
+								+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS) - absenceMap.get(AbsenceType.INJUSTIFIE))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
+								-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.INJUSTIFIE)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF))
 								- (35/7)*absenceMap.get(AbsenceType.PATERNITE)
 								+ (weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday			
 							)
@@ -2658,11 +2750,17 @@ class TimeManagerService {
 		def inAndOutList
 		def criteria
 		def elapsedSeconds
-		def employeeInstanceList
+		//def employeeInstanceList
 		def calendar = Calendar.instance
 		calendar.time=currentDate
+		def employeeInstanceList = []		
+		def functionList = Function.list([sort: "ranking", order: "asc"])
+		 for (Function function:functionList){
+			 employeeInstanceList.addAll(Employee.findAllBySiteAndFunction(site,function))
+		 }
 		
-		employeeInstanceList = Employee.findAllBySite(site)
+		
+		//employeeInstanceList = Employee.findAllBySite(site)
 		for (Employee employee:employeeInstanceList){
 			criteria = DailyTotal.createCriteria()
 			dailyTotal= criteria.get{
@@ -2685,8 +2783,7 @@ class TimeManagerService {
 					}
 			}		
 			dailyInAndOutMap.put(employee, inAndOutList)
-			def tt = getDailyTotal(dailyTotal)
-			
+
 			elapsedSeconds = dailyTotal!=null ? (getDailyTotal(dailyTotal)).get("elapsedSeconds") : 0
 			if (elapsedSeconds > DailyTotal.maxWorkingTime){
 				dailySupMap.put(employee,getTimeAsText(computeHumanTime(elapsedSeconds-DailyTotal.maxWorkingTime),false))
@@ -2792,6 +2889,7 @@ class TimeManagerService {
 		def siteRemainingCA = 0
 		def siteAnnualRTT = 0
 		def siteAnnualCSS = 0
+		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0	
@@ -2812,6 +2910,7 @@ class TimeManagerService {
 			siteRemainingCA += ((annualReportMap.get(employee)).get('remainingCA'))
 			siteAnnualRTT += ((annualReportMap.get(employee)).get('annualRTT'))
 			siteAnnualCSS += ((annualReportMap.get(employee)).get('annualCSS'))
+			siteAnnualINJUSTIFIE += ((annualReportMap.get(employee)).get('annualINJUSTIFIE'))
 			siteAnnualSickness += ((annualReportMap.get(employee)).get('annualSickness'))
 			siteAnnualDIF += ((annualReportMap.get(employee)).get('annualDIF'))
 			siteAnnualExceptionnel += ((annualReportMap.get(employee)).get('annualExceptionnel'))
@@ -2831,6 +2930,7 @@ class TimeManagerService {
 			siteRemainingCA:siteRemainingCA,
 			siteAnnualRTT:siteAnnualRTT,
 			siteAnnualCSS:siteAnnualCSS,
+			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
 			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
@@ -3637,6 +3737,7 @@ class TimeManagerService {
 		def sickness = []
 		def pregnancy = []
 		def sansSolde = []
+		def injustifie = []
 		def pregnancyCredit = 0
 		def counter = 0
 		def totalNumberOfDays = 0
@@ -3733,6 +3834,10 @@ class TimeManagerService {
 			sansSolde = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.CSS])
 		}
 		
+		Absence.withTransaction{
+			injustifie = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.INJUSTIFIE])
+		}
+		
 		calendar.set(Calendar.HOUR_OF_DAY,23)
 		calendar.set(Calendar.MINUTE,59)
 		calendar.set(Calendar.SECOND,59)
@@ -3772,6 +3877,7 @@ class TimeManagerService {
 			rtt:rtt.size(),
 			sickness:sickness.size(),
 			sansSolde:sansSolde.size(),
+			injustifie:injustifie.size(),
 			monthTheoritical:monthTheoritical,
 			pregnancyCredit:pregnancyCredit,
 			calendar:calendar
@@ -3827,6 +3933,7 @@ class TimeManagerService {
 		def yearlySickness = []
 		def pregnancy = []
 		def yearlySansSolde = []
+		def yearlyInjustifie = []
 		
 		/* create a loop over months and invoke getMonthTheoritical method */
 		// check if employee entered the company or left the company over the period.
@@ -3876,6 +3983,9 @@ class TimeManagerService {
 			yearlySansSolde = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.CSS])
 		}
 		
+		Absence.withTransaction{
+			yearlyInjustifie = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.INJUSTIFIE])
+		}
 						
 		if (month>=6){			
 			MonthlyTotal.withTransaction{
@@ -4104,7 +4214,7 @@ class TimeManagerService {
 						tmpTheoritical += realOpenDays*weeklyContractTime/Employee.WeekOpenedDays as long
 						log.debug('1: tmpTheoritical: '+tmpTheoritical)
 						
-						tmpTheoritical += (Employee.Pentecote)*(((realOpenDays as long) - (absenceMap.get(AbsenceType.CSS) as long))/totalNumberOfDays)*((weeklyContractTime as long)/Employee.legalWeekTime)
+						tmpTheoritical += (Employee.Pentecote)*(((realOpenDays as long) - (absenceMap.get(AbsenceType.CSS) as long) - (absenceMap.get(AbsenceType.INJUSTIFIE) as long))/totalNumberOfDays)*((weeklyContractTime as long)/Employee.legalWeekTime)
 						log.debug('2: tmpTheoritical: '+tmpTheoritical)
 						
 						
@@ -4119,6 +4229,9 @@ class TimeManagerService {
 							
 						if ( absenceMap.get(AbsenceType.CSS) != null )
 							multiplier += absenceMap.get(AbsenceType.CSS) as long
+							
+						if ( absenceMap.get(AbsenceType.INJUSTIFIE) != null )
+							multiplier += absenceMap.get(AbsenceType.INJUSTIFIE) as long
 
 						if ( absenceMap.get(AbsenceType.EXCEPTIONNEL) != null )
 							multiplier += absenceMap.get(AbsenceType.EXCEPTIONNEL) as long
@@ -4184,6 +4297,7 @@ class TimeManagerService {
 		def paternite = []
 		def dif = []
 		def sansSolde = []
+		def injustifie = []
 		def pregnancy = []
 		def pregnancyCredit = 0
 		def patSundayCount = 0
@@ -4227,12 +4341,15 @@ class TimeManagerService {
 		}
 		
 		Absence.withTransaction{
+			injustifie = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.INJUSTIFIE])
+			absenceMap.put(AbsenceType.INJUSTIFIE, injustifie.size())
+		}
+		
+		Absence.withTransaction{
 			pregnancy = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.GROSSESSE])
 			pregnancyCredit=30*60*pregnancy.size()	
 			absenceMap.put(AbsenceType.GROSSESSE, pregnancyCredit)		
 		}
-		
-		
 		return absenceMap
 	}
 		
@@ -4362,6 +4479,7 @@ class TimeManagerService {
 		def siteRemainingCA = 0
 		def siteAnnualRTT = 0
 		def siteAnnualCSS = 0
+		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
@@ -4386,6 +4504,7 @@ class TimeManagerService {
 				 siteRemainingCA += data.get('remainingCA')
 				 siteAnnualRTT += data.get('annualRTT')
 				 siteAnnualCSS += data.get('annualCSS')
+				 siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
 				 siteAnnualSickness += data.get('annualSickness')
 				 siteAnnualDIF += data.get('annualDIF')
 				 siteAnnualExceptionnel += data.get('annualExceptionnel')
@@ -4413,6 +4532,7 @@ class TimeManagerService {
 			siteRemainingCA:siteRemainingCA,
 			siteAnnualRTT:siteAnnualRTT,
 			siteAnnualCSS:siteAnnualCSS,
+			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
 			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,

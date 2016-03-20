@@ -202,6 +202,7 @@ class SiteController {
 		def siteRemainingCA = 0
 		def siteAnnualRTT = 0
 		def siteAnnualCSS = 0
+		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
@@ -278,6 +279,7 @@ class SiteController {
 					employeeModel << ['remainingCA':annualEmployeeData.valueMap.get('remainingCA').toLong()]
 					employeeModel << ['annualRTT':annualEmployeeData.valueMap.get('annualRTT').toLong()]
 					employeeModel << ['annualCSS':annualEmployeeData.valueMap.get('annualCSS').toLong()]
+					employeeModel << ['annualINJUSTIFIE':annualEmployeeData.valueMap.get('annualINJUSTIFIE').toLong()]
 					employeeModel << ['annualDIF':annualEmployeeData.valueMap.get('annualDIF').toLong()]
 					employeeModel << ['annualSickness':annualEmployeeData.valueMap.get('annualSickness').toLong()]
 					employeeModel << ['annualExceptionnel':annualEmployeeData.valueMap.get('annualExceptionnel').toLong()]
@@ -295,6 +297,7 @@ class SiteController {
 					siteRemainingCA += annualEmployeeData.valueMap.get('remainingCA').toLong()
 					siteAnnualRTT += annualEmployeeData.valueMap.get('annualRTT').toLong()
 					siteAnnualCSS += annualEmployeeData.valueMap.get('annualCSS').toLong()
+					siteAnnualINJUSTIFIE += annualEmployeeData.valueMap.get('annualINJUSTIFIE').toLong()
 					siteAnnualSickness += annualEmployeeData.valueMap.get('annualSickness').toLong()
 					siteAnnualDIF += annualEmployeeData.valueMap.get('annualDIF').toLong()
 					siteAnnualExceptionnel += annualEmployeeData.valueMap.get('annualExceptionnel').toLong()
@@ -314,6 +317,7 @@ class SiteController {
 				siteRemainingCA:siteRemainingCA,
 				siteAnnualRTT:siteAnnualRTT,
 				siteAnnualCSS:siteAnnualCSS,
+				siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 				siteAnnualSickness:siteAnnualSickness,
 				siteAnnualDIF:siteAnnualDIF,
 				siteAnnualExceptionnel:siteAnnualExceptionnel,
@@ -345,6 +349,7 @@ class SiteController {
 				 siteRemainingCA += data.get('remainingCA')
 				 siteAnnualRTT += data.get('annualRTT')
 				 siteAnnualCSS += data.get('annualCSS')
+				 siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
 				 siteAnnualSickness += data.get('annualSickness')
 				 siteAnnualDIF += data.get('annualDIF')
 				 siteAnnualExceptionnel += data.get('annualExceptionnel')
@@ -370,6 +375,7 @@ class SiteController {
 			siteRemainingCA:siteRemainingCA,
 			siteAnnualRTT:siteAnnualRTT,
 			siteAnnualCSS:siteAnnualCSS,
+			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
 			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
@@ -392,23 +398,12 @@ class SiteController {
 		def calendar = Calendar.instance
 		def executionTime
 		def annualEmployeeData
-		def threads
-		
+		def threads		
 		Period period = (calendar.get(Calendar.MONTH) < 5) ? Period.findByYear(calendar.get(Calendar.YEAR)-1) : Period.findByYear(calendar.get(Calendar.YEAR))
 		
 		for (Site site:siteList){
 			log.error('starting computation for site: '+site.name + 'and period: '+period)
 			employeeList = Employee.findAllBySite(site)
-			
-			/*
-			GParsExecutorsPool.withPool {
-				employeeList.iterator().eachParallel {
-					log.error('executing query for employee: '+it)
-					data = timeManagerService.getAnnualReportData(period.year, it)
-					annualReportMap.put(it,data)
-				}
-			}
-			*/
 			
 			threads = []
 			employeeList.each{ employee ->
@@ -421,9 +416,6 @@ class SiteController {
 			}
 			threads.each { it.start() }
 			threads.each { it.join() }
-			
-			
-			
 			
 			for (Employee employee:employeeList){
 				criteria = AnnualEmployeeData.createCriteria()
@@ -451,6 +443,7 @@ class SiteController {
 					valueMap << ['remainingCA':String.valueOf(annualReportMap.get(employee).get('remainingCA'))]
 					valueMap << ['annualRTT':String.valueOf(annualReportMap.get(employee).get('annualRTT'))]
 					valueMap << ['annualCSS':String.valueOf(annualReportMap.get(employee).get('annualCSS'))]
+					valueMap << ['annualINJUSTIFIE':String.valueOf(annualReportMap.get(employee).get('annualINJUSTIFIE'))]
 					valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
 					valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
 					valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
@@ -469,8 +462,6 @@ class SiteController {
 			use (TimeCategory){executionTime=new Date()-calendar.time}
 			log.error('execution time: '+executionTime)
 		}
-		
-
 	}
 	
 	def getAjaxSiteData(){
@@ -496,6 +487,7 @@ class SiteController {
 		def siteRemainingCA = 0
 		def siteAnnualRTT = 0
 		def siteAnnualCSS = 0
+		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
@@ -522,6 +514,7 @@ class SiteController {
 				siteRemainingCA += data.get('remainingCA')
 				siteAnnualRTT += data.get('annualRTT')
 				siteAnnualCSS += data.get('annualCSS')
+				siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
 				siteAnnualSickness += data.get('annualSickness')
 				siteAnnualDIF += data.get('annualDIF')
 				siteAnnualExceptionnel += data.get('annualExceptionnel')
@@ -536,59 +529,6 @@ class SiteController {
 		threads.each { it.start() }
 		threads.each { it.join() }
 
-		/*
-				employeeList.each{ employee ->
-			def th = new Thread({
-				log.error('executing query for employee: '+employee)
-			//	data = timeManagerService.getAnnualReportData(period.year, employee)
-			//	annualReportMap.put(employee,data)
-			})
-			threads << th
-			siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
-			siteAnnualTheoritical += data.get('annualTheoritical')
-			siteAnnualTotal += data.get('annualTotal')
-			siteAnnualHoliday += data.get('annualHoliday')
-			siteRemainingCA += data.get('remainingCA')
-			siteAnnualRTT += data.get('annualRTT')
-			siteAnnualCSS += data.get('annualCSS')
-			siteAnnualSickness += data.get('annualSickness')
-			siteAnnualDIF += data.get('annualDIF')
-			siteAnnualExceptionnel += data.get('annualExceptionnel')
-			siteAnnualPaternite += data.get('annualPaternite')
-			siteAnnualPayableSupTime += data.get('annualPayableSupTime') as long
-			siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
-			siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
-			siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')		
-		}
-		threads.each { it.start() }
-		threads.each { it.join() }
-		
-		*/
-		/*
-		GParsExecutorsPool.withPool {
-			 employeeList.iterator().eachParallel {
-				 log.error('executing query for employee: '+it)
-				 data = timeManagerService.getAnnualReportData(period.year, it)
-				 annualReportMap.put(it,data)
-				 siteAnnualEmployeeWorkingDays += data.get('annualEmployeeWorkingDays')
-				 siteAnnualTheoritical += data.get('annualTheoritical')
-				 siteAnnualTotal += data.get('annualTotal')
-				 siteAnnualHoliday += data.get('annualHoliday')
-				 siteRemainingCA += data.get('remainingCA')
-				 siteAnnualRTT += data.get('annualRTT')
-				 siteAnnualCSS += data.get('annualCSS')
-				 siteAnnualSickness += data.get('annualSickness')
-				 siteAnnualDIF += data.get('annualDIF')
-				 siteAnnualExceptionnel += data.get('annualExceptionnel')
-				 siteAnnualPaternite += data.get('annualPaternite')
-				 siteAnnualPayableSupTime += data.get('annualPayableSupTime') as long
-				 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
-				 siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
-				 siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')
-			 }
-		 }
-		 */
-		
 		log.error('employee loop finished')
 		use (TimeCategory){executionTime=new Date()-startDate}
 		log.error('execution time: '+executionTime)
@@ -607,6 +547,7 @@ class SiteController {
 			siteRemainingCA:siteRemainingCA,
 			siteAnnualRTT:siteAnnualRTT,
 			siteAnnualCSS:siteAnnualCSS,
+			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
 			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
@@ -644,6 +585,7 @@ class SiteController {
 				valueMap << ['remainingCA':String.valueOf(annualReportMap.get(employee).get('remainingCA'))]
 				valueMap << ['annualRTT':String.valueOf(annualReportMap.get(employee).get('annualRTT'))]
 				valueMap << ['annualCSS':String.valueOf(annualReportMap.get(employee).get('annualCSS'))]
+				valueMap << ['annualINJUSTIFIE':String.valueOf(annualReportMap.get(employee).get('annualINJUSITIFIE'))]
 				valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
 				valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
 				valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
@@ -656,8 +598,6 @@ class SiteController {
 				annualEmployeeData.save(flush : true)
 			}
 		}
-		
-		
 		render template: "/site/template/siteDetailTableTemplate", model:model
 		return		
 	}
