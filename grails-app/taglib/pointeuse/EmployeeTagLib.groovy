@@ -84,8 +84,12 @@ class EmployeeTagLib {
 		
 	}
 	
-	def fieldUpdatePopup ={attrs,body->		
+	def fieldUpdatePopup = {attrs,body->		
 		out<<render(template:"/employeeDataListMap/template/fieldUpdatePopup",model:[fieldName:attrs.fieldName,type:attrs.type])
+	}
+	
+	def weeklyTime = {attrs,body->		
+		out<<render(template:"/employee/template/listWeeklyTimeTemplate")
 	}
 	
 

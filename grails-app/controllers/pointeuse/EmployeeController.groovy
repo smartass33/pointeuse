@@ -101,14 +101,8 @@ class EmployeeController {
 		if (siteId!=null && !siteId.equals("")){
 			 site = Site.get(params.int('site.id'))
 			 employeeInstanceList = []
-			 /*
-			 for (Function function:functionList){
-				 employeeInstanceList.addAll(Employee.findAllBySiteAndFunction(site,function))
-			 }
-			 */
 			 
 			for (Function function:functionList){
-					// employeeInstanceList.addAll(Employee.findAllByFunctionAndServiceAndSite(function,service,[sort: "lastName", order: "asc"]))
 				for (Service service:serviceList){					 
 					 criteria = Employee.createCriteria()
 					 employeeSubList= criteria.list{
@@ -208,6 +202,130 @@ class EmployeeController {
 		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:calendar.time,maxSize:maxSize]
 	}
 	
+	
+	@Secured(['ROLE_ADMIN'])
+	def weeklyReport(){
+		log.error('weeklyReport called')
+		
+		params.each{i->log.error(i)}
+		def weeklyMap = [:]
+		def criteria
+		def elapsedSeconds = 0
+		def employeeInstanceList
+		def currentDate
+		def calendar = Calendar.instance
+		def fromIndex=params.boolean('fromIndex')
+		def weeklyTotalByEmployee = [:]
+		def weeklyTotalByWeek = [:]
+		def weekList = []
+		def employeeSubList
+		def year
+		
+		 def period = Period.get(params.int('periodId'))
+		 def site = Site.get(params.int('siteId'))
+		 if (period != null){
+			 year = period.year
+		 } else{
+			 period = Period.findByYear(year)
+		 }
+		 if (year == null){
+		 	year = calendar.get(Calendar.YEAR)
+		 }
+		 
+		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
+		def currentYear = year
+		def currentWeek = 0
+		def functionList = Function.list([sort: "ranking", order: "asc"])
+		def serviceList = Service.list([sort: "name", order: "asc"])
+		
+		if (site != null){
+			employeeInstanceList = []
+			for (Function function:functionList){
+				for (Service service:serviceList){
+					 criteria = Employee.createCriteria()
+					 employeeSubList = criteria.list{
+						 and {
+							 eq('function',function)
+							 eq('service',service)
+							 eq('site',site)
+						 }
+						 order('lastName','asc')
+					 }
+					 employeeInstanceList.addAll(employeeSubList)
+				 }
+			 }
+			 
+		}else{
+			employeeInstanceList = []
+			for (Service service:serviceList){
+				for (Function function:functionList){
+					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
+				}
+			}
+				
+		}
+	//	employeeInstanceList = []
+	//	employeeInstanceList.add(Employee.get(2))
+		
+		for (int currentMonth in monthList){	
+			if (currentMonth == 1){
+				currentYear = year + 1
+			}
+			//finding time done during sundays
+			def tmpCal = Calendar.instance
+			tmpCal.set(Calendar.MONTH,currentMonth - 1)
+			tmpCal.set(Calendar.YEAR,currentYear)
+			tmpCal.clearTime()
+			tmpCal.set(Calendar.DATE,1)
+			while(tmpCal.get(Calendar.DAY_OF_MONTH) <= tmpCal.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				if (currentWeek != tmpCal.get(Calendar.WEEK_OF_YEAR)){
+					log.debug('tmpCal.time: '+tmpCal.time)
+					log.debug('tmpCal.get(Calendar.MONTH) + 1: '+(tmpCal.get(Calendar.MONTH) + 1))
+					log.debug('tmpCal.get(Calendar.YEAR): '+tmpCal.get(Calendar.YEAR))
+					currentWeek = tmpCal.get(Calendar.WEEK_OF_YEAR)
+					log.debug('currentWeek: '+currentWeek)
+					criteria = WeeklyTotal.createCriteria()
+					
+					def weeklyTotals = criteria.list {
+						and {
+							eq('month',tmpCal.get(Calendar.MONTH) + 1)
+							eq('year',tmpCal.get(Calendar.YEAR))
+							eq('week',currentWeek)
+							'in'('employee',employeeInstanceList)
+						}
+						order('employee', 'asc')
+					}					
+					weeklyTotalByWeek.put(currentWeek,weeklyTotals)
+					weekList.add(currentWeek)			
+				}
+				tmpCal.roll(Calendar.DAY_OF_YEAR, 1)
+				if (tmpCal.get(Calendar.DAY_OF_MONTH) == tmpCal.getActualMaximum(Calendar.DAY_OF_MONTH))	{
+					log.debug('adding sunday time: '+tmpCal.time)
+					break;
+				}
+			}
+		}	 
+		if (!fromIndex && site == null){
+			flash.message = message(code: 'weeklyTime.site.selection.error')
+			params["fromIndex"]=true
+			redirect(action: "weeklyReport",params:params)
+			return
+		}
+		if (site!=null){
+			render template: "/employee/template/listWeeklyTimeTemplate", 
+			model:[
+				site:site,
+				period:period,
+				weeklyTotalByWeek:weeklyTotalByWeek,
+				weekList:weekList,
+				employeeInstanceList:employeeInstanceList,
+				firstYear:period.year,
+				lastYear:period.year+1
+				]
+			return
+		}
+		[currentDate:calendar.time]
+	}
 	
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
@@ -1794,7 +1912,6 @@ class EmployeeController {
 			myDate = dateFormat.parse(myDate)			
 		}
 			
-		def pppp = params["userId"]	
 		if (userId==null){
 			if (params["userId"] instanceof String)
 				userId = params["userId"]

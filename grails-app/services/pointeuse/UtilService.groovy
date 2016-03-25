@@ -210,12 +210,13 @@ class UtilService  {
 	def getOpenDays(Period period){
 		def openDays=0
 		def startCalendar = Calendar.instance
-		
+		def criteria
 		startCalendar.set(Calendar.YEAR,period.year)
 		startCalendar.set(Calendar.MONTH,5)
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.clearTime()
-
+		def bankHolidayCounter = 0
+		
 		log.warn("getting opened days from: "+startCalendar.time + " until end of year "+period.year)
 		
 		while(startCalendar.get(Calendar.DAY_OF_YEAR) <= startCalendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
@@ -245,7 +246,7 @@ class UtilService  {
 		
 		
 		criteria = BankHoliday.createCriteria()
-		bankHolidayList = criteria.list{
+		def bankHolidayList = criteria.list{
 			
 			or{
 				and {
@@ -375,6 +376,59 @@ class UtilService  {
 				
 			}
 			order('startDate','desc')
+		}
+	}
+	
+	def rollAllYear(Period period){
+		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
+		def year = period.year
+		def currentYear = year
+		def currentWeek = 0
+		def criteria
+		for (int currentMonth in monthList){
+	
+			if (currentMonth == 1){
+				currentYear = year + 1
+			}
+		
+			//finding time done during sundays
+			def tmpCal = Calendar.instance
+			tmpCal.set(Calendar.MONTH,currentMonth - 1)
+			tmpCal.set(Calendar.YEAR,currentYear)
+			tmpCal.clearTime()
+			tmpCal.set(Calendar.DATE,1)
+			
+			log.debug('current month: '+currentMonth)
+			log.debug('current year: ' +currentYear)
+			log.debug('tmpCal: '+tmpCal.time)
+			log.debug('last day of month: '+tmpCal.getActualMaximum(Calendar.DAY_OF_MONTH))
+					
+			while(tmpCal.get(Calendar.DAY_OF_MONTH) <= tmpCal.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				if (currentWeek != tmpCal.get(Calendar.WEEK_OF_YEAR)){
+					log.error('tmpCal.time: '+tmpCal.time)
+					currentWeek = tmpCal.get(Calendar.WEEK_OF_YEAR)
+					
+					criteria = WeeklyTotal.createCriteria()
+					def weeklyTotals = criteria.get {
+						and {
+							eq('month',tmpCal.get(Calendar.MONTH) + 1)
+							eq('year',tmpCal.get(Calendar.YEAR))
+							eq('week',tmpCal.get(tmpCal.get(Calendar.WEEK_OF_YEAR)))
+						}
+					}
+				}
+				
+				log.debug('tmpCal: '+tmpCal.time)
+				if (tmpCal.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY && tmpCal.get(Calendar.MONTH) == currentMonth - 1){
+					log.debug("sunday: "+tmpCal.time)
+				}
+				tmpCal.roll(Calendar.DAY_OF_YEAR, 1)
+				if (tmpCal.get(Calendar.DAY_OF_MONTH) == tmpCal.getActualMaximum(Calendar.DAY_OF_MONTH))	{
+					log.debug('adding sunday time: '+tmpCal.time)
+					break;
+				}
+			}
+
 		}
 	}
 }
