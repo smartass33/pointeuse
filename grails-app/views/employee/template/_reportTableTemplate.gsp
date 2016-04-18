@@ -1,5 +1,6 @@
 <%@ page import="org.codehaus.groovy.grails.plugins.web.taglib.JavascriptValue"%>
 <%@ page import="pointeuse.Employee"%>
+<%@ page import="pointeuse.Site"%>
 <%@ page import="pointeuse.InAndOut"%>
 <%@ page import="pointeuse.AbsenceType"%>
 <%@ page import="pointeuse.MonthlyTotal"%>
@@ -10,6 +11,7 @@
 	<table  border="1" style="table-layout: fixed;" id="reportTable" >
 	    <thead>
 	      <th>${message(code: 'report.table.date.label', default: 'report')}</th>
+	      <th>localisation</th>
 	      <th>${message(code: 'report.table.daily.total.label', default: 'report')}</th>
 	      <th>${message(code: 'report.table.HS.label', default: 'report')}</th>
 	      <th>${message(code: 'report.table.absence.label', default: 'report')}</th>
@@ -32,27 +34,65 @@
 								<td style="width:120px;" class="eventTD"><font size="2"><i>${entries.key.format('E dd MMM')}</i></font></td>						
 		                   </g:else>
 	                  </g:else>
-	                  <g:if
-	                    test="${dailyTotalMap.get(entries.key) !=null}">
-	                    <td class="eventTD"><font size="2">${dailyTotalMap.get(entries.key)}</font></td>
+	                  <g:if test="${dailyTotalMap.get(entries.key) != null}">
+	                    <g:if test="${dailyTotalMap.get(entries.key).site != null}">
+	                    	<td class="eventTD">
+	                    		
+	                    		<g:select style='width:110px'
+			                          onchange="${remoteFunction(action:'modifySite', update:'report_table_div', 
+												  params:'\'employeeId=' + employee.id 						  
+												  + '&day=' + entries.key.format("dd/MM/yyyy")	
+												  +	'&month=' + entries.key.format("dd/MM/yyyy")	
+												  + '&year=' + entries.key.format("dd/MM/yyyy")
+												  + '&updatedSite=\' + this.value'								  
+												  )}"
+			                          name="dailySite" from="${Site.list()}"
+			                          noSelection="${['':(dailyTotalMap.get(entries.key)).site]}" />
+	                    	</td>
+	                    </g:if>
+	                    <g:else>
+	                    	<td class="eventTD">
+       			                    		<g:select style='width:110px'
+			                          onchange="${remoteFunction(action:'modifySite', update:'report_table_div', 
+												  params:'\'employeeId=' + employee.id 						  
+												  + '&day=' + entries.key.format("dd/MM/yyyy")	
+												  +	'&month=' + entries.key.format("dd/MM/yyyy")	
+												  + '&year=' + entries.key.format("dd/MM/yyyy")
+												  + '&updatedSite=\' + this.value'								  
+												  )}"
+			                          name="dailySite" from="${Site.list()}"
+			                          noSelection="${['':employee.site]}" />
+	                    	</td>	                    
+	                    </g:else>
+	                    <td class="eventTD"><font size="2"><my:humanTimeTD id="dailyTotalTime"  name="dailyTotalTime" value="${dailyTotalMap.get(entries.key).elapsedSeconds}"/></font></td>
 	                  </g:if>
 	                  <g:else>
-	                    <td class="eventTD"><font size="2">00:00</font></td>
+	                  	<td class="eventTD">
+                 			 <g:select style='width:110px'
+								onchange="${remoteFunction(action:'modifySite', update:'report_table_div', 
+												  params:'\'employeeId=' + employee.id 						  
+												  + '&day=' + entries.key.format("dd/MM/yyyy")	
+												  +	'&month=' + entries.key.format("dd/MM/yyyy")	
+												  + '&year=' + entries.key.format("dd/MM/yyyy")
+												  + '&updatedSite=\' + this.value'								  
+												  )}"
+							  name="dailySite" from="${Site.list()}"
+	                          noSelection="${['':employee.site]}" />
+	                  	</td>	
+	                    <td class="eventTD"><font size="2"><my:humanTimeTD id="dailyTotalTime"  name="dailyTotalTime" value="0"/></font></td>
 	                  </g:else>
 	                  <td class="eventTD"><font size="2"> 
 	                  <g:if test="${employee.weeklyContractTime==35}">
 	                        <g:if
 	                          test="${weeklySupTotal.get(employee) != null && weeklySupTotal.get(employee).get(day.key) !=null}">
-	                          <g:if
-	                            test="${dailySupTotalMap.get(entries.key) !=null}">
-	                            ${dailySupTotalMap.get(entries.key)}
+	                          <g:if test="${dailySupTotalMap.get(entries.key) !=null}">
+	                          	<my:humanTimeTD id="dailySupTotalMap"  name="dailySupTotalMap" value="${dailySupTotalMap.get(entries.key)}"/>    
 	                          </g:if>
 	                        </g:if>
 	                      </g:if> 
 	                      <g:else>
-	                        <g:if
-	                          test="${dailySupTotalMap.get(entries.key) !=null}">
-	                          ${dailySupTotalMap.get(entries.key)}
+	                        <g:if test="${dailySupTotalMap.get(entries.key) !=null}">
+	                          	<my:humanTimeTD id="dailySupTotalMap"  name="dailySupTotalMap" value="${dailySupTotalMap.get(entries.key)}"/>    
 	                        </g:if>
 	                      </g:else>
 	                  </font></td>             

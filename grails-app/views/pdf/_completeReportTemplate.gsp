@@ -409,10 +409,11 @@
 		<BR/><BR/>
 		<table  id="reportTable" style="border:1px solid black;width:690px;text-align:left;font-weight:bold;">
 		    <thead>
-		      <th style="border:1px; solid black; width:92px;text-align:center">${message(code: 'report.table.date.label', default: 'report')}</th>
-		      <th style="border:1px;width:62px;text-align:center">${message(code: 'report.table.daily.total.label', default: 'report')}</th>
-		      <th style="border:1px;width:32px;text-align:center">${message(code: 'report.table.HS.label', default: 'report')}</th>
-		      <th style="border:1px;width:48px;text-align:center">${message(code: 'report.table.absence.label', default: 'report')}</th>
+		      <th style="border:1px; solid black; width:100px;text-align:center">${message(code: 'report.table.date.label', default: 'report')}</th>
+		      <th style="border:1px;width:150px;text-align:center">${message(code: 'employee.site.label', default: 'report')}</th>
+		      <th style="border:1px;width:70px;text-align:center">${message(code: 'report.table.daily.total.label', default: 'report')}</th>    
+		      <th style="border:1px;width:40px;text-align:center">${message(code: 'report.table.HS.label', default: 'report')}</th>
+		      <th style="border:1px;width:55x;text-align:center">${message(code: 'report.table.absence.label', default: 'report')}</th>
 		      <th style="border:1px;width:400px;text-align:center">${message(code: 'events.label', default: 'report')}</th>
 		    </thead>	    
 		</table>		
@@ -428,16 +429,29 @@
 						                <g:if test="${entries.key.getAt(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY}"><td style="border:1px;width:100px;font-weight:bold;text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td></g:if>
 						                <g:else><td style="border:1px;width:100px;text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td></g:else>		                
 						          	</g:else>          		
-					                <g:if test="${dailyTotalMap.get(entries.key) !=null}">		
-						                <td style="border:1px;width:70px">          
-											${dailyTotalMap.get(entries.key)}                  	
+					                <g:if test="${dailyTotalMap.get(entries.key) !=null}">	
+					                	<g:if test="${dailyTotalMap.get(entries.key).site != null}">
+							                <td style="border:1px;width:80px">  
+							                	${dailyTotalMap.get(entries.key).site}      											                  	
+									         </td>		
+									     </g:if>
+								         <g:else>
+							                <td style="border:1px;width:80px">  
+							                	${employee.site.name}        											                  	
+									         </td>								         
+								         </g:else>			                
+						                <td style="border:1px;width:70px"> 
+						                	${dailyTotalTextMap.get(entries.key)} 											                  	
 								         </td>
 					                </g:if>
-				                	<g:else><td style="border:1px;width:70px">00:00</td></g:else>
+				                	<g:else>
+				                		<td style="border:1px;width:100px">${employee.site.name}</td>
+				                		<td style="border:1px;width:70px">00:00</td>
+				                	</g:else>
 				                  	<g:if test="${weeklySupTotal.get(employee) != null && weeklySupTotal.get(employee).get(day.key) !=null}">
-				                    	<g:if test="${dailySupTotalMap.get(entries.key) !=null}">
+				                    	<g:if test="${dailySupTotalTextMap.get(entries.key) !=null}">
 				                            <td style="border:1px;width:40px">
-				                            	${dailySupTotalMap.get(entries.key)}
+				                            	${dailySupTotalTextMap.get(entries.key)}
 				                            </td>
 				                         </g:if>
 					                    <g:else>

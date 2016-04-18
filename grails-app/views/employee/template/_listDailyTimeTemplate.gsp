@@ -4,6 +4,7 @@
 	<thead>
 		<tr>
 			<th style="width:90px;text-align:center">${message(code: 'employee.lastName.label', default: 'Report')}</th>
+			<th style="width:120px;text-align:center">${message(code: 'employee.site.localisation', default: 'Report')}</th>
 			<th style="width:120px;text-align:center">${message(code: 'employee.function.label', default: 'Report')}</th>
 			<th style="width:120px;text-align:center">${message(code: 'service.label', default: 'Report')}</th>
 			<th style="width:90px;text-align:center">${message(code: 'employee.daily.time.short', default: 'Report')}</th>
@@ -14,6 +15,7 @@
 		<g:each in="${dailyMap}" status="i" var="entry">
 			<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
 				<td style="width:90px;text-align:center;valign:middle;">${entry.key.lastName}<BR>${entry.key.firstName}</td>
+				<td style="width:120px;text-align:center;valign:middle;">${(localisationMap.get(entry.key))}</td>
 				<td style="width:120px;text-align:center;valign:middle;">${entry.key.function.name}</td>
 				<td style="width:120px;text-align:center;valign:middle;">${entry.key.service.name}</td>
 				<td style="width:90px;text-align:center"><my:humanTimeTD id="dailyTime"  name="dailyTime" value="${entry.value}"/><BR>(HS:<my:humanTimeTD id="supTime"  name="supTime" value="${dailySupMap.get(entry.key)}"/>)</td>				

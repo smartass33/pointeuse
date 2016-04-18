@@ -13,6 +13,7 @@ class DailyTotal {
 	Employee employee
 	int entryCount
 	int exitCount
+	Site site
 	WeeklyTotal weeklyTotal
 	static hasMany = [inAndOuts:InAndOut]
 	static belongsTo = [weeklyTotal:WeeklyTotal]
@@ -27,6 +28,11 @@ class DailyTotal {
 		this.elapsedSeconds=0
 		this.entryCount=1
 		this.inAndOuts=[]
+		this.site = null
+	}
+	static constraints = {
+		site nullable:true
+		site blank: true
 	}
 	
 	String toString(){

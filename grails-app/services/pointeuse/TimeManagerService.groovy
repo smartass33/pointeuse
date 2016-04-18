@@ -1580,6 +1580,8 @@ class TimeManagerService {
 			weeklySupTotal:data.get('weeklySupTotalTimeByEmployee'),
 			dailySupTotalMap:data.get('dailySupTotalMap'),
 			dailyTotalMap:data.get('dailyTotalMap'),
+			dailySupTotalTextMap:data.get('dailySupTotalTextMap'),
+			dailyTotalTextMap:data.get('dailyTotalTextMap'),
 			holidayMap:data.get('holidayMap'),
 			month:month,
 			year:year,
@@ -3036,10 +3038,7 @@ class TimeManagerService {
 		supTime.save(flush: true)
 		endDate = new Date()
 		use (TimeCategory){executionTime=endDate-startDate}
-	//	log.error('computeWeeklyTotals executed in '+executionTime+' for employee: '+employee.lastName)
-		
-		//log.error('timeBefore7 for month and year: '+timeBefore7+', month: '+month+',year: '+year)
-		//log.error('timeAfter20 for month and year: '+timeAfter20+', month: '+month+',year: '+year)
+
 		return [
 			timeBefore7:timeBefore7,
 			timeAfter20:timeAfter20,
@@ -3090,6 +3089,8 @@ class TimeManagerService {
 		def weeklyTotalTimeByEmployee = [:]
 		def dailyTotalMap = [:]
 		def dailySupTotalMap = [:]
+		def dailyTotalTextMap = [:]
+		def dailySupTotalTextMap = [:]
 		def dailyBankHolidayMap = [:]
 		def holidayMap = [:]
 		def weeklyAggregate = [:]
@@ -3141,7 +3142,7 @@ class TimeManagerService {
 				
 				weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), getTimeAsText(computeHumanTime(weeklyTotal),false))
 			
-				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
+				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR) == lastWeekParam.get(0) ){
 					weeklySupTime = 0
 				}else{
 					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
@@ -3157,12 +3158,12 @@ class TimeManagerService {
 			}
 			// daily total is null. Still, we need to check if supplementary time exists within the week
 			if (dailyTotal==null && calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
-				if (calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
+				if (calendarLoop.get(Calendar.WEEK_OF_YEAR) == lastWeekParam.get(0) ){
 					weeklySupTime = 0
 				}else{
 					weeklySupTime = computeSupplementaryTime(employee,calendarLoop.get(Calendar.WEEK_OF_YEAR), calendarLoop.get(Calendar.YEAR))
 				}
-					weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),getTimeAsText(computeHumanTime(Math.round(weeklySupTime)),false))
+				weeklySuppTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR),getTimeAsText(computeHumanTime(Math.round(weeklySupTime)),false))
 				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
 					monthlySupTime += weeklySupTime
 					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
@@ -3182,19 +3183,27 @@ class TimeManagerService {
 			}
 			// put in a map in and outs
 			def tmpDate = calendarLoop.time
-			if 	(entriesByDay.size()>0){
-				if (dailyTotal!=null){
-					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(dailySeconds),false))
-					dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)),false))
+			if 	(entriesByDay.size() > 0){
+				if (dailyTotal != null){
+					dailyTotalMap.put(tmpDate, dailyTotal)//dailySeconds)
+					dailySupTotalMap.put(tmpDate, Math.max(dailySeconds-DailyTotal.maxWorkingTime,0))
+					dailyTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(dailySeconds),false))
+					dailySupTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)),false))
+
 				}else {
-					dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
-					dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)),false))
+					dailyTotalMap.put(tmpDate,null)// 0)
+					dailySupTotalMap.put(tmpDate, Math.max(dailySeconds-DailyTotal.maxWorkingTime,0))
+					dailyTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
+					dailySupTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)),false))
+
 				}
 				mapByDay.put(tmpDate, entriesByDay)
 			}
 			else{
-				dailyTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
-				dailySupTotalMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
+				dailyTotalMap.put(tmpDate,null)//, 0)
+				dailySupTotalMap.put(tmpDate, 0)
+				dailyTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
+				dailySupTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
 				mapByDay.put(tmpDate, null)
 			}
 			
@@ -3271,11 +3280,9 @@ class TimeManagerService {
 
 		supTime.save(flush: true)
 		endDate = new Date()
-		use (TimeCategory){executionTime=endDate-startDate}
+		use (TimeCategory){executionTime = endDate - startDate}
 		log.debug('computeWeeklyTotals executed in '+executionTime+' for employee: '+employee.lastName)
-		
-		//log.error('timeBefore7 for month and year: '+timeBefore7+', month: '+month+',year: '+year)
-		//log.error('timeAfter20 for month and year: '+timeAfter20+', month: '+month+',year: '+year)
+
 		return [
 			timeBefore7:timeBefore7,
 			timeAfter20:timeAfter20,
@@ -3289,6 +3296,8 @@ class TimeManagerService {
 			weeklyTotalTimeByEmployee:weeklyTotalTimeByEmployee,
 			dailyTotalMap:dailyTotalMap,
 			dailySupTotalMap:dailySupTotalMap,
+			dailyTotalTextMap:dailyTotalTextMap,
+			dailySupTotalTextMap:dailySupTotalTextMap,
 			dailyBankHolidayMap:dailyBankHolidayMap,
 			holidayMap:holidayMap,
 			weeklyAggregate:weeklyAggregate,

@@ -78,6 +78,8 @@ class EmployeeController {
 		def inAndOutsForEmployee = []
 		def inAndOutsForEmployeeMap = [:]
 		def employeeSubList 
+		def localisationMap = [:]
+		
 		
 		if (!fromIndex && (siteId == null || siteId.size() == 0)){
 			flash.message = message(code: 'ecart.site.selection.error')
@@ -98,40 +100,130 @@ class EmployeeController {
 		def functionList = Function.list([sort: "ranking", order: "asc"])
 		def serviceList = Service.list([sort: "name", order: "asc"])
 		
-		if (siteId!=null && !siteId.equals("")){
+		if (siteId != null && !siteId.equals("")){
 			 site = Site.get(params.int('site.id'))
 			 employeeInstanceList = []
+			 
+			 def foreignEmployees = []
+			 def foreignEmployeesIds = []
+			 criteria = DailyTotal.createCriteria()
+			 
+			 def dailyTotals = criteria.list{
+				 and {
+					 eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+					 eq('month',calendar.get(Calendar.MONTH)+1)
+					 eq('year',calendar.get(Calendar.YEAR))
+					 eq('site',site)
+				 }
+			 }
+			 for (DailyTotal dailyTotalIter : dailyTotals){
+				 if (dailyTotalIter.site != null && dailyTotalIter.site != dailyTotalIter.employee.site){
+					 foreignEmployees.add(dailyTotalIter.employee)
+					 foreignEmployeesIds.add(dailyTotalIter.employee.id)
+					 localisationMap.put(dailyTotalIter.employee,site)
+				 }
+			 }
+			 
+			 for (Function function:functionList){
+				 for (Service service:serviceList){
+					  criteria = Employee.createCriteria()
+					  
+					  if (foreignEmployeesIds != null && foreignEmployeesIds.size() > 0){
+						  employeeSubList = criteria.list{
+							  or{
+								  
+								  and {
+									  eq('function',function)
+									  eq('service',service)
+									  eq('site',site)
+								  }
+								  
+								  and {
+									  eq('function',function)
+									  eq('service',service)
+									  'in'("id",foreignEmployeesIds)
+								  }
+								  order('lastName','asc')
+							  }
+						  }
+					  }
+					  else{
+						  employeeSubList = criteria.list{
+							  or{
+								  and {
+									  eq('function',function)
+									  eq('service',service)
+									  eq('site',site)
+								  }
+								  order('lastName','asc')
+							  }
+						  }
+						  
+					  }
+					  employeeInstanceList.addAll(employeeSubList)
+				 }
+							  
+			 }
+
+			 /*
 			 
 			for (Function function:functionList){
 				for (Service service:serviceList){					 
 					 criteria = Employee.createCriteria()
-					 employeeSubList= criteria.list{
-						 and {
-							 eq('function',function)
-							 eq('service',service)
-							 eq('site',site)
+					 
+					 if (foreignEmployeesIds != null && foreignEmployeesIds.size() > 0){
+						 employeeSubList = criteria.list{
+							// or{
+								 
+								 and {
+									 eq('function',function)
+									 eq('service',service)
+									 eq('site',site)
+								 }
+								 
+								 and {
+									 eq('function',function)
+									 eq('service',service)
+									 'in'("id",foreignEmployeesIds)
+								 }							 
+								 order('lastName','asc')							 
+							// }
 						 }
-						 order('lastName','asc')
 					 }
-					 employeeInstanceList.addAll(employeeSubList)					 
-				 }
-			 }
+					 else{
+						 employeeSubList = criteria.list{
+							 or{
+								 and {
+									 eq('function',function)
+									 eq('service',service)
+									 eq('site',site)
+								 }
+								 order('lastName','asc')								 
+							 }
+						 }
+						 
+					 }
+					 employeeInstanceList.addAll(employeeSubList)
+				}
+							 
+			}
+		*/
+		//	employeeInstanceList = []
+			//def myNewEmployeeList = []
+
 			 
 		}else{
-		
-			//employeeInstanceList = Employee.findAll("from Employee")
 			employeeInstanceList = []
 			for (Service service:serviceList){
 				for (Function function:functionList){
 					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
 				}
 			}
-				
 		}
 		for (Employee employee:employeeInstanceList){	
 			inAndOutsForEmployee = []
 			criteria = DailyTotal.createCriteria()
-			dailyTotal= criteria.get{
+			dailyTotal = criteria.get{
 				and {
 					eq('employee',employee)
 					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
@@ -139,6 +231,15 @@ class EmployeeController {
 					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
 				}				
 			}
+			
+			if (dailyTotal != null && dailyTotal.site != null && dailyTotal.site != site){
+				def tmpSite = Site.findByName(dailyTotal.site.name)
+				localisationMap.put(employee,tmpSite)
+			}else{
+				localisationMap.put(employee,site)
+			}
+			
+			
 			criteria = InAndOut.createCriteria()			
 			inAndOutList = criteria.list{
 				and {
@@ -177,7 +278,9 @@ class EmployeeController {
 			}else{
 				dailySupMap.put(employee,0)
 			}
-			dailyMap.put(employee,elapsedSeconds)
+			if (dailyTotal != null && (dailyTotal.site == site || dailyTotal.site == null)){
+				dailyMap.put(employee,elapsedSeconds)
+			}
 			
 			inAndOutsForEmployeeMap.put(employee,inAndOutsForEmployee)
 		}		
@@ -195,6 +298,7 @@ class EmployeeController {
 				site:site,
 				dailySupMap:dailySupMap,
 				dailyInAndOutMap:dailyInAndOutMap,
+				localisationMap:localisationMap,
 				maxSize:maxSize]
 			return	
 		}
@@ -1368,7 +1472,7 @@ class EmployeeController {
 				}else{
 					absence.type=updatedSelection
 					
-					if (absence.month<6){
+					if (absence.month < 6){
 						absence.period=Period.findByYear(absence.year-1)
 					}else{
 						absence.period=Period.findByYear(absence.year)
@@ -1426,6 +1530,48 @@ class EmployeeController {
 		render template: "/employee/template/cartoucheTemplate", model:model
 		return
 	}
+	
+	
+	def modifySite(){
+		log.error('modifySite called')
+		def employee = Employee.get(params.int('employeeId'))
+		def siteName = params["updatedSite"].toString()
+		def day = params["day"]
+		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
+		Date date = dateFormat.parse(day)
+		def cal = Calendar.instance
+		def criteria
+		def dailyTotal
+		def site
+		cal.time = date	
+		if (siteName != null && siteName.size() > 0 && !siteName.equals('')){
+			site  = Site.findByName(siteName)
+			if (site!= null){
+				criteria = DailyTotal.createCriteria()
+				
+				// get cumul holidays
+				dailyTotal = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('year',cal.get(Calendar.YEAR))
+						eq('month',cal.get(Calendar.MONTH) + 1)
+						eq('day',cal.get(Calendar.DAY_OF_MONTH))
+					}
+				}
+				if (dailyTotal != null){
+					dailyTotal.site = site
+					dailyTotal.save(flush: true)
+				}
+			}
+		}
+		
+		
+		
+		def report = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR))
+		render template: "/employee/template/reportTableTemplate", model: report	
+		return
+	}
+	
 	
 	def addingEventToEmployee(){
 		def cal = Calendar.instance	
