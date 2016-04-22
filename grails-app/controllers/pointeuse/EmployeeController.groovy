@@ -371,6 +371,69 @@ class EmployeeController {
 	//	employeeInstanceList = []
 	//	employeeInstanceList.add(Employee.get(2))
 		
+		def rollingCal = Calendar.instance
+		rollingCal.set(Calendar.MONTH,5)
+		rollingCal.set(Calendar.DAY_OF_MONTH,1)
+		rollingCal.set(Calendar.YEAR,currentYear)
+		rollingCal.clearTime()
+		
+		def lastWeekOfYear = rollingCal.getActualMaximum(Calendar.WEEK_OF_YEAR)
+		log.error('lastWeekOfYear: '+lastWeekOfYear)
+		
+		def firstWeek = rollingCal.get(Calendar.WEEK_OF_YEAR)
+		log.error('firstWeek: '+firstWeek)
+		
+		def weekNumber = []
+		for (int i = firstWeek; i <= lastWeekOfYear;i++){
+			weekNumber.add(i)
+		}
+
+		
+		def endOfPeriodCal =  Calendar.instance
+		endOfPeriodCal.set(Calendar.MONTH,4)
+		endOfPeriodCal.set(Calendar.DAY_OF_MONTH,endOfPeriodCal.getActualMaximum(Calendar.DAY_OF_MONTH))
+		endOfPeriodCal.set(Calendar.YEAR,currentYear + 1)
+		endOfPeriodCal.clearTime()
+		
+		for (int j = 1; j <= endOfPeriodCal.get(Calendar.WEEK_OF_YEAR);j++){
+			weekNumber.add(j)
+		}
+		log.error(weekNumber)
+		
+		def iteratorYear = currentYear
+		for (week in weekNumber){
+			if (week < firstWeek){
+				iteratorYear = currentYear + 1
+			}
+			criteria = WeeklyTotal.createCriteria()
+			def weeklyTotals = criteria.list {
+					and {
+						eq('year',currentYear)
+						eq('week',week)
+						'in'('employee',employeeInstanceList)
+					}
+			
+				order('employee', 'asc')
+			}
+			weeklyTotalByWeek.put(week,weeklyTotals)
+			weekList.add(week)		
+		}
+		/*
+		while(rollingCal.get(Calendar.WEEK_OF_YEAR) <= rollingCal.getActualMaximum(Calendar.WEEK_OF_YEAR)){
+			
+			log.error('rollingCal: '+rollingCal.time)
+			rollingCal.roll(Calendar.WEEK_OF_YEAR, 1)
+			
+			
+			if (rollingCal.get(Calendar.WEEK_OF_YEAR) == rollingCal.getActualMaximum(Calendar.WEEK_OF_YEAR))	{
+				log.error('weeks are identical, skipping: '+rollingCal.time)
+				
+				break;
+			}
+		}
+		*/
+		
+		/*
 		for (int currentMonth in monthList){	
 			if (currentMonth == 1){
 				currentYear = year + 1
@@ -391,12 +454,14 @@ class EmployeeController {
 					criteria = WeeklyTotal.createCriteria()
 					
 					def weeklyTotals = criteria.list {
-						and {
-							eq('month',tmpCal.get(Calendar.MONTH) + 1)
-							eq('year',tmpCal.get(Calendar.YEAR))
-							eq('week',currentWeek)
-							'in'('employee',employeeInstanceList)
-						}
+						
+							and {
+								eq('month',tmpCal.get(Calendar.MONTH) + 1)
+								eq('year',tmpCal.get(Calendar.YEAR))
+								eq('week',currentWeek)
+								'in'('employee',employeeInstanceList)
+							}
+					
 						order('employee', 'asc')
 					}					
 					weeklyTotalByWeek.put(currentWeek,weeklyTotals)
@@ -409,6 +474,28 @@ class EmployeeController {
 				}
 			}
 		}	 
+		*/
+		def weeklyTotalsByWeek = [:]
+		for (int weekIter in weekList){
+			def weeklyTotalsByEmployee = [:]
+			for (Employee currentEmployee in employeeInstanceList){
+				
+				for (WeeklyTotal weeklyTotal in weeklyTotalByWeek.get(weekIter)){
+					if (weeklyTotal.employee == currentEmployee){
+						if (weeklyTotalsByEmployee.get(currentEmployee) == null){
+							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotal.elapsedSeconds as long)
+						}else{
+							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + weeklyTotal.elapsedSeconds as long)
+						}
+						weeklyTotalsByWeek.put(weekIter,weeklyTotalsByEmployee)
+						
+					}
+				}
+				
+			}
+			
+		}
+		
 		if (!fromIndex && site == null){
 			flash.message = message(code: 'weeklyTime.site.selection.error')
 			params["fromIndex"]=true
@@ -421,6 +508,7 @@ class EmployeeController {
 				site:site,
 				period:period,
 				weeklyTotalByWeek:weeklyTotalByWeek,
+				weeklyTotalsByWeek:weeklyTotalsByWeek,
 				weekList:weekList,
 				employeeInstanceList:employeeInstanceList,
 				firstYear:period.year,
@@ -1911,6 +1999,8 @@ class EmployeeController {
 				render(view: "report", model: retour)
 			}
 			timeManagerService.timeModification( idList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
+			
+			
 				// now, find if employee still has errors:			
 			if (fromRegularize){
 				redirect(action: "pointage", id: employee.id)
@@ -2198,11 +2288,6 @@ class EmployeeController {
 				def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('pregnancyCredit'))
 				def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyTheoritical'))
 				def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyPregnancyCredit'))
-			
-				
-				//def yearlyActualTotal = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyActualTotal'))
-				
-				
 				def payableSupTime = timeManagerService.computeHumanTime(Math.round(monthlySupTime))
 				def payableCompTime = timeManagerService.computeHumanTime(0)
 				def currentContract = cartoucheTable.get('currentContract')

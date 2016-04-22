@@ -262,6 +262,8 @@ class TimeManagerService {
 		getDailyTotalWithMonth(inOrOut.dailyTotal)
 		
 		utilService.removeAbsence( employee, calendar)
+		//computeWeeklyTotals( employee,  calendar.get(Calendar.MONTH) + 1,  calendar.get(Calendar.YEAR))
+		
 		//employee.status=type.equals("S")?false:true
 	}
 		
@@ -388,13 +390,19 @@ class TimeManagerService {
 				inOrOut.regularizationType=fromRegularize ? InAndOut.MODIFIEE_SALARIE : InAndOut.MODIFIEE_ADMIN
 				inOrOut.systemGenerated=false
 				
+				
 				if (user!=null){
 					inOrOut.modifyingUser=user
 					inOrOut.modifyingTime=new Date()
 					log.debug("user "+user?.username+" modified "+inOrOut)
 				}
+				inOrOut.save(flush:true)
+				
+				computeWeeklyTotals( employee, calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR))
+					
 			}
 		}
+		
 	}
 	
 	def openDaysBetweenDates(Date startDate,Date endDate){
@@ -3141,6 +3149,20 @@ class TimeManagerService {
 				}
 				
 				weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), getTimeAsText(computeHumanTime(weeklyTotal),false))
+				def weeklyTotalCriteria = WeeklyTotal.createCriteria()
+				def weeklyTotalInstance = weeklyTotalCriteria.get {
+					and {
+						eq('employee',employee)
+						eq('year',calendarLoop.get(Calendar.YEAR))
+						eq('month',calendarLoop.get(Calendar.MONTH)+1)
+						eq('week',calendarLoop.get(Calendar.WEEK_OF_YEAR))
+						
+					}
+				}
+				if (weeklyTotalInstance != null){
+					weeklyTotalInstance.elapsedSeconds=weeklyTotal
+					weeklyTotalInstance.save(flush:true,failOnError:true)
+				}
 			
 				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR) == lastWeekParam.get(0) ){
 					weeklySupTime = 0
@@ -3254,6 +3276,8 @@ class TimeManagerService {
 			monthlyTotal.supplementarySeconds=monthlySupTime
 			monthlyTotal.save(flush:true,failOnError:true)
 		}
+		
+		
 		
 		
 		//here, we can proceed to the creation, or update of the SupplementaryTime object

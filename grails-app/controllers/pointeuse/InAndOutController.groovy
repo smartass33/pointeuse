@@ -86,7 +86,7 @@ class InAndOutController {
 		calendar.set(Calendar.MINUTE,minute)
 		calendar.set(Calendar.SECOND,second)	
 		def today = Calendar.instance
-		if(calendar.time>today.time){
+		if(calendar.time > today.time){
 			flash.message = message(code: 'inAndOut.in.futur.error')
 			if (fromReport){
 				redirect(action: "report", controller:"employee", id: employeeId, params:[userId:employeeId,myDate:instanceDate.format('dd/MM/yyyy')])
