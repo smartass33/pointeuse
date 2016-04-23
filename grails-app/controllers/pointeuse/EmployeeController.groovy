@@ -368,8 +368,9 @@ class EmployeeController {
 			}
 				
 		}
-	//	employeeInstanceList = []
-	//	employeeInstanceList.add(Employee.get(2))
+		//employeeInstanceList = []
+		//employeeInstanceList.add(Employee.get(48))
+		
 		
 		def rollingCal = Calendar.instance
 		rollingCal.set(Calendar.MONTH,5)
@@ -378,10 +379,10 @@ class EmployeeController {
 		rollingCal.clearTime()
 		
 		def lastWeekOfYear = rollingCal.getActualMaximum(Calendar.WEEK_OF_YEAR)
-		log.error('lastWeekOfYear: '+lastWeekOfYear)
+		//log.error('lastWeekOfYear: '+lastWeekOfYear)
 		
 		def firstWeek = rollingCal.get(Calendar.WEEK_OF_YEAR)
-		log.error('firstWeek: '+firstWeek)
+		//log.error('firstWeek: '+firstWeek)
 		
 		def weekNumber = []
 		for (int i = firstWeek; i <= lastWeekOfYear;i++){
@@ -398,18 +399,23 @@ class EmployeeController {
 		for (int j = 1; j <= endOfPeriodCal.get(Calendar.WEEK_OF_YEAR);j++){
 			weekNumber.add(j)
 		}
-		log.error(weekNumber)
+		
 		
 		def iteratorYear = currentYear
 		for (week in weekNumber){
 			if (week < firstWeek){
 				iteratorYear = currentYear + 1
 			}
+			//log.error('iteratorYear: '+iteratorYear)
+			//log.error('currentYear: '+currentYear)
+			
+			//log.error('week: '+week)
 			criteria = WeeklyTotal.createCriteria()
 			def weeklyTotals = criteria.list {
 					and {
-						eq('year',currentYear)
+						eq('year',iteratorYear)
 						eq('week',week)
+						
 						'in'('employee',employeeInstanceList)
 					}
 			
@@ -418,68 +424,11 @@ class EmployeeController {
 			weeklyTotalByWeek.put(week,weeklyTotals)
 			weekList.add(week)		
 		}
-		/*
-		while(rollingCal.get(Calendar.WEEK_OF_YEAR) <= rollingCal.getActualMaximum(Calendar.WEEK_OF_YEAR)){
-			
-			log.error('rollingCal: '+rollingCal.time)
-			rollingCal.roll(Calendar.WEEK_OF_YEAR, 1)
-			
-			
-			if (rollingCal.get(Calendar.WEEK_OF_YEAR) == rollingCal.getActualMaximum(Calendar.WEEK_OF_YEAR))	{
-				log.error('weeks are identical, skipping: '+rollingCal.time)
-				
-				break;
-			}
-		}
-		*/
-		
-		/*
-		for (int currentMonth in monthList){	
-			if (currentMonth == 1){
-				currentYear = year + 1
-			}
-			//finding time done during sundays
-			def tmpCal = Calendar.instance
-			tmpCal.set(Calendar.MONTH,currentMonth - 1)
-			tmpCal.set(Calendar.YEAR,currentYear)
-			tmpCal.clearTime()
-			tmpCal.set(Calendar.DATE,1)
-			while(tmpCal.get(Calendar.DAY_OF_MONTH) <= tmpCal.getActualMaximum(Calendar.DAY_OF_MONTH)){
-				if (currentWeek != tmpCal.get(Calendar.WEEK_OF_YEAR)){
-					log.debug('tmpCal.time: '+tmpCal.time)
-					log.debug('tmpCal.get(Calendar.MONTH) + 1: '+(tmpCal.get(Calendar.MONTH) + 1))
-					log.debug('tmpCal.get(Calendar.YEAR): '+tmpCal.get(Calendar.YEAR))
-					currentWeek = tmpCal.get(Calendar.WEEK_OF_YEAR)
-					log.debug('currentWeek: '+currentWeek)
-					criteria = WeeklyTotal.createCriteria()
-					
-					def weeklyTotals = criteria.list {
-						
-							and {
-								eq('month',tmpCal.get(Calendar.MONTH) + 1)
-								eq('year',tmpCal.get(Calendar.YEAR))
-								eq('week',currentWeek)
-								'in'('employee',employeeInstanceList)
-							}
-					
-						order('employee', 'asc')
-					}					
-					weeklyTotalByWeek.put(currentWeek,weeklyTotals)
-					weekList.add(currentWeek)			
-				}
-				tmpCal.roll(Calendar.DAY_OF_YEAR, 1)
-				if (tmpCal.get(Calendar.DAY_OF_MONTH) == tmpCal.getActualMaximum(Calendar.DAY_OF_MONTH))	{
-					log.debug('adding sunday time: '+tmpCal.time)
-					break;
-				}
-			}
-		}	 
-		*/
+
 		def weeklyTotalsByWeek = [:]
 		for (int weekIter in weekList){
 			def weeklyTotalsByEmployee = [:]
-			for (Employee currentEmployee in employeeInstanceList){
-				
+			for (Employee currentEmployee in employeeInstanceList){				
 				for (WeeklyTotal weeklyTotal in weeklyTotalByWeek.get(weekIter)){
 					if (weeklyTotal.employee == currentEmployee){
 						if (weeklyTotalsByEmployee.get(currentEmployee) == null){
@@ -487,13 +436,12 @@ class EmployeeController {
 						}else{
 							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + weeklyTotal.elapsedSeconds as long)
 						}
+						//log.error('week: '+weekIter+' and time: '+timeManagerService.testMe(weeklyTotalsByEmployee.get(currentEmployee)))
 						weeklyTotalsByWeek.put(weekIter,weeklyTotalsByEmployee)
-						
+						//log.error(weekNumber)						
 					}
-				}
-				
-			}
-			
+				}				
+			}			
 		}
 		
 		if (!fromIndex && site == null){
@@ -507,7 +455,7 @@ class EmployeeController {
 			model:[
 				site:site,
 				period:period,
-				weeklyTotalByWeek:weeklyTotalByWeek,
+				//weeklyTotalByWeek:weeklyTotalByWeek,
 				weeklyTotalsByWeek:weeklyTotalsByWeek,
 				weekList:weekList,
 				employeeInstanceList:employeeInstanceList,

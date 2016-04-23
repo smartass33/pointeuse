@@ -525,7 +525,7 @@ class TimeManagerService {
 	}
 	
 	
-	static test(long inputSeconds){
+	def testMe(long inputSeconds){
 		boolean isNegative = false
 		if (inputSeconds < 0){
 			//inputSeconds = -inputSeconds
