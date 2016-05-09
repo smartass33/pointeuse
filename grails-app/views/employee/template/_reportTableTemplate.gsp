@@ -36,8 +36,7 @@
 	                  </g:else>
 	                  <g:if test="${dailyTotalMap.get(entries.key) != null}">
 	                    <g:if test="${dailyTotalMap.get(entries.key).site != null}">
-	                    	<td class="eventTD">
-	                    		
+	                    	<td class="eventTD">                		
 	                    		<g:select style='width:110px'
 			                          onchange="${remoteFunction(action:'modifySite', update:'report_table_div', 
 												  params:'\'employeeId=' + employee.id 						  
@@ -52,7 +51,7 @@
 	                    </g:if>
 	                    <g:else>
 	                    	<td class="eventTD">
-       			                    		<g:select style='width:110px'
+       			                   <g:select style='width:110px'
 			                          onchange="${remoteFunction(action:'modifySite', update:'report_table_div', 
 												  params:'\'employeeId=' + employee.id 						  
 												  + '&day=' + entries.key.format("dd/MM/yyyy")	

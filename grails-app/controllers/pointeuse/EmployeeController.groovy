@@ -1582,9 +1582,8 @@ class EmployeeController {
 		cal.time = date	
 		if (siteName != null && siteName.size() > 0 && !siteName.equals('')){
 			site  = Site.findByName(siteName)
-			if (site!= null){
-				criteria = DailyTotal.createCriteria()
-				
+			if (site != null){
+				criteria = DailyTotal.createCriteria()			
 				// get cumul holidays
 				dailyTotal = criteria.get {
 					and {
@@ -1594,16 +1593,16 @@ class EmployeeController {
 						eq('day',cal.get(Calendar.DAY_OF_MONTH))
 					}
 				}
-				if (dailyTotal != null){
+				if (dailyTotal == null){
+					timeManagerService.initializeTotals(employee, cal.time,site)
+				}else{
 					dailyTotal.site = site
 					dailyTotal.save(flush: true)
 				}
 			}
 		}
-		
-		
-		
 		def report = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR))
+		log.error('modifySite ended')		
 		render template: "/employee/template/reportTableTemplate", model: report	
 		return
 	}

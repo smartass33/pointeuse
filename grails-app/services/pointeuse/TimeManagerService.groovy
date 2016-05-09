@@ -61,13 +61,14 @@ class TimeManagerService {
 		def bankHolidayCounter = 0
 		calendar.set(Calendar.YEAR,year)
 		calendar.set(Calendar.WEEK_OF_YEAR,week)
+		def holidayCal = Calendar.instance
 		
 		criteria = BankHoliday.createCriteria()
 		bankHolidays = criteria.list {
 			or{
 				and {
 					eq('year',year)
-					eq('month',calendar.get(Calendar.MONTH)+1)
+					eq('month',calendar.get(Calendar.MONTH) + 1)
 				}
 				
 				and{
@@ -79,9 +80,15 @@ class TimeManagerService {
 		}
 		
 		
-		
 		for (BankHoliday bankHoliday:bankHolidays){
-			if (bankHoliday.calendar.get(Calendar.WEEK_OF_YEAR)==week){
+			holidayCal.set(Calendar.YEAR,bankHoliday.year)
+			holidayCal.set(Calendar.WEEK_OF_YEAR,bankHoliday.week)
+			holidayCal.set(Calendar.DAY_OF_MONTH,bankHoliday.day)
+			holidayCal.set(Calendar.MONTH,bankHoliday.month - 1)
+
+			if (bankHoliday.calendar.get(Calendar.WEEK_OF_YEAR) == week & holidayCal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+				
+		//	if (bankHoliday.calendar.get(Calendar.WEEK_OF_YEAR) == week) {
 				bankHolidayCounter+=1
 			}
 		}
@@ -234,6 +241,60 @@ class TimeManagerService {
 		return [dailyTotal,weeklyTotal,monthlyTotal]
 	}
 	
+	def initializeTotals(Employee employee, Date currentDate,Site site){
+		def criteria = MonthlyTotal.createCriteria()
+		def monthlyTotal = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',currentDate.getAt(Calendar.YEAR))
+					eq('month',currentDate.getAt(Calendar.MONTH)+1)
+				}
+			}
+		
+		if (monthlyTotal==null){
+			monthlyTotal = new MonthlyTotal(employee,currentDate)
+			employee.monthlyTotals.add(monthlyTotal)
+			monthlyTotal.save(flush:true)
+			
+		}
+		
+		criteria = WeeklyTotal.createCriteria()
+		def weeklyTotal = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('year',currentDate.getAt(Calendar.YEAR))
+				eq('month',currentDate.getAt(Calendar.MONTH)+1)
+				eq('week',currentDate.getAt(Calendar.WEEK_OF_YEAR))
+			}
+		}
+		
+		if (weeklyTotal == null){
+			weeklyTotal = new WeeklyTotal(employee,currentDate)
+			monthlyTotal.weeklyTotals.add(weeklyTotal)
+			weeklyTotal.monthlyTotal=monthlyTotal
+			weeklyTotal.save(flush:true)
+			
+		}
+
+		criteria = DailyTotal.createCriteria()
+		def dailyTotal = criteria.get {
+			and {
+				eq('employee',employee)
+				eq('year',currentDate.getAt(Calendar.YEAR))
+				eq('month',currentDate.getAt(Calendar.MONTH)+1)
+				eq('day',currentDate.getAt(Calendar.DAY_OF_MONTH))
+			}
+		}
+		if (dailyTotal==null){
+			dailyTotal = new DailyTotal(employee,currentDate)
+			dailyTotal.site = site
+			dailyTotal.weeklyTotal=weeklyTotal
+			weeklyTotal.dailyTotals.add(dailyTotal)
+			dailyTotal.save(flush:true)
+			
+		}
+		return [dailyTotal,weeklyTotal,monthlyTotal]
+	}
 	
 	def regularizeTime(String type,Long userId,InAndOut inOrOut,Calendar calendar){
 		if (calendar == null){
@@ -3179,7 +3240,7 @@ class TimeManagerService {
 				dailyTotalId=dailyTotal.id
 			}
 			// daily total is null. Still, we need to check if supplementary time exists within the week
-			if (dailyTotal==null && calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+			if (dailyTotal == null && calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
 				if (calendarLoop.get(Calendar.WEEK_OF_YEAR) == lastWeekParam.get(0) ){
 					weeklySupTime = 0
 				}else{
@@ -3207,6 +3268,7 @@ class TimeManagerService {
 			def tmpDate = calendarLoop.time
 			if 	(entriesByDay.size() > 0){
 				if (dailyTotal != null){
+					dailySeconds = getDailyTotal(dailyTotal).get("elapsedSeconds")
 					dailyTotalMap.put(tmpDate, dailyTotal)//dailySeconds)
 					dailySupTotalMap.put(tmpDate, Math.max(dailySeconds-DailyTotal.maxWorkingTime,0))
 					dailyTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(dailySeconds),false))
@@ -3214,15 +3276,18 @@ class TimeManagerService {
 
 				}else {
 					dailyTotalMap.put(tmpDate,null)// 0)
-					dailySupTotalMap.put(tmpDate, Math.max(dailySeconds-DailyTotal.maxWorkingTime,0))
+					dailySupTotalMap.put(tmpDate, 0)
 					dailyTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
-					dailySupTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)),false))
+					dailySupTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
 
 				}
 				mapByDay.put(tmpDate, entriesByDay)
-			}
-			else{
-				dailyTotalMap.put(tmpDate,null)//, 0)
+			}else{
+				if (dailyTotal != null){
+					dailyTotalMap.put(tmpDate, dailyTotal)
+				}else{
+					dailyTotalMap.put(tmpDate, null)
+				}
 				dailySupTotalMap.put(tmpDate, 0)
 				dailyTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
 				dailySupTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
