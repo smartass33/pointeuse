@@ -57,7 +57,7 @@ class SupplementaryTimeService {
 				for (int rollingMonth = 5 ;rollingMonth < month ; rollingMonth++){
 					calendar.set(Calendar.MONTH,rollingMonth)
 					log.error('period: '+calendar.time)
-					result = timeManagerService.getReportData(null, employee, null,rollingMonth+1,period.year)
+					result = timeManagerService.getReportData(null, employee, null,rollingMonth+1,period.year,false)
 					//computeSecondsFromHumanTime(def table)
 					periodSupTime += timeManagerService.computeSecondsFromHumanTime(result.get('payableSupTime'))
 					
@@ -69,7 +69,7 @@ class SupplementaryTimeService {
 					calendar.set(Calendar.MONTH,rollingMonth)
 					log.error('period: '+calendar.time)
 					//result = timeManagerService.computeMonthlyTime(calendar,employee)
-					result = timeManagerService.getReportData(null, employee, null,rollingMonth+1,period.year)
+					result = timeManagerService.getReportData(null, employee, null,rollingMonth+1,period.year,false)
 					
 					periodSupTime  += timeManagerService.computeSecondsFromHumanTime(result.get('payableSupTime'))
 					log.error('sup time= '+periodSupTime)				
@@ -80,7 +80,7 @@ class SupplementaryTimeService {
 					calendar.set(Calendar.MONTH,rollingMonth)
 					calendar.set(Calendar.YEAR,period.year+1)
 					log.error('period: '+calendar.time)
-					result = timeManagerService.getReportData(null, employee, null,rollingMonth+1,period.year)
+					result = timeManagerService.getReportData(null, employee, null,rollingMonth+1,period.year,false)
 					periodSupTime  += timeManagerService.computeSecondsFromHumanTime(result.get('payableSupTime'))
 					log.error('sup time= '+periodSupTime)
 				}

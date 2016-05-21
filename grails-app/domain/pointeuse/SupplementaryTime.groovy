@@ -31,4 +31,6 @@ class SupplementaryTime {
 		this.loggingTime = new Date()
 		this.amountPaid = 0
 	}
+	
+
 }

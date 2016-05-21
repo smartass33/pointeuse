@@ -152,7 +152,7 @@ class InAndOutController {
 		try {
 			if (fromReport){
 				log.error('entry created from report: '+inAndOutInstance)
-				def report = timeManagerService.getReportData(null, employee,  null, calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR))
+				def report = timeManagerService.getReportData(null, employee,  null, calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR),true)
 				render template: "/employee/template/reportTableTemplate", model: report
 				return
 			}else{

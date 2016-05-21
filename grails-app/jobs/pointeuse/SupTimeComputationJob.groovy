@@ -45,7 +45,7 @@ class SupTimeComputationJob {
 		
 		for (Employee employee: employees){
 			Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)
-			def data = timeManagerService.getYearSupTime(employee,year,month)
+			def data = timeManagerService.getYearSupTime(employee,year,month,true)
 			def criteria = SupplementaryTime.createCriteria()
 			def supTime = criteria.get {
 				and {

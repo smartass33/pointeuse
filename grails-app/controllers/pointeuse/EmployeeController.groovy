@@ -321,9 +321,12 @@ class EmployeeController {
 		def fromIndex=params.boolean('fromIndex')
 		def weeklyTotalByEmployee = [:]
 		def weeklyTotalByWeek = [:]
+		def lastWeekOfYearByEmployee = [:]
 		def weekList = []
 		def employeeSubList
 		def year
+		def weeklyTotals
+		def lastWeekOfYearWeeklyTotals
 		
 		 def period = Period.get(params.int('periodId'))
 		 def site = Site.get(params.int('siteId'))
@@ -406,12 +409,8 @@ class EmployeeController {
 			if (week < firstWeek){
 				iteratorYear = currentYear + 1
 			}
-			//log.error('iteratorYear: '+iteratorYear)
-			//log.error('currentYear: '+currentYear)
-			
-			//log.error('week: '+week)
 			criteria = WeeklyTotal.createCriteria()
-			def weeklyTotals = criteria.list {
+			weeklyTotals = criteria.list {
 					and {
 						eq('year',iteratorYear)
 						eq('week',week)
@@ -421,10 +420,31 @@ class EmployeeController {
 			
 				order('employee', 'asc')
 			}
+
 			weeklyTotalByWeek.put(week,weeklyTotals)
 			weekList.add(week)		
+			
+			if (iteratorYear == currentYear && week == lastWeekOfYear){
+				log.error('we got the rest of the last week of year that is in the year + 1')
+				criteria = WeeklyTotal.createCriteria()
+				lastWeekOfYearWeeklyTotals = criteria.list {
+						and {
+							eq('year',currentYear + 1)
+							eq('week',week)
+							
+							'in'('employee',employeeInstanceList)
+						}				
+					order('employee', 'asc')
+				}		
+				
+			}
 		}
 
+		for (WeeklyTotal weeklyTotal in lastWeekOfYearWeeklyTotals){
+			lastWeekOfYearByEmployee.put(weeklyTotal.employee,weeklyTotal)
+		}
+		
+			
 		def weeklyTotalsByWeek = [:]
 		for (int weekIter in weekList){
 			def weeklyTotalsByEmployee = [:]
@@ -435,14 +455,19 @@ class EmployeeController {
 							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotal.elapsedSeconds as long)
 						}else{
 							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + weeklyTotal.elapsedSeconds as long)
+				
+							
 						}
-						//log.error('week: '+weekIter+' and time: '+timeManagerService.testMe(weeklyTotalsByEmployee.get(currentEmployee)))
+						if (weekIter == lastWeekOfYear && lastWeekOfYearWeeklyTotals!= null && lastWeekOfYearByEmployee.get(currentEmployee) != null){							
+							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + lastWeekOfYearByEmployee.get(currentEmployee).elapsedSeconds as long)							
+						}
 						weeklyTotalsByWeek.put(weekIter,weeklyTotalsByEmployee)
-						//log.error(weekNumber)						
 					}
-				}				
+				}	
+							
 			}			
 		}
+
 		
 		if (!fromIndex && site == null){
 			flash.message = message(code: 'weeklyTime.site.selection.error')
@@ -455,12 +480,11 @@ class EmployeeController {
 			model:[
 				site:site,
 				period:period,
-				//weeklyTotalByWeek:weeklyTotalByWeek,
 				weeklyTotalsByWeek:weeklyTotalsByWeek,
 				weekList:weekList,
 				employeeInstanceList:employeeInstanceList,
 				firstYear:period.year,
-				lastYear:period.year+1
+				lastYear:period.year+1,
 				]
 			return
 		}
@@ -1399,12 +1423,21 @@ class EmployeeController {
 	def getAjaxSupplementaryTime(Long id) {
 		def year = params.int('year')
  		def month = params.int('month')
+		 
 		log.error("getAjaxSupplementaryTime triggered with params: month="+month+" and year="+year)
 		def employee = Employee.get(id)		
-		def model = timeManagerService.getYearSupTime(employee,year,month)
-		Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)
+		def model
+		def currentContract
+		def calendar = Calendar.instance
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.MONTH,month)
+	
+		if (employee){
+			model = timeManagerService.getYearSupTime(employee,year,month,false)
+		}
 		
 		//here, we can proceed to the creation, or update of the SupplementaryTime object
+		/*
 		def criteria = SupplementaryTime.createCriteria()
 		def supTime = criteria.get {
 			and {
@@ -1420,8 +1453,8 @@ class EmployeeController {
 			supTime.value = model.get('ajaxYearlySupTimeDecimal')
 		}
 		supTime.save(flush: true)	
-		
-		log.error("getYearSupTime has terminated")
+		*/
+		log.error("getAjaxSupplementaryTime has terminated")
 		
 		model << [id:id,month:month,year:year]
 		render template: "/employee/template/yearSupplementaryTime", model: model
@@ -1509,7 +1542,7 @@ class EmployeeController {
 					absence.type=updatedSelection
 					
 					if (absence.month < 6){
-						absence.period=Period.findByYear(absence.year-1)
+						absence.period=Period.findByYear(absence.year - 1)
 					}else{
 						absence.period=Period.findByYear(absence.year)
 					}				
@@ -1525,8 +1558,8 @@ class EmployeeController {
 					absence.year=cal.get(Calendar.YEAR)
 					absence.type=updatedSelection
 					
-					if (absence.month<6){
-						absence.period=Period.findByYear(absence.year-1)
+					if (absence.month < 6){
+						absence.period=Period.findByYear(absence.year - 1)
 					}else{
 						absence.period=Period.findByYear(absence.year)
 					}			
@@ -1537,18 +1570,18 @@ class EmployeeController {
 			flash.message=message(code: 'absence.impossible.update')
 		}
 		
-		def cartoucheTable = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH)+1, cal.get(Calendar.YEAR))
-		def openedDays = timeManagerService.computeMonthlyHours(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1)
+		def cartoucheTable = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),true)
+		def openedDays = timeManagerService.computeMonthlyHours(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH) + 1)
 		def yearInf
 		def yearSup
 		if ((cal.get(Calendar.MONTH)+1)>5){
 			yearInf=cal.get(Calendar.YEAR)
-			yearSup=cal.get(Calendar.YEAR)+1
+			yearSup=cal.get(Calendar.YEAR) + 1
 		}else{
-			yearInf=cal.get(Calendar.YEAR)-1
+			yearInf=cal.get(Calendar.YEAR) - 1
 			yearSup=cal.get(Calendar.YEAR)
 		}
-		Period period = ((cal.get(Calendar.MONTH)+1)>5)?Period.findByYear(cal.get(Calendar.YEAR)):Period.findByYear(cal.get(Calendar.YEAR)-1)
+		Period period = ((cal.get(Calendar.MONTH) + 1) > 5)?Period.findByYear(cal.get(Calendar.YEAR)):Period.findByYear(cal.get(Calendar.YEAR) - 1)
 		def model=[
 			period2:period,
 			period:cal.time,
@@ -1601,7 +1634,7 @@ class EmployeeController {
 				}
 			}
 		}
-		def report = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR))
+		def report = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),true)
 		log.error('modifySite ended')		
 		render template: "/employee/template/reportTableTemplate", model: report	
 		return
@@ -1655,7 +1688,7 @@ class EmployeeController {
 			def LIT = lastIn.time
 			use (TimeCategory){timeDiff=currentDate-LIT}
 			//empecher de represser le bouton pendant 30 seconds
-			if ((timeDiff.seconds + timeDiff.minutes*60+timeDiff.hours*3600)<30){
+			if ((timeDiff.seconds + timeDiff.minutes*60 + timeDiff.hours*3600) < 30){
 				flash.message = message(code: 'employee.overlogging.error')
 				flashMessage=false
 			}
@@ -1706,10 +1739,6 @@ class EmployeeController {
 	
 
     def update(Long id, Long version) {
-		params.each{i->
-			log.error('param for update: '+i)
-		}		
-		
 		def siteId=params["siteId"]
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
         def employeeInstance = Employee.get(id)
@@ -1727,11 +1756,7 @@ class EmployeeController {
                 render(view: "edit", model: [employeeInstance: employeeInstance])
                 return
             }
-        }
-		
-		
-		//def employeeStatus = employeeInstance.status
-		
+        }		
 		log.debug('employee status: '+employeeInstance.status)
 		
         employeeInstance.properties = params
@@ -1913,14 +1938,14 @@ class EmployeeController {
 	
 	
 	def trash(){
-		def eventId=params["inOrOutId"]
+		def eventId = params["inOrOutId"]
 		def inOrOut = InAndOut.get(eventId)
 		def month = inOrOut.month
 		def year = inOrOut.year
 		def employee = inOrOut.employee
 		log.error('removing entry '+inOrOut)
 		inOrOut.delete(flush:true)
-		def report = timeManagerService.getReportData(null, employee,  null, month, year)			
+		def report = timeManagerService.getReportData(null, employee,  null, month, year,true)			
 		render template: "/employee/template/reportTableTemplate", model: report
 		return
 	}
@@ -2318,18 +2343,18 @@ class EmployeeController {
 		}
 		//get last day of the month
 		if (employee){			
-			report = timeManagerService.getReportData(siteId, employee,  myDate, monthPeriod, yearPeriod)
+			report = timeManagerService.getReportData(siteId, employee,  myDate, monthPeriod, yearPeriod,false)
 			currentContract = report.getAt('currentContract')
 			if (currentContract == null){
 				def lastContract = Contract.findByEmployee(employee,[max: 1, sort: "endDate", order: "desc"])
 				if (lastContract != null){
 					flash.message = message(code: 'employee.is.gone.error')	
-					report = timeManagerService.getReportData(siteId, employee,  null, lastContract.endDate.getAt(Calendar.MONTH)+1, lastContract.endDate.getAt(Calendar.YEAR))	
+					report = timeManagerService.getReportData(siteId, employee,  null, lastContract.endDate.getAt(Calendar.MONTH)+1, lastContract.endDate.getAt(Calendar.YEAR),false)	
 					calendar.set(Calendar.MONTH,lastContract.endDate.getAt(Calendar.MONTH))
 					calendar.set(Calendar.YEAR,lastContract.endDate.getAt(Calendar.YEAR))				
 				}else{
 					flash.message = message(code: 'employee.not.arrived.error')	
-					report = timeManagerService.getReportData(siteId, employee,  null, employee.arrivalDate.getAt(Calendar.MONTH)+1, employee.arrivalDate.getAt(Calendar.YEAR))
+					report = timeManagerService.getReportData(siteId, employee,  null, employee.arrivalDate.getAt(Calendar.MONTH)+1, employee.arrivalDate.getAt(Calendar.YEAR),false)
 					calendar.set(Calendar.MONTH,employee.arrivalDate.getAt(Calendar.MONTH))
 					calendar.set(Calendar.YEAR,employee.arrivalDate.getAt(Calendar.YEAR))				
 				}					
@@ -3372,7 +3397,7 @@ class EmployeeController {
 		def counter = 1
 		for (Employee employee: employees){
 			Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)	
-			def data = timeManagerService.getYearSupTime(employee,year,month)		
+			def data = timeManagerService.getYearSupTime(employee,year,month,false)		
 			def criteria = SupplementaryTime.createCriteria()
 			def supTime = criteria.get {
 				and {
@@ -3440,7 +3465,6 @@ class EmployeeController {
 			loopMonth = initialMonth - 1
 			year = initialYear
 			log.error('dealing with employee #'+counter)
-		//	 executorService.submit({				
 				while (year <= currentYear){
 					if (loopMonth == 12){
 						loopMonth = 1
@@ -3451,7 +3475,7 @@ class EmployeeController {
 					
 					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
 					log.error('will compute yearSupTime for month:  '+loopMonth+' and year: '+year)
-					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int)
+					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int,true)
 					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
 					log.error('supTime computed')
 					
@@ -3768,9 +3792,9 @@ class EmployeeController {
 						for (month in monthList){
 							try{
 								if (month>=6){
-									timeManagerService.computeWeeklyTotals( employee,  month,  year)									
+									timeManagerService.computeWeeklyTotals( employee,  month,  year,true)									
 								}else{
-									timeManagerService.computeWeeklyTotals( employee,  month,  year+1)						
+									timeManagerService.computeWeeklyTotals( employee,  month,  year + 1,true)						
 								}
 							}catch (Exception e){
 								log.error('Exception: '+e.message)

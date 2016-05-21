@@ -2,8 +2,8 @@ package pointeuse
 
 class WeeklyTotal {
 
-	static final float WeeklyLegalTime=35 //35H
-	static final long maxWorkingTime=42*3600
+	static final float WeeklyLegalTime = 35 //35H
+	static final long maxWorkingTime = 42 * 3600
 	int month
 	int year
 	int week
@@ -23,7 +23,7 @@ class WeeklyTotal {
 		this.elapsedSeconds=0
 		this.dailyTotals=[]
 	}
+
 	
-    static constraints = {
-    }
+  
 }

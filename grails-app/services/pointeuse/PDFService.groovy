@@ -7,6 +7,8 @@ import com.itextpdf.text.pdf.PdfCopyFields
 import groovy.time.TimeDuration
 import groovy.time.TimeCategory
 import groovyx.gpars.*
+import org.hibernate.exception.LockAcquisitionException
+import org.hibernate.StaleObjectStateException
 
 class PDFService {
 	def timeManagerService
@@ -31,8 +33,8 @@ class PDFService {
 		try {
 			for (Employee employee:employeeList){
 				log.error('method pdf siteMonthlyTimeSheet with parameters: site: '+site.name+',  last name='+employee.lastName+', first name= '+employee.firstName+', year= '+calendar.get(Calendar.YEAR)+', month= '+(calendar.get(Calendar.MONTH)+1))
-				def modelReport=timeManagerService.getReportData((site.id).toString(),employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-				modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+				def modelReport = timeManagerService.getReportData((site.id).toString(),employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,false)
+				modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,false)
 				ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeReportTemplate', model: modelReport)
 				filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString() +'-'+employee.lastName +'-'+employee.firstName+'.pdf'
 				fileNameList.add(filename)
@@ -58,6 +60,30 @@ class PDFService {
 		}
 	}
 	
+	def generateUserMonthlyTimeSheetWithModel(Date myDate,Employee employee,String folder, def reportData, def yearSupTimeData){
+		log.error('generateUserMonthlyTimeSheetWithModel called for employee: '+employee.firstName+' '+employee.lastName)
+		def filename
+		Calendar calendar = Calendar.instance
+		calendar.time = myDate
+		OutputStream outputStream
+		File file
+		boolean entityUpdate = true
+		log.error('method pdf generateUserMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
+		def modelReport = reportData
+		modelReport << yearSupTimeData
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeReportTemplate', model: modelReport)
+		filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString()+'-'+employee.lastName+'-'+employee.firstName+'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
 	def generateUserMonthlyTimeSheet(Date myDate,Employee employee,String folder){
 		log.error('generateUserMonthlyTimeSheet called for employee: '+employee.firstName+' '+employee.lastName)	
 		def filename
@@ -65,9 +91,10 @@ class PDFService {
 		calendar.time = myDate
 		OutputStream outputStream
 		File file
+		boolean entityUpdate = true
 		log.error('method pdf generateUserMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
-		def modelReport=timeManagerService.getReportData(employee.site.id as String,employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-		modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+		def modelReport = timeManagerService.getReportData(employee.site.id as String,employee,myDate,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,false)
+		modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,false)
 		log.error('getReportData and getYearSupTime finalized with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
 		// Get the bytes
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeReportTemplate', model: modelReport)
@@ -315,8 +342,8 @@ class PDFService {
 			def employeeList = Employee.findAllBySite(site)
 			for (Employee employee:employeeList){
 				log.error('method pdf siteMonthlyTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+calendar.get(Calendar.YEAR)+', Month= '+(calendar.get(Calendar.MONTH)+1))
-				def modelReport=timeManagerService.getReportData((site.id).toString(),employee,calendar.time,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
-				modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1)
+				def modelReport=timeManagerService.getReportData((site.id).toString(),employee,calendar.time,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,false)
+				modelReport << timeManagerService.getYearSupTime(employee,calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)+1,false)
 				log.error('getReportData and getYearSupTime finalized')
 				
 				// Get the bytes

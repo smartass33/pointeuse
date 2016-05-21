@@ -40,7 +40,7 @@
 					<g:each in="${employeeInstanceList}" var="currentEmployee">	
 						<td style="vertical-align: middle;text-align:center;width:10px;">	
 							<g:if test="${weeklyTotalsByWeek.get(weekNumber)!= null && weeklyTotalsByWeek.get(weekNumber).get(currentEmployee) != null}">
-								<my:humanTimeTD id="weeklyTotalByEmployee" name="weeklyTotalByEmployee" value="${weeklyTotalsByWeek.get(weekNumber).get(currentEmployee)}"/>							
+								<my:humanTimeTD id="weeklyTotalByEmployee" name="weeklyTotalByEmployee" value="${weeklyTotalsByWeek.get(weekNumber).get(currentEmployee)}"/>	
 							</g:if>				
 							<g:else>
 								<my:humanTimeTD id="weeklyTotalByEmployee" name="weeklyTotalByEmployee" value="0"/>							
