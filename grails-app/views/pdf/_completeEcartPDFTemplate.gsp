@@ -186,7 +186,7 @@
 					<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_theoritical'>	
 						<g:if test="${monthlyTheoriticalByEmployee.get(employee)!=null}">
 							<g:if test="${monthList.contains(month_theoritical)}">
-								<td class="eventTD">${monthlyTheoriticalByEmployee.get(employee).get(month_theoritical)}</td>
+								<td class="eventTD"><my:humanTimeTD id="theoritical" name="theoritical" value="${monthlyTheoriticalByEmployee.get(employee).get(month_theoritical)}"/></td>
 							</g:if>
 							<g:else>
 								<td class="eventTD" style="background-color:#CCCCCE"/>
@@ -199,7 +199,7 @@
 					<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_actual'>						
 						<g:if test='${monthlyActualByEmployee.get(employee)!=null}'>
 							<g:if test="${monthList.contains(month_actual)}">
-								<td class="eventTD">${monthlyActualByEmployee.get(employee).get(month_actual)}</td>
+								<td class="eventTD"><my:humanTimeTD id="month_actual" name="month_actual" value="${monthlyActualByEmployee.get(employee).get(month_actual)}"/></td>
 							</g:if>
 							<g:else>
 								<td class="eventTD" style="background-color:#CCCCCE"/>
@@ -212,7 +212,7 @@
 					<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_ecart'>									
 						<g:if test='${ecartByEmployee.get(employee)!=null}'>
 							<g:if test="${monthList.contains(month_ecart)}">
-								<td class="eventTD">${ecartByEmployee.get(employee).get(month_ecart)}</td>
+								<td class="eventTD"><my:humanTimeTD id="ecartByEmployee" name="ecartByEmployee" value="${ecartByEmployee.get(employee).get(month_ecart)}"/></td>
 							</g:if>
 							<g:else>
 								<td class="eventTD" style="background-color:#CCCCCE"/>
@@ -241,7 +241,7 @@
 					<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
 						<g:if test='${ecartMinusRTTByEmployee.get(employee)!=null}'>
 							<g:if test="${monthList != null && monthList.contains(month_rtt)}">				
-								<td class="eventTD">${ecartMinusRTTByEmployee.get(employee).get(month_rtt)}</td>
+								<td class="eventTD"><my:humanTimeTD id="ecartMinusRTTByEmployee" name="ecartMinusRTTByEmployee" value="${ecartMinusRTTByEmployee.get(employee).get(month_rtt)}"/></td>
 							</g:if>
 							<g:else>
 								<td class="eventTD" style="background-color:#CCCCCE"/>
@@ -257,7 +257,7 @@
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
 					<g:if test='${monthlySupTimeMapByEmployee.get(employee)!=null}'>
 						<g:if test="${monthList != null && monthList.contains(month_rtt)}">				
-							<td class="eventTD">${monthlySupTimeMapByEmployee.get(employee).get(month_rtt)}</td>
+							<td class="eventTD"><my:humanTimeTD id="monthlySupTimeMapByEmployee" name="monthlySupTimeMapByEmployee" value="${monthlySupTimeMapByEmployee.get(employee).get(month_rtt)}"/></td>
 						</g:if>
 						<g:else>
 							<td class="eventTD" style="background-color:#CCCCCE"/>
@@ -273,7 +273,7 @@
 				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_rtt'>									
 					<g:if test='${ecartMinusRTTAndHSByEmployee.get(employee)!=null}'>
 						<g:if test="${monthList != null && monthList.contains(month_rtt)}">				
-							<td class="eventTD">${ecartMinusRTTAndHSByEmployee.get(employee).get(month_rtt)}</td>
+							<td class="eventTD"><my:humanTimeTD id="ecartMinusRTTAndHSByEmployee" name="ecartMinusRTTAndHSByEmployee" value="${ecartMinusRTTAndHSByEmployee.get(employee).get(month_rtt)}"/></td>
 						</g:if>
 						<g:else>
 							<td class="eventTD" style="background-color:#CCCCCE"/>

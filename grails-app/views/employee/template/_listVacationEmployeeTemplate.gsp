@@ -10,6 +10,8 @@
 			<th class='rotate-45'><div><span><g:message code="rtt.reference.label"/></span></div></th>
 			<th class='rotate-45'><div><span><g:message code="rtt.taken.label"/></span></div></th>
 			<th class='rotate-45'><div><span><g:message code="rtt.remainder.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="css.taken.label"/></span></div></th>
+			<th class='rotate-45'><div><span><g:message code="sickness.taken.label"/></span></div></th>		
 			<th class='rotate-45'><div><span><g:message code="other.vacation.label"/></span></div></th>
 			<th class='rotate-45'><div><span><g:message code="exceptionnal.vacation.label"/></span></div></th>
 			<th class='rotate-45'><div><span><g:message code="paternite.vacation.label"/></span></div></th>
@@ -26,6 +28,8 @@
 					<td>${initialRTTMap.get(employee)}</td>
 					<td>${takenRTTMap.get(employee)}</td>
 					<td>${remainingRTTMap.get(employee)}</td>		
+					<td>${takenCSSMap.get(employee)}</td>						
+					<td>${takenSicknessMap.get(employee)}</td>	
 					<td>${takenAutreMap.get(employee)}</td>			
 					<td>${takenExceptionnelMap.get(employee)}</td>	
 					<td>${takenPaterniteMap.get(employee)}</td>	

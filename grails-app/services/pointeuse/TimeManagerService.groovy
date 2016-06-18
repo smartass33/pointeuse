@@ -3125,7 +3125,7 @@ class TimeManagerService {
 			def startDate = new Date()
 			def endDate
 			def executionTime
-			log.error('computeWeeklyTotals called for employee: '+employee+', month: '+month+',year: '+year+' and entityUpdate: '+entityUpdate)
+			log.debug('computeWeeklyTotals called for employee: '+employee+', month: '+month+',year: '+year+' and entityUpdate: '+entityUpdate)
 			//variables
 			def weekName="semaine "
 			def criteria

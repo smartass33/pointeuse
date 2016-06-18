@@ -16,14 +16,17 @@ class EmployeeService {
 		startCalendar.set(Calendar.HOUR_OF_DAY,00)
 		startCalendar.set(Calendar.MINUTE,00)
 		startCalendar.set(Calendar.SECOND,00)
+		log.debug("startCalendar: "+startCalendar.time)
 		
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
 		endCalendar.set(Calendar.DAY_OF_MONTH,31)
-		endCalendar.set(Calendar.MONTH,6)
+		endCalendar.set(Calendar.MONTH,4)
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
+		log.debug("endCalendar: "+endCalendar.time)
+		
 		
 		startCalendar.set(Calendar.YEAR,period.year)
 		endCalendar.set(Calendar.YEAR,period.year+1)

@@ -145,11 +145,11 @@
 				<td style="vertical-align: middle;text-align:center;">${annualEmployeeWorkingDays}</td>
 				<td style="vertical-align: middle;text-align:center;">
 					<g:if test="${annualTheoritical !=null}">
-		               	${annualTheoritical} 
+		               	<my:humanTimeTD id="annualTheoritical"  name="annualTheoritical"  value="${annualTheoritical}"/> 
 		           	</g:if>	
 		           	<g:else>
-		           		00:00
-		           	</g:else>
+						<my:humanTimeTD id="annualTheoritical"  name="annualTheoritical"  value="0"/>    	
+			        </g:else>
 		        </td>
 		        <td style="vertical-align: middle;text-align:center;">${initialCA}</td>
 		        <td style="vertical-align: middle;text-align:center;">${takenCA}</td>        
