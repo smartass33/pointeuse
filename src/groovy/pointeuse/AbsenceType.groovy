@@ -13,6 +13,7 @@ public enum AbsenceType {
 	EXCEPTIONNEL('CE'),
 	PATERNITE('CP'),
 	DIF('DIF'),
+	FORMATION('FO'),
 	INJUSTIFIE('AI')
 	
 	final String value

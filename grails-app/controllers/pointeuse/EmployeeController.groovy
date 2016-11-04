@@ -360,21 +360,15 @@ class EmployeeController {
 					 }
 					 employeeInstanceList.addAll(employeeSubList)
 				 }
-			 }
-			 
+			 }			 
 		}else{
 			employeeInstanceList = []
 			for (Service service:serviceList){
 				for (Function function:functionList){
 					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
 				}
-			}
-				
+			}				
 		}
-		//employeeInstanceList = []
-		//employeeInstanceList.add(Employee.get(48))
-		
-		
 		def rollingCal = Calendar.instance
 		rollingCal.set(Calendar.MONTH,5)
 		rollingCal.set(Calendar.DAY_OF_MONTH,1)
@@ -402,8 +396,7 @@ class EmployeeController {
 		for (int j = 1; j <= endOfPeriodCal.get(Calendar.WEEK_OF_YEAR);j++){
 			weekNumber.add(j)
 		}
-		
-		
+				
 		def iteratorYear = currentYear
 		for (week in weekNumber){
 			if (week < firstWeek){
@@ -416,8 +409,7 @@ class EmployeeController {
 						eq('week',week)
 						
 						'in'('employee',employeeInstanceList)
-					}
-			
+					}			
 				order('employee', 'asc')
 			}
 
@@ -435,8 +427,7 @@ class EmployeeController {
 							'in'('employee',employeeInstanceList)
 						}				
 					order('employee', 'asc')
-				}		
-				
+				}						
 			}
 		}
 
@@ -454,9 +445,7 @@ class EmployeeController {
 						if (weeklyTotalsByEmployee.get(currentEmployee) == null){
 							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotal.elapsedSeconds as long)
 						}else{
-							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + weeklyTotal.elapsedSeconds as long)
-				
-							
+							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + weeklyTotal.elapsedSeconds as long)											
 						}
 						if (weekIter == lastWeekOfYear && lastWeekOfYearWeeklyTotals!= null && lastWeekOfYearByEmployee.get(currentEmployee) != null){							
 							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + lastWeekOfYearByEmployee.get(currentEmployee).elapsedSeconds as long)							
@@ -852,6 +841,11 @@ class EmployeeController {
 				}else{
 					dailyList.add(0)
 				}
+				if (absenceMap.get(AbsenceType.FORMATION) != null){
+					dailyList.add(absenceMap.get(AbsenceType.FORMATION))
+				}else{
+					dailyList.add(0)
+				}
 				fillRow(dailyList,i)
 				i+=1
 			}
@@ -929,18 +923,19 @@ class EmployeeController {
 		def employeeInstanceList
 		def period
 		def criteria
-		def initialCAMap=[:]
-		def remainingCAMap=[:]
-		def takenCAMap=[:]
-		def initialRTTMap=[:]
-		def remainingRTTMap=[:]
-		def takenRTTMap=[:]
-		def takenSicknessMap=[:]
-		def takenCSSMap=[:]
-		def takenAutreMap=[:]
-		def takenExceptionnelMap=[:]		
-		def takenPaterniteMap=[:]
-		def takenDifMap=[:]
+		def initialCAMap = [:]
+		def remainingCAMap = [:]
+		def takenCAMap = [:]
+		def initialRTTMap = [:]
+		def remainingRTTMap = [:]
+		def takenRTTMap = [:]
+		def takenSicknessMap = [:]
+		def takenCSSMap = [:]
+		def takenAutreMap = [:]
+		def takenExceptionnelMap = [:]		
+		def takenPaterniteMap = [:]
+		def takenDifMap = [:]
+		def formationMap = [:]
 		def takenSickness
 		def takenRTT
 		def takenCA
@@ -949,6 +944,7 @@ class EmployeeController {
 		def takenExceptionnel
 		def takenPaternite
 		def takenDIF	
+		def formation
 		def employeeInstanceTotal
 		
 		if (params["siteId"]!=null && !params["siteId"].equals("")){
@@ -1129,6 +1125,22 @@ class EmployeeController {
 				takenAutreMap.put(employee, 0)
 			}
 			
+			//FORMATION
+			criteria = Absence.createCriteria()
+			formation = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.FORMATION)
+				}
+			}
+			if (formation!=null){
+				formationMap.put(employee, formation.size())
+			}else{
+				formationMap.put(employee, 0)
+			}
+			
 			//EXCEPTIONNEL
 			criteria = Absence.createCriteria()
 			takenExceptionnel = criteria.list {
@@ -1196,7 +1208,8 @@ class EmployeeController {
 			initialCAMap:initialCAMap,
 			initialRTTMap:initialRTTMap,
 			remainingRTTMap:remainingRTTMap,
-			remainingCAMap:remainingCAMap
+			remainingCAMap:remainingCAMap,
+			formationMap:formationMap
 		]	
 	}
 	
@@ -1210,6 +1223,7 @@ class EmployeeController {
 		def takenRTT=[]
 		def takenCSS=[]
 		def takenAutre=[]
+		def formation=[]
 		def takenSickness = []
 		def takenRTTMap=[:]
 		def takenCAMap=[:]
@@ -1221,6 +1235,7 @@ class EmployeeController {
 		def takenSicknessMap=[:]
 		def takenCSSMap=[:]
 		def takenAutreMap=[:]
+		def formationMap=[:]
 		// starting calendar: 1 of June of the period
 		def startCalendar = Calendar.instance
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
@@ -1353,9 +1368,41 @@ class EmployeeController {
 				takenAutreMap.put(period.year, takenAutre.size())
 			}else{
 				takenAutreMap.put(period.year, 0)
-			}				
+			}	
+			
+			
+			criteria = Absence.createCriteria()
+			formation = criteria.list {
+				and {
+					eq('employee',employeeInstance)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.FORMATION)
+				}
+			}
+			
+			if (formation!=null){
+				formationMap.put(period.year, formation.size())
+			}else{
+				formationMap.put(period.year, 0)
+			}
+						
 		}
-	[takenCSSMap:takenCSSMap,takenAutreMap:takenAutreMap,takenSicknessMap:takenSicknessMap,takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId,yearMap:yearMap,initialCAMap:initialCAMap,initialRTTMap:initialRTTMap,remainingRTTMap:remainingRTTMap,remainingCAMap:remainingCAMap]	
+	[
+		takenCSSMap:takenCSSMap,
+		takenAutreMap:takenAutreMap,
+		takenSicknessMap:takenSicknessMap,
+		takenRTTMap:takenRTTMap,takenCAMap:takenCAMap,
+		employeeInstance: employeeInstance,
+		isAdmin:isAdmin,
+		siteId:siteId,
+		yearMap:yearMap,
+		initialCAMap:initialCAMap,
+		initialRTTMap:initialRTTMap,
+		remainingRTTMap:remainingRTTMap,
+		formationMap:formationMap,
+		remainingCAMap:remainingCAMap
+		]	
 
 	}
 	

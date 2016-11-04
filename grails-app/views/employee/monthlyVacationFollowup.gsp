@@ -101,6 +101,8 @@
   					<th class="rotate-45"><div><span>${AbsenceType.DIF}</span></div></th>  					
   	  				<th class="rotate-45"><div><span>${AbsenceType.GROSSESSE}</span></div></th> 	
   					<th class="rotate-45"><div><span>${AbsenceType.MALADIE}</span></div></th>
+  					<th class="rotate-45"><div><span>${AbsenceType.FORMATION}</span></div></th>
+  					
    				</tr>
   			</thead>
   			<tbody>
@@ -165,7 +167,11 @@
    						<td class="vacationTD">
   							<g:if test="${employeeAbsenceMap.get(employee.key).get(AbsenceType.MALADIE) == null }">0</g:if> 							
   							<g:else>${employeeAbsenceMap.get(employee.key).get(AbsenceType.MALADIE)}</g:else>  							
-  						</td> 						
+  						</td> 	
+  						<td class="vacationTD">
+  							<g:if test="${employeeAbsenceMap.get(employee.key).get(AbsenceType.FORMATION) == null }">0</g:if> 							
+  							<g:else>${employeeAbsenceMap.get(employee.key).get(AbsenceType.FORMATION)}</g:else>  							
+  						</td> 					
   					</tr>
   				</g:each>
   			</tbody>

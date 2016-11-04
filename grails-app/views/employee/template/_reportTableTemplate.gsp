@@ -138,14 +138,14 @@
 								<g:else>
 									<g:if test="${holidayMap.get(entries.key) != null}">
 					                      <font size="2"> 
-					                      <g:if test="${holidayMap.get(entries.key).type == AbsenceType.MALADIE || holidayMap.get(entries.key).type == AbsenceType.GROSSESSE}">
+					                      <g:if test="${holidayMap.get(entries.key).type == AbsenceType.MALADIE || holidayMap.get(entries.key).type == AbsenceType.GROSSESSE || holidayMap.get(entries.key).type == AbsenceType.FORMATION}">
 					                    	<g:select width="50px"
 					                          onchange="${remoteFunction(action:'modifyAbsence', update:'cartouche_div', 
 												  params:'\'employeeId=' + employee.id 						  
 												  + '&day=' + entries.key.format("dd/MM/yyyy")					
 												  + '&updatedSelection=\' + this.value'								  
 												  )}"
-					                          name="absenceType" from="${['-',AbsenceType.GROSSESSE,AbsenceType.MALADIE]}"
+					                          name="absenceType" from="${['-',AbsenceType.GROSSESSE,AbsenceType.MALADIE,AbsenceType.FORMATION]}"
 					                          noSelection="${['':holidayMap.get(entries.key).type]}" />
 					                      </g:if>
 					                      <g:else>
@@ -168,7 +168,7 @@
 												  + '&day=' + entries.key.format("dd/MM/yyyy")					
 												  + '&updatedSelection=\' + this.value'								  
 												  )}"
-					                          name="absenceType" from="${['-',AbsenceType.GROSSESSE,AbsenceType.MALADIE]}"
+					                          name="absenceType" from="${['-',AbsenceType.GROSSESSE,AbsenceType.MALADIE,AbsenceType.FORMATION]}"
 					                          noSelection="${['':'-']}" />
 					                 </g:else>
 			                  	</g:else>

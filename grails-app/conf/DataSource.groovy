@@ -21,7 +21,7 @@ environments {
 			dialect = "org.hibernate.dialect.MySQL5InnoDBDialect"
 		    //username = "pointeuse"
 		    username = "root"
-			password = ""
+			password = "root"
 			properties {
 				maxActive = 50
 				maxIdle = 25

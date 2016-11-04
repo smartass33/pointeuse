@@ -1828,7 +1828,7 @@ class TimeManagerService {
 					ecartMinusRTTAndHSMap.put(month, (ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(currentContract.weeklyLength/Employee.WeekOpenedDays)) - monthlySupTimeMap.get(month))as long)
 					
 				}else{
-					log.error('currentContract is null for employee  '+employee+ ' and month= '+month)
+					log.debug('currentContract is null for employee  '+employee+ ' and month= '+month)
 					ecartMinusRTTMap.put(month, ecartMap.get(month) as long)
 					ecartMinusRTTAndHSMap.put(month, (ecartMap.get(month) - monthlySupTimeMap.get(month))as long)				
 				}		
@@ -3465,6 +3465,8 @@ class TimeManagerService {
 		def timeBefore7 = 0
 		def timeAfter20 = 0
 		def timeOffHours= 0
+		def yearTheoritical = 0
+		def monthTheoritical = 0
 		def calendar = Calendar.instance
 		calendar.set(Calendar.YEAR,year)
 		def bankHolidayList
@@ -3519,6 +3521,8 @@ class TimeManagerService {
 			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
 				log.debug('calendarIter: '+calendarIter.time)
 				data = computeWeeklyTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR),entityUpdate)
+				monthTheoritical = getMonthTheoritical(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTheoritical += monthTheoritical
 				yearSupTime +=  data.get('monthlySupTime')
 				yearTimeBefore7 += data.get('timeBefore7')
 				yearTimeAfter20 += data.get('timeAfter20')
@@ -3536,6 +3540,8 @@ class TimeManagerService {
 			while(calendarIter.get(Calendar.MONTH) <= 11){
 				log.debug('calendarIter: '+calendarIter.time)
 				data = computeWeeklyTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR),entityUpdate)
+				monthTheoritical = getMonthTheoritical(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTheoritical += monthTheoritical
 				yearSupTime +=  data.get('monthlySupTime')
 				yearTimeBefore7 += data.get('timeBefore7')
 				yearTimeAfter20 += data.get('timeAfter20')
@@ -3555,6 +3561,8 @@ class TimeManagerService {
 			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
 				log.debug('calendarIter: '+calendarIter.time)
 				data = computeWeeklyTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR),entityUpdate)
+				monthTheoritical = getMonthTheoritical(employee,  calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
+				yearTheoritical += monthTheoritical
 				yearSupTime +=  data.get('monthlySupTime')
 				yearTimeBefore7 += data.get('timeBefore7')
 				yearTimeAfter20 += data.get('timeAfter20')
@@ -3594,8 +3602,15 @@ class TimeManagerService {
 		
 		def yearTimeOffHoursDecimal = computeHumanTime(yearTimeOffHours as long)
 		yearTimeOffHoursDecimal=(yearTimeOffHoursDecimal.get(0)+yearTimeOffHoursDecimal.get(1)/60).setScale(2,2)
+		
+		
+		
+
+		
 			
 		return [
+			monthTheoritical:monthTheoritical,
+			yearTheoritical:yearTheoritical,
 			monthlySupTime:getTimeAsText(computeHumanTime(monthlySupTime as long),false),
 			timeBefore7:getTimeAsText(computeHumanTime(timeBefore7 as long),false),
 			timeAfter20:getTimeAsText(computeHumanTime(timeAfter20 as long),false),
@@ -4227,9 +4242,6 @@ class TimeManagerService {
 			if (tmp != null && tmp.size() > 0)
 				previousContracts.addAll(tmp)
 				
-			//previousContracts.addAll(Contract.findAll("from Contract where employee = :employee and endDate >= :startDate and endDate <= :endDate and endDate is not null order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:endCalendar.time]))
-			//previousContracts .addAll(Contract.findAll("from Contract where employee = :employee and startDate <= :endDate and endDate is null order by startDate desc",[employee:employee,endDate:startCalendar.time]))
-			//previousContracts.addAll(Contract.findAll("from Contract where employee = :employee and startDate >= :startDate and startDate <= :endDate order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:endCalendar.time]))
 			monthTheoritical = 0
 			for (Contract currentContract : previousContracts){
 				weeklyContractTime = currentContract.weeklyLength
@@ -4306,13 +4318,10 @@ class TimeManagerService {
 						
 						tmpTheoritical += (Employee.Pentecote)*(((realOpenDays as long) - (absenceMap.get(AbsenceType.CSS) as long) - (absenceMap.get(AbsenceType.INJUSTIFIE) as long))/totalNumberOfDays)*((weeklyContractTime as long)/Employee.legalWeekTime)
 						log.debug('2: tmpTheoritical: '+tmpTheoritical)
-						
-						
-						
+												
 						def multiplier = 0
 						if ( absenceMap.get(AbsenceType.MALADIE) != null )
 							multiplier += absenceMap.get(AbsenceType.MALADIE) as long
-
 							
 						if ( absenceMap.get(AbsenceType.VACANCE) != null )
 							multiplier += absenceMap.get(AbsenceType.VACANCE) as long
@@ -4342,41 +4351,13 @@ class TimeManagerService {
 						log.debug('6: tmpTheoritical: '+tmpTheoritical)
 						
 						monthTheoritical = tmpTheoritical
-						log.debug('monthTheoritical: '+monthTheoritical)
-						
-						/*
-						monthTheoritical += (
-							3600*(
-									realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
-									+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
-									-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF))
-									- (35/7)*absenceMap.get(AbsenceType.PATERNITE)
-								)
-								- absenceMap.get(AbsenceType.GROSSESSE)) as int
-							*/
+						log.debug('monthTheoritical: '+monthTheoritical)						
 					}
 				}
 				log.debug('monthTheoritical: '+monthTheoritical)
-			}
-			
-			}
-		/*
-		Contract.withTransaction{
-			previousContracts.add(Contract.findAll("from Contract where employee = :employee and endDate >= :startDate and endDate <= :endDate and endDate is not null order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:endCalendar.time]))
+			}		
 		}
-
-		Contract.withTransaction{
-			previousContracts.add(Contract.findAll("from Contract where employee = :employee and startDate <= :endDate and endDate is null order by startDate desc",[employee:employee,endDate:startCalendar.time]))
-		}
-		
-		Contract.withTransaction{
-			previousContracts.add(Contract.findAll("from Contract where employee = :employee and startDate >= :startDate and startDate <= :endDate order by startDate desc",[employee:employee,startDate:startCalendar.time,endDate:endCalendar.time]))
-		}
-			*/	
-
-
 		return monthTheoritical
-		
 	}
 	
 	def getAbsencesBetweenDatesMultiThread(Employee employee,Date startDate,Date endDate){
