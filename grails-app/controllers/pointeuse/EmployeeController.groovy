@@ -1562,6 +1562,8 @@ class EmployeeController {
 			updatedSelection = AbsenceType.ANNULATION
 		if (updatedSelection.equals('M'))
 			updatedSelection = AbsenceType.MALADIE
+		if (updatedSelection.equals('FO'))
+			updatedSelection = AbsenceType.FORMATION
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 		Date date = dateFormat.parse(day)
 		def cal= Calendar.instance
@@ -1569,8 +1571,7 @@ class EmployeeController {
 		cal.time=date
 		if (!updatedSelection.equals('')){
 			// check if an absence was already logged:
-			criteria = Absence.createCriteria()
-			
+			criteria = Absence.createCriteria()			
 			// get cumul holidays
 			def absence = criteria.get {
 				and {
@@ -1586,8 +1587,7 @@ class EmployeeController {
 					// annulation nécessaire: il faut effacer le tupple
 					absence.delete(flush: true)
 				}else{
-					absence.type=updatedSelection
-					
+					absence.type=updatedSelection					
 					if (absence.month < 6){
 						absence.period=Period.findByYear(absence.year - 1)
 					}else{
@@ -1603,8 +1603,7 @@ class EmployeeController {
 					absence.day=cal.get(Calendar.DAY_OF_MONTH)
 					absence.month=cal.get(Calendar.MONTH)+1
 					absence.year=cal.get(Calendar.YEAR)
-					absence.type=updatedSelection
-					
+					absence.type=updatedSelection					
 					if (absence.month < 6){
 						absence.period=Period.findByYear(absence.year - 1)
 					}else{
@@ -1615,8 +1614,7 @@ class EmployeeController {
 			}
 		}else{
 			flash.message=message(code: 'absence.impossible.update')
-		}
-		
+		}	
 		def cartoucheTable = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),true)
 		def openedDays = timeManagerService.computeMonthlyHours(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH) + 1)
 		def yearInf
@@ -1640,7 +1638,6 @@ class EmployeeController {
 			yearSup:yearSup,
 			employee:employee,
 			openedDays:openedDays
-
 			]
 		model << cartoucheTable
 		render template: "/employee/template/cartoucheTemplate", model:model
@@ -1687,7 +1684,6 @@ class EmployeeController {
 		return
 	}
 	
-	
 	def addingEventToEmployee(){
 		def cal = Calendar.instance	
 		def type = params["type"].equals("Entrer") ? "E" : "S" 
@@ -1699,8 +1695,7 @@ class EmployeeController {
 		def timeDiff		
 		def flashMessage=true
 		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).time
-			
-		
+				
 		log.error('trying to add event to employee '+employeeInstance.firstName+' '+employeeInstance.lastName+' with type: '+type)
 		// liste les entrees de la journée et vérifie que cette valeur n'est pas supérieure à une valeur statique
 		def inAndOutcriteria = InAndOut.createCriteria()
@@ -1748,8 +1743,6 @@ class EmployeeController {
 			log.error('entry created with params: '+inOrOut)
 		}
 		
-		
-		
 		criteria = InAndOut.createCriteria()
 		def inAndOuts = criteria.list {
 			and {
@@ -1760,8 +1753,7 @@ class EmployeeController {
 				order('time','asc')
 			}
 		}
-		
-		
+			
 		if (lastIn!=null){
 			if (flashMessage){
 				entranceStatus = lastIn.type.equals("S") ? true : false
@@ -1784,7 +1776,6 @@ class EmployeeController {
 		render template: "/employee/template/last5DaysTemplate", model:model
 	}
 	
-
     def update(Long id, Long version) {
 		def siteId=params["siteId"]
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
@@ -1794,7 +1785,6 @@ class EmployeeController {
             redirect(action: "list")
             return
         }
-
         if (version != null) {
             if (employeeInstance.version > version) {
                 employeeInstance.errors.rejectValue("version", "default.optimistic.locking.failure",
@@ -1804,10 +1794,8 @@ class EmployeeController {
                 return
             }
         }		
-		log.debug('employee status: '+employeeInstance.status)
-		
+		log.debug('employee status: '+employeeInstance.status)	
         employeeInstance.properties = params
-		
 		
 		if (params["weeklyContractTime"] != null){
 			employeeInstance.weeklyContractTime = params.float("weeklyContractTime")
@@ -1852,28 +1840,23 @@ class EmployeeController {
 				if (params[k] == ''){
 					employeeInstance.extraData.remove(k)
 				}
-			}
-				
+			}		
 		}
-		
 		//employeeInstance.extraData
 		//employeeInstance.status = employeeStatus		
         if (!employeeInstance.save(flush: true)) {
             render(view: "edit", model: [employeeInstance: employeeInstance])
             return
         }
-
         flash.message = message(code: 'default.updated.message', args: [message(code: 'employee.label', default: 'Employee'), employeeInstance.userName])
         redirect(action: "edit", id: employeeInstance.id,params: [isAdmin: isAdmin,siteId:siteId])
     }
-
 	
 	def changeContractParams(){
 		def employee = Employee.get(params["userId"])
 		def contract = Contract.get(params["contractId"])
 		def newDate
-		def newValue
-		
+		def newValue		
 		if (params["newDate"] != null) {			
 			if (params["newDate"] == ''){
 				if (params["type"].contains('startDate')){
@@ -1891,7 +1874,6 @@ class EmployeeController {
 				}
 			}	
 		}
-		
 		if (params["newValue"] != null){
 			newValue = params["newValue"].toFloat()
 			contract.weeklyLength = newValue
@@ -1901,9 +1883,7 @@ class EmployeeController {
 		render template: "/employee/template/contractTable", model: model
 		return
 	}
-	
-	
-	
+		
 	def trashContract(){
 		def contractId=params["contractId"]
 		def contract = Contract.get(params["contractId"])
@@ -1916,8 +1896,7 @@ class EmployeeController {
 		return
 	}
 	
-    def delete(Long id) {
-		
+    def delete(Long id) {		
         def employeeInstance = Employee.get(id)
 		def employeeName = employeeInstance.firstName + ' ' +employeeInstance.lastName
         if (!employeeInstance) {

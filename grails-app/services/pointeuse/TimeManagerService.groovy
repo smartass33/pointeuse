@@ -1682,6 +1682,14 @@ class TimeManagerService {
 		def totalEcart = [:]
 		def totalEcartMinusRTT = [:]
 		def totalEcartMinusRTTAndHS = [:]
+		
+		////
+		def totalPeriodTheoritical = 0
+		def totalEmployees = 0
+		def presentEmployeeByMonth = [:]
+		def totalPeriodTheoriticalByMonth = [:]
+		def totalPeriodEcartByMonth = [:]
+		////
 
 		for (Employee employee:employeeInstanceList){
 			monthlySupTimeMap = [:]
@@ -1784,7 +1792,28 @@ class TimeManagerService {
 				}else{
 					totalMonthlyTheoritical.put(month, totalMonthlyTheoritical.get(month) + monthlyTheoriticalMap.get(month))			
 				}
-				if (monthlyTotalInstance!=null){				
+				
+				/////
+				if (totalPeriodTheoriticalByMonth.get(month) != null){
+					totalPeriodTheoriticalByMonth.put(month,totalPeriodTheoriticalByMonth.get(month) + totalMonthlyTheoritical.get(month) as long)
+				}else{
+					totalPeriodTheoriticalByMonth.put(month,totalMonthlyTheoritical.get(month) as long)
+				}
+				
+				
+				////
+				
+				if (monthlyTotalInstance != null){		
+					
+					////
+					if (presentEmployeeByMonth.get(month) == null){
+						presentEmployeeByMonth.put(month,1)
+					}else{
+						presentEmployeeByMonth.put(month,presentEmployeeByMonth.get(month) + 1)
+					}
+					////
+					
+							
 					monthlyActualMap.put(month, monthlyTotalInstance.elapsedSeconds + actualTime2add)
 				}else{
 					monthlyActualMap.put(month, actualTime2add)
@@ -1822,6 +1851,15 @@ class TimeManagerService {
 				}else{
 					totalEcart.put(month, totalEcart.get(month) + ecartMap.get(month))
 				}
+				
+				/////
+				
+				if (totalPeriodEcartByMonth.get(month) != null){
+					totalPeriodEcartByMonth.put(month,totalPeriodEcartByMonth.get(month) + totalEcart.get(month) as long)
+				}else{
+					totalPeriodEcartByMonth.put(month,totalEcart.get(month) as long)
+				}
+				/////
 				currentContract = data.get('currentContract')	
 				if (currentContract != null){
 					ecartMinusRTTMap.put(month, ecartMap.get(month)-(3600*(monthlyTakenRTTMap.get(month))*(currentContract.weeklyLength/Employee.WeekOpenedDays)) as long)
@@ -1844,37 +1882,12 @@ class TimeManagerService {
 					totalEcartMinusRTTAndHS.put(month, totalEcartMinusRTTAndHS.get(month) + ecartMinusRTTAndHSMap.get(month))
 				}
 			}
-			
-			
-		/*
-			monthlyTheoriticalMap.each() {
-				it.value=getTimeAsText(computeHumanTime(it.value),false)
-			}
-			monthlyActualMap.each() {
-				it.value=getTimeAsText(computeHumanTime(it.value),false)
-		   }
-			ecartMap.each() {
-				it.value=getTimeAsText(computeHumanTime(it.value),false)
-		   }
-			ecartMinusRTTMap.each() {
-				it.value=getTimeAsText(computeHumanTime(it.value),false)
-		   }
-			
-			ecartMinusRTTAndHSMap.each() {
-				it.value=getTimeAsText(computeHumanTime(it.value),false)
-		   }
-			monthlySupTimeMap.each(){
-				it.value=getTimeAsText(computeHumanTime(it.value),false)
-			}
-			
-			*/
 			monthlySupTimeMapByEmployee.put(employee,monthlySupTimeMap)
 			monthlyTheoriticalByEmployee.put(employee,monthlyTheoriticalMap)
 			monthlyActualByEmployee.put(employee,monthlyActualMap)
 			ecartByEmployee.put(employee, ecartMap)
 			ecartMinusRTTByEmployee.put(employee,ecartMinusRTTMap)
-			ecartMinusRTTAndHSByEmployee.put(employee,ecartMinusRTTAndHSMap)
-			
+			ecartMinusRTTAndHSByEmployee.put(employee,ecartMinusRTTAndHSMap)		
 			rttByEmployee.put(employee, monthlyTakenRTTMap)
 		}
 		return [
@@ -1894,10 +1907,32 @@ class TimeManagerService {
 			totalEcart:totalEcart,
 			totalEcartMinusRTT:totalEcartMinusRTT,
 			totalEcartMinusRTTAndHS:totalEcartMinusRTTAndHS,
-			totalTakenRTT:totalTakenRTT
+			totalTakenRTT:totalTakenRTT,
+			totalPeriodTheoriticalByMonth:totalPeriodTheoriticalByMonth,
+			totalPeriodEcartByMonth:totalPeriodEcartByMonth,
+			presentEmployeeByMonth:presentEmployeeByMonth		
 		]
 	}
+		/*
+	def getAllSitesEcartData(def monthList,Period period){
+		def sites = Site.findAll("from Site")
+		def siteData = []
+		def employeeCount = 0
+		def periodTheoritical = 0
+		for (Site site in sites){
+			siteData = getEcartData(site, monthList, period)
+			//Somme HR - HT
+			// nombre de salariés
+			// HT
+			siteData['monthlyTheoriticalByEmployee'].each(){
+				employeeCount ++
+				periodTheoritical += it.value
+				}
+			}
+		}
 		
+	}
+	*/
 	def getMonthlySupTime(Employee employee,int month, int year){
 		log.error('getMonthlySupTime called with month: '+month+' year: '+year)
 		int daysToWithdraw
@@ -3577,7 +3612,6 @@ class TimeManagerService {
 				calendarIter.roll(Calendar.MONTH, 1)
 			}
 		}
-		//monthlySupTime=getTimeAsText(computeHumanTime(monthlySupTime as long),false)
 		
 		def monthlySupTimeDecimal=computeHumanTime(monthlySupTime as long)
 		monthlySupTimeDecimal=(monthlySupTimeDecimal.get(0)+monthlySupTimeDecimal.get(1)/60).setScale(2,2)
@@ -3603,11 +3637,6 @@ class TimeManagerService {
 		def yearTimeOffHoursDecimal = computeHumanTime(yearTimeOffHours as long)
 		yearTimeOffHoursDecimal=(yearTimeOffHoursDecimal.get(0)+yearTimeOffHoursDecimal.get(1)/60).setScale(2,2)
 		
-		
-		
-
-		
-			
 		return [
 			monthTheoritical:monthTheoritical,
 			yearTheoritical:yearTheoritical,
