@@ -68,8 +68,9 @@
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.CSS.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.INJUSTIFIE.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.sickness.label"/></th>
-			<th style="vertical-align: middle;text-align:center;"><g:message code="employee.exceptionnel.count"/></th>
+			<th style="vertical-align: middle;text-align:center;width:"><g:message code="employee.exceptionnel.count"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="employee.paternite.count"/></th>
+			<!-- th style="vertical-align: middle;text-align:center;"><g:message code="employee.formation.count"/></th-->
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.supplementary.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.sunday.time.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.bank.holiday.time.label"/></th>
@@ -102,6 +103,8 @@
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('sickness')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('exceptionnel')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('paternite')}</td>
+					<!--  td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('formation')}</td-->
+
 					<td style="vertical-align: middle;text-align:right;">
 						<g:if test="${yearMonthlySupTime.get(cartouche.key) !=null}"><my:humanTimeTD id="yearMonthlySupTime"  name="yearMonthlySupTime" value="${yearMonthlySupTime.get(cartouche.key)} "/></g:if>
 					</td>					

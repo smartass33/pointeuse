@@ -1923,7 +1923,6 @@ class EmployeeController {
 				(mysqldump_folder+'/mysqldump -u root --no-create-info --where=employee_id='+employeeInstance.id+' --ignore-table=pointeuse.absence_type_config --ignore-table=pointeuse.authorization_nature --ignore-table=pointeuse.authorization_type --ignore-table=pointeuse.bank_holiday --ignore-table=pointeuse.card_terminal --ignore-table=pointeuse.employee_data_list_map --ignore-table=pointeuse.employee_data_list_map_field_map --ignore-table=pointeuse.employee_data_list_map_hidden_field_map --ignore-table=pointeuse.employee_extra_data --ignore-table=pointeuse.event_log --ignore-table=pointeuse.exception_logger --ignore-table=pointeuse.function --ignore-table=pointeuse.period --ignore-table=pointeuse.reason --ignore-table=pointeuse.role --ignore-table=pointeuse.service --ignore-table=pointeuse.site --ignore-table=pointeuse.site_user --ignore-table=pointeuse.status --ignore-table=pointeuse.user --ignore-table=pointeuse.user_role --ignore-table=pointeuse.year --ignore-table=pointeuse.employee --ignore-table=pointeuse.dummy --ignore-table=pointeuse.monthly_total_weekly_total -C pointeuse --result-file='+file2).execute()
 			})
 			threads << dump2_thread		
-	
 			threads.each { it.start() }
 			threads.each { it.join() }
 			def delete_thread = new Thread({

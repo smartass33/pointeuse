@@ -5,9 +5,7 @@
 <h1 style="padding:15px">
 	<g:message code="yearly.recap.label"/> ${lastYear} / ${thisYear} : <g:if test="${employee != null }">${employee.firstName} ${employee.lastName}</g:if>
 	<g:set var="calendar" value="${Calendar.instance}"/>
-	
 </h1>
-
 
 <table id="table-header-rotated" style="width:100%;"class="table table-striped table-header-rotated" >
 	<BR>
@@ -17,14 +15,15 @@
 		<th class='rotate-45'  style="width:60px"><div><span><g:message code="annual.report.working.days"/></span></div></th>			
 		<th class='rotate-45'><div><span><g:message code="annual.report.theoritical.label"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.report.elapsed.label"/></span></div></th>
-		<th class='rotate-45' style="width:55px"><div><span><g:message code="annual.report.holidays.label"/></span></div></th>
-		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>	
-		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.RTT.label"/></span></div></th>
-		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
-		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
-		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>
+		<th class='rotate-45' style="width:45px"><div><span><g:message code="annual.report.holidays.label"/></span></div></th>
+		<th class='rotate-45'  style="width:54px"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>	
+		<th class='rotate-45'  style="width:45px"><div><span><g:message code="annual.report.RTT.label"/></span></div></th>
+		<th class='rotate-45'  style="width:45px"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
+		<th class='rotate-45'  style="width:50px"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
+		<th class='rotate-45'  style="width:50px"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>
 		<th class='rotate-45'  style="width:75px"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
-		<th class='rotate-45'  style="width:70px"><div><span><g:message code="employee.paternite.count"/></span></div></th>		
+		<th class='rotate-45'  style="width:65x"><div><span><g:message code="employee.paternite.count"/></span></div></th>		
+		<th class='rotate-45'  style="width:50px"><div><span><g:message code="employee.formation.count"/></span></div></th>		
 		<th class='rotate-45'><div><span><g:message code="annual.report.supplementary.label"/></span></div></th>
 		<th class='rotate-45'  style="width:65px"><div><span><g:message code="annual.report.sunday.time.label"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.report.bank.holiday.time.label"/></span></div></th>
@@ -60,6 +59,7 @@
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sickness')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('exceptionnel')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('paternite')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('formation')}</td>			
 				<td style="vertical-align: middle;text-align:right;">
 					<g:if test="${yearMonthlySupTime.get(cartouche.key) !=null}"><my:humanTimeTD id="yearMonthlySupTime"  name="yearMonthlySupTime" value="${yearMonthlySupTime.get(cartouche.key)} "/></g:if>
 				</td>	
@@ -90,6 +90,8 @@
 		<td style="vertical-align: middle;text-align:center;">${annualSickness}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualExceptionnel}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualPaternite}</td>
+		<td style="vertical-align: middle;text-align:center;">${annualFormation}</td>
+		
 		<td style="vertical-align: middle;text-align:right;">
 		<g:if test="${annualMonthlySupTime !=null}">
 			<my:humanTimeTD id="annualMonthlySupTime"  name="annualMonthlySupTime" value="${annualMonthlySupTime}"/>
