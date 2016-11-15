@@ -1508,9 +1508,7 @@ class EmployeeController {
 		return 
 	}
 	
-	
-	
-	
+
 	def getAjaxOffHoursTime(Long id){
 		log.error('getOffHoursTime called')
 		def year = params.int('year')

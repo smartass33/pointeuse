@@ -312,8 +312,6 @@
 	        						</table>
 	        					</td>	
 							</tr>
-							
-							
 							<g:if test="${monthlySupTime!=null}">						
 								<tr>
 									<td style="text-align:left;">${message(code: 'employee.monthly.sup.above.42.time', default: 'report')} :</td>				
@@ -322,8 +320,7 @@
 		        							<thead></thead>
 		        							<tr>
 		        								<td style="font-weight:bold">	  					
-													${monthlySupTime} ou ${monthlySupTimeDecimal}
-
+													<my:humanTimeTD id="monthlySupTime" name="monthlySupTime" value="${monthlySupTime}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="monthlySupTimeDecimal"  name="monthlySupTimeDecimal" value="${monthlySupTime}"/>
 							  					</td>
 							  				</tr>
 		        						</table>
@@ -332,7 +329,7 @@
 									<td>
 		        						<table border="1" class="cartoucheValues" >
 		        							<thead></thead>
-		        							<tr><td style="font-weight:bold">${ajaxYearlySupTime} ou ${ajaxYearlySupTimeDecimal}</td></tr>
+		        							<tr><td style="font-weight:bold"><my:humanTimeTD id="ajaxYearlySupTime" name="ajaxYearlySupTime" value="${ajaxYearlySupTime}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="ajaxYearlySupTimeDecimal"  name="ajaxYearlySupTimeDecimal" value="${ajaxYearlySupTime}"/></td></tr>
 		        						</table>
 		        					</td>
 								</tr>
@@ -346,7 +343,7 @@
 										<td>
 			        						<table border="1" class="cartoucheValues" >
 			        							<thead></thead>
-			        							<tr><td style="font-weight:bold">${payableCompTime.get(0)}:${payableCompTime.get(1)}</td></tr>
+			        							<tr><td style="font-weight:bold"><my:humanTimeDecimalTD id="payableCompTime"  name="payableCompTime" value="${payableCompTime}"/></td></tr>
 			        						</table>
 			        					</td>
 			        					
@@ -359,29 +356,29 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${timeBefore7} ou ${timeBefore7Decimal}</td></tr>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="timeBefore7" name="timeBefore7" value="${timeBefore7}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeBefore7"  name="timeBefore7" value="${timeBefore7}"/></td></tr>
 	        						</table>
 	        					</td>
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${yearTimeBefore7} ou ${yearTimeBefore7Decimal}	 </td></tr>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="yearTimeBefore7" name="yearTimeBefore7" value="${yearTimeBefore7}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeBefore7Decimal"  name="yearTimeBefore7Decimal" value="${yearTimeBefore7}"/></td></tr>
 	        						</table>
 	        					</td>	        					
 	        					
 							</tr>	
 							<tr>
 								<td style="text-align:left;">${message(code: 'employee.monthly.timeAfter20', default: 'report')} :</td>				
-								<td>
+								<td> 
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${timeAfter20} ou ${timeAfter20Decimal}</td></tr>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="timeAfter20"  name="timeAfter20" value="${timeAfter20}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeAfter20Decimal"  name="timeAfter20Decimal" value="${timeAfter20}"/></td></tr>
 	        						</table>
 	        					</td>
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${yearTimeAfter20} ou ${yearTimeAfter20Decimal}</td></tr>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="yearTimeAfter20"  name="yearTimeAfter20" value="${yearTimeAfter20}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeAfter20Decimal"  name="yearTimeAfter20Decimal" value="${yearTimeAfter20}"/></td></tr>
 	        						</table>
 	        					</td>
 							</tr>	
@@ -390,13 +387,13 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${timeOffHours} ou ${timeOffHoursDecimal}</td></tr>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="timeOffHours"  name="timeOffHours" value="${timeOffHours}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeOffHours"  name="timeOffHours" value="${timeOffHours}"/></td></tr>
 	        						</table>
 	        					</td>
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold">${yearTimeOffHours} ou ${yearTimeOffHoursDecimal}</td></tr>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="yearTimeOffHours"  name="yearTimeOffHours" value="${yearTimeOffHours}"/>${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeOffHoursDecimal"  name="yearTimeOffHoursDecimal" value="${yearTimeOffHours}"/></td></tr>
 	        						</table>
 	        					</td>
 							</tr>																											
