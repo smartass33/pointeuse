@@ -2,8 +2,14 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	<gvisualization:apiImport/> 
-	    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+		<script type="text/javascript"> 
+			window.initMap = function(){
+			//alert("ok");
+		}	
+	
+		</script>
+		<gvisualization:apiImport/> 
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAX3_gqxz5Zs-mrTDDmB7YCEnOQePhNhvw&callback=initMap" async defer></script>
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'site.label', default: 'Site')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>		
@@ -31,3 +37,5 @@
 		</div>
 	</body>
 </html>
+
+

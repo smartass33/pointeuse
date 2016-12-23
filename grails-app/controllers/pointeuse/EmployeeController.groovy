@@ -1549,6 +1549,145 @@ class EmployeeController {
 	}
 	
 	
+	def modifyAllAbsence(){
+		log.error('entering modifyAllAbsence')
+		
+		def employee = Employee.get(params.int('employeeId'))
+		def updatedSelection = params["updatedSelection"].toString()
+		if (updatedSelection.equals('G'))
+			updatedSelection = AbsenceType.GROSSESSE
+		if (updatedSelection.equals('-'))
+			updatedSelection = AbsenceType.ANNULATION
+		if (updatedSelection.equals('M'))
+			updatedSelection = AbsenceType.MALADIE
+		if (updatedSelection.equals('FO'))
+			updatedSelection = AbsenceType.FORMATION
+		if (updatedSelection.equals('CE'))
+			updatedSelection = AbsenceType.EXCEPTIONNEL
+		
+			if (updatedSelection.equals('RTT'))
+			updatedSelection = AbsenceType.RTT
+			
+			if (updatedSelection.equals('V'))
+			updatedSelection = AbsenceType.VACANCE
+			
+			if (updatedSelection.equals('R'))
+			updatedSelection = AbsenceType.AUTRE
+			
+			if (updatedSelection.equals('CSS'))
+			updatedSelection = AbsenceType.CSS
+			
+			if (updatedSelection.equals('F'))
+			updatedSelection = AbsenceType.FERIE
+			
+			if (updatedSelection.equals('CP'))
+			updatedSelection = AbsenceType.PATERNITE
+			
+			if (updatedSelection.equals('DIF'))
+			updatedSelection = AbsenceType.DIF
+			
+			if (updatedSelection.equals('AI'))
+			updatedSelection = AbsenceType.INJUSTIFIE
+			
+
+			
+			
+			
+		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
+		Date date = dateFormat.parse(params["period"])
+		def calendarLoop= Calendar.instance
+		def criteria
+		calendarLoop.time=date
+		calendarLoop.set(Calendar.DAY_OF_MONTH,1)
+		log.error(calendarLoop.time)
+		
+		
+		
+		// check if an absence was already logged:
+			
+		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendarLoop.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			if (!updatedSelection.equals('')){
+				criteria = Absence.createCriteria()
+				// get cumul holidays
+				def absence = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('year',calendarLoop.get(Calendar.YEAR))
+						eq('month',calendarLoop.get(Calendar.MONTH)+1)
+						eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+					}
+				}
+		
+				if (absence != null){
+					if (updatedSelection.equals(AbsenceType.ANNULATION.key)){
+						// annulation nécessaire: il faut effacer le tupple
+						absence.delete(flush: true)
+					}else{
+						absence.type=updatedSelection
+						if (absence.month < 6){
+							absence.period=Period.findByYear(absence.year - 1)
+						}else{
+							absence.period=Period.findByYear(absence.year)
+						}
+						absence.save(flush: true)
+					}
+				}else {
+					if (!updatedSelection.equals(AbsenceType.ANNULATION)){
+						absence = new Absence()
+						absence.date=date
+						absence.employee=employee
+						absence.day=calendarLoop.get(Calendar.DAY_OF_MONTH)
+						absence.month=calendarLoop.get(Calendar.MONTH)+1
+						absence.year=calendarLoop.get(Calendar.YEAR)
+						absence.type=updatedSelection
+						if (absence.month < 6){
+							absence.period=Period.findByYear(absence.year - 1)
+						}else{
+							absence.period=Period.findByYear(absence.year)
+						}
+						absence.save(flush: true)
+					}
+				}
+			}else{
+				flash.message=message(code: 'absence.impossible.update')
+			}
+			if (calendarLoop.get(Calendar.DAY_OF_MONTH) == calendarLoop.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				break
+			}
+			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)	
+		}
+
+		def cartoucheTable = timeManagerService.getReportData(null, employee,  null, calendarLoop.get(Calendar.MONTH) + 1, calendarLoop.get(Calendar.YEAR),true)
+		def openedDays = timeManagerService.computeMonthlyHours(calendarLoop.get(Calendar.YEAR),calendarLoop.get(Calendar.MONTH) + 1)
+		def yearInf
+		def yearSup
+		if ((calendarLoop.get(Calendar.MONTH) + 1) > 5){
+			yearInf=calendarLoop.get(Calendar.YEAR)
+			yearSup=calendarLoop.get(Calendar.YEAR) + 1
+		}else{
+			yearInf=calendarLoop.get(Calendar.YEAR) - 1
+			yearSup=calendarLoop.get(Calendar.YEAR)
+		}
+		Period period = ((calendarLoop.get(Calendar.MONTH) + 1) > 5)?Period.findByYear(calendarLoop.get(Calendar.YEAR)):Period.findByYear(calendarLoop.get(Calendar.YEAR) - 1)
+		def model=[
+			period2:period,
+			period:calendarLoop.time,
+			firstName:employee.firstName,
+			lastName:employee.lastName,
+			weeklyContractTime:employee.weeklyContractTime,
+			matricule:employee.matricule,
+			yearInf:yearInf,
+			yearSup:yearSup,
+			employee:employee,
+			openedDays:openedDays
+			]
+		model << cartoucheTable
+		log.error('modifyAllAbsence finished')
+		render template: "/employee/template/cartoucheTemplate", model:model
+		return
+	}
+	
+		
 	def modifyAbsence(){
 		def employee = Employee.get(params.int('employeeId'))
 		def day = params["day"]
@@ -2816,7 +2955,6 @@ class EmployeeController {
 	}
 	
 	def addNewContract = {
-		params.each{i-> log.error(i)}
 		log.error('addNewContract called')
 		Contract contract = new Contract()
 		Employee employee = Employee.get(params.id)

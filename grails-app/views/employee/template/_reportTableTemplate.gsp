@@ -14,7 +14,18 @@
 	      <th>localisation</th>
 	      <th>${message(code: 'report.table.daily.total.label', default: 'report')}</th>
 	      <th>${message(code: 'report.table.HS.label', default: 'report')}</th>
-	      <th>${message(code: 'report.table.absence.label', default: 'report')}</th>
+	      <th>
+	      	${message(code: 'report.table.absence.label', default: 'report')}    
+             <g:select width="50px"
+                    onchange="${remoteFunction(action:'modifyAllAbsence', update:'cartouche_div', 
+	  				params:'\'employeeId=' + employee.id 	
+					+ '&period=' + period.format('dd/MM/yyyy')
+	  				+ '&updatedSelection=\' + this.value'								  
+	  				)}"
+                    name="absenceType" from="${AbsenceType.values()}"
+                    value="${AbsenceType}"
+                    noSelection="${['-':'']}" />	
+	      	</th>
 	      <th colspan="80">${message(code: 'events.label', default: 'report')}</th>
 	    </thead>
 	    <tbody>

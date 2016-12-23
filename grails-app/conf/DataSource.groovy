@@ -13,6 +13,8 @@ hibernate {
 
 environments {
     development {
+		
+		/*
         dataSource {
 		    pooled = true
 		    dbCreate = "update"
@@ -31,26 +33,77 @@ environments {
 				timeBetweenEvictionRunsMillis = 60000
 				maxWait = 10000			}
 		}
+		*/
+		
+		dataSource {
+			pooled = true
+			dbCreate = "update"
+			url = "jdbc:mariadb://localhost:3306/pointeuse"
+			driverClassName = "org.mariadb.jdbc.Driver"
+			username = "root"
+			password = ""
+			
+			properties {
+				maxActive = 50
+				maxIdle = 25
+				minIdle = 5
+				initialSize = 5
+				minEvictableIdleTimeMillis=60000
+				timeBetweenEvictionRunsMillis=60000
+				numTestsPerEvictionRun=3
+				testOnBorrow=true
+				testWhileIdle=true
+				testOnReturn=true
+				validationQuery="SELECT 1"
+			}
+		}
     }
+	
+	
+	aws {
+		dataSource {
+			pooled = true
+			dbCreate = "update"
+			url = "jdbc:mariadb://pointeuse.cjwt4qnapscg.eu-west-1.rds.amazonaws.com:3306/pointeuse"
+			driverClassName = "org.mariadb.jdbc.Driver"
+			username = "pointeuse"
+			password = "pointeuse"
+			properties {
+				maxActive = 50
+				maxIdle = 25
+				minIdle = 5
+				initialSize = 5
+				minEvictableIdleTimeMillis=60000
+				timeBetweenEvictionRunsMillis=60000
+				numTestsPerEvictionRun=3
+				testOnBorrow=true
+				testWhileIdle=true
+				testOnReturn=true
+				validationQuery="SELECT 1"
+			}
+		}
+	}
 	
 	alrikiki {
 		dataSource {
 			pooled = true
 			dbCreate = "update"
-			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
-			driverClassName = "com.mysql.jdbc.Driver"
+			url = "jdbc:mariadb://localhost:3306/pointeuse"
+			driverClassName = "org.mariadb.jdbc.Driver"
 			username = "root"
 			password = "root"
 			properties {
-				maxActive = 100
+				maxActive = 50
 				maxIdle = 25
-				minIdle = 20
-				initialSize = 20
-				maxWait = 10000
-				validationQuery = "select 1"
-				testOnBorrow = true
-				testWhileIdle = true
-				testOnReturn = true
+				minIdle = 5
+				initialSize = 5
+				minEvictableIdleTimeMillis=60000
+				timeBetweenEvictionRunsMillis=60000
+				numTestsPerEvictionRun=3
+				testOnBorrow=true
+				testWhileIdle=true
+				testOnReturn=true
+				validationQuery="SELECT 1"
 			}
 		}
 	

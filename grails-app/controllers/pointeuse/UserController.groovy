@@ -24,7 +24,7 @@ class UserController {
         redirect(action: "list", params: params)
     }
 
-	@Secured(['ROLE_ADMIN'])
+	//@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
         params.max = Math.min(max ?: 10, 100)
 		def userInstanceList = User.list(params)
@@ -46,7 +46,8 @@ class UserController {
     def create() {
         [userInstance: new User(params)]
     }
-	@Secured(['ROLE_SUPER_ADMIN'])
+	
+	//@Secured(['ROLE_SUPER_ADMIN'])
     def save() {
 		def role = params["role"].get('id')
         def userInstance = new User(params)			
@@ -73,7 +74,7 @@ class UserController {
 
         [userInstance: userInstance]
     }
-	@Secured(['ROLE_SUPER_ADMIN'])
+	//@Secured(['ROLE_SUPER_ADMIN'])
     def edit(Long id) {
         def userInstance = User.get(id)
         if (!userInstance) {
@@ -85,7 +86,7 @@ class UserController {
         [userInstance: userInstance]
     }
 
-	@Secured(['ROLE_SUPER_ADMIN'])
+	//@Secured(['ROLE_SUPER_ADMIN'])
     def update(Long id, Long version) {
 		def site
         def userInstance = User.get(id)
@@ -135,7 +136,7 @@ class UserController {
         redirect(action: "show", id: userInstance.id)
     }
 
-	@Secured(['ROLE_SUPER_ADMIN'])
+	//@Secured(['ROLE_SUPER_ADMIN'])
     def delete(Long id) {
         def userInstance = User.get(id)
         if (!userInstance) {

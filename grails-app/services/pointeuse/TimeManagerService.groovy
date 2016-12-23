@@ -1576,9 +1576,7 @@ class TimeManagerService {
 		def payableCompTime = 0
 		if (currentContract != null && currentContract.weeklyLength != Employee.legalWeekTime && data.get('monthlyTotalTime') > monthTheoritical){
 			payableCompTime = Math.round(Math.max(data.get('monthlyTotalTime')-monthTheoritical-data.get('monthlySupTime'),0))
-		}
-		//def monthlySupTime = computeHumanTime(data.get('monthlySupTime') as long)
-		
+		}		
 		monthlyTotalTimeByEmployee.put(employee, computeHumanTime(data.get('monthlyTotalTime')))
 		def monthlyTotal=computeHumanTime(data.get('monthlyTotalTime'))
 		monthTheoritical = computeHumanTime(cartoucheTable.get('monthTheoritical'))
@@ -1592,32 +1590,13 @@ class TimeManagerService {
 				departureDate = employee.status.date
 			}
 		}	
-		/*
-		def monthlySupTimeDecimal=(monthlySupTime.get(0)+monthlySupTime.get(1)/60).setScale(2,2)
-				
-		def timeBefore7Decimal=computeHumanTime(data.get('timeBefore7') as long)
-		timeBefore7Decimal=(timeBefore7Decimal.get(0)+timeBefore7Decimal.get(1)/60).setScale(2,2)
-		
-		def timeAfter20Decimal=computeHumanTime(data.get('timeAfter20') as long)
-		timeAfter20Decimal=(timeAfter20Decimal.get(0)+timeAfter20Decimal.get(1)/60).setScale(2,2)
-		
-		def timeOffHoursDecimal=computeHumanTime(data.get('timeOffHours') as long)
-		timeOffHoursDecimal= (timeOffHoursDecimal.get(0)+timeOffHoursDecimal.get(1)/60).setScale(2,2)
-		*/
-		
+
 		return [
 			yearOpenDays:yearOpenDays,
 			monthlySupTime:data.get('monthlySupTime') as long,
-			//timeBefore7:getTimeAsText(computeHumanTime(data.get('timeBefore7')),false),
 			timeBefore7:data.get('timeBefore7') as long,	
 			timeAfter20:data.get('timeAfter20') as long,	
 			timeOffHours:data.get('timeOffHours') as long,
-			/*
-			monthlySupTimeDecimal:monthlySupTimeDecimal,
-			timeBefore7Decimal:timeBefore7Decimal,
-			timeAfter20Decimal:timeAfter20Decimal,
-			timeOffHoursDecimal:timeOffHoursDecimal,
-			*/
 			initialCA:initialCA,
 			initialRTT:initialRTT,	
 			isCurrentMonth:isCurrentMonth,
@@ -2532,7 +2511,8 @@ class TimeManagerService {
 				eq('type',AbsenceType.VACANCE)
 			}
 		}
-		absenceMap.put(AbsenceType.VACANCE, holidays.size())		
+		absenceMap.put(AbsenceType.VACANCE, holidays.size())	
+			
 		criteria = Absence.createCriteria()
 		def exceptionnel = criteria.list {
 			and {
@@ -2553,7 +2533,7 @@ class TimeManagerService {
 				eq('type',AbsenceType.FORMATION)
 			}
 		}
-		absenceMap.put(AbsenceType.EXCEPTIONNEL, formation.size())
+		absenceMap.put(AbsenceType.FORMATION, formation.size())
 		
 		criteria = Absence.createCriteria()
 		def paternite = criteria.list {
@@ -3656,35 +3636,7 @@ class TimeManagerService {
 				calendarIter.roll(Calendar.MONTH, 1)
 			}
 		}
-		
-		/*
-		def monthlySupTimeDecimal=computeHumanTime(monthlySupTime as long)
-		monthlySupTimeDecimal=(monthlySupTimeDecimal.get(0)+monthlySupTimeDecimal.get(1)/60).setScale(2,2)
-			
-		def timeBefore7Decimal = computeHumanTime(timeBefore7 as long) 
-		timeBefore7Decimal=(timeBefore7Decimal.get(0)+timeBefore7Decimal.get(1)/60).setScale(2,2)
-		
-		def timeAfter20Decimal = computeHumanTime(timeAfter20 as long) 
-		timeAfter20Decimal=(timeAfter20Decimal.get(0)+timeAfter20Decimal.get(1)/60).setScale(2,2)
-		
-		def timeOffHoursDecimal = computeHumanTime(timeOffHours as long)
-		timeOffHoursDecimal= (timeOffHoursDecimal.get(0)+timeOffHoursDecimal.get(1)/60).setScale(2,2)
-		
-		def ajaxYearlySupTimeDecimal = computeHumanTime(yearSupTime as long)
-		ajaxYearlySupTimeDecimal= (ajaxYearlySupTimeDecimal.get(0)+ajaxYearlySupTimeDecimal.get(1)/60).setScale(2,2)
-		
-		def yearTimeBefore7Decimal =computeHumanTime(yearTimeBefore7 as long)
-		yearTimeBefore7Decimal= (yearTimeBefore7Decimal.get(0)+yearTimeBefore7Decimal.get(1)/60).setScale(2,2)
-		
-		def yearTimeAfter20Decimal = computeHumanTime(yearTimeAfter20 as long) 
-		yearTimeAfter20Decimal= (yearTimeAfter20Decimal.get(0)+yearTimeAfter20Decimal.get(1)/60).setScale(2,2)
-		
-		def yearTimeOffHoursDecimal = computeHumanTime(yearTimeOffHours as long)
-		yearTimeOffHoursDecimal=(yearTimeOffHoursDecimal.get(0)+yearTimeOffHoursDecimal.get(1)/60).setScale(2,2)
-		*/
-		// monthly theoritical + sup time:
-		//def monthlyHT_HS
-		
+
 		return [
 			monthTheoritical:monthTheoritical as long,
 			yearTheoritical:yearTheoritical as long,
@@ -3696,19 +3648,8 @@ class TimeManagerService {
 			yearTimeBefore7:yearTimeBefore7 as long,
 			yearTimeAfter20:yearTimeAfter20 as long,
 			yearTimeOffHours:yearTimeOffHours as long
-			/*,			
-			monthlySupTimeDecimal:monthlySupTimeDecimal,
-			timeBefore7Decimal:timeBefore7Decimal,
-			timeAfter20Decimal:timeAfter20Decimal,
-			timeOffHoursDecimal:timeOffHoursDecimal,
-			ajaxYearlySupTimeDecimal:ajaxYearlySupTimeDecimal,
-			yearTimeBefore7Decimal:yearTimeBefore7Decimal,
-			yearTimeAfter20Decimal:yearTimeAfter20Decimal,
-			yearTimeOffHoursDecimal:yearTimeOffHoursDecimal*/
-			]	
+		]	
 	}
-	
-	
 
 	def retrieveOffHoursTime(Employee employee,int year,int month){
 		def monthNumber=0
@@ -3773,9 +3714,7 @@ class TimeManagerService {
 		// 2 cases: either min date is greater than 1st of the year, then 1 loop. Otherwise, 2 loops.
 		if (minDate.getAt(Calendar.YEAR) == maxDate.getAt(Calendar.YEAR)){
 			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
-				log.debug('calendarIter: '+calendarIter.time)
-				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
-				
+				log.debug('calendarIter: '+calendarIter.time)				
 				criteria = MonthlyTotal.createCriteria()
 				 monthlyTotal = criteria.get {
 						and {
@@ -3802,9 +3741,6 @@ class TimeManagerService {
 		}else{
 			while(calendarIter.get(Calendar.MONTH) <= 11){
 				log.debug('calendarIter: '+calendarIter.time)
-				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
-				
-				
 				criteria = MonthlyTotal.createCriteria()
 				monthlyTotal = criteria.get {
 					   and {
@@ -3832,7 +3768,6 @@ class TimeManagerService {
 			
 			while(calendarIter.get(Calendar.MONTH) <= maxDate.getAt(Calendar.MONTH)){
 				log.debug('calendarIter: '+calendarIter.time)
-				//data = computeOffTimeTotals( employee, calendarIter.get(Calendar.MONTH)+1, calendarIter.get(Calendar.YEAR))
 				criteria = MonthlyTotal.createCriteria()
 				 monthlyTotal = criteria.get {
 					and {

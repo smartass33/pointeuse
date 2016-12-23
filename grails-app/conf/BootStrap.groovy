@@ -6,13 +6,16 @@ import java.util.Calendar
 import pointeuse.InAndOutCLosingJob
 import pointeuse.SiteAnnualReportJob
 import pointeuse.EventLogAppender
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
+import grails.util.GrailsUtil
 
 class BootStrap {
 
 	def grailsApplication
 	//def springSecurityService
-
-	
+	def executorService
+	def scheduledExecutorService
 	
     def init = { servletContext ->
 		log.error 'executing bootstrap'
@@ -23,21 +26,9 @@ class BootStrap {
 		log.error 'registring InAndOutCLosingJob at '+calendar.time
 		InAndOutCLosingJob.schedule(calendar.time)
 		
-		
 		calendar.set(Calendar.HOUR_OF_DAY,03)
 		calendar.set(Calendar.MINUTE,30)
-		//SupTimeComputationJob.schedule(calendar.time)
-		//log.error 'registring SupTimeComputationJob at '+calendar.time
-		
 
-		
-		/*
-		calendar.set(Calendar.HOUR_OF_DAY,3)
-		calendar.set(Calendar.MINUTE,0)
-		log.error 'registring SiteMonthlyPDFJob at '+calendar.time
-		SiteMonthlyPDFJob.schedule(calendar.time,[folder:grailsApplication.config.pdf.directory])
-		*/
-		
 		//create a calendar to schedule next JOB first day of month
 		def firstDayCalendar = Calendar.instance
 		firstDayCalendar.set(Calendar.MONTH,firstDayCalendar.get(Calendar.MONTH) + 1)
@@ -45,12 +36,15 @@ class BootStrap {
 		firstDayCalendar.set(Calendar.HOUR_OF_DAY,3)
 		firstDayCalendar.set(Calendar.MINUTE,0)
 		SiteAnnualReportJob.schedule(firstDayCalendar.time)
-		
-		
-		
-		
-		
     }
+
     def destroy = {
+		switch (GrailsUtil.environment) {
+			case "aws":
+				executorService.shutdown()
+				scheduledExecutorService.close()
+				break
+		}
+
     }
 }

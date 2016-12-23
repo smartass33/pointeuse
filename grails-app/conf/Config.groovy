@@ -93,12 +93,46 @@ environments {
 				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
 				   'org.codehaus.groovy.grails.commons',            // core / classloading
 				   'org.codehaus.groovy.grails.plugins'            // plugins
+			debug 'org.springframework.security'
 			root {
 				warn 'rollingFileAppender','stdout'//,'eventLogAppender'
 			}
 		}
     }
 
+	aws {
+		pdf.directory='/opt/tomcat/pdf'
+		mysqldump.directory='/usr/bin'
+		grails.app.context=''
+		grails.logging.jul.usebridge = false
+		grails.resources.processing.enabled=false
+		//serverURL = "http://192.168.1.17"
+		serverURL = "http://ec2-54-154-203-127.eu-west-1.compute.amazonaws.com"
+		context=''
+		log4j = {
+				'null' name:'stacktrace'
+				appenders {
+					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+				}
+			
+				
+				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
+				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
+					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+					   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
+					   'org.codehaus.groovy.grails.commons',            // core / classloading
+					   'org.codehaus.groovy.grails.plugins',            // plugins
+					   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
+					   'org.springframework',
+					   'org.hibernate',
+					   'net.sf.ehcache.hibernate'
+					  debug 'org.springframework.security'
+				root {
+					warn 'myAppender'//,'rollingFile'
+				}
+			}
+	}
+	
 	alrikiki {
 		pdf.directory='/opt/tomcat/pdf'
 		mysqldump.directory='/usr/local/mysql/bin'
@@ -134,7 +168,6 @@ environments {
 		mysqldump.directory='/usr/local/mysql/bin'
 		grails.app.context=''
 		grails.logging.jul.usebridge = false
-		//serverURL = "http://192.168.1.17"
 		serverURL = "http://10.33.6.10"
 		context=''
 		log4j = {
@@ -164,7 +197,6 @@ environments {
 		pdf.directory='/opt/tomcat/pdf'
 		grails.app.context=''
 		grails.logging.jul.usebridge = false
-		//serverURL = "http://192.168.1.17"
 		serverURL = "http://10.33.6.112"
 		context=''
 		log4j = {
