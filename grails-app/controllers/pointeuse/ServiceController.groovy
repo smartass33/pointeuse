@@ -1,8 +1,7 @@
 package pointeuse
 
 import org.springframework.dao.DataIntegrityViolationException
-import grails.plugins.springsecurity.Secured
-
+import grails.plugin.springsecurity.annotation.Secured
 class ServiceController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]

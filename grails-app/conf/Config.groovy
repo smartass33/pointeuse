@@ -92,7 +92,7 @@ environments {
 				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
 				   'org.codehaus.groovy.grails.commons',            // core / classloading
 				   'org.codehaus.groovy.grails.plugins'            // plugins
-			debug 'org.springframework.security'
+			trace 'org.springframework.security'
 			root {
 				warn 'rollingFileAppender','stdout'//,'eventLogAppender'
 			}
@@ -246,23 +246,27 @@ grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'pointeuse.Use
 grails.plugins.springsecurity.authority.className = 'pointeuse.Role'
 grails.plugins.springsecurity.auth.loginFormUrl = '/login/auth'
 grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
+grails.plugin.springsecurity.password.algorithm = 'SHA-256'
+grails.plugin.springsecurity.password.hash.iterations = 1
+grails.plugin.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
+
 
 // Added by the Spring Security Core plugin:
-//grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-//	'/':                		['permitAll'],
-//	'/index':           		['permitAll'],
-//	'/employee/pointage/**':	['permitAll'],
-//	'/employee/pointage':		['permitAll'],
-//	'/index.gsp':       		['permitAll'],
-//	'/pointeuse/assets/**':		['permitAll'],
-//	'/assets/**':				['permitAll'],
-//	'**/assets/**':       		['permitAll'],
-//	'/**/js/**':        		['permitAll'],
-//	'/**/css/**':       		['permitAll'],
-//	'/**/images/**':    		['permitAll'],
-//	'/register/**':    			['permitAll'],
-//	'/**/favicon.ico':  		['permitAll']
-//]
+grails.plugin.springsecurity.controllerAnnotations.staticRules = [
+	'/':                		['permitAll'],
+	'/index':           		['permitAll'],
+	'/employee/pointage/**':	['permitAll'],
+	'/employee/pointage':		['permitAll'],
+	'/index.gsp':       		['permitAll'],
+	'/pointeuse/assets/**':		['permitAll'],
+	'/assets/**':				['permitAll'],
+	'**/assets/**':       		['permitAll'],
+	'/**/js/**':        		['permitAll'],
+	'/**/css/**':       		['permitAll'],
+	'/**/images/**':    		['permitAll'],
+	'/register/**':    			['permitAll'],
+	'/**/favicon.ico':  		['permitAll']
+]
 /*
 grails.plugin.springsecurity.auth.loginFormUrl = '/login/auth'
 grails.plugin.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
