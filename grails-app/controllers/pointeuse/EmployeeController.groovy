@@ -26,6 +26,7 @@ import java.util.concurrent.*
 import groovyx.gpars.GParsConfig
 import groovyx.gpars.GParsPool
 
+
 class EmployeeController {	
 	def PDFService
 	def utilService
@@ -46,11 +47,12 @@ class EmployeeController {
 	private static final log = LogFactory.getLog(this)
 	
 	
-
+	@Secured(['ROLE_ADMIN'])
     def index() {
         redirect(action: "list", params: params)
     }
 
+	@Secured(['ROLE_ADMIN'])
 	def modifyAbsenceCounter(){
 		def year=params["year"]
 		def userId=params["userId"]
@@ -161,57 +163,8 @@ class EmployeeController {
 						  
 					  }
 					  employeeInstanceList.addAll(employeeSubList)
-				 }
-							  
+				 }							  
 			 }
-
-			 /*
-			 
-			for (Function function:functionList){
-				for (Service service:serviceList){					 
-					 criteria = Employee.createCriteria()
-					 
-					 if (foreignEmployeesIds != null && foreignEmployeesIds.size() > 0){
-						 employeeSubList = criteria.list{
-							// or{
-								 
-								 and {
-									 eq('function',function)
-									 eq('service',service)
-									 eq('site',site)
-								 }
-								 
-								 and {
-									 eq('function',function)
-									 eq('service',service)
-									 'in'("id",foreignEmployeesIds)
-								 }							 
-								 order('lastName','asc')							 
-							// }
-						 }
-					 }
-					 else{
-						 employeeSubList = criteria.list{
-							 or{
-								 and {
-									 eq('function',function)
-									 eq('service',service)
-									 eq('site',site)
-								 }
-								 order('lastName','asc')								 
-							 }
-						 }
-						 
-					 }
-					 employeeInstanceList.addAll(employeeSubList)
-				}
-							 
-			}
-		*/
-		//	employeeInstanceList = []
-			//def myNewEmployeeList = []
-
-			 
 		}else{
 			employeeInstanceList = []
 			for (Service service:serviceList){
@@ -553,6 +506,7 @@ class EmployeeController {
 		
     }
 	
+	@Secured(['ROLE_ADMIN'])
     def create() {
 		def service = params["employee.service.id"]
 		def employeeInstance =new Employee(params)
@@ -560,6 +514,7 @@ class EmployeeController {
         [employeeInstance: employeeInstance]
     }
 
+	@Secured(['ROLE_ADMIN'])
     def save() {
 		params.each{i-> log.debug('param: '+i)}
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
@@ -593,7 +548,8 @@ class EmployeeController {
         redirect(action: "show", id: employeeInstance.id,params: [isAdmin: isAdmin])
     }
 
-	def search = {
+	@Secured(['ROLE_ADMIN'])
+	def search() {
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].split(" ").getAt(0).equals("true")) ? true : false
 		def query = "*"+params.q+"*"
 		if(query){
@@ -610,6 +566,7 @@ class EmployeeController {
 		}
 	}
 
+	@Secured(['ROLE_ADMIN'])
     def show(Long id) {		
 		def siteId=params["siteId"]
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
@@ -622,6 +579,7 @@ class EmployeeController {
         [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]
     }
 	
+	@Secured(['ROLE_ADMIN'])
 	def employeeExcelExport(){
 		def folder = grailsApplication.config.pdf.directory
 		log.error('entering employeeExcelExport')
@@ -2172,7 +2130,7 @@ class EmployeeController {
 		}
 	}
 	
-
+	@Secured(['ROLE_ADMIN'])
 	def annualReport(Long userId){
 		def year
 		def month
@@ -2250,6 +2208,7 @@ class EmployeeController {
 		[employee:employee,userId:employee.id]				
 	}
 	
+	@Secured(['ROLE_ANONYMOUS'])
 	def reportLight(Long userId,int monthPeriod,int yearPeriod){
 		def yearInf
 		def yearSup

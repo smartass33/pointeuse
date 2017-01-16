@@ -13,7 +13,6 @@ import grails.util.GrailsUtil
 class BootStrap {
 
 	def grailsApplication
-	//def springSecurityService
 	def executorService
 	def scheduledExecutorService
 	
@@ -39,12 +38,15 @@ class BootStrap {
     }
 
     def destroy = {
+		/*
 		switch (GrailsUtil.environment) {
 			case "aws":
 				executorService.shutdown()
 				scheduledExecutorService.close()
 				break
+			case "dell":
+				break
 		}
-
+*/
     }
 }

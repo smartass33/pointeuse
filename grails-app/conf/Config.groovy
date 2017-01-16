@@ -1,4 +1,3 @@
-q
 import org.apache.log4j.*;
 import org.apache.log4j.jdbc.JDBCAppender;
 import pointeuse.EventLogAppender
@@ -114,8 +113,6 @@ environments {
 				appenders {
 					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
-			
-				
 				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
 				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
 					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
@@ -126,11 +123,11 @@ environments {
 					   'org.springframework',
 					   'org.hibernate',
 					   'net.sf.ehcache.hibernate'
-					  debug 'org.springframework.security'
+				warn 'org.springframework.security'
 				root {
 					warn 'myAppender'//,'rollingFile'
 				}
-			}
+		}
 	}
 	
 	alrikiki {
@@ -160,7 +157,7 @@ environments {
 				root {
 					warn 'myAppender'//,'rollingFile'
 				}
-			}
+		}
 	}
 	
 	dell {
@@ -185,13 +182,11 @@ environments {
 				   'org.springframework',
 				   'org.hibernate',
 				   'net.sf.ehcache.hibernate'
-			
 			root {
 				warn 'rollingFile'//,'stdout'
 			}
 		}
 	}
-	
 	
 	dell_test {
 		pdf.directory='/opt/tomcat/pdf'
@@ -213,14 +208,12 @@ environments {
 				   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
 				   'org.springframework',
 				   'org.hibernate',
-				   'net.sf.ehcache.hibernate'
-			
+				   'net.sf.ehcache.hibernate'			
 			root {
 				warn 'rollingFile'//,'stdout'
 			}
 		}
 	}
-	
 }
 
 grails {
@@ -236,14 +229,6 @@ grails {
 	 }
 }
 
-// Added by the Spring Security Core plugin:
-grails.plugins.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
-grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'pointeuse.UserRole'
-grails.plugins.springsecurity.authority.className = 'pointeuse.Role'
-grails.plugins.springsecurity.auth.loginFormUrl = '/login/auth'
-grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
-
-
 jquery {
 	sources = 'jquery'
 	version = '1.10.0'
@@ -254,3 +239,57 @@ prototype {
 	version = '1.0'
 }
 
+
+// Added by the Spring Security Core plugin:
+grails.plugins.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
+grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'pointeuse.UserRole'
+grails.plugins.springsecurity.authority.className = 'pointeuse.Role'
+grails.plugins.springsecurity.auth.loginFormUrl = '/login/auth'
+grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
+
+// Added by the Spring Security Core plugin:
+//grails.plugin.springsecurity.controllerAnnotations.staticRules = [
+//	'/':                		['permitAll'],
+//	'/index':           		['permitAll'],
+//	'/employee/pointage/**':	['permitAll'],
+//	'/employee/pointage':		['permitAll'],
+//	'/index.gsp':       		['permitAll'],
+//	'/pointeuse/assets/**':		['permitAll'],
+//	'/assets/**':				['permitAll'],
+//	'**/assets/**':       		['permitAll'],
+//	'/**/js/**':        		['permitAll'],
+//	'/**/css/**':       		['permitAll'],
+//	'/**/images/**':    		['permitAll'],
+//	'/register/**':    			['permitAll'],
+//	'/**/favicon.ico':  		['permitAll']
+//]
+/*
+grails.plugin.springsecurity.auth.loginFormUrl = '/login/auth'
+grails.plugin.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
+grails.plugin.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
+grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'pointeuse.UserRole'
+grails.plugin.springsecurity.authority.className = 'pointeuse.Role'
+grails.plugin.springsecurity.password.algorithm = 'bcrypt'
+grails.plugin.springsecurity.password.bcrypt.logrounds = 10
+grails.plugin.springsecurity.password.encodeHashAsBase64 = true
+grails.plugin.springsecurity.dao.reflectionSaltSourceProperty = 'username'
+
+grails.plugin.springsecurity.ui.register.defaultRoleNames = ['ROLE_ADMIN']
+grails.plugin.springsecurity.ui.encodePassword = true
+grails.plugin.springsecurity.ui.forgotPassword.emailFrom = 'pointeuse@biolab33.com'
+grails.plugin.springsecurity.ui.password.validationRegex='^.*(?!^.*[A-Z]{2,}.*$)^[A-Za-z]*$'
+grails.plugin.springsecurity.ui.password.minLength = 8
+grails.plugin.springsecurity.ui.password.maxLength = 64
+grails.plugin.springsecurity.ui.register.postRegisterUrl = '/index.gsp'
+grails.plugin.springsecurity.ui.forgotPassword.emailSubject = 'TOTO'
+
+
+//grails.plugin.springsecurity.ui.register.emailBody = '...'
+grails.plugin.springsecurity.ui.register.emailFrom = 'pointeuse@biolab33.com'
+//grails.plugin.springsecurity.ui.register.emailSubject = '...'
+grails.plugin.springsecurity.ui.register.postRegisterUrl = '/'
+grails.plugin.springsecurity.ui.register.postResetUrl = '/'
+
+
+//grails.plugin.springsecurity.securityConfigType = 'Requestmap'
+*/

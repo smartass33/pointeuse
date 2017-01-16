@@ -53,6 +53,8 @@ grails.project.dependency.resolution = {
 		runtime 'mysql:mysql-connector-java:5.1.21'
 		compile 'com.itextpdf:itextpdf:5.4.1'
 		build 'org.codehaus.gpars:gpars:1.2.1'
+		//compile ':spring-security-ui:1.0-RC3' //) { excludes ":asset-pipeline:2.6.10"}
+		
     }
 
     plugins {
@@ -74,6 +76,9 @@ grails.project.dependency.resolution = {
 		compile ":tooltip:0.8"		
 		runtime ":prototype:1.0"
 		compile ":spring-security-core:1.2.7.3"
+		//compile ":spring-security-core:2.0.0"
+		//compile "org.grails.plugins:spring-security-ui:1.0-RC3"
+		compile "org.grails.plugins:asset-pipeline:2.12.4"
 		compile ":rendering:0.4.4"
 		compile ":quartz2:2.1.6.2"
 		compile ":richui:0.8"
@@ -84,5 +89,11 @@ grails.project.dependency.resolution = {
 		compile ":csv:0.3.1"
 		compile ":ajax-uploader:1.1"
 		compile "org.grails.plugins:remote-pagination:0.4.8"
+		
+		/*
+		compile ("org.grails.plugins:email-confirmation:2.0.8"){
+			excludes "quartz:1.0-RC2"
+        }	
+        */
     }
 }

@@ -55,7 +55,7 @@ class InAndOutCLosingJob {
 				
 			 }
 			 if (inAndOutList != null && inAndOutList.size()>0){
-				 log.error("there still "+inAndOutList.size() +" errors for employee "+employee.id + " : " +employee.lastName)
+				 log.debug("there still "+inAndOutList.size() +" errors for employee "+employee.id + " : " +employee.lastName)
 				 employee.hasError=true
 			 }else {
 			 	employee.hasError=false

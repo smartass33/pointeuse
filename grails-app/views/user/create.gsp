@@ -1,39 +1,37 @@
-<%@ page import="pointeuse.User" %>
-<!DOCTYPE html>
 <html>
 	<head>
-		<meta name="layout" content="main">
-		<g:set var="entityName" value="${message(code: 'user.label', default: 'User')}" />
-		<title><g:message code="default.create.label" args="[entityName]" /></title>
+		<meta name="layout" content="${layoutUi}"/>
+		<s2ui:title messageCode='default.create.label' entityNameMessageCode='user.label' entityNameDefault='User'/>
 	</head>
 	<body>
-		<a href="#create-user" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
-		<div class="nav" role="navigation">
-			<ul>
-				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
-				<li><g:link class="list" action="list"><g:message code="default.list.label" args="[entityName]" /></g:link></li>
-			</ul>
-		</div>
-		<div id="create-user" class="content scaffold-create" role="main">
-			<h1><g:message code="default.create.label" args="[entityName]" /></h1>
-			<g:if test="${flash.message}">
-			<div class="message" role="status">${flash.message}</div>
-			</g:if>
-			<g:hasErrors bean="${userInstance}">
-			<ul class="errors" role="alert">
-				<g:eachError bean="${userInstance}" var="error">
-				<li <g:if test="${error in org.springframework.validation.FieldError}">data-field-id="${error.field}"</g:if>><g:message error="${error}"/></li>
-				</g:eachError>
-			</ul>
-			</g:hasErrors>
-			<g:form action="save" >
-				<fieldset class="form">
-					<g:render template="form"/>
-				</fieldset>
-				<fieldset class="buttons">
-					<g:submitButton name="create" class="save" value="${message(code: 'default.button.create.label', default: 'Create')}" />
-				</fieldset>
-			</g:form>
-		</div>
+		<h3><g:message code='default.create.label' args='[entityName]'/></h3>
+		<s2ui:form type='save' beanName='user' focus='username'>
+			<s2ui:tabs elementId='tabs' height='375' data='${tabData}'>
+				<s2ui:tab name='userinfo' height='280'>
+					<table>
+					<tbody>
+						<s2ui:textFieldRow name='username' labelCodeDefault='Username'/>
+						<s2ui:passwordFieldRow name='password' labelCodeDefault='Password'/>
+						<s2ui:checkboxRow name='enabled' labelCodeDefault='Enabled'/>
+						<s2ui:checkboxRow name='accountExpired' labelCodeDefault='Account Expired'/>
+						<s2ui:checkboxRow name='accountLocked' labelCodeDefault='Account Locked'/>
+						<s2ui:checkboxRow name='passwordExpired' labelCodeDefault='Password Expired'/>
+					</tbody>
+					</table>
+				</s2ui:tab>
+				<s2ui:tab name='roles' height='280'>
+					<g:each var='role' in='${authorityList}'>
+					<div>
+						<g:set var='authority' value='${uiPropertiesStrategy.getProperty(role, 'authority')}'/>
+						<g:checkBox name='${authority}'/>
+						<g:link controller='role' action='edit' id='${role.id}'>${authority}</g:link>
+					</div>
+					</g:each>
+				</s2ui:tab>
+			</s2ui:tabs>
+			<div style='float:left; margin-top: 10px;'>
+				<s2ui:submitButton/>
+			</div>
+		</s2ui:form>
 	</body>
 </html>

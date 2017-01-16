@@ -3,8 +3,8 @@ package pointeuse
 import org.springframework.dao.DataIntegrityViolationException
 
 import grails.plugins.springsecurity.Secured
-import groovy.time.TimeDuration;
-import groovy.time.TimeCategory;
+import groovy.time.TimeDuration
+import groovy.time.TimeCategory
 
 import java.text.Normalizer
 import java.util.Date;

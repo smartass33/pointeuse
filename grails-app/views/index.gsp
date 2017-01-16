@@ -27,7 +27,7 @@
 				if (i<10){i="0" + i;}
 				return i;
 			}
-		</script>
+		</script>		
 	</head>
 	<body>
 	    <g:javascript>window.onload = startTime();document.getElementById('mytextfield').focus();</g:javascript>

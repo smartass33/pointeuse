@@ -682,9 +682,7 @@ class TimeManagerService {
 		def secondsAsString = seconds > 9 ? seconds.toString() :'0'+seconds.toString()
 		if (seconds==0) secondsAsString ='00'
 		
-		//return [hours,minutes,seconds]
-		return [hoursAsString,minutesAsString,secondsAsString]
-		
+		return [hoursAsString,minutesAsString,secondsAsString]		
 	}
 	
 	
@@ -731,8 +729,7 @@ class TimeManagerService {
 				dailyTotal.weeklyTotal.elapsedSeconds+=dailyDelta
 				dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds+=dailyDelta
 			}
-		}
-		
+		}		
 	}
 	
 	def recomputeDailyTotals(int userId,int day,int month,int year){
@@ -751,7 +748,6 @@ class TimeManagerService {
 				}
 			}
 		
-	
 		criteria=InAndOut.createCriteria()
 		def inOrOutList = criteria.list {
 			and {
