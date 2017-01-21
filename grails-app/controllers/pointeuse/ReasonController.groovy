@@ -1,7 +1,9 @@
 package pointeuse
 
 import org.springframework.dao.DataIntegrityViolationException
+import grails.plugin.springsecurity.annotation.Secured
 
+@Secured(['ROLE_SUPER_ADMIN'])
 class ReasonController {
 
 	def springSecurityService

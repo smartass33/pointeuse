@@ -1,11 +1,13 @@
 package pointeuse
 
 
-
+import grails.plugin.springsecurity.annotation.Secured
 import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional
 
 @Transactional(readOnly = true)
+
+@Secured(['ROLE_SUPER_ADMIN'])
 class FunctionController {
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]

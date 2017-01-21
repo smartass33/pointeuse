@@ -2,12 +2,14 @@ package pointeuse
 
 
 import static org.springframework.http.HttpStatus.*
+import grails.plugin.springsecurity.annotation.Secured
 
-import java.util.Date;
-import java.util.Map;
+import java.util.Date
+import java.util.Map
 
 import grails.transaction.Transactional
 
+@Secured(['ROLE_ADMIN'])
 @Transactional(readOnly = true)
 class EmployeeDataListMapController {
 

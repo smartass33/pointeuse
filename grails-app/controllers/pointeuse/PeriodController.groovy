@@ -3,7 +3,9 @@ package pointeuse
 
 import org.springframework.dao.DataIntegrityViolationException
 import org.apache.commons.logging.LogFactory
+import grails.plugin.springsecurity.annotation.Secured
 
+@Secured(['ROLE_SUPER_ADMIN'])
 class PeriodController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]

@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8"%>
+ <%@ page contentType="text/html;charset=UTF-8"%>
 <%@ page import="pointeuse.InAndOut"%>
 <%@ page import="pointeuse.Employee"%>
 <%@ page import="pointeuse.Reason"%>
@@ -37,9 +37,7 @@
 			  	}
 				return i;
 			}
-		
 
-		
 			function datePickerLaunch (){
 				$.datepicker.regional['fr'] = {
 							closeText: 'Fermer',
@@ -97,9 +95,6 @@
 				t=setTimeout(logout,60000) //logs out in 1 min
 			}
 		</script>
-		<style>
-	
-		</style>
 	</head>
 	<body>
 		<g:javascript>window.onload = startTime();</g:javascript>

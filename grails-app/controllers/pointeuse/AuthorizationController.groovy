@@ -3,11 +3,11 @@ package pointeuse
 
 
 import static org.springframework.http.HttpStatus.*
-
-import java.util.Date;
-
+import grails.plugin.springsecurity.annotation.Secured
+import java.util.Date
 import grails.transaction.Transactional
 
+@Secured(['ROLE_ADMIN'])
 @Transactional(readOnly = true)
 class AuthorizationController {
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]

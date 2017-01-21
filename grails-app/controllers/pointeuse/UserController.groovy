@@ -1,32 +1,70 @@
 package pointeuse
 
+import java.security.MessageDigest
+import javax.servlet.http.HttpServletRequest
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.plugin.springsecurity.ui.strategy.UserStrategy;
 
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import uk.co.desirableobjects.ajaxuploader.exception.FileUploadException
 
-import java.io.File;
-import java.io.InputStream;
-import java.security.MessageDigest
-
-import javax.servlet.http.HttpServletRequest;
-class UserController {
-	def authenticateService
-	def springSecurityService
-	def ajaxUploaderService
+class UserController extends grails.plugin.springsecurity.ui.UserController {
 	
-    static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
+	
+	UserStrategy uiUserStrategy
+	
+		def save() {
+			doSave uiUserStrategy.saveUser(params, roleNamesFromParams(), params.password)
+		}
+	
+		def update() {
+			params.each{i->log.error('parameter of list: '+i)}
+			//def user = User.get(id)
+			
+		
+			
+			
+			
+			doUpdate { user ->
+				
+				def site
+				user.properties = params
+				
+						if (params['siteId'] instanceof String){
+							site = Site.get(params['siteId'])
+							if (site.users == null){
+								site.users = []
+							}
+							site.users.add(user)
+							site.save()
+						}else{
+							params['siteId'].each {
+								log.error('siteId: '+it)
+								site = Site.get(it)
+								if (site.users == null){
+									site.users = []
+								}
+								site.users.add(user)
+								site.save()
+							  }
+						}
+				
+				uiUserStrategy.updateUser params, user, roleNamesFromParams()
+			}
+		}
+	
+	/*
+	def ajaxUploaderService
+	def index() {
+		redirect(action: "list", params: params)
+	}
 
-    def index() {
-        redirect(action: "list", params: params)
-    }
-
-	//@Secured(['ROLE_ADMIN'])
-    def list(Integer max) {
-        params.max = Math.min(max ?: 10, 100)
+	@Secured(['ROLE_ADMIN'])
+	def list(Integer max) {
+		params.max = Math.min(max ?: 10, 100)
 		def userInstanceList = User.list(params)
 		def sites = Site.list()
 		def userSiteMap = [:]
@@ -35,78 +73,78 @@ class UserController {
 			def userSiteList = []
 			for (Site site : sites){
 				if (site.users.contains(user)){
-					userSiteList.add(site)					
+					userSiteList.add(site)
 				}
 			}
 			userSiteMap.put(user,userSiteList)
 		}
-        [userInstanceList: userInstanceList, userInstanceTotal: userInstanceTotal,userSiteMap:userSiteMap]
-    }
+		[userInstanceList: userInstanceList, userInstanceTotal: userInstanceTotal,userSiteMap:userSiteMap]
+	}
 
-    def create() {
-        [userInstance: new User(params)]
-    }
+	def create() {
+		[userInstance: new User(params)]
+	}
 	
-	//@Secured(['ROLE_SUPER_ADMIN'])
-    def save() {
+	@Secured(['ROLE_SUPER_ADMIN'])
+	def save() {
 		def role = params["role"].get('id')
-        def userInstance = new User(params)			
-        if (!userInstance.save(flush: true)) {
-            render(view: "create", model: [userInstance: userInstance])
-            return
-        }
+		def userInstance = new User(params)
+		if (!userInstance.save(flush: true)) {
+			render(view: "create", model: [userInstance: userInstance])
+			return
+		}
 		if (role != null){
 			def roleObject = Role.get(role)
 			UserRole.create(userInstance,roleObject)
 		}
 
-        flash.message = message(code: 'default.created.message', args: [message(code: 'user.label', default: 'User'), userInstance.firstName+' '+userInstance.lastName])
-        redirect(action: "show", id: userInstance.id)
-    }
+		flash.message = message(code: 'default.created.message', args: [message(code: 'user.label', default: 'User'), userInstance.firstName+' '+userInstance.lastName])
+		redirect(action: "show", id: userInstance.id)
+	}
 
-    def show(Long id) {
-        def userInstance = User.get(id)
-        if (!userInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'user.label', default: 'User'), id])
-            redirect(action: "list")
-            return
-        }
+	@Secured(['ROLE_ADMIN'])
+	def show(Long id) {
+		def userInstance = User.get(id)
+		if (!userInstance) {
+			flash.message = message(code: 'default.not.found.message', args: [message(code: 'user.label', default: 'User'), id])
+			redirect(action: "list")
+			return
+		}
 
-        [userInstance: userInstance]
-    }
-	//@Secured(['ROLE_SUPER_ADMIN'])
-    def edit(Long id) {
-        def userInstance = User.get(id)
-        if (!userInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'user.label', default: 'User'), id])
-            redirect(action: "list")
-            return
-        }
+		[userInstance: userInstance]
+	}
+	@Secured(['ROLE_SUPER_ADMIN'])
+	def edit(Long id) {
+		def userInstance = User.get(id)
+		if (!userInstance) {
+			flash.message = message(code: 'default.not.found.message', args: [message(code: 'user.label', default: 'User'), id])
+			redirect(action: "list")
+			return
+		}
+		[userInstance: userInstance]
+	}
 
-        [userInstance: userInstance]
-    }
-
-	//@Secured(['ROLE_SUPER_ADMIN'])
-    def update(Long id, Long version) {
+	@Secured(['ROLE_SUPER_ADMIN'])
+	def update(Long id, Long version) {
 		def site
-        def userInstance = User.get(id)
-        if (!userInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'user.label', default: 'User'), id])
-            redirect(action: "list")
-            return
-        }
+		def userInstance = User.get(id)
+		if (!userInstance) {
+			flash.message = message(code: 'default.not.found.message', args: [message(code: 'user.label', default: 'User'), id])
+			redirect(action: "list")
+			return
+		}
 
-        if (version != null) {
-            if (userInstance.version > version) {
-                userInstance.errors.rejectValue("version", "default.optimistic.locking.failure",
-                          [message(code: 'user.label', default: 'User')] as Object[],
-                          "Another user has updated this User while you were editing")
-                render(view: "edit", model: [userInstance: userInstance])
-                return
-            }
-        }
+		if (version != null) {
+			if (userInstance.version > version) {
+				userInstance.errors.rejectValue("version", "default.optimistic.locking.failure",
+						  [message(code: 'user.label', default: 'User')] as Object[],
+						  "Another user has updated this User while you were editing")
+				render(view: "edit", model: [userInstance: userInstance])
+				return
+			}
+		}
 
-        userInstance.properties = params
+		userInstance.properties = params
 
 		if (params['siteId'] instanceof String){
 			site = Site.get(params['siteId'])
@@ -127,38 +165,38 @@ class UserController {
 			  }
 		}
 
-        if (!userInstance.save(flush: true)) {
-            render(view: "edit", model: [userInstance: userInstance])
-            return
-        }
+		if (!userInstance.save(flush: true)) {
+			render(view: "edit", model: [userInstance: userInstance])
+			return
+		}
 
-        flash.message = message(code: 'default.updated.message', args: [message(code: 'user.label', default: 'User'), userInstance.id])
-        redirect(action: "show", id: userInstance.id)
-    }
+		flash.message = message(code: 'default.updated.message', args: [message(code: 'user.label', default: 'User'), userInstance.id])
+		redirect(action: "show", id: userInstance.id)
+	}
 
-	//@Secured(['ROLE_SUPER_ADMIN'])
-    def delete(Long id) {
-        def userInstance = User.get(id)
-        if (!userInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'user.label', default: 'User'), id])
-            redirect(action: "list")
-            return
-        }
+	@Secured(['ROLE_SUPER_ADMIN'])
+	def delete(Long id) {
+		def userInstance = User.get(id)
+		if (!userInstance) {
+			flash.message = message(code: 'default.not.found.message', args: [message(code: 'user.label', default: 'User'), id])
+			redirect(action: "list")
+			return
+		}
 
-        try {
-            userInstance.delete(flush: true)
-            flash.message = message(code: 'default.deleted.message', args: [message(code: 'user.label', default: 'User'), id])
-            redirect(action: "list")
-        }
-        catch (DataIntegrityViolationException e) {
-            flash.message = message(code: 'default.not.deleted.message', args: [message(code: 'user.label', default: 'User'), id])
-            redirect(action: "show", id: id)
-        }
-    }
+		try {
+			userInstance.delete(flush: true)
+			flash.message = message(code: 'default.deleted.message', args: [message(code: 'user.label', default: 'User'), id])
+			redirect(action: "list")
+		}
+		catch (DataIntegrityViolationException e) {
+			flash.message = message(code: 'default.not.deleted.message', args: [message(code: 'user.label', default: 'User'), id])
+			redirect(action: "show", id: id)
+		}
+	}
 		
 	def importUserList = {
 		log.error('importUserList called')
-		def lastName 
+		def lastName
 		def user
 		def site
 		def settings = [separatorChar:';','charset':'windows-1252']
@@ -190,11 +228,11 @@ class UserController {
 							site.users.add(user)
 							site.save()
 						}
-					}		
+					}
 					user.email = tokens[4]
 					user.hasMail = true
 					user.reportSendDay=1
-					user.save()		
+					user.save()
 				}
 				log.error("user: "+user)
 			}
@@ -213,7 +251,7 @@ class UserController {
 		return request.inputStream
 	}
 
-		
+	
 	def isAuthenticated(){
 		def username = params["username"]
 		def password = params["password"]
@@ -232,7 +270,7 @@ class UserController {
 		}
 		
 		if (password == null){
-			log.error('authentication failed!')			
+			log.error('authentication failed!')
 		}
 		else{
 			hash = digest.digest(password.getBytes("UTF-8"));
@@ -251,4 +289,6 @@ class UserController {
 		render retour
 		return retour
 	}
+	
+	*/
 }

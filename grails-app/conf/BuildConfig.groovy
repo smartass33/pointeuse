@@ -77,7 +77,7 @@ grails.project.dependency.resolution = {
 		runtime ":prototype:1.0"
 		//compile ":spring-security-core:1.2.7.3"
 		compile ":spring-security-core:2.0.0"
-		//compile "org.grails.plugins:spring-security-ui:1.0-RC3"
+		compile "org.grails.plugins:spring-security-ui:1.0-RC3"
 		compile "org.grails.plugins:asset-pipeline:2.12.4"
 		compile ":rendering:0.4.4"
 		compile ":quartz2:2.1.6.2"

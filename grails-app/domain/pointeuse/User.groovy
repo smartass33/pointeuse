@@ -15,7 +15,11 @@ class User {
 	String email
 	boolean hasMail
 	int reportSendDay
-	
+	/*
+	static transients = ['beforeInsertRunOnce','beforeUpdateRunOnce']
+	boolean beforeInsertRunOnce
+	boolean beforeUpdateRunOnce
+	*/
 	static hasMany = [userRoles:UserRole]
 
 	static constraints = {
@@ -36,16 +40,30 @@ class User {
 		UserRole.findAllByUser(this).collect { it.role } as Set
 	}
 
-	def beforeInsert() {
-		encodePassword()
-	}
+/*
 
-	def beforeUpdate() {
-		if (isDirty('password')) {
+	def beforeInsert() {
+		if (! beforeInsertRunOnce) {
+			beforeInsertRunOnce = true
 			encodePassword()
 		}
 	}
 
+	def afterInsert() {
+		beforeInsertRunOnce = false
+	}
+
+	def beforeUpdate() {
+		if (isDirty('password') && ! beforeUpdateRunOnce ) {
+			beforeUpdateRunOnce = true
+			encodePassword()
+		}
+	}
+
+	def afterUpdate() {
+		beforeUpdateRunOnce = false
+	}
+	*/
 	protected void encodePassword() {
 		password = springSecurityService.encodePassword(password)
 	}

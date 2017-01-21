@@ -92,7 +92,7 @@ environments {
 				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
 				   'org.codehaus.groovy.grails.commons',            // core / classloading
 				   'org.codehaus.groovy.grails.plugins'            // plugins
-			trace 'org.springframework.security'
+			debug 'org.springframework.security'
 			root {
 				warn 'rollingFileAppender','stdout'//,'eventLogAppender'
 			}
@@ -105,7 +105,6 @@ environments {
 		grails.app.context=''
 		grails.logging.jul.usebridge = false
 		grails.resources.processing.enabled=false
-		//serverURL = "http://192.168.1.17"
 		serverURL = "http://ec2-54-154-203-127.eu-west-1.compute.amazonaws.com"
 		context=''
 		log4j = {
@@ -126,7 +125,7 @@ environments {
 				warn 'org.springframework.security'
 				root {
 					warn 'myAppender'//,'rollingFile'
-				}
+			}
 		}
 	}
 	
@@ -241,11 +240,11 @@ prototype {
 
 
 // Added by the Spring Security Core plugin:
-grails.plugins.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
-grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'pointeuse.UserRole'
-grails.plugins.springsecurity.authority.className = 'pointeuse.Role'
-grails.plugins.springsecurity.auth.loginFormUrl = '/login/auth'
-grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
+grails.plugin.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
+grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'pointeuse.UserRole'
+grails.plugin.springsecurity.authority.className = 'pointeuse.Role'
+grails.plugin.springsecurity.auth.loginFormUrl = '/login/auth'
+grails.plugin.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
 grails.plugin.springsecurity.password.algorithm = 'SHA-256'
 grails.plugin.springsecurity.password.hash.iterations = 1
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
@@ -253,47 +252,50 @@ grails.plugin.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
 
 // Added by the Spring Security Core plugin:
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-	'/':                		['permitAll'],
-	'/index':           		['permitAll'],
-	'/employee/pointage/**':	['permitAll'],
-	'/employee/pointage':		['permitAll'],
-	'/index.gsp':       		['permitAll'],
-	'/pointeuse/assets/**':		['permitAll'],
-	'/assets/**':				['permitAll'],
-	'**/assets/**':       		['permitAll'],
-	'/**/js/**':        		['permitAll'],
-	'/**/css/**':       		['permitAll'],
-	'/**/images/**':    		['permitAll'],
-	'/register/**':    			['permitAll'],
-	'/**/favicon.ico':  		['permitAll']
+	'/':                			['permitAll'],
+	'/index':           			['permitAll'],
+	'/employee/main.css':			['permitAll'],
+	'/user/**':						['ROLE_SUPER_ADMIN'],
+	'/role/**':						['ROLE_SUPER_ADMIN'],
+	'/registrationCode/**':			['ROLE_SUPER_ADMIN'],
+	'/securityInfo/**':				['ROLE_SUPER_ADMIN'],
+	'/employee/pointage':			['permitAll'],
+	'/index.gsp':       			['permitAll'],
+	'/pointeuse/assets/**':			['permitAll'],
+	'/assets/**':					['permitAll'],
+	'**/assets/**':       			['permitAll'],
+	'/**/js/**':        			['permitAll'],
+	'/**/css/**':       			['permitAll'],
+	'/**/images/**':    			['permitAll'],
+	'/register/**':    				['permitAll'],
+	'/**/favicon.ico':  			['permitAll'],
+	'/plugins/**':					['permitAll']
+	
+	// special URL to be accessed via cron
+	
 ]
-/*
-grails.plugin.springsecurity.auth.loginFormUrl = '/login/auth'
-grails.plugin.springsecurity.failureHandler.defaultFailureUrl = '/login/denied'
-grails.plugin.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
-grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'pointeuse.UserRole'
-grails.plugin.springsecurity.authority.className = 'pointeuse.Role'
-grails.plugin.springsecurity.password.algorithm = 'bcrypt'
-grails.plugin.springsecurity.password.bcrypt.logrounds = 10
-grails.plugin.springsecurity.password.encodeHashAsBase64 = true
-grails.plugin.springsecurity.dao.reflectionSaltSourceProperty = 'username'
 
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ['ROLE_ADMIN']
 grails.plugin.springsecurity.ui.encodePassword = true
 grails.plugin.springsecurity.ui.forgotPassword.emailFrom = 'pointeuse@biolab33.com'
 grails.plugin.springsecurity.ui.password.validationRegex='^.*(?!^.*[A-Z]{2,}.*$)^[A-Za-z]*$'
-grails.plugin.springsecurity.ui.password.minLength = 8
+grails.plugin.springsecurity.ui.password.minLength = 6
 grails.plugin.springsecurity.ui.password.maxLength = 64
 grails.plugin.springsecurity.ui.register.postRegisterUrl = '/index.gsp'
-grails.plugin.springsecurity.ui.forgotPassword.emailSubject = 'TOTO'
-
-
-//grails.plugin.springsecurity.ui.register.emailBody = '...'
 grails.plugin.springsecurity.ui.register.emailFrom = 'pointeuse@biolab33.com'
+grails.plugin.springsecurity.ui.forgotPassword.emailBody = '''\
+Bonjour $user.username,<br/>
+<br/>
+Vous (ou quelqu'un prétendant être vous) a demandé la réinitialisation de votre mot de passe.<br/>
+<br/>
+Si vous n'êtes pas à l'origine de cette demande, veuillez igoner ce message.<br/>
+<br/>
+Si en revanche vous souhaitez réinitialiser votre mot passe, merci de cliquer <a href="$url">ici</a>.
+'''
+
+	
+grails.plugin.springsecurity.ui.forgotPassword.emailSubject = 'Réinitialisation du mot de passe pointeuse.biolab33'
+//grails.plugin.springsecurity.ui.register.emailBody = '...'
 //grails.plugin.springsecurity.ui.register.emailSubject = '...'
 grails.plugin.springsecurity.ui.register.postRegisterUrl = '/'
 grails.plugin.springsecurity.ui.register.postResetUrl = '/'
-
-
-//grails.plugin.springsecurity.securityConfigType = 'Requestmap'
-*/

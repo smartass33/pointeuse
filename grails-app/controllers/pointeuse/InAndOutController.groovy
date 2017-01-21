@@ -1,9 +1,12 @@
 package pointeuse
 
 import org.codehaus.groovy.grails.web.servlet.mvc.exceptions.CannotRedirectException
+import grails.plugin.springsecurity.annotation.Secured
+
 import org.springframework.dao.DataIntegrityViolationException
 import groovy.time.TimeCategory
 
+@Secured(['ROLE_ANONYMOUS'])
 class InAndOutController {
 
 	def springSecurityService

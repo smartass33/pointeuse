@@ -1,6 +1,7 @@
 package pointeuse
 
 import org.springframework.dao.DataIntegrityViolationException
+import grails.plugin.springsecurity.annotation.Secured
 
 import grails.plugin.springsecurity.annotation.Secured
 import groovy.time.TimeDuration
@@ -24,6 +25,7 @@ class SiteController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 	private static final log = LogFactory.getLog(this)
 	
+	@Secured(['ROLE_ADMIN'])
     def index() {
         redirect(action: "list", params: params)
     }
@@ -56,10 +58,12 @@ class SiteController {
         [siteInstanceList: siteInstanceList, siteInstanceTotal: Site.count()]
     }
 
+	@Secured(['ROLE_SUPER_ADMIN'])
     def create() {
         [siteInstance: new Site(params),fromSite:true]
     }
 
+	@Secured(['ROLE_SUPER_ADMIN'])
     def save() {
 		def user = springSecurityService.currentUser
 		def result
@@ -90,7 +94,8 @@ class SiteController {
         flash.message = message(code: 'default.created.message', args: [message(code: 'site.label', default: 'Site'), siteInstance.name])
         redirect(action: "show", id: siteInstance.id)
     }
-
+	
+	@Secured(['ROLE_ADMIN'])
     def show(Long id) {
         def siteInstance = Site.get(id)
         if (!siteInstance) {
@@ -102,6 +107,7 @@ class SiteController {
         [siteInstance: siteInstance,employeeInstanceList:siteInstance.employees,employeeInstanceTotal:siteInstance.employees.size(),fromSite:true]
     }
 
+	@Secured(['ROLE_SUPER_ADMIN'])
     def edit(Long id) {
         def siteInstance = Site.get(id)
         if (!siteInstance) {
@@ -113,6 +119,7 @@ class SiteController {
         [siteInstance: siteInstance]
     }
 
+	@Secured(['ROLE_SUPER_ADMIN'])
     def update(Long id, Long version) {
         def siteInstance = Site.get(id)
 		def result
@@ -145,7 +152,8 @@ class SiteController {
         flash.message = message(code: 'default.updated.message', args: [message(code: 'site.label', default: 'Site'), siteInstance.name])
         redirect(action: "show", id: siteInstance.id)
     }
-
+	
+	@Secured(['ROLE_SUPER_ADMIN'])
     def delete(Long id) {
         def siteInstance = Site.get(id)
         if (!siteInstance) {
@@ -173,7 +181,8 @@ class SiteController {
 		render result as String
 	  }
 	
-	def siteTotalTime = {
+	@Secured(['ROLE_SUPER_ADMIN'])
+	def siteTotalTime(){
 		log.error('siteTotalTime called')
 		Date currentDate = new Date()
 		def month = currentDate.getAt(Calendar.MONTH) + 1
@@ -182,6 +191,7 @@ class SiteController {
 		[period2:period,year:year,month:month]
 	}
 
+	@Secured(['ROLE_ADMIN'])
 	def completeSiteReport(){
 		log.error('entering completeSiteReport method')
 		params.each{i->log.error('parameter of list: '+i)}
@@ -389,6 +399,7 @@ class SiteController {
 		return
 	}
 	
+	@Secured(['ROLE_ANONYMOUS'])
 	def createAllSiteData(){
 		def criteria
 		def data
@@ -464,6 +475,7 @@ class SiteController {
 		}
 	}
 	
+	@Secured(['ROLE_ADMIN'])
 	def getAjaxSiteData(){
 		log.error('entering getAjaxSiteData method')
 		def site = Site.get(params.int('site'))
@@ -529,10 +541,9 @@ class SiteController {
 		threads.each { it.start() }
 		threads.each { it.join() }
 
-		log.error('employee loop finished')
+		log.debug('employee loop finished')
 		use (TimeCategory){executionTime=new Date()-startDate}
-		log.error('execution time: '+executionTime)
-		
+		log.debug('execution time: '+executionTime)		
 		 
 		model << [
 			period2:period,
@@ -556,9 +567,7 @@ class SiteController {
 			siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
 			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
 			siteAnnualGlobalSupTimeToPay:siteAnnualGlobalSupTimeToPay
-		]
-		
-		
+		]	
 		for (Employee employee:employeeList){
 			def criteria = AnnualEmployeeData.createCriteria()
 			def annualEmployeeData = criteria.get {
@@ -602,6 +611,7 @@ class SiteController {
 		return		
 	}
 	
+	@Secured(['ROLE_ADMIN'])
 	def completeSiteReportPDF(){
 		log.error('entering completeSiteReportPDF method')
 		def site 
@@ -648,7 +658,5 @@ class SiteController {
 		response.setHeader("Content-disposition", "filename=${retour[1]}")
 		response.outputStream << retour[0]	
 	}
-	
-	
-	 
+
 }
