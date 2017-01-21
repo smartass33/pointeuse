@@ -6,7 +6,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.dao.DataIntegrityViolationException
 import groovy.time.TimeCategory
 
-@Secured(['ROLE_ANONYMOUS'])
+//@Secured(['ROLE_ANONYMOUS'])
 class InAndOutController {
 
 	def springSecurityService
@@ -318,7 +318,5 @@ class InAndOutController {
 		inAndOutInstance.regularization=true
 		inAndOutInstance.regularizationType=InAndOut.INITIALE_SALARIE
 		timeManagerService.regularizeTime(type,employeeId,inAndOutInstance,calendar)
-
 	}
-	
 }

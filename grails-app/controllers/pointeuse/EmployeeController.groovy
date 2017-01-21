@@ -486,8 +486,7 @@ class EmployeeController {
 			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
 			return
 		}
-		[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
-		
+		[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]	
     }
 	
 	@Secured(['ROLE_ADMIN'])
@@ -2446,7 +2445,7 @@ class EmployeeController {
 	}
 
 
-	@Secured(['ROLE_ANONYMOUS'])
+	//@Secured(['ROLE_ANONYMOUS'])
 	def pointage(Long id){	
 		log.error('pointage called')
 		try {	
