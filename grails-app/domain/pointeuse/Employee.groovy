@@ -22,7 +22,21 @@ class Employee{
 	Title title
 	
 	
-	static hasMany = [annualEmployeeData:AnnualEmployeeData,payments:Payment,supplementary_time:SupplementaryTime,contracts:Contract,vacations:Vacation,vacationsCounters:Vacation,absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
+	static hasMany = [
+		annualEmployeeData:AnnualEmployeeData,
+		payments:Payment,
+		supplementary_time:SupplementaryTime,
+		contracts:Contract,
+		vacations:Vacation,
+		vacationsCounters:Vacation,
+		absenceCounters:AbsenceCounter,
+		inAndOuts: InAndOut,
+		dailyTotals:DailyTotal,
+		weeklyTotals:WeeklyTotal,
+		monthlyTotals:MonthlyTotal,
+		absences:Absence,
+		milages:Mileage
+	]	
 	static searchable = true	
 	static constraints = {
 		matricule (blank: true,nullable:true)

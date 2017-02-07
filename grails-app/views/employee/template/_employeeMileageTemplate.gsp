@@ -1,6 +1,6 @@
 <%@ page import="pointeuse.Site"%>
 <%@ page import="pointeuse.Employee"%>
-<%@ page import="pointeuse.InAndOut"%>
+<%@ page import="pointeuse.Milage"%>
 
 
 <g:set var="calendar" value="${Calendar.instance}"/>
@@ -23,22 +23,13 @@
 	<tbody id='body_update' style="border:1px;">
 		<tr>
 			<td class="eventTD" />			
-			
-			
 			<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th_2'>		
 				<%= calendar.set(Calendar.MONTH,month_th_2-1) %>
 				<td class="eventTD" style="vertical-align: middle;">${calendar.time.format('MMM') }</td>
 			</g:each>
 		</tr>	
 		
-		<g:if test="${totalPeriodEcartByMonth != null}">
-			<tr>
-				<td class="eventTD" />		
-				<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var="month_th_3">	
-					<td class="eventTD" style="vertical-align: middle;"><my:humanTimeTD id="totalPeriodEcartByMonth"  name="totalPeriodEcartByMonth" value="${totalPeriodEcartByMonth.get(month_th_3)}"/></td>
-				</g:each>
-			</tr>
-		</g:if>
+
 		<g:if test="${employeeInstanceList != null}">
 			<th colspan='13' class="eventTD" style="text-align:left;font-weight:bold;text-transform: uppercase;">${message(code: 'ecart.totals', default: 'report')}
 				<g:form method="POST" url="[controller:'employee', action:'ecartEXCEL']" >

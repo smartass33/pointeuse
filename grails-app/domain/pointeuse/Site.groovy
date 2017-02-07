@@ -10,7 +10,8 @@ class Site {
 	String town
 	int postCode
 	CardTerminal cardTerminal
-
+	Date lastReportDate
+	
 	static hasMany = [employees: Employee,users:User]
 
     static constraints = {
@@ -19,6 +20,7 @@ class Site {
 		name unique:true
 		address blank:true
 		town blank:true	
+		lastReportDate nullable:true
     }
 	
 	String toString(){

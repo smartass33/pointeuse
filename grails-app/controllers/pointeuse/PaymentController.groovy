@@ -168,7 +168,6 @@ class PaymentController {
 	}
 	
 	def paymentReport() {
-	//	params.each{i-> log.error(i)}	
 		def fromIndex = (params['fromIndex'] != null) ? params.boolean('fromIndex') :false
 		def fromAnnualReport = (params['fromAnnualReport'] != null) ? params.boolean('fromAnnualReport') :false
 		def employee 

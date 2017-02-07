@@ -92,7 +92,7 @@ environments {
 				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
 				   'org.codehaus.groovy.grails.commons',            // core / classloading
 				   'org.codehaus.groovy.grails.plugins'            // plugins
-			debug 'org.springframework.security'
+			warn 'org.springframework.security'
 			root {
 				warn 'rollingFileAppender','stdout'//,'eventLogAppender'
 			}
@@ -103,7 +103,7 @@ environments {
 		pdf.directory='/opt/tomcat/pdf'
 		mysqldump.directory='/usr/bin'
 		grails.app.context=''
-		grails.logging.jul.usebridge = false
+		grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
 		serverURL = "http://ec2-54-154-203-127.eu-west-1.compute.amazonaws.com"
 		context=''
@@ -112,7 +112,7 @@ environments {
 				appenders {
 					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
-				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
+			//	warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
 				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
 					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
 					   'org.codehaus.groovy.grails.web.mapping',        // URL mapping

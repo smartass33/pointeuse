@@ -51,7 +51,10 @@ class PDFService {
 				PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
 				finalCopy.addDocument(pdfReader)	
 			}
+
 			finalCopy.close();		
+			site.lastReportDate=calendar.time
+			site.save(flush:true)
 		} catch( java.io.IOException ioe){
 			log.error(ioe)
 		}finally{

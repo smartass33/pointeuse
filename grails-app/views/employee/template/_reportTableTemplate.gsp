@@ -11,13 +11,15 @@
 	<table  border="1" style="table-layout: fixed;" id="reportTable" >
 	    <thead>
 	      <th>${message(code: 'report.table.date.label', default: 'report')}</th>
-	      <th>localisation</th>
+	      <th>${message(code: 'report.table.location', default: 'report')}</th>
 	      <th>${message(code: 'report.table.daily.total.label', default: 'report')}</th>
 	      <th>${message(code: 'report.table.HS.label', default: 'report')}</th>
 	      <th>
 	      	${message(code: 'report.table.absence.label', default: 'report')}    
              <g:select width="50px"
-                    onchange="${remoteFunction(action:'modifyAllAbsence', update:'cartouche_div', 
+                    onchange="${remoteFunction(action:'modifyAllAbsence', update:'report_table_div', 
+					onLoading: "document.getElementById('spinner').style.display = 'inline';",
+					onComplete: "document.getElementById('spinner').style.display = 'none';",
 	  				params:'\'employeeId=' + employee.id 	
 					+ '&period=' + period.format('dd/MM/yyyy')
 	  				+ '&updatedSelection=\' + this.value'								  

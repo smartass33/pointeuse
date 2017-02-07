@@ -38,6 +38,9 @@
 				return i;
 			}
 
+
+			
+
 			function datePickerLaunch (){
 				$.datepicker.regional['fr'] = {
 							closeText: 'Fermer',
@@ -79,8 +82,13 @@
 						$.datepicker.setDefaults($.datepicker.regional['fr']);		
 						$( "#date_picker" ).datetimepicker({
 							defaultDate:new Date(${period.getAt(Calendar.YEAR)},${period.getAt(Calendar.MONTH)},1)
-						});					
+						});		
+
+						$( "#date_mileage_picker" ).datetimepicker({
+							defaultDate:new Date(${period.getAt(Calendar.YEAR)},${period.getAt(Calendar.MONTH)},1)
+						});				
 			}
+			
 	
 			var t;
 			window.onload=resetTimer;

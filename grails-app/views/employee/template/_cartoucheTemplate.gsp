@@ -32,8 +32,12 @@
 		</tr>		
 		<tr>
 			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="payment" action='paymentReport'  id="${payment}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true]}">${message(code: 'employee.sup.time.label', default: 'Report')}</g:link></td>
-		</tr>	
-
+		</tr>
+		<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">
+			<tr>
+				<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="mileage" action='employeeMileage'  id="${milage}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true,employeeId:employee.id]}">Gestion des indemnités kilométriques</g:link></td>
+			</tr>		
+	</sec:ifAnyGranted>
 	</table> 				
 	<table style="float: left; border:0px;border-width:0px;border-style:none;">
 		<tbody>

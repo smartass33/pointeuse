@@ -1,7 +1,10 @@
 package pointeuse
 
 import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.core.io.Resource
 import org.springframework.dao.DataIntegrityViolationException
+import org.apache.commons.io.IOUtils
+import org.apache.commons.io.FileUtils
 
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
@@ -17,6 +20,7 @@ import grails.converters.JSON
 
 import org.apache.commons.logging.LogFactory
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.codehaus.groovy.grails.core.io.ResourceLocator
 
 import pl.touk.excel.export.WebXlsxExporter
 
@@ -44,7 +48,7 @@ class EmployeeController {
 	long dayInMillis = hourInMillis * 24;
 	long yearInMillis = dayInMillis * 365;
 	private static final log = LogFactory.getLog(this)
-	
+	ResourceLocator assetResourceLocator
 	
 	@Secured(['ROLE_ADMIN'])
     def index() {
@@ -1563,7 +1567,7 @@ class EmployeeController {
 			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)	
 		}
 
-		def cartoucheTable = timeManagerService.getReportData(null, employee,  null, calendarLoop.get(Calendar.MONTH) + 1, calendarLoop.get(Calendar.YEAR),true)
+		def report = timeManagerService.getReportData(null, employee,  null, calendarLoop.get(Calendar.MONTH) + 1, calendarLoop.get(Calendar.YEAR),true)
 		def openedDays = timeManagerService.computeMonthlyHours(calendarLoop.get(Calendar.YEAR),calendarLoop.get(Calendar.MONTH) + 1)
 		def yearInf
 		def yearSup
@@ -1575,6 +1579,7 @@ class EmployeeController {
 			yearSup=calendarLoop.get(Calendar.YEAR)
 		}
 		Period period = ((calendarLoop.get(Calendar.MONTH) + 1) > 5)?Period.findByYear(calendarLoop.get(Calendar.YEAR)):Period.findByYear(calendarLoop.get(Calendar.YEAR) - 1)
+		
 		def model=[
 			period2:period,
 			period:calendarLoop.time,
@@ -1587,9 +1592,9 @@ class EmployeeController {
 			employee:employee,
 			openedDays:openedDays
 			]
-		model << cartoucheTable
+		model << report
 		log.error('modifyAllAbsence finished')
-		render template: "/employee/template/cartoucheTemplate", model:model
+		render template: "/employee/template/reportTableTemplate", model: model
 		return
 	}
 	
@@ -2500,6 +2505,35 @@ class EmployeeController {
 	}	
 
 	@Secured(['ROLE_ADMIN'])
+	def ecartEXCEL(){
+		params.each{i-> log.debug('param: '+i) }
+		def folder = grailsApplication.config.pdf.directory
+		def totalMonthlyTheoritical = params["totalMonthlyTheoritical"] as long
+		def totalMonthlyActual = params["totalMonthlyActual"] as long 
+		def employeeInstanceListCount = params["employeeInstanceListCount"] as long
+		def ecart = totalMonthlyActual - totalMonthlyTheoritical
+		def site = Site.get(params["siteId"])		
+		def headers = 
+			[
+				message(code: 'site.unit'),
+				message(code: 'laboratory.label'), 
+				message(code: 'site.total.theoritical.time'),
+				message(code: 'site.total.actual.time'),
+				message(code: 'site.total.delta.time'),
+				message(code: 'site.total.employee')
+			]
+		
+		new WebXlsxExporter(folder+'/ecart_site.xlsx').with {
+			setResponseHeaders(response)
+			fillHeader(headers)
+			//fillRow([message(code: 'site.unit.seconds'),site.name,totalMonthlyTheoritical,totalMonthlyActual,ecart,employeeInstanceListCount],1)
+			fillRow([message(code: 'site.unit.hours'),site.name,totalMonthlyTheoritical/3600,totalMonthlyActual/3600,ecart/3600,employeeInstanceListCount],1)	
+			save(response.outputStream)
+		}
+	}
+	
+	
+	@Secured(['ROLE_ADMIN'])
 	def ecartPDF(){
 		def siteId=params["site.id"]
 		def year = params["year"]
@@ -2597,8 +2631,6 @@ class EmployeeController {
 		}else {
 			calendar.time=myDate
 		}
-	
-
 		if (params["site.id"]!=null && !params["site.id"].equals('')){
 			siteId = params["site.id"].toInteger()
 			site = Site.get(siteId)
@@ -2853,8 +2885,11 @@ class EmployeeController {
 			 return [site:site,fromIndex:fromIndex,period:period]
 		 }
 		 
+		 
+		def lastMonth = monthList.last() 
 		def ecartData = timeManagerService.getEcartData(site, monthList, period)
 		def retour = [
+			lastMonth:lastMonth,
 			site:site,
 			fromIndex:fromIndex,
 			period:period,
@@ -3570,8 +3605,7 @@ class EmployeeController {
 		def retour = PDFService.generateSiteInfo(myDate,site,folder)
 		def file = new File(folder+'/'+retour[1])
 		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
-		
-		
+
 		if (!file.exists()){
 			flash.message = message(code: 'pdf.site.report.not.available')
 			redirect(action: "list")
@@ -3595,9 +3629,9 @@ class EmployeeController {
 		calendar.roll(Calendar.MONTH,-1)
 		def currentDate = calendar.time
 		if (calendar.get(Calendar.MONTH) == 11){
-			log.error('this is the first month of the year: need to get december instead')
+			log.debug('this is the first month of the year: need to get december instead')
 			calendar.roll(Calendar.YEAR,-1)
-			log.error('the new date is:  '+calendar.time)
+			log.debug('the new date is:  '+calendar.time)
 			currentDate = calendar.time
 		}
 		
@@ -3606,11 +3640,11 @@ class EmployeeController {
 	    def thr = sites.each{ site ->
 			if (site.id != 16){
 		        def th = new Thread({	            				
-					log.error('generating PDF for site: '+site.name)
+					log.debug('generating PDF for site: '+site.name)
 					retour = PDFService.generateSiteMonthlyTimeSheet(currentDate,site,folder)
 					siteNames.add(retour[1])
 		        })
-		        println "putting thread in list"
+				log.debug('putting thread in list')
 		        threads << th
 			}
 	    }	
@@ -3618,99 +3652,37 @@ class EmployeeController {
 	    threads.each { it.join() }	
 		def thTime = Thread.start{			
 			def endDate = new Date()
-			log.error('end time= '+endDate)
+			log.debug('end time= '+endDate)
 			use (TimeCategory){timeDifference = endDate - startDate}
 			log.error("report createAllSitesPDF execution time"+timeDifference)
 		}
 		thTime.join()
-		sites = Site.findAll()
-		sites.each{site ->
+		
+		Resource myResource = assetResourceLocator.findAssetForURI('biolab3.png')
+		def logoFile = new File('logo')
+		FileUtils.writeByteArrayToFile(logoFile, myResource.getByteArray())
+		sites.each { site ->
 			def userList = site.users
-			userList.each {user ->
+			def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
+			def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+			
+			userList.each { user ->
 				log.debug('userList: '+user)
 				log.debug('user.reportSendDay: '+user.reportSendDay)
 				log.debug('calendar.time: '+calendar.time)
 				log.debug('calendar.get(Calendar.DAY_OF_MONTH): '+calendar.get(Calendar.DAY_OF_MONTH))
 				log.debug('user.email: '+user.email)
-				if (user.reportSendDay == (calendar.get(Calendar.DAY_OF_MONTH)) && user.email != null){
-					log.error('user reportSendDay has come: will fire report to him')
-					def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
-					def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
-					if (!file.exists()){
-						log.error('no file found: '+filename)
-						return
-					}else{
-						if (file.length() > 0 && user.hasMail){
-							log.error('file found for site '+site.name+', sending it to :'+user.email)
-							mailService.sendMail {
-								multipart true
-								to user.email
-								subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
-								html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
-								attachBytes filename,'application/pdf', file.readBytes()
-								inline 'biolab33', 'image/png', new File('/images/biolab3.png')
-							}
-							
-							mailService.sendMail {
-								multipart true
-								to 'henri.martin@gmail.com'
-								subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
-								html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
-								attachBytes filename,'application/pdf', file.readBytes()
-								inline 'biolab33', 'image/png', new File('/images/biolab3.png')
-							}
-						}
+				if (user.reportSendDay == (calendar.get(Calendar.DAY_OF_MONTH)) && user.email != null && file.exists()){
+					log.error('user reportSendDay has come: will fire report to: '+user.email)
+					mailService.sendMail {
+						multipart true
+						to user.email
+						subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+						html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+						attachBytes filename,'application/pdf', file.readBytes()
+						inline 'biolab33', 'image/png', logoFile
 					}
-					
-				}
-				
-			}
-		}
-	}
-	
-	@Secured(['ROLE_ANONYMOUS'])
-	def sendMailToAll(){
-		log.error('sendMailToAll called: sending email to all admins')
-		def sites = Site.findAll()
-		def folder = grailsApplication.config.pdf.directory
-		
-		Calendar calendar = Calendar.instance
-		calendar.roll(Calendar.MONTH,-1)
-		
-		sites = Site.findAll()
-		sites.each{site ->
-			def userList = site.users
-			userList.each {user ->
-				log.error('userList: '+user)
-				log.error('user.reportSendDay: '+user.reportSendDay)
-				log.error('calendar.time: '+calendar.time)
-				log.error('calendar.get(Calendar.DAY_OF_MONTH)+1: '+calendar.get(Calendar.DAY_OF_MONTH))
-				log.error('user.email: '+user.email)
-				if (user.reportSendDay == (calendar.get(Calendar.DAY_OF_MONTH)) && user.email != null){
-					log.error('user reportSendDay has come: will fire report to him')
-					def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
-					def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
-					if (!file.exists()){
-						log.error('no file found: '+filename)
-						return
-					}else{
-						if (file.length() > 0 && user.hasMail){
-							log.error('file found for site '+site.name+', sending it to :'+user.email)
-							/*
-							mailService.sendMail {
-								multipart true
-								to user.email
-								subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
-								html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
-								attachBytes filename,'application/pdf', file.readBytes()
-								inline 'biolab33', 'image/png', new File('/images/biolab3.png')
-							}
-							*/
-						}
-					}
-					
-				}
-				
+				}			
 			}
 		}
 	}
