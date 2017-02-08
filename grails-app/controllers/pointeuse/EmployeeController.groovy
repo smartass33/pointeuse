@@ -2253,7 +2253,6 @@ class EmployeeController {
 				monthlyTotalTime += dailySeconds
 				def previousValue=weeklyTotalTime.get(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR))
 				if (previousValue!=null){
-					//def newValue=previousValue.get(0)*3600+previousValue.get(1)*60+previousValue.get(2)
 					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), dailySeconds+previousValue)
 				}else{
 					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), dailySeconds)
@@ -2338,21 +2337,21 @@ class EmployeeController {
 			if (userId != null){
 				def cartoucheTable = timeManagerService.getCartoucheData(employee,year,month)
 				def monthTheoritical = cartoucheTable.get('monthTheoritical')
-				def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('pregnancyCredit'))
-				def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyTheoritical'))
-				def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyPregnancyCredit'))
-				def payableSupTime = timeManagerService.computeHumanTime(Math.round(monthlySupTime))
+				def pregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('pregnancyCredit') as long)
+				def yearlyTheoritical = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyTheoritical') as long)
+				def yearlyPregnancyCredit = timeManagerService.computeHumanTime(cartoucheTable.get('yearlyPregnancyCredit') as long)
+				def payableSupTime = timeManagerService.computeHumanTime(Math.round(monthlySupTime) as long)
 				def payableCompTime = timeManagerService.computeHumanTime(0)
 				def currentContract = cartoucheTable.get('currentContract')
 							
 				if (currentContract.weeklyLength!=35){
 					if (monthlyTotalTime > monthTheoritical){
-						payableCompTime = timeManagerService.computeHumanTime(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0))
+						payableCompTime = timeManagerService.computeHumanTime(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0) as long)
 					}
 				}
 			
-				monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotalTime))
-				monthTheoritical = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical')),true)		
+				monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotalTime as long))
+				monthTheoritical = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical') as long),true)		
 	
 				if (month>5){
 					yearInf=year
