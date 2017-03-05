@@ -22,12 +22,6 @@ class UserController extends grails.plugin.springsecurity.ui.UserController {
 	
 		def update() {
 			params.each{i->log.error('parameter of list: '+i)}
-			//def user = User.get(id)
-			
-		
-			
-			
-			
 			doUpdate { user ->
 				
 				def site

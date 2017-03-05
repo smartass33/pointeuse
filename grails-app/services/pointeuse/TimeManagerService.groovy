@@ -3,7 +3,8 @@ package pointeuse
 import groovy.time.TimeDuration;
 import groovy.time.TimeCategory;
 
-import java.text.SimpleDateFormat;
+import java.text.SimpleDateFormat
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.transaction.annotation.Transactional
@@ -1640,6 +1641,7 @@ class TimeManagerService {
 			dailySupTotalTextMap:data.get('dailySupTotalTextMap'),
 			dailyTotalTextMap:data.get('dailyTotalTextMap'),
 			holidayMap:data.get('holidayMap'),
+			mileageMapByDay:data.get('mileageMapByDay'),
 			month:month,
 			year:year,
 			period:calendarLoop.getTime(),		
@@ -3200,6 +3202,7 @@ class TimeManagerService {
 	
 			//maps
 			def mapByDay = [:]
+			def mileageMapByDay = [:]
 			def weeklyTotalTime = [:]
 			def weeklySuppTotalTime = [:]
 			def weeklySupTotalTimeByEmployee = [:]
@@ -3242,6 +3245,18 @@ class TimeManagerService {
 						eq('year',year)
 					}
 				}
+				
+				criteria = Mileage.createCriteria()
+				def dailyMileage = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+						eq('month',month)
+						eq('year',year)
+					}
+				}
+			
+				
 				// permet de récupérer le total hebdo
 				if (dailyTotal != null && dailyTotal != dailyTotalId){
 					def timing = getDailyTotal(dailyTotal)
@@ -3317,7 +3332,7 @@ class TimeManagerService {
 				if 	(entriesByDay.size() > 0){
 					if (dailyTotal != null){
 						dailySeconds = getDailyTotal(dailyTotal).get("elapsedSeconds")
-						dailyTotalMap.put(tmpDate, dailyTotal)//dailySeconds)
+						dailyTotalMap.put(tmpDate, dailyTotal)
 						dailySupTotalMap.put(tmpDate, Math.max(dailySeconds-DailyTotal.maxWorkingTime,0))
 						dailyTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(dailySeconds),false))
 						dailySupTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(Math.max(dailySeconds-DailyTotal.maxWorkingTime,0)),false))
@@ -3341,6 +3356,7 @@ class TimeManagerService {
 					dailySupTotalTextMap.put(tmpDate, getTimeAsText(computeHumanTime(0),false))
 					mapByDay.put(tmpDate, null)
 				}
+				mileageMapByDay.put(tmpDate, dailyMileage)
 				
 				// find out if day is a bank holiday:
 				criteria = BankHoliday.createCriteria()
@@ -3437,7 +3453,8 @@ class TimeManagerService {
 				dailyBankHolidayMap:dailyBankHolidayMap,
 				holidayMap:holidayMap,
 				weeklyAggregate:weeklyAggregate,
-				monthlySupTime:monthlySupTime
+				monthlySupTime:monthlySupTime,
+				mileageMapByDay:mileageMapByDay
 			]	
 	}
 	

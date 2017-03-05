@@ -105,7 +105,7 @@ environments {
 		grails.app.context=''
 		grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
-		serverURL = "http://ec2-54-154-203-127.eu-west-1.compute.amazonaws.com"
+		serverURL = "http://ec2-54-171-80-34.eu-west-1.compute.amazonaws.com"
 		context=''
 		log4j = {
 				'null' name:'stacktrace'

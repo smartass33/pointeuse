@@ -13,32 +13,32 @@
 					</tr>
 					<tr>
 						<td>&nbsp;</td>
-						<td><g:message code='spring.security.ui.search.true'/></td>
-						<td><g:message code='spring.security.ui.search.false'/></td>
-						<td><g:message code='spring.security.ui.search.either'/></td>
+						<td style='text-align:center;'><g:message code='spring.security.ui.search.true'/></td>
+						<td style='text-align:center;'><g:message code='spring.security.ui.search.false'/></td>
+						<td style='text-align:center;'><g:message code='spring.security.ui.search.either'/></td>
 					</tr>
 					<tr>
 						<td><g:message code='user.enabled.label' default='Enabled'/>:</td>
 						<g:radioGroup name='enabled' labels="['','','']" values='[1,-1,0]' value='${enabled ?: 0}'>
-						<td><%=it.radio%></td>
+						<td style='text-align:center;'><%=it.radio%></td>
 						</g:radioGroup>
 					</tr>
 					<tr>
 						<td><g:message code='user.accountExpired.label' default='Account Expired'/>:</td>
 						<g:radioGroup name='accountExpired' labels="['','','']" values='[1,-1,0]' value='${accountExpired ?: 0}'>
-						<td><%=it.radio%></td>
+						<td style='text-align:center;'><%=it.radio%></td>
 						</g:radioGroup>
 					</tr>
 					<tr>
 						<td><g:message code='user.accountLocked.label' default='Account Locked'/>:</td>
 						<g:radioGroup name='accountLocked' labels="['','','']" values='[1,-1,0]' value='${accountLocked ?: 0}'>
-						<td><%=it.radio%></td>
+						<td style='text-align:center;'><%=it.radio%></td>
 						</g:radioGroup>
 					</tr>
 					<tr>
 						<td><g:message code='user.passwordExpired.label' default='Password Expired'/>:</td>
 						<g:radioGroup name='passwordExpired' labels="['','','']" values='[1,-1,0]' value='${passwordExpired ?: 0}'>
-						<td><%=it.radio%></td>
+						<td style='text-align:center;'><%=it.radio%></td>
 						</g:radioGroup>
 					</tr>
 				</s2ui:searchForm>
@@ -57,12 +57,27 @@
 				</thead>
 				<tbody>
 				<g:each in='${results}' status='i' var='user'>
-				<tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-					<td><g:link action='edit' id='${user.id}'>${uiPropertiesStrategy.getProperty(user, 'username')}</g:link></td>
-					<td><s2ui:formatBoolean bean='${user}' name='enabled'/></td>
-					<td><s2ui:formatBoolean bean='${user}' name='accountExpired'/></td>
-					<td><s2ui:formatBoolean bean='${user}' name='accountLocked'/></td>
-					<td><s2ui:formatBoolean bean='${user}' name='passwordExpired'/></td>
+				<tr  class="${(i % 2) == 0 ? 'odd' : 'even'}">
+					<td style='text-align:center;'><g:link action='edit' id='${user.id}'>${uiPropertiesStrategy.getProperty(user, 'username')}</g:link></td>
+					<td style='text-align:center;'>
+						<g:if test="${user.enabled}"><g:img dir="images" file="skin/tick.png" width="14" height="14"/></g:if>
+						<g:else><g:img dir="images" file="skin/cross.png" width="14" height="14"/></g:else>
+						
+					</td>				
+					<td style='text-align:center;'>
+						<g:if test="${user.accountExpired}"><g:img dir="images" file="skin/tick.png" width="14" height="14"/></g:if>
+						<g:else><g:img dir="images" file="skin/cross.png" width="14" height="14"/></g:else>						
+					</td>							
+					<td style='text-align:center;'>
+						<g:if test="${user.accountLocked}"><g:img dir="images" file="skin/tick.png" width="14" height="14"/></g:if>
+						<g:else><g:img dir="images" file="skin/cross.png" width="14" height="14"/></g:else>						
+					</td>					
+					<td style='text-align:center;'>
+						<g:if test="${user.passwordExpired}"><g:img dir="images" file="skin/tick.png" width="14" height="14"/></g:if>
+						<g:else><g:img dir="images" file="skin/cross.png" width="14" height="14"/></g:else>
+						
+					</td>
+
 				</tr>
 				</g:each>
 				</tbody>

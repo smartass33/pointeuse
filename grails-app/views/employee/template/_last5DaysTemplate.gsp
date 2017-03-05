@@ -148,7 +148,7 @@
 				<div id="popup" class="popup">
 					<h2>${message(code: 'inAndOut.create.button', default: 'Report')}</h2>
 					<p>${message(code: 'inAndOut.create.info', default: 'Report')}</p>
-					<g:form action="create">
+					<g:form controller="inAndOut" action="create">
 						<table>
 							<tbody>
 								<tr class="prop">
@@ -182,11 +182,11 @@
 						<g:hiddenField name="userId" value="${userId}" />
 						<g:hiddenField name="fromReport" value="${fromReport}" />
 						<g:submitToRemote class="listButton"
-	                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-	                    	onComplete="document.getElementById('spinner').style.display = 'none';"				
-							update="last5days"
-							onSuccess="closePopup()"
-							url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
+			                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
+			                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
+									update="last5days"
+									onSuccess="closePopup()"
+									url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
 					</g:form>
 					<a class="close" id="closeId" href="#close"></a>
 				</div>

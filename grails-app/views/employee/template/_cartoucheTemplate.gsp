@@ -2,7 +2,10 @@
 	$(function(){$('#yearSupTotal').load('${createLink(controller:'employee', action:'getAjaxSupplementaryTime',params:[id:employee?.id,month:period.getAt(Calendar.MONTH)+1,year:period.getAt(Calendar.YEAR)])}');});
 </script>	
 
+
 <body>
+
+
 	<BR/>
 	<table style="float: left;">
 		<tr>
@@ -36,6 +39,13 @@
 		<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">
 			<tr>
 				<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="mileage" action='employeeMileage'  id="${milage}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true,employeeId:employee.id]}">Gestion des indemnités kilométriques</g:link></td>
+			</tr>
+			<tr>
+				<td class="cartoucheLeftTD"  style="font-weight: bold;">
+					<input type="button" id='detailSelector'    value="Masquer les kilomètres"  onclick="showVal();" />
+					<input type="button" id='principalSelector' value="Afficher les kilomètres" onclick="showVal();" />
+				</td>
+			
 			</tr>		
 	</sec:ifAnyGranted>
 	</table> 				

@@ -1831,10 +1831,13 @@ a.modalbox {
 }
 
 	.mileageTD {
+	  @extend .eventTD;
+	}
+
+	.mileageTD {
     font:14px Georgia, serif;
     padding:1px 1px;
     text-align:center;
-   // background-color:#DEF3CA;
     border: 0px solid #E7EFE0;
     -moz-border-radius:2px;
     -webkit-border-radius:2px;
@@ -1842,9 +1845,27 @@ a.modalbox {
     color:#666;
     text-shadow:1px 1px 1px #fff;
     width:60px;
-}
+	}
 
-		.eventTDEntry {
+		
+	.mileageTextField {
+	  @extend .mileageTD;
+	}
+
+	.mileageTextField {
+    font:14px Georgia, serif;
+    padding:1px 1px;
+    text-align:center;
+    border: 0px solid #E7EFE0;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    width:60px;
+	}
+		
+	.eventTDEntry {
     font:14px Georgia, serif;
     padding:2px 2px;
     padding-right: 2px;     

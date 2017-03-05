@@ -1,10 +1,10 @@
 
-<%@ page import="pointeuse.Milage" %>
+<%@ page import="pointeuse.Mileage" %>
 <!DOCTYPE html>
 <html>
 	<head>
 		<meta name="layout" content="main">
-		<g:set var="entityName" value="${message(code: 'milage.label', default: 'Milage')}" />
+		<g:set var="entityName" value="${message(code: 'mileage.label', default: 'Milage')}" />
 		<title><g:message code="default.show.label" args="[entityName]" /></title>
 	</head>
 	<body>

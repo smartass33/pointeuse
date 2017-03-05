@@ -15,7 +15,22 @@
 	<g:set var="weeklyRecap" value="0" />
 	<title>${message(code: 'employee.report.label', default: 'Report')}</title>
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+	
+	
+	
 	<style>
+			th.admin { display: none; } 
+			td.mileageTD { display: none; }	
+			table.showDetail th.admin { display: table-cell;  } 
+			table.showDetail th.principal { display: none; } 
+			table.showDetail td.mileageTD { display: table-cell;  }
+			table.showDetail td.eventTDEntry { display: none; }
+			table.showDetail td.eventTDExit { display: none; }
+			table.showDetail th.eventTH { display: none; }
+			
+			table.hideDetail th.hidePrincipal { display: none; } 
+			table.hidePrincipal td.hidePrincipal  { display: none;}	
+	
 		 th
 		{
 		    font:15px Georgia, serif;	
@@ -67,6 +82,17 @@
 
 	<script type="text/javascript">
 
+
+   
+    var MyJSClass = {
+		setParams: function() {
+		MyJSClass.dynamicParams = {email: $("#mileage").val()}  
+		}
+	}
+    
+
+
+	
 	function closePopup ( ){
 		window.location = $('#closeId').attr('href');
 	}
@@ -187,4 +213,22 @@
 	<div style='float:none' id="report_table_div">
 		<g:reportTable />
 	</div>
+	<g:hiddenField name="detail" value="1" />		
+<script>
+	function showVal() {
+		if (document.getElementById("detail").value == "1"){
+		    document.getElementById('reportTable').className='hideDetail';
+		    document.getElementById('detailSelector').style.display = 'none';
+		    document.getElementById('principalSelector').style.display = 'block';
+		    document.getElementById("detail").value = "0";
+	    }else{
+	    	document.getElementById('reportTable').className='showDetail';
+			document.getElementById('detailSelector').style.display = 'block';
+			document.getElementById('principalSelector').style.display = 'none';
+			document.getElementById("detail").value = "1";		
+	    }
+	}
+	showVal();
+	
+</script>
 </body>

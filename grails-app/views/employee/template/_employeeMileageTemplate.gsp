@@ -1,6 +1,6 @@
 <%@ page import="pointeuse.Site"%>
 <%@ page import="pointeuse.Employee"%>
-<%@ page import="pointeuse.Milage"%>
+<%@ page import="pointeuse.Mileage"%>
 
 
 <g:set var="calendar" value="${Calendar.instance}"/>

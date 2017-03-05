@@ -3,9 +3,15 @@ grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.work.dir = "target/work"
-grails.project.target.level = 1.6
-grails.project.source.level = 1.6
+grails.project.target.level = 1.7
+grails.project.source.level = 1.7
   
+
+grails.war.resources = { stagingDir, args ->
+	copy(todir: "${stagingDir}/WEB-INF/lib", flatten: "true") {
+		fileset(dir: "${grailsHome}/lib", includes: "**/jline-*.jar, **/jansi-*.jar")
+	}
+}
 grails.project.fork = [
     // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
     //  compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
@@ -76,6 +82,7 @@ grails.project.dependency.resolution = {
 		compile ":spring-security-core:2.0.0"
 		compile "org.grails.plugins:spring-security-ui:1.0-RC3"
 		compile "org.grails.plugins:asset-pipeline:2.12.4"
+		//compile "org.grails.plugins:asset-pipeline:1.9.9"
 		compile ":rendering:0.4.4"
 		compile ":quartz2:2.1.6.2"
 		compile ":richui:0.8"

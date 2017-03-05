@@ -48,7 +48,7 @@
 			 	text-align:center;
 			 	height:5px;
 			 	width:90px;
-			 	font-size:95%;
+			 	font-size:80%;
 			}			
 			tbody th{
 			 	text-align:center;
@@ -71,7 +71,6 @@
 	<body>
 	<h1 style="text-align:center;font-size:130%">${message(code: 'employee.monthly.report.label')} <g:formatDate format="MMMM yyyy" date="${period}"/></h1>
 	<table>
-		<thead></thead>
 		<tbody>  
 			<tr>
 				<td width="20%">
@@ -79,7 +78,7 @@
 						<tr>
 							<td style="font-weight: bold;text-align:left;" >${fieldValue(bean: employee, field: "firstName")} ${fieldValue(bean: employee, field: "lastName")}</td>
 						</tr>
-						<tr/><tr/><tr/><tr/><tr/><tr/><tr/><tr/>						
+						<tr/><tr/><tr/><tr/>						
 						<tr>
 							<g:if test="${currentContract!=null}">		
 								<td style="text-align:left;">${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${currentContract.weeklyLength}</td>

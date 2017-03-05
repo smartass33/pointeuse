@@ -10,12 +10,15 @@
 				<s2ui:tab name='userinfo' height='280'>
 					<table>
 					<tbody>
-						<s2ui:textFieldRow name='username' labelCodeDefault='Username'/>
-						<s2ui:passwordFieldRow name='password' labelCodeDefault='Password'/>
-						<s2ui:checkboxRow name='enabled' labelCodeDefault='Enabled'/>
-						<s2ui:checkboxRow name='accountExpired' labelCodeDefault='Account Expired'/>
-						<s2ui:checkboxRow name='accountLocked' labelCodeDefault='Account Locked'/>
-						<s2ui:checkboxRow name='passwordExpired' labelCodeDefault='Password Expired'/>
+						<s2ui:textFieldRow name='username' labelCodeDefault='${message(code: 'springSecurity.login.username.label', default: 'Create')}'/>
+						<s2ui:textFieldRow name='firstName' labelCodeDefault='${message(code: 'user.firstname.label', default: 'Create')}'/>
+						<s2ui:textFieldRow name='lastName' labelCodeDefault='${message(code: 'user.lastname.label', default: 'Create')}'/>
+						<s2ui:textFieldRow name='email' labelCodeDefault='${message(code: 'user.email.label', default: 'Create')}'/>				
+						<s2ui:passwordFieldRow name='password' labelCodeDefault='${message(code: 'springSecurity.login.password.label', default: 'Create')}'/>
+						<s2ui:checkboxRow name='enabled' labelCodeDefault='${message(code: 'user.enabled.label', default: 'Create')}'/>
+						<s2ui:checkboxRow name='accountExpired' labelCodeDefault='${message(code: 'user.accountExpired.label', default: 'Create')}'/>
+						<s2ui:checkboxRow name='accountLocked' labelCodeDefault='${message(code: 'user.accountLocked.label', default: 'Create')}'/>
+						<s2ui:checkboxRow name='passwordExpired' labelCodeDefault='${message(code: 'user.passwordExpired.label', default: 'Create')}'/>
 					</tbody>
 					</table>
 				</s2ui:tab>

@@ -841,6 +841,9 @@ class EmployeeController {
 		if (thisMonthCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) && thisMonthCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) ){
 			isCurrentMonth = true
 		}
+		if (calendar.get(Calendar.MONTH) >= thisMonthCalendar.get(Calendar.MONTH) || calendar.get(Calendar.YEAR) >= thisMonthCalendar.get(Calendar.YEAR) ){
+			isCurrentMonth = true
+		}
 		
 		Period period = (calendar.get(Calendar.MONTH) < 5) ? Period.findByYear(calendar.get(Calendar.YEAR) - 1) : Period.findByYear(calendar.get(Calendar.YEAR))
 		def lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -2394,7 +2397,7 @@ class EmployeeController {
 		}	
 	}
 	
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def report(Long userId,int monthPeriod,int yearPeriod){
 		def siteId=params["siteId"]
@@ -3615,6 +3618,19 @@ class EmployeeController {
 	}
 	
 	@Secured(['ROLE_ANONYMOUS'])
+	def testResource() {
+		def timeDifference
+		def folder = grailsApplication.config.pdf.directory
+		Resource myResource = assetResourceLocator.findAssetForURI('biolab3.png')
+		def logoFile = new File('logo')
+		//writeByteArrayToFile(File file, byte[] data)
+		def fileUtil = new FileUtils()
+		fileUtil.writeByteArrayToFile(logoFile, myResource.getByteArray())
+		log.error(logoFile)
+		
+	}
+	
+	@Secured(['ROLE_ANONYMOUS'])
 	def createAllSitesPDF() {
 		def timeDifference
 		def folder = grailsApplication.config.pdf.directory
@@ -3659,7 +3675,9 @@ class EmployeeController {
 		
 		Resource myResource = assetResourceLocator.findAssetForURI('biolab3.png')
 		def logoFile = new File('logo')
-		FileUtils.writeByteArrayToFile(logoFile, myResource.getByteArray())
+		//FileUtils.writeByteArrayToFile(logoFile, myResource.getByteArray())
+		def fileUtil = new FileUtils()
+		fileUtil.writeByteArrayToFile(logoFile, myResource.getByteArray())
 		sites.each { site ->
 			def userList = site.users
 			def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'

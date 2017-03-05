@@ -1,4 +1,4 @@
-<%@ page import="pointeuse.Milage" %>
+<%@ page import="pointeuse.Mileage" %>
 
 
 

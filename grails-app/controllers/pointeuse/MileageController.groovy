@@ -14,6 +14,7 @@ class MileageController {
 
 	def mileageService
 	def springSecurityService
+	def timeManagerService
 	
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
@@ -67,16 +68,31 @@ class MileageController {
 		params.each{i->log.error('parameter of list: '+i)}
 		def period = Period.get(params['periodId'])
 		def employee = Employee.get(params['employeeId'])
+		def fromReport = params.boolean('fromReport')//.split(" ").getAt(0) as boolean
 		def value = params.long('value')
-		def date_mileage_picker =params["date_mileage_picker"]
+		//def date_mileage_picker = params["date_mileage_picker"]//.split(" ").getAt(0)
 		def calendar = Calendar.instance
-		if (date_mileage_picker != null && date_mileage_picker.size()>0){
-			calendar.time = new Date().parse("d/M/yyyy HH:mm", date_mileage_picker)
+		//if (date_mileage_picker != null && date_mileage_picker.size() > 0){
+			calendar.time = new Date().parse("d/M/yyyy", params["date_mileage_picker"])
+			
+		//}
+		log.error('calendar.time: '+calendar.time)
+		
+
+
+		//def month = (params["datemileage_picker"] != null && params["date_mileage_picker"].size() > 0) ? (params["date_mileage_picker"].split(" ").getAt(0)) as int : calendar.get(Calendar.MONTH) + 1
+		
+		//calendar.get(Calendar.MONTH) + 1//(params["month"].split(" ").getAt(0)) as int
+		def month = calendar.get(Calendar.MONTH) + 1
+		def year = calendar.get(Calendar.YEAR)//(month >= 6 ? period.year : period.year + 1)
+		if (period == null){
+			if (month < 6){
+				period=Period.findByYear(year - 1)
+			}else{
+				period=Period.findByYear(year)
+			}
 		}
-		
-		
-		def month = calendar.get(Calendar.MONTH) + 1//(params["month"].split(" ").getAt(0)) as int
-		def year = calendar.get(Calendar.YEAR)//(month >= 6 ? period.year : period.year + 1)	
+			
 		def criteria = Mileage.createCriteria()
 		def day = calendar.get(Calendar.DAY_OF_MONTH)
 		def mileage = criteria.get {
@@ -100,10 +116,15 @@ class MileageController {
 			return
 		}finally{
 			sleep(2000)
-			def model = mileageService.getReportData( period, employee.site)
-			//render template:"/mileage/template/mileageTemplate",model:model
-			redirect(action: "employeeMileage", periodId: period.id,employeeId:employee.id,siteId:employee.site.id)
-			return
+			//def model = mileageService.getReportData( period, employee.site)
+			if (fromReport){
+				def report = timeManagerService.getReportData(null, employee,  null, month, year,true)
+				render template: "/employee/template/reportTableTemplate", model: report
+				return
+			}else{
+				redirect(action: "employeeMileage", periodId: period.id,employeeId:employee.id,siteId:employee.site.id)
+				return
+			}
 		}
 	}
 	
