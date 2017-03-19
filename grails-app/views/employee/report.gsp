@@ -83,15 +83,19 @@
 	<script type="text/javascript">
 
 
-   
-    var MyJSClass = {
-		setParams: function() {
-		MyJSClass.dynamicParams = {email: $("#mileage").val()}  
-		}
-	}
+	var MyJSClass = {
+			  setParams: function(id,employeeId,date_mileage_picker,fromReport) {
+				  val = document.getElementById(id);
+				  if(val === null){
+			      	MyJSClass.dynamicParams = {value: null, employeeId: employeeId,date_mileage_picker:date_mileage_picker,fromReport:fromReport}  
+				  }else{
+				    MyJSClass.dynamicParams = {value: val.value, employeeId: employeeId,date_mileage_picker:date_mileage_picker,fromReport:fromReport}  
+						
+				  }   
+			      
+			  }
+			}
     
-
-
 	
 	function closePopup ( ){
 		window.location = $('#closeId').attr('href');
@@ -219,11 +223,13 @@
 		if (document.getElementById("detail").value == "1"){
 		    document.getElementById('reportTable').className='hideDetail';
 		    document.getElementById('detailSelector').style.display = 'none';
+		    document.getElementById('detailPDF').style.display = 'none';		    
 		    document.getElementById('principalSelector').style.display = 'block';
 		    document.getElementById("detail").value = "0";
 	    }else{
 	    	document.getElementById('reportTable').className='showDetail';
 			document.getElementById('detailSelector').style.display = 'block';
+			document.getElementById('detailPDF').style.display = 'block';		
 			document.getElementById('principalSelector').style.display = 'none';
 			document.getElementById("detail").value = "1";		
 	    }

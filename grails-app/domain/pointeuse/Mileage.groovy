@@ -14,9 +14,17 @@ class Mileage {
 
 	static belongsTo = [employee:Employee]
 	
+	
 	String toString(){
-		return this.year + '/' + this.month +  '/' +this.day + '-' + +this.employee.lastName + '-' + this.value
+		return 
+			this.year.toString() +
+			 '/' + 
+			 this.month.toString()  +
+			 '/' + this.day.toString()  +
+			 '-' + this.employee.lastName + 
+			 '-' + this.value.toString()
 	}
+
 	
 	static constraints = {
 		month (unique:['employee','period','month','year','day'])

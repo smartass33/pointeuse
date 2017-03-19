@@ -111,6 +111,27 @@ class PDFService {
 		file = new File(folder+'/'+filename)
 		return [file.bytes,file.name]
 	}
+	
+	def generateUserMonthlyMileageSheet(Date minDate, Date maxDate,Employee employee,String folder){
+		log.error('generateUserMonthlyMileageSheet called for employee: '+employee.firstName+' '+employee.lastName)
+		def filename
+		Calendar calendar = Calendar.instance
+		OutputStream outputStream
+		File file
+		boolean entityUpdate = true
+		def modelReport = timeManagerService.getMileage(minDate, maxDate, employee)
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeUserMileageTemplate', model: modelReport)
+		filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString()+'-Kilometres-'+employee.lastName+'-'+employee.firstName+'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
 
 	def generateUserAnnualTimeSheet(int year,int month,Employee employee,String folder){
 		def filename

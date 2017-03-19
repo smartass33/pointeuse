@@ -20,10 +20,10 @@ class InAndOutCLosingJob {
 		log.error "Job run!"
 		
 		def inOrOut
-		//trouver toutes les entr�es du jour courant
-		//trouver, pour chaque employ� le plus r�cent
-		//Si ce dernier est une Entr�e, rajouter une sortie
-		// ajouter dans un nouveau champs de InAndOut que cette 'sortie' est g�n�r�e automatiquement pour la resortir en erreur dans les rapprts.
+		//trouver toutes les entrees du jour courant
+		//trouver, pour chaque employe le plus recent
+		//Si ce dernier est une Entree, rajouter une sortie
+		// ajouter dans un nouveau champs de InAndOut que cette 'sortie' est generee automatiquement pour la resortir en erreur dans les rapprts.
 
 		def employeeList = Employee.findAll("from Employee")
 		def calendar = Calendar.instance

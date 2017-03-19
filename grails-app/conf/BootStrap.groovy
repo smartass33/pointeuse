@@ -20,14 +20,16 @@ class BootStrap {
 		log.error 'executing bootstrap'
 		EventLogAppender.appInitialized = true
 		def calendar = Calendar.instance		
+	/*
 		calendar.set(Calendar.HOUR_OF_DAY,22)
 		calendar.set(Calendar.MINUTE,0)
 		log.error 'registring InAndOutCLosingJob at '+calendar.time
+	
 		InAndOutCLosingJob.schedule(calendar.time)
 		
 		calendar.set(Calendar.HOUR_OF_DAY,03)
 		calendar.set(Calendar.MINUTE,30)
-
+	*/
 		//create a calendar to schedule next JOB first day of month
 		def firstDayCalendar = Calendar.instance
 		firstDayCalendar.set(Calendar.MONTH,firstDayCalendar.get(Calendar.MONTH) + 1)

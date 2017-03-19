@@ -13,28 +13,7 @@ hibernate {
 
 environments {
     development {
-		
-		/*
-        dataSource {
-		    pooled = true
-		    dbCreate = "update"
-			url = "jdbc:mysql://localhost:3306/pointeuse"
-		    driverClassName = "com.mysql.jdbc.Driver"
-			dialect = "org.hibernate.dialect.MySQL5InnoDBDialect"
-		    //username = "pointeuse"
-		    username = "root"
-			password = "root"
-			properties {
-				maxActive = 50
-				maxIdle = 25
-				minIdle = 5
-				initialSize = 5
-				minEvictableIdleTimeMillis = 60000
-				timeBetweenEvictionRunsMillis = 60000
-				maxWait = 10000			}
-		}
-		*/
-		
+
 		dataSource {
 			pooled = true
 			dbCreate = "update"
@@ -58,7 +37,6 @@ environments {
 			}
 		}
     }
-	
 	
 	aws {
 		dataSource {
@@ -84,32 +62,6 @@ environments {
 		}
 	}
 	
-	alrikiki {
-		dataSource {
-			pooled = true
-			dbCreate = "update"
-			url = "jdbc:mariadb://localhost:3306/pointeuse"
-			driverClassName = "org.mariadb.jdbc.Driver"
-			username = "root"
-			password = "root"
-			properties {
-				maxActive = 50
-				maxIdle = 25
-				minIdle = 5
-				initialSize = 5
-				minEvictableIdleTimeMillis=60000
-				timeBetweenEvictionRunsMillis=60000
-				numTestsPerEvictionRun=3
-				testOnBorrow=true
-				testWhileIdle=true
-				testOnReturn=true
-				validationQuery="SELECT 1"
-			}
-		}
-	
-	}
-	
-	
 	dell {
 		dataSource {
 			pooled = true
@@ -132,30 +84,5 @@ environments {
 		}
 	
 	}
-	
-	dell_test {
-		dataSource {
-			pooled = true
-			dbCreate = "update"
-			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
-			driverClassName = "com.mysql.jdbc.Driver"
-			username = "root"
-			password = "root"
-			properties {
-				maxActive = 100
-				maxIdle = 25
-				minIdle = 20
-				initialSize = 20
-				maxWait = 10000
-				validationQuery = "select 1"
-				testOnBorrow = true
-				testWhileIdle = true
-				testOnReturn = true
-			}
-		}
-	
-	}
-	
-
 }
 

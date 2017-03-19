@@ -45,8 +45,21 @@
 					<input type="button" id='detailSelector'    value="Masquer les kilomètres"  onclick="showVal();" />
 					<input type="button" id='principalSelector' value="Afficher les kilomètres" onclick="showVal();" />
 				</td>
-			
-			</tr>		
+			</tr>	
+			<tr id="detailPDF">	
+				<td style="border-style:none;" >
+					<g:form controller="mileage">
+						<g:actionSubmit class="pdfButton" action="mileagePDF" 
+								value="PDF"
+								onLoading="document.getElementById('spinner').style.display = 'inline';"
+				                onComplete="document.getElementById('spinner').style.display = 'none';"
+							/>						
+						<g:hiddenField name="mileageMinDate" value="${mileageMinDate.format('yyyyMd')}" /> 				
+						<g:hiddenField name="mileageMaxDate" value="${mileageMaxDate.format('yyyyMd')}" /> 	
+						<g:hiddenField name="employeeId" value="${employee.id}" /> 	
+					</g:form>	
+				</td>
+			</tr>			
 	</sec:ifAnyGranted>
 	</table> 				
 	<table style="float: left; border:0px;border-width:0px;border-style:none;">

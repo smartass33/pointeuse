@@ -3012,52 +3012,7 @@ class EmployeeController {
 		return
 	}
 	
-	@Secured(['ROLE_ANONYMOUS'])
-	def sendMail (){	
-		def myDate = params["myDate"]
-		def site
-		def siteId = params["siteId"]
-		def timeDifference
-		def filename
-		Calendar calendar = Calendar.instance
-		def startTime = calendar.time
-		def folder = grailsApplication.config.pdf.directory
-		if (myDate==null || myDate.equals("")){
-			myDate=calendar.time
-		}else {
-			calendar.time=myDate
-		}
-		if (params["siteId"]!=null && !params["siteId"].equals('')){
-			site = Site.get(params["siteId"].toInteger())
-		}else{
-			flash.message = message(code: 'pdf.site.selection.error')
-			return
-		}
-
-		def sites = Site.findAll(){
-			log.error("site: "+siteOccurence)
-		}
-		
-		filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
-		def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
-		if (!file.exists()){
-			flash.message = message(code: 'pdf.site.report.not.available')
-			//redirect(action: "list")
-			return
-		}else{
-		//	render(file: file, fileName: file.name,contentType: "application/octet-stream")
-		log.error('file found')
-		
-			mailService.sendMail {
-				multipart true
-				to "henri.martin@gmail.com"
-				subject "Rapport Mensuel du site de "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
-				body "Veuillez trouver ci-joint le rapport mensuel du site"
-				attachBytes filename,'application/pdf', file.readBytes()	
-			}	
-		}
-		log.error('mail sent')
-	  }
+	
 	
 	@Secured(['ROLE_ADMIN'])
 	def removeCSS(){
@@ -3617,18 +3572,32 @@ class EmployeeController {
 		}
 	}
 	
-	@Secured(['ROLE_ANONYMOUS'])
+	@Secured(['ROLE_ADMIN'])
 	def testResource() {
 		def timeDifference
+		def site = Site.get(3)
+		def user = User.get(1)
+		def calendar = Calendar.instance
 		def folder = grailsApplication.config.pdf.directory
 		Resource myResource = assetResourceLocator.findAssetForURI('biolab3.png')
+		
 		def logoFile = new File('logo')
 		//writeByteArrayToFile(File file, byte[] data)
 		def fileUtil = new FileUtils()
 		fileUtil.writeByteArrayToFile(logoFile, myResource.getByteArray())
 		log.error(logoFile)
+		mailService.sendMail {
+			multipart true
+			to 'henri.martin@gmail.com'
+			subject 'TOTOT'
+			html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+			inline 'biolab33', 'image/png', logoFile
+		}
 		
 	}
+	
+	
+
 	
 	@Secured(['ROLE_ANONYMOUS'])
 	def createAllSitesPDF() {
@@ -3675,9 +3644,12 @@ class EmployeeController {
 		
 		Resource myResource = assetResourceLocator.findAssetForURI('biolab3.png')
 		def logoFile = new File('logo')
-		//FileUtils.writeByteArrayToFile(logoFile, myResource.getByteArray())
 		def fileUtil = new FileUtils()
-		fileUtil.writeByteArrayToFile(logoFile, myResource.getByteArray())
+		def addingLogo = false
+		if (myResource != null){ 
+			fileUtil.writeByteArrayToFile(logoFile, myResource.getByteArray())
+			addingLogo = true
+		}
 		sites.each { site ->
 			def userList = site.users
 			def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
@@ -3691,13 +3663,23 @@ class EmployeeController {
 				log.debug('user.email: '+user.email)
 				if (user.reportSendDay == (calendar.get(Calendar.DAY_OF_MONTH)) && user.email != null && file.exists()){
 					log.error('user reportSendDay has come: will fire report to: '+user.email)
-					mailService.sendMail {
-						multipart true
-						to user.email
-						subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
-						html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
-						attachBytes filename,'application/pdf', file.readBytes()
-						inline 'biolab33', 'image/png', logoFile
+					if (addingLogo) {
+						mailService.sendMail {
+							multipart true
+							to user.email
+							subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+							html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+							attachBytes filename,'application/pdf', file.readBytes()
+							inline 'biolab33', 'image/png', logoFile
+						}
+					}else{
+						mailService.sendMail {
+							multipart true
+							to user.email
+							subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+							html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+							attachBytes filename,'application/pdf', file.readBytes()
+						}
 					}
 				}			
 			}
@@ -3912,5 +3894,47 @@ class EmployeeController {
 		
 		}
 			log.error('modifyTime done')
+	}
+	
+	@Secured(['ROLE_ANONYMOUS'])
+	def closeDay() {
+		log.error('launching CloseDay')
+		
+		def inOrOut
+		def employeeList = Employee.findAll("from Employee")
+		def calendar = Calendar.instance
+		for (employee in employeeList){
+			def lastIn = InAndOut.findByEmployee(employee,[max:1,sort:"time",order:"desc"])
+			if (lastIn != null && lastIn.type == "E"){
+				log.error "we have a problem: user "+employee.lastName +" did not log out"
+				inOrOut = new InAndOut(employee, calendar.time,"S",false)
+				inOrOut.dailyTotal=lastIn.dailyTotal
+				inOrOut.systemGenerated=true
+				employee.inAndOuts.add(inOrOut)
+				employee.hasError=true
+				log.error "creating inOrOut: "+inOrOut
+			}
+			
+			def criteria = InAndOut.createCriteria()
+			def inAndOutList = criteria.list {
+				or{
+					and {
+						eq('employee',employee)
+						eq('systemGenerated',true)
+					}
+					and {
+						eq('employee',employee)
+						eq('regularizationType',InAndOut.INITIALE_SALARIE)
+					}
+				 }	
+			}
+			if (inAndOutList != null && inAndOutList.size()>0){
+				log.debug("there still "+inAndOutList.size() +" errors for employee "+employee.id + " : " +employee.lastName)
+				 employee.hasError=true
+			 }else {
+				 employee.hasError=false
+			 }	
+		}	
+		return 'CloseDay done!'	
 	}
 }

@@ -1512,6 +1512,7 @@ class TimeManagerService {
 		def calendar = Calendar.instance
 		def monthlyTotalTimeByEmployee = [:]
 		def criteria
+		def monthlyPeriodValue = 0
 
 		//get last day of the month
 		if (myDate == null){
@@ -1587,8 +1588,70 @@ class TimeManagerService {
 				departureDate = employee.status.date
 			}
 		}	
+		
+		
+		criteria = Mileage.createCriteria()
+		def mileageList
+		def mileageMinDate = Calendar.instance
+		def mileageMaxDate = Calendar.instance
+		
+		if (month == 1){
+			mileageList = criteria.list {
+				or{
+					and {
+						eq('employee',employee)
+						eq('month',month)
+						eq('year',year)
+						le('day',20)
+					}
+					and {
+						eq('employee',employee)
+						eq('month',12)
+						eq('year',year - 1)
+						gt('day',20)
+					}
+				}
+			}
+			mileageMinDate.set(Calendar.YEAR,year - 1)
+			mileageMinDate.set(Calendar.MONTH,11)
+			mileageMinDate.set(Calendar.DAY_OF_MONTH,21)
+			mileageMaxDate.set(Calendar.YEAR,year)
+			mileageMaxDate.set(Calendar.MONTH,0)
+			mileageMaxDate.set(Calendar.DAY_OF_MONTH,20)
+		}else{
+			mileageList = criteria.list {
+				or{
+					and {
+						eq('employee',employee)
+						eq('month',month)
+						eq('year',year)
+						le('day',20)
+					}
+					and {
+						eq('employee',employee)
+						eq('month',month - 1)
+						eq('year',year)
+						gt('day',20)
+					}
+				}
+			}
+			mileageMinDate.set(Calendar.YEAR,year)
+			mileageMinDate.set(Calendar.MONTH,month - 2)
+			mileageMinDate.set(Calendar.DAY_OF_MONTH,21)
+			mileageMaxDate.set(Calendar.YEAR,year)
+			mileageMaxDate.set(Calendar.MONTH,month - 1)
+			mileageMaxDate.set(Calendar.DAY_OF_MONTH,20)
+		}
+		if (mileageList != null){
+			for (Mileage mileageIter : mileageList){
+				monthlyPeriodValue += mileageIter.value
+			}
+		}
 
 		return [
+			mileageMinDate:mileageMinDate,
+			mileageMaxDate:mileageMaxDate,
+			monthlyPeriodValue:monthlyPeriodValue as long,
 			yearOpenDays:yearOpenDays,
 			monthlySupTime:data.get('monthlySupTime') as long,
 			timeBefore7:data.get('timeBefore7') as long,	
@@ -2840,7 +2903,7 @@ class TimeManagerService {
 				log.debug('realOpenDays*weeklyContractTime/Employee.WeekOpenedDays: '+realOpenDays*weeklyContractTime/Employee.WeekOpenedDays)
 				log.debug('(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime): '+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime))
 				log.debug('(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)): '+(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)))
-				log.debug('(35/7)*absenceMap.get(AbsenceType.PATERNITE): '+(35/7)*absenceMap.get(AbsenceType.PATERNITE))
+	  			log.debug('(35/7)*absenceMap.get(AbsenceType.PATERNITE): '+(35/7)*absenceMap.get(AbsenceType.PATERNITE))
 				log.debug('(weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday: '+(weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday)
 				log.debug('absenceMap.get(AbsenceType.GROSSESSE)): '+absenceMap.get(AbsenceType.GROSSESSE))
 			
@@ -4648,5 +4711,82 @@ class TimeManagerService {
 		]
 		
 		return model
+	}
+	
+	def getMileage(Date minDate, Date maxDate, Employee employee){
+		def mileageMaxDay = 20
+		Calendar maxCalendar = Calendar.instance
+		maxCalendar.time = maxDate
+		maxCalendar.set(Calendar.DAY_OF_MONTH,1)
+		Calendar minCalendar = Calendar.instance
+		minCalendar.time = minDate 
+		def dailyMileage 
+		def totalPeriodMileage = 0
+		def year
+		def month
+		def day
+		def model = [:]
+		 
+		
+		def mileageMap = [:]
+		while(minCalendar.get(Calendar.DAY_OF_MONTH) <= minCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			log.debug('minCalendar: '+minCalendar.time)
+			def criteria = Mileage.createCriteria()
+			dailyMileage = criteria.get {
+				and {
+					eq('employee',employee)				
+					eq('year',minCalendar.get(Calendar.YEAR))
+					eq('month',minCalendar.get(Calendar.MONTH) + 1)
+					eq('day',minCalendar.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			if (dailyMileage != null){
+				mileageMap.put(minCalendar.time,dailyMileage.value)
+				totalPeriodMileage += dailyMileage.value
+			}
+			else {
+				mileageMap.put(minCalendar.time,0)
+			}
+			if (minCalendar.get(Calendar.DAY_OF_MONTH) == minCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){			
+				break
+			}
+			minCalendar.roll(Calendar.DAY_OF_MONTH, 1)
+		}
+		while(maxCalendar.get(Calendar.DAY_OF_MONTH) <= mileageMaxDay){
+			log.debug('maxCalendar: '+maxCalendar.time)
+			def criteria = Mileage.createCriteria()
+			dailyMileage = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',maxCalendar.get(Calendar.YEAR))
+					eq('month',maxCalendar.get(Calendar.MONTH) + 1)
+					eq('day',maxCalendar.get(Calendar.DAY_OF_MONTH))		
+				}
+			}
+			if (dailyMileage != null){
+				mileageMap.put(maxCalendar.time,dailyMileage.value)
+				totalPeriodMileage += dailyMileage.value
+			}
+			else {
+				mileageMap.put(maxCalendar.time,0)
+			}
+			if (maxCalendar.get(Calendar.DAY_OF_MONTH) == mileageMaxDay){
+				break
+			}
+			maxCalendar.roll(Calendar.DAY_OF_MONTH, 1)
+		}
+		
+
+		
+		model << [
+				mileageMap:mileageMap,
+				totalPeriodMileage:totalPeriodMileage,
+				minDate:minDate,
+				maxDate:maxDate,
+				employee:employee			
+			]
+		return model
+				
+		
 	}
 }

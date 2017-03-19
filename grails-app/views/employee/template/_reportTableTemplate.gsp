@@ -18,7 +18,7 @@
 	      <th>${message(code: 'report.table.daily.total.label', default: 'report')}</th>
 	      <th>${message(code: 'report.table.HS.label', default: 'report')}</th>
 	      <th>
-	      	${message(code: 'report.table.absence.label', default: 'report')}    
+	      	${message(code: 'report.table.absence.labe@l', default: 'report')}    
              <g:select width="50px"
                     onchange="${remoteFunction(action:'modifyAllAbsence', update:'report_table_div', 
 					onLoading: "document.getElementById('spinner').style.display = 'inline';",
@@ -31,8 +31,16 @@
                     value="${AbsenceType}"
                     noSelection="${['-':'']}" />	
 	      	</th>
-	      <th colspan="80" class="principal">${message(code: 'events.label', default: 'report')}</th>
-	      <th class="admin">Indemnités Kilométriques</th>
+	      <th colspan="80" class="principal">${message(code: 'events.label')}</th>
+	      <th class="admin">
+	      	${message(code: 'mileage.label')} 
+			<g:if test="${monthlyPeriodValue}">
+				 : ${monthlyPeriodValue}KM (${mileageMinDate.format('dd/MM/yyyy')} - ${mileageMaxDate.format('dd/MM/yyyy')}) 
+	        </g:if>	    
+	        <g:else>
+	        	 : ${0}KM (${mileageMinDate.format('dd/MM/yyyy')} - ${mileageMaxDate.format('dd/MM/yyyy')}) 
+	        </g:else>  		
+	      </th>
 	    </thead>
 	    <tbody>
 	        <g:each in="${weeklyAggregate}" status="k" var="week">
@@ -301,14 +309,18 @@
 	                  
 
 	                    	<td class='mileageTD'>
-								<g:textField id="mileage" name="mileage" class='mileageTextField' value="${mileageMapByDay.get(entries.key).value ?: '0'}" align="center" style="vertical-align: middle;"/>
+								<g:textField id="${entries.key.format('yyyyMd')}" name="mileage" class='mileageTextField' value="${mileageMapByDay.get(entries.key).value ?: '0'}" align="center" style="vertical-align: middle;"/>
 				                <g:remoteLink action="modifyMileage" 
 				                		controller="mileage" 
-				                		params="[employeeId: employee.id,date_mileage_picker:entries.key.format('d/M/yyyy'),employeeId:employee.id,fromReport:true,MyJSClass.dynamicParams:MyJSClass.dynamicParams]"
-				                    	update="mileageTableDiv"
-				                    	before="MyJSClass.setParams()"
+				                		params="MyJSClass.dynamicParams"
+				                    	update="report_table_div"
+				                    	before="MyJSClass.setParams(${entries.key.format('yyyyMd')},${employee.id},${entries.key.format('yyyyMd')},${true})"
 				                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                    	onComplete="document.getElementById('spinner').style.display = 'none';">
+				                    	onComplete="document.getElementById('spinner').style.display = 'none';
+				                    				document.getElementById('reportTable').className='showDetail';
+													document.getElementById('detailSelector').style.display = 'block';
+													document.getElementById('principalSelector').style.display = 'none';
+													document.getElementById('detail').value = '1';">
 				                    	<g:img dir="images" file="skin/refresh.png" width="16" height="16" style="vertical-align: middle;"/>
 				                    </g:remoteLink>	
 									
@@ -316,12 +328,17 @@
 	                  </g:if>
 	                  <g:else>
 	                  		<td class='mileageTD'>
-								<g:textField id="mileage" name="mileage" class='mileageTextField' value="0" align="center" style="vertical-align: middle;"/>
+								<g:textField id="${entries.key.format('yyyyMd')}" name="mileage" class='mileageTextField' value="0" align="center" style="vertical-align: middle;"/>
 				                <g:remoteLink action="modifyMileage" controller="mileage" 
-				                		params="[employeeId: employee.id,date_mileage_picker:entries.key.format('d/M/yyyy'),employeeId:employee.id,fromReport:true]"
-				                    	update="mileageTableDiv"
+				                		params="MyJSClass.dynamicParams"
+				                    	update="report_table_div"
+				                    	before="MyJSClass.setParams(${entries.key.format('yyyyMd')},${employee.id},${entries.key.format('yyyyMd')},${true})"
 				                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                    	onComplete="document.getElementById('spinner').style.display = 'none';">
+				                    	onComplete="document.getElementById('spinner').style.display = 'none';
+				                    		    	document.getElementById('reportTable').className='showDetail';
+													document.getElementById('detailSelector').style.display = 'block';
+													document.getElementById('principalSelector').style.display = 'none';
+													document.getElementById('detail').value = '1';">
 				                    	<g:img dir="images" file="skin/refresh.png" width="16" height="16" style="vertical-align: middle;"/>
 				                    </g:remoteLink>								
 							</td>
