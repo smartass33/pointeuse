@@ -2,11 +2,18 @@
 <%@ page import="pointeuse.Employee"%>
 
 <g:set var="calendar" value="${Calendar.instance}"/>
+<g:set var="minCal" value="${Calendar.instance}"/>
+<g:set var="maxCal" value="${Calendar.instance}"/>
+
 <g:if test="${ period != null}">
-	<g:set var="currentYear" value="${period.year}"/>
+	<g:set var="maxYear" value="${period.year}"/>
+	<g:set var="minYear" value="${period.year}"/>
+	
 </g:if>
 <g:else>
-	<g:set var="currentYear" value="${calendar.get(Calendar.YEAR)}"/>
+	<g:set var="maxYear" value="${calendar.get(Calendar.YEAR)}"/>
+	<g:set var="minYear" value="${calendar.get(Calendar.YEAR)}"/>
+	
 </g:else>
 <g:if test="${flash.message}">
 	<div class="message" role="status">${flash.message}</div>
@@ -17,11 +24,25 @@
 		<thead>
 			<th class="eventTD" style="vertical-align: middle;text-align: left;width:120px;"/>
 			<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
-				<th class="eventTD" style="width:50px">
+				<th class="eventTD" style="width:65px">
 					<% calendar.set(Calendar.MONTH,month_th - 1) 
-						if (month_th == 1){currentYear +=1}
+						if (month_th == 1){
+							maxYear +=1	
+							minYear +=1
+						}
+						
+						
+						minCal.set(Calendar.MONTH,month_th - 1)
+						minCal.set(Calendar.DAY_OF_MONTH,21)
+						minCal.set(Calendar.YEAR,minYear)
+						
+						maxCal.set(Calendar.MONTH,month_th)
+						maxCal.set(Calendar.DAY_OF_MONTH,20)
+						maxCal.set(Calendar.YEAR,maxYear)
+						
+						
 					%>
-					${calendar.time.format('MMM')} ${currentYear}
+					${minCal.time.format('dd/MM/yy')} <BR> ${maxCal.time.format('dd/MM/yy')}
 				</th>
 			</g:each>		
 			<th class="eventTD" style="vertical-align: middle;text-align: center;width:50px;">total</th>
@@ -45,10 +66,7 @@
 								 	total += mileage.value as long
 								  %>
 							<td style="vertical-align: middle;text-align:center;" class="eventTD">								
-								<g:remoteField id="value" action="modifyMileage" update="mileageTableDiv" class="mileageTD" style="vertical-align: middle;text-align:center;" 
-									name="mileageVal" value="${mileage.value ?: '0'}" 
-									style="vertical-align: middle;"
-									params="\'value=\'+this.value+\'&employeeId=\'+\'${employee.id}+\'+\'&periodId=\'+\'${period.id}+\'+\'&month=\'+\'${mileageMap.key}+\'"/>								
+								${mileage.value ?: '0'}
 							</td>						
 						</g:each>
 					</g:each>

@@ -1735,7 +1735,7 @@ class EmployeeController {
 		return
 	}
 	
-	@Secured(['ROLE_ANONYMOUS'])
+	@Secured(['ROLE_ANONYMOUS','ROLE_ADMIN'])
 	def addingEventToEmployee(){
 		def cal = Calendar.instance	
 		def type = params["type"].equals("Entrer") ? "E" : "S" 

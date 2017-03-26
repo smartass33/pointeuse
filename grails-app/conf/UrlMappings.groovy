@@ -6,7 +6,8 @@ class UrlMappings {
 				// apply constraints here
 			}
 		}
-
+		"/redirection"(uri: "/redirection.html")
+		
 		"/"(view:"/index")
 		//"500"(view:'/error')
 		

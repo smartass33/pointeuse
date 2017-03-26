@@ -45,7 +45,7 @@ environments {
 			url = "jdbc:mariadb://pointeuse.cjwt4qnapscg.eu-west-1.rds.amazonaws.com:3306/pointeuse"
 			driverClassName = "org.mariadb.jdbc.Driver"
 			username = "pointeuse"
-			password = "pointeuse"
+			password = "Wichita3*"
 			properties {
 				maxActive = 50
 				maxIdle = 25

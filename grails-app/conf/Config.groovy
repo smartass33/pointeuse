@@ -105,7 +105,9 @@ environments {
 		grails.app.context=''
 		grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
-		serverURL = "http://ec2-54-171-80-34.eu-west-1.compute.amazonaws.com"
+		//serverURL = "http://ec2-54-171-101-4.eu-west-1.compute.amazonaws.com"
+		serverURL = "http://pointeuse.biolab33.com"
+		
 		context=''
 		log4j = {
 				'null' name:'stacktrace'
@@ -254,6 +256,8 @@ grails.plugin.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/':                			['permitAll'],
 	'/index':           			['permitAll'],
+	'/redirection':           		['permitAll'],
+	'/redirection.html':           	['permitAll'],
 	'/employee/main.css':			['permitAll'],
 	'/user/**':						['ROLE_SUPER_ADMIN'],
 	'/role/**':						['ROLE_SUPER_ADMIN'],

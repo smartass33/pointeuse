@@ -53,43 +53,79 @@ class MileageService {
 		log.error('calling Mileage getReportData with period: '+period+' and site: '+site)
 		def monthList=[6,7,8,9,10,11,12,1,2,3,4,5]
 		def mileageMap = [:]
-		def mileageIDMap = [:]
+		//def mileageIDMap = [:]
 		def mileageMapByEmployee = [:]
-		def mileageMapByStringByEmployee = [:]
-		def mileageMapAsString = [:]
-		def mileageIDMapByEmployee = [:]
+		//def mileageMapByStringByEmployee = [:]
+		//def mileageMapAsString = [:]
+		//def mileageIDMapByEmployee = [:]
 		def employeeInstanceList
 		def criteria
 		def mileageList
+		def supYear
+		def infYear
+		def supMonth
+		def infMonth
+		def monthlyPeriodValue = 0
 		
 		if (site != null){
 			employeeInstanceList = Employee.findAllBySite(site,[sort:'lastName',order:'asc'])
 			for (Employee employee:employeeInstanceList){
 				mileageMap =[:]
-				mileageIDMap= [:]
-
+				//mileageIDMap= [:]
 				for (int month in monthList ){
-					Mileage existingMileage = Mileage.find('from Mileage where employee = :employee and period = :period and month = :month',[employee:employee,period:period,month:month])
-					if (existingMileage != null){
-						log.debug('mileage is created for period: '+period+' and month: '+month)
-						mileageIDMap.put(month,existingMileage.id)
-						mileageMap.put(month,existingMileage.value)
+					monthlyPeriodValue = 0
+					criteria = Mileage.createCriteria()					
+					supMonth = month + 1
+					infMonth = month
+					if (month < 6){
+						supYear = period.year + 1
+						infYear = period.year + 1						
+
+					}else{					
+							supYear = period.year
+							infYear = period.year
+							if (month == 12){
+								supYear = period.year + 1
+								infYear = period.year
+								supMonth = 1
+								infMonth = 12
+							}
+					}
+					mileageList = criteria.list {
+						or{
+							and {
+								eq('employee',employee)
+								eq('month',supMonth)
+								eq('year',supYear)
+								le('day',20)
+							}
+							and {
+								eq('employee',employee)
+								eq('month',infMonth)
+								eq('year',infYear)
+								gt('day',20)
+							}
+						}
+					}
+					
+					if (mileageList != null){
+						for (Mileage mileageIter : mileageList){
+							monthlyPeriodValue += mileageIter.value
+						}
+						mileageMap.put(month,monthlyPeriodValue)
 					}else{
-						log.debug('mileage does not exist. will generate an =0 cell')
-						mileageIDMap.put(month,0)
 						mileageMap.put(month,0)
+					
 					}
 				}
 				mileageMapByEmployee.put(employee,mileageMap)
-				mileageIDMapByEmployee.put(employee,mileageIDMap)
 			}
 		}
 		return [
 			site:site,
 			period:period,
 			employeeInstanceList:employeeInstanceList,
-			mileageMapByEmployee:mileageMapByEmployee,
-			mileageIDMapByEmployee:mileageIDMapByEmployee
+			mileageMapByEmployee:mileageMapByEmployee
 		]
 	}
 	
