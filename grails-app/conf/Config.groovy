@@ -92,7 +92,7 @@ environments {
 				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
 				   'org.codehaus.groovy.grails.commons',            // core / classloading
 				   'org.codehaus.groovy.grails.plugins'            // plugins
-			warn 'org.springframework.security'
+			debug 'org.springframework.security'
 			root {
 				warn 'rollingFileAppender','stdout'//,'eventLogAppender'
 			}
@@ -282,7 +282,8 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ['ROLE_ADMIN']
 grails.plugin.springsecurity.ui.encodePassword = true
 grails.plugin.springsecurity.ui.forgotPassword.emailFrom = 'pointeuse@biolab33.com'
-grails.plugin.springsecurity.ui.password.validationRegex='^.*(?!^.*[A-Z]{2,}.*$)^[A-Za-z]*$'
+//grails.plugin.springsecurity.ui.password.validationRegex='^.*(?!^.*[A-Z]{2,}.*$)^[A-Za-z]*$'
+grails.plugin.springsecurity.ui.password.validationRegex='^.*(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&]).*$'
 grails.plugin.springsecurity.ui.password.minLength = 6
 grails.plugin.springsecurity.ui.password.maxLength = 64
 grails.plugin.springsecurity.ui.register.postRegisterUrl = '/index.gsp'

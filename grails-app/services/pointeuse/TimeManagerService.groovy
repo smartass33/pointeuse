@@ -842,6 +842,7 @@ class TimeManagerService {
 			}
 		}
 		dailyTotal.elapsedSeconds=elapsedSeconds
+		dailyTotal.save(flush:true)
 		return [
 			elapsedSeconds:elapsedSeconds,
 			timeBefore7:timeBefore7,

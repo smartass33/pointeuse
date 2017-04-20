@@ -2451,10 +2451,9 @@ class EmployeeController {
 		return report			
 	}
 
-
-	//@Secured(['ROLE_ANONYMOUS'])
 	def pointage(Long id){	
 		log.error('pointage called')
+		log.error('IP address: '+request.getHeader("X-Forwarded-For"))
 		try {	
 			def username = params["username"]
 			def employee
@@ -3686,6 +3685,9 @@ class EmployeeController {
 		}
 	}
 	
+	
+	
+	
 	@Secured(['ROLE_ANONYMOUS'])
 	def computeMonthlyTotals() {
 		def timeDifference
@@ -3770,6 +3772,73 @@ class EmployeeController {
 			log.error("report computeMonthlyTotals execution time: "+timeDifference)
 		}
 		thTime.join()
+	}
+	
+	
+	
+	@Secured(['ROLE_ADMIN'])
+	def reComputeMonthlyTotals() {
+		
+		def year=params.int("year")
+		def day=params.int("day")
+		def month=params.int("month")
+		def weeklyTotal
+		def criteria
+		def calendar = Calendar.instance	
+		log.error("reComputeMonthlyTotals called at: "+calendar.time)
+		calendar.set(Calendar.MONTH,month - 1)
+		calendar.set(Calendar.YEAR,year)
+		calendar.set(Calendar.DAY_OF_MONTH,day)
+		
+		def employeeList = Employee.findAll()
+		for (Employee employee: employeeList){
+		
+		
+	
+			criteria = DailyTotal.createCriteria()
+			def dailyTotal = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('day',day)
+					eq('month',month)
+					eq('year',year)
+				}
+			}
+			
+			criteria = InAndOut.createCriteria()
+			def entriesByDay = criteria{
+				and {
+					eq('employee',employee)
+					eq('day',day)
+					eq('month',month)
+					eq('year',year)
+					order('time')
+					}
+			}
+			// put in a map in and outs
+			if 	(entriesByDay.size() > 0 && dailyTotal == null){
+				
+				dailyTotal = new DailyTotal(employee,calendar.time)
+				
+				
+				criteria = WeeklyTotal.createCriteria()
+				weeklyTotal = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('year',calendar.get(Calendar.YEAR))
+						eq('month',calendar.get(Calendar.MONTH)+1)
+						eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
+					}
+				}
+				if (weeklyTotal != null){
+					log.error('dailyTotal Empty: creating it for employee: '+employee+' and date: '+calendar.time)
+					dailyTotal.weeklyTotal = weeklyTotal
+					dailyTotal.save(flush:true)
+				}
+			}		
+		}
+		log.error('reCompute Ended')
+		
 	}
 	
 	@Secured(['ROLE_ANONYMOUS'])
