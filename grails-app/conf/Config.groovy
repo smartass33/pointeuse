@@ -75,6 +75,7 @@ grails.plugins.remotepagination.enableBootstrap=false
 
 environments {
     development {
+		ip.authorized = ['90.80.193.12','0:0:0:0:0:0:0:1']
 		pdf.directory='/Users/henri/pointeuse'
 		mysqldump.directory='/usr/local/mysql/bin'
 		grails.app.context=pointeuse
@@ -92,7 +93,7 @@ environments {
 				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
 				   'org.codehaus.groovy.grails.commons',            // core / classloading
 				   'org.codehaus.groovy.grails.plugins'            // plugins
-			debug 'org.springframework.security'
+			warn 'org.springframework.security'
 			root {
 				warn 'rollingFileAppender','stdout'//,'eventLogAppender'
 			}
@@ -100,6 +101,7 @@ environments {
     }
 
 	aws {
+		ip.authorized = ['90.80.193.12','0:0:0:0:0:0:0:1']
 		pdf.directory='/opt/tomcat/pdf'
 		mysqldump.directory='/usr/bin'
 		grails.app.context=''
@@ -130,91 +132,7 @@ environments {
 			}
 		}
 	}
-	
-	alrikiki {
-		pdf.directory='/opt/tomcat/pdf'
-		mysqldump.directory='/usr/local/mysql/bin'
-		grails.app.context=''
-		grails.logging.jul.usebridge = false
-		//serverURL = "http://192.168.1.17"
-		serverURL = "http://192.168.1.31"
-		context=''
-		log4j = {
-				'null' name:'stacktrace'
-				appenders {
-					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
-				}
-			
-				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
-				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
-					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-					   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
-					   'org.codehaus.groovy.grails.commons',            // core / classloading
-					   'org.codehaus.groovy.grails.plugins',            // plugins
-					   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
-					   'org.springframework',
-					   'org.hibernate',
-					   'net.sf.ehcache.hibernate'			
-				root {
-					warn 'myAppender'//,'rollingFile'
-				}
-		}
-	}
-	
-	dell {
-		pdf.directory='/opt/tomcat/pdf'
-		mysqldump.directory='/usr/local/mysql/bin'
-		grails.app.context=''
-		grails.logging.jul.usebridge = false
-		serverURL = "http://10.33.6.10"
-		context=''
-		log4j = {
-			'null' name:'stacktrace'
-			appenders {
-				rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
-			}			
-			warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
-			warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
-				   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
-				   'org.codehaus.groovy.grails.commons',            // core / classloading
-				   'org.codehaus.groovy.grails.plugins',            // plugins
-				   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
-				   'org.springframework',
-				   'org.hibernate',
-				   'net.sf.ehcache.hibernate'
-			root {
-				warn 'rollingFile'//,'stdout'
-			}
-		}
-	}
-	
-	dell_test {
-		pdf.directory='/opt/tomcat/pdf'
-		grails.app.context=''
-		grails.logging.jul.usebridge = false
-		serverURL = "http://10.33.6.112"
-		context=''
-		log4j = {
-			'null' name:'stacktrace'
-			appenders {
-				rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
-			}		
-			warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
-			warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
-				   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
-				   'org.codehaus.groovy.grails.commons',            // core / classloading
-				   'org.codehaus.groovy.grails.plugins',            // plugins
-				   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
-				   'org.springframework',
-				   'org.hibernate',
-				   'net.sf.ehcache.hibernate'			
-			root {
-				warn 'rollingFile'//,'stdout'
-			}
-		}
-	}
+
 }
 
 grails {
@@ -282,9 +200,12 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ['ROLE_ADMIN']
 grails.plugin.springsecurity.ui.encodePassword = true
 grails.plugin.springsecurity.ui.forgotPassword.emailFrom = 'pointeuse@biolab33.com'
+
+//grails.plugin.springsecurity.ui.password.validationRegex='^.*(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}*$'
+
 //grails.plugin.springsecurity.ui.password.validationRegex='^.*(?!^.*[A-Z]{2,}.*$)^[A-Za-z]*$'
 grails.plugin.springsecurity.ui.password.validationRegex='^.*(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&]).*$'
-grails.plugin.springsecurity.ui.password.minLength = 6
+grails.plugin.springsecurity.ui.password.minLength = 8
 grails.plugin.springsecurity.ui.password.maxLength = 64
 grails.plugin.springsecurity.ui.register.postRegisterUrl = '/index.gsp'
 grails.plugin.springsecurity.ui.register.emailFrom = 'pointeuse@biolab33.com'

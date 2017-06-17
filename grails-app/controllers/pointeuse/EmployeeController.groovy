@@ -2454,6 +2454,15 @@ class EmployeeController {
 	def pointage(Long id){	
 		log.error('pointage called')
 		log.error('IP address: '+request.getHeader("X-Forwarded-For"))
+		log.error('request.remoteAddr: '+request.remoteAddr)
+		def clientIP = request.getHeader("X-Forwarded-For")
+		def authorizedIPList = grailsApplication.config.ip.authorized
+		
+		if (!authorizedIPList.contains(clientIP) && !authorizedIPList.contains(request.remoteAddr)){
+			log.error('found no matching IP, exiting...')
+			flash.message = message(code: 'employee.pointage.wrong.ip')
+			redirect(uri:'/')
+		}
 		try {	
 			def username = params["username"]
 			def employee

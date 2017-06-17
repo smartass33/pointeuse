@@ -139,7 +139,7 @@ class PDFService {
 		File file
 		log.error('method pdf generateUserAnnualTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+year+', Month= '+month)
 		def modelReport = timeManagerService.getAnnualReportData(year, employee)		
-		modelReport << timeManagerService.getOffHoursTime(employee,year)
+		modelReport << timeManagerService.getOffHoursTimeNoUpdate(employee,year)
 		// Get the bytes
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeAnnualReportTemplate', model: modelReport)
 		filename = year.toString()+'-'+employee.lastName +'-'+employee.firstName +'-annualReport' +'.pdf'

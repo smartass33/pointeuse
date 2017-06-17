@@ -842,7 +842,14 @@ class TimeManagerService {
 			}
 		}
 		dailyTotal.elapsedSeconds=elapsedSeconds
-		dailyTotal.save(flush:true)
+		
+		try{
+			dailyTotal.save(flush:true)
+		}
+		catch(org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException e) {
+			log.debug('concurrent access error: '+e.message)
+		}
+		
 		return [
 			elapsedSeconds:elapsedSeconds,
 			timeBefore7:timeBefore7,
@@ -1845,8 +1852,11 @@ class TimeManagerService {
 					actualSupTime2add = monthlySupTimeMap.get(month-1)
 					
 				}
-				
-				monthlyTheoriticalMap.put(month, data.get('monthTheoritical') + theoricalTime2add)
+				if (data.get('monthTheoritical') != null){
+					monthlyTheoriticalMap.put(month, data.get('monthTheoritical') + theoricalTime2add)
+				}else {
+					monthlyTheoriticalMap.put(month, theoricalTime2add)	
+				}
 				if (totalMonthlyTheoritical.get(month) == null){
 					totalMonthlyTheoritical.put(month, monthlyTheoriticalMap.get(month))
 				}else{
@@ -2547,6 +2557,25 @@ class TimeManagerService {
 		def annualOffHoursTimeDecimal = computeHumanTime(annualOffHoursTime as long)
 		annualOffHoursTimeDecimal=(annualOffHoursTimeDecimal.get(0)+annualOffHoursTimeDecimal.get(1)/60).setScale(2,2)		
 		return [annualBefore7Time:annualBefore7Time,annualAfter20Time: annualAfter20Time,annualOffHoursTime:annualOffHoursTime,annualOffHoursTimeDecimal:annualOffHoursTimeDecimal]	
+	}
+	
+	def getOffHoursTimeNoUpdate(Employee employee, def year){
+		log.error('getOffHoursTimeNoUpdate called with param: year= '+year+' and employee: '+employee)
+		def annualBefore7Time = 0
+		def annualAfter20Time = 0
+		def data
+		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
+		for (int currentMonth in monthList){
+			data = computeWeeklyTotals( employee,  currentMonth,  (currentMonth < 6) ? year + 1 : year,false)
+			def timeBefore7 = data.get('timeBefore7')
+			def timeAfter20 = data.get('timeAfter20')
+			annualBefore7Time += timeBefore7
+			annualAfter20Time += timeAfter20
+		}
+		def annualOffHoursTime = annualBefore7Time + annualAfter20Time
+		def annualOffHoursTimeDecimal = computeHumanTime(annualOffHoursTime as long)
+		annualOffHoursTimeDecimal=(annualOffHoursTimeDecimal.get(0)+annualOffHoursTimeDecimal.get(1)/60).setScale(2,2)
+		return [annualBefore7Time:annualBefore7Time,annualAfter20Time: annualAfter20Time,annualOffHoursTime:annualOffHoursTime,annualOffHoursTimeDecimal:annualOffHoursTimeDecimal]
 	}
 	
 	def getAbsencesBetweenDates(Employee employee,Date startDate,Date endDate){
@@ -3349,7 +3378,12 @@ class TimeManagerService {
 					}
 					if (weeklyTotalInstance != null && entityUpdate){
 						weeklyTotalInstance.elapsedSeconds = weeklyTotal
-						weeklyTotalInstance.save(flush:true,failOnError:true)
+						try{
+							weeklyTotalInstance.save(flush:true)
+						}
+						catch(org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException e) {
+							log.debug('concurrent access error: '+e.message)
+						}
 					}
 					
 					if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR) == lastWeekParam.get(0) ){
@@ -3468,7 +3502,13 @@ class TimeManagerService {
 				monthlyTotal.timeBefore7=timeBefore7
 				monthlyTotal.timeAfter20=timeAfter20
 				monthlyTotal.supplementarySeconds=monthlySupTime
-				monthlyTotal.save(flush:true,failOnError:true)
+				try {
+					monthlyTotal.save(flush:true,failOnError:true)
+
+				   }
+				   catch(org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException e) {
+				   	log.debug('error of concurrent acces: '+e.message)
+				   }
 			}
 			
 			//here, we can proceed to the creation, or update of the SupplementaryTime object
@@ -3493,7 +3533,13 @@ class TimeManagerService {
 						supTime.amountPaid = 0
 					}
 				}			
-				supTime.save(flush: true)
+				
+				try {
+					supTime.save(flush: true)
+				   }
+				   catch(org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException e) {
+					   log.debug('error of concurrent acces: '+e.message)
+				   }
 			}
 			endDate = new Date()
 			use (TimeCategory){executionTime = endDate - startDate}
