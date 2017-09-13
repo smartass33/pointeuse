@@ -11,8 +11,8 @@
 				<br/>
 				<h3><g:message code='spring.security.ui.resetPassword.description'/></h3>
 				<table>
-					<s2ui:passwordFieldRow name='password' labelCodeDefault='Password'/>
-					<s2ui:passwordFieldRow name='password2' labelCodeDefault='Password (again)'/>
+					<s2ui:passwordFieldRow name='password' labelCodeDefault='${message(code: "spring.security.ui.resetPassword.password")}' />
+					<s2ui:passwordFieldRow name='password2'  labelCodeDefault='${message(code: "spring.security.ui.resetPassword.password2")}'/>
 				</table>
 				<s2ui:submitButton elementId='submit' messageCode='spring.security.ui.resetPassword.submit'/>
 				</div>

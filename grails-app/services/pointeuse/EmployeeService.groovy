@@ -20,11 +20,11 @@ class EmployeeService {
 		
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
-		endCalendar.set(Calendar.DAY_OF_MONTH,1)
-		endCalendar.set(Calendar.MONTH,5)
-		endCalendar.set(Calendar.HOUR_OF_DAY,00)
-		endCalendar.set(Calendar.MINUTE,00)
-		endCalendar.set(Calendar.SECOND,00)
+		endCalendar.set(Calendar.DAY_OF_MONTH,31)
+		endCalendar.set(Calendar.MONTH,4)
+		endCalendar.set(Calendar.HOUR_OF_DAY,23)
+		endCalendar.set(Calendar.MINUTE,59)
+		endCalendar.set(Calendar.SECOND,59)
 			
 		startCalendar.set(Calendar.YEAR,period.year)
 		endCalendar.set(Calendar.YEAR,period.year+1)
@@ -39,6 +39,7 @@ class EmployeeService {
 				eq('type',AbsenceType.VACANCE)
 			}
 		}
+		
 		return takenCA!=null?takenCA.size():0
 	}
 	
@@ -86,11 +87,11 @@ class EmployeeService {
 		
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
-		endCalendar.set(Calendar.DAY_OF_MONTH,1)
-		endCalendar.set(Calendar.MONTH,5)
-		endCalendar.set(Calendar.HOUR_OF_DAY,00)
-		endCalendar.set(Calendar.MINUTE,00)
-		endCalendar.set(Calendar.SECOND,00)
+		endCalendar.set(Calendar.DAY_OF_MONTH,31)
+		endCalendar.set(Calendar.MONTH,4)
+		endCalendar.set(Calendar.HOUR_OF_DAY,23)
+		endCalendar.set(Calendar.MINUTE,59)
+		endCalendar.set(Calendar.SECOND,59)
 		
 		startCalendar.set(Calendar.YEAR,period.year)
 		endCalendar.set(Calendar.YEAR,period.year+1)

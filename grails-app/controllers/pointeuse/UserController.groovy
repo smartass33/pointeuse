@@ -15,6 +15,7 @@ class UserController extends grails.plugin.springsecurity.ui.UserController {
 	
 	
 	UserStrategy uiUserStrategy
+	def springSecurityService
 	
 		def save() {
 			doSave uiUserStrategy.saveUser(params, roleNamesFromParams(), params.password)
@@ -46,6 +47,10 @@ class UserController extends grails.plugin.springsecurity.ui.UserController {
 							  }
 						}
 				
+				if (params['password'] != null){					
+					user.password = springSecurityService.encodePassword(params.password, user.username)
+
+				}
 				uiUserStrategy.updateUser params, user, roleNamesFromParams()
 			}
 		}

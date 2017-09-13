@@ -3580,7 +3580,7 @@ class EmployeeController {
 		}
 	}
 	
-	@Secured(['ROLE_ADMIN'])
+	@Secured(['ROLE_ANONYMOUS'])
 	def testResource() {
 		def timeDifference
 		def site = Site.get(3)
@@ -3588,6 +3588,9 @@ class EmployeeController {
 		def calendar = Calendar.instance
 		def folder = grailsApplication.config.pdf.directory
 		Resource myResource = assetResourceLocator.findAssetForURI('biolab3.png')
+		
+		def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)).toString() +'-'+site.name+'.pdf'
+		def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)).toString() +'-'+site.name+'.pdf')
 		
 		def logoFile = new File('logo')
 		//writeByteArrayToFile(File file, byte[] data)
@@ -3597,9 +3600,10 @@ class EmployeeController {
 		mailService.sendMail {
 			multipart true
 			to 'henri.martin@gmail.com'
-			subject 'TOTOT'
-			html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+			subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
 			inline 'biolab33', 'image/png', logoFile
+			html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+			attachBytes filename,'application/pdf', file.readBytes()
 		}
 		
 	}
@@ -3669,16 +3673,16 @@ class EmployeeController {
 				log.debug('calendar.time: '+calendar.time)
 				log.debug('calendar.get(Calendar.DAY_OF_MONTH): '+calendar.get(Calendar.DAY_OF_MONTH))
 				log.debug('user.email: '+user.email)
-				if (user.reportSendDay == (calendar.get(Calendar.DAY_OF_MONTH)) && user.email != null && file.exists()){
+				if (user.reportSendDay == calendar.get(Calendar.DAY_OF_MONTH) && user.email != null && file.exists()){
 					log.error('user reportSendDay has come: will fire report to: '+user.email)
 					if (addingLogo) {
 						mailService.sendMail {
 							multipart true
 							to user.email
 							subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+							inline 'biolab33', 'image/png', logoFile
 							html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
 							attachBytes filename,'application/pdf', file.readBytes()
-							inline 'biolab33', 'image/png', logoFile
 						}
 					}else{
 						mailService.sendMail {
@@ -3694,8 +3698,57 @@ class EmployeeController {
 		}
 	}
 	
-	
-	
+	@Secured(['ROLE_ANONYMOUS'])
+	def sendMonthlySiteMail(){
+		def sites = Site.findAll()
+		def folder = grailsApplication.config.pdf.directory
+		Calendar calendar = Calendar.instance
+		
+		Resource myResource = assetResourceLocator.findAssetForURI('biolab3.png')
+		def logoFile = new File('logo')
+		def fileUtil = new FileUtils()
+		def addingLogo = false
+		if (myResource != null){
+			fileUtil.writeByteArrayToFile(logoFile, myResource.getByteArray())
+			addingLogo = true
+		}
+			
+		sites.each { site ->
+			def userList = site.users
+			def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
+			def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+			log.debug('filename: '+folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
+			userList.each { user ->
+				log.debug('userList: '+user)
+				log.debug('user.reportSendDay: '+user.reportSendDay)
+				log.debug('calendar.time: '+calendar.time)
+				log.debug('calendar.get(Calendar.DAY_OF_MONTH): '+calendar.get(Calendar.DAY_OF_MONTH))
+				log.debug('user.email: '+user.email)
+				if (user.reportSendDay == calendar.get(Calendar.DAY_OF_MONTH) && user.email != null && file.exists()){
+					log.error('user reportSendDay has come: will fire report '+filename+' to: '+user.email )
+					if (addingLogo) {
+						log.error('user.email: '+user.email)
+						mailService.sendMail {
+							multipart true
+							to 'henri.martin@gmail.com'
+							subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+							inline 'biolab33', 'image/png', logoFile				
+							html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+							attachBytes filename,'application/pdf', file.readBytes()
+						}
+					}else{
+						mailService.sendMail {
+							multipart true
+							to 'henri.martin@gmail.com'
+							subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
+							html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
+							attachBytes filename,'application/pdf', file.readBytes()
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	@Secured(['ROLE_ANONYMOUS'])
 	def computeMonthlyTotals() {

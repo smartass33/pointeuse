@@ -101,7 +101,7 @@ environments {
     }
 
 	aws {
-		ip.authorized = ['90.80.193.12','0:0:0:0:0:0:0:1']
+		ip.authorized = ['90.80.193.12','90.120.222.39','0:0:0:0:0:0:0:1']
 		pdf.directory='/opt/tomcat/pdf'
 		mysqldump.directory='/usr/bin'
 		grails.app.context=''
@@ -202,10 +202,10 @@ grails.plugin.springsecurity.ui.encodePassword = true
 grails.plugin.springsecurity.ui.forgotPassword.emailFrom = 'pointeuse@biolab33.com'
 
 //grails.plugin.springsecurity.ui.password.validationRegex='^.*(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}*$'
-
+grails.plugin.springsecurity.ui.password.validationRegex='^.*[A-Za-z0-9].*$'
 //grails.plugin.springsecurity.ui.password.validationRegex='^.*(?!^.*[A-Z]{2,}.*$)^[A-Za-z]*$'
-grails.plugin.springsecurity.ui.password.validationRegex='^.*(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&]).*$'
-grails.plugin.springsecurity.ui.password.minLength = 8
+//grails.plugin.springsecurity.ui.password.validationRegex='^.*(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&]).*$'
+grails.plugin.springsecurity.ui.password.minLength = 6
 grails.plugin.springsecurity.ui.password.maxLength = 64
 grails.plugin.springsecurity.ui.register.postRegisterUrl = '/index.gsp'
 grails.plugin.springsecurity.ui.register.emailFrom = 'pointeuse@biolab33.com'
