@@ -91,6 +91,7 @@
 		     			<td class="cartoucheRightFiguresTD">${yearlySickness as java.lang.Float}</td>   
 		     			<td class="cartoucheRightFiguresTD"/>						
 					</tr>
+
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.sanssolde.count', default: 'report')} :</td>
 						<td class="cartoucheRightFiguresTD">${sansSolde as java.lang.Float}</td>
@@ -108,7 +109,13 @@
 						<td class="cartoucheRightFiguresTD">${exceptionnel as java.lang.Float}</td>        					
 		     			<td class="cartoucheRightFiguresTD">${yearlyExceptionnel as java.lang.Float}</td>
 		     			<td class="cartoucheRightFiguresTD">
-					</tr>			
+					</tr>	
+					<tr>
+						<td class="cartoucheRightTitleTD" >${message(code: 'employee.maternite.count', default: 'report')} :</td>
+						<td class="cartoucheRightFiguresTD">${maternite as java.lang.Float}</td>
+		     			<td class="cartoucheRightFiguresTD">${yearlyMaternite as java.lang.Float}</td>   
+		     			<td class="cartoucheRightFiguresTD"/>						
+					</tr>		
 					<tr>		
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.paternite.count', default: 'report')} :</td>	
 						<td class="cartoucheRightFiguresTD">${paternite as java.lang.Float}</td>        					

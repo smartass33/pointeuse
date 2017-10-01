@@ -1141,6 +1141,18 @@ class TimeManagerService {
 				eq('type',AbsenceType.MALADIE)
 			}
 		}
+		
+		
+		criteria = Absence.createCriteria()
+		def yearlyMaternite = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.MATERNITE)
+			}
+		}
+		
 		criteria = Absence.createCriteria()
 		def pregnancy = criteria.list {
 			and {
@@ -1288,6 +1300,7 @@ class TimeManagerService {
 			yearlyDif:yearlyDif.size(),	
 			yearlyRtt:yearlyRtt.size(),
 			yearlySickness:yearlySickness.size(),
+			yearlyMaternite:yearlyMaternite.size(),
 			yearlyTheoritical:yearTheoritical,
 			yearlyPregnancyCredit:yearlyPregnancyCredit,
 			yearlyTotalTime:totalTime,
@@ -1394,6 +1407,17 @@ class TimeManagerService {
 				eq('type',AbsenceType.MALADIE)
 			}
 		}
+		
+		criteria = Absence.createCriteria()
+		def maternite = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.MATERNITE)
+			}
+		}
+		
 		
 		// get cumul holidays
 		criteria = Absence.createCriteria()
@@ -1504,6 +1528,7 @@ class TimeManagerService {
 			dif:dif.size(),
 			rtt:rtt.size(),
 			sickness:sickness.size(),
+			maternite:maternite.size(),
 			sansSolde:sansSolde.size(),
 			injustifie:injustifie.size(),
 			monthTheoritical:monthTheoritical,
@@ -1552,6 +1577,7 @@ class TimeManagerService {
 		def rtt = cartoucheTable.get('rtt')
 		def isCurrentMonth = cartoucheTable.get('isCurrentMonth')	
 		def sickness = cartoucheTable.get('sickness')
+		def maternite = cartoucheTable.get('maternite')
 		def sansSolde = cartoucheTable.get('sansSolde')
 		def injustifie = cartoucheTable.get('injustifie')	
 		def monthTheoritical = cartoucheTable.get('monthTheoritical')
@@ -1563,6 +1589,7 @@ class TimeManagerService {
 		def yearlyFormation = cartoucheTable.get('yearlyFormation')	
 		def yearlyRtt = cartoucheTable.get('yearlyRtt')
 		def yearlySickness = cartoucheTable.get('yearlySickness')
+		def yearlyMaternite = cartoucheTable.get('yearlyMaternite')
 		def yearlyTheoritical = computeHumanTimeAsString(cartoucheTable.get('yearlyTheoritical'))
 		def yearlyPregnancyCredit = computeHumanTimeAsString(cartoucheTable.get('yearlyPregnancyCredit'))
 		def yearlyActualTotal = computeHumanTimeAsString(cartoucheTable.get('yearlyTotalTime'))
@@ -1682,6 +1709,7 @@ class TimeManagerService {
 			holiday:holiday,
 			rtt:rtt,
 			sickness:sickness,
+			maternite:maternite,
 			formation:formation,
 			sansSolde:sansSolde,			
 			injustifie:injustifie,
@@ -1693,6 +1721,7 @@ class TimeManagerService {
 			yearlyHoliday:yearlyHoliday,
 			yearlyRtt:yearlyRtt,
 			yearlySickness:yearlySickness,
+			yearlyMaternite:yearlyMaternite,
 			yearlySansSolde:yearlySansSolde,
 			yearlyInjustifie:yearlyInjustifie,
 			yearlySupTime:computeHumanTimeAsString(yearlySupTime as long),
@@ -2070,6 +2099,7 @@ class TimeManagerService {
 		def annualINJUSTIFIE = 0
 		def annualDIF = 0
 		def annualSickness = 0
+		def annualMaternite = 0
 		def annualExceptionnel = 0	
 		def annualPaternite = 0	
 		def annualFormation = 0
@@ -2246,6 +2276,7 @@ class TimeManagerService {
 			annualCSS += cartoucheTable.getAt('sansSolde')
 			annualINJUSTIFIE += cartoucheTable.getAt('injustifie')
 			annualSickness += cartoucheTable.getAt('sickness')
+			annualMaternite += cartoucheTable.getAt('maternite')		
 			annualExceptionnel += cartoucheTable.getAt('exceptionnel')
 			annualPaternite += cartoucheTable.getAt('paternite')	
 			annualFormation += cartoucheTable.getAt('formation')	
@@ -2293,6 +2324,7 @@ class TimeManagerService {
 			annualCSS:annualCSS,
 			annualINJUSTIFIE:annualINJUSTIFIE,
 			annualSickness:annualSickness,
+			annualMaternite:annualMaternite,			
 			annualExceptionnel:annualExceptionnel,
 			annualFormation:annualFormation,
 			annualPaternite:annualPaternite,
@@ -2342,6 +2374,7 @@ class TimeManagerService {
 		def annualINJUSTIFIE = 0
 		def annualDIF = 0
 		def annualSickness = 0
+		def annualMaternite = 0	
 		def annualExceptionnel = 0
 		def annualFormation = 0
 		def annualPaternite = 0
@@ -2479,6 +2512,7 @@ class TimeManagerService {
 			annualCSS += cartoucheTable.getAt('yearlySansSolde')
 			annualINJUSTIFIE += cartoucheTable.getAt('yearlyInjustifie')			
 			annualSickness += cartoucheTable.getAt('yearlySickness')
+			annualMaternite += cartoucheTable.getAt('yearlyMaternite')		
 			annualExceptionnel += cartoucheTable.getAt('yearlyExceptionnel')
 			annualPaternite += cartoucheTable.getAt('yearlyPaternite')
 			annualFormation += cartoucheTable.getAt('yearlyFormation')
@@ -2519,6 +2553,7 @@ class TimeManagerService {
 			annualCSS:annualCSS,
 			annualINJUSTIFIE:annualINJUSTIFIE,
 			annualSickness:annualSickness,
+			annualMaternite:annualMaternite,
 			annualExceptionnel:annualExceptionnel,
 			annualPaternite:annualPaternite,
 			annualFormation:annualFormation,
@@ -2592,6 +2627,18 @@ class TimeManagerService {
 			}
 		}
 		absenceMap.put(AbsenceType.MALADIE, sickness.size())	
+		
+		criteria = Absence.createCriteria()
+		def maternite = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',startDate)
+				le('date',endDate)
+				eq('type',AbsenceType.MATERNITE)
+			}
+		}
+		absenceMap.put(AbsenceType.MATERNITE, maternite.size())
+		
 		// get cumul holidays
 		criteria = Absence.createCriteria()
 		def holidays = criteria.list {
@@ -2707,6 +2754,17 @@ class TimeManagerService {
 			}
 		}
 		absenceMap.put(AbsenceType.MALADIE, sickness.size())
+		
+		criteria = Absence.createCriteria()
+		def maternite = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.MATERNITE)
+			}
+		}
+		absenceMap.put(AbsenceType.MATERNITE, maternite.size())
 		
 		// get cumul holidays
 		criteria = Absence.createCriteria()
@@ -2932,7 +2990,7 @@ class TimeManagerService {
 				log.debug('open days: '+realOpenDays)
 				log.debug('realOpenDays*weeklyContractTime/Employee.WeekOpenedDays: '+realOpenDays*weeklyContractTime/Employee.WeekOpenedDays)
 				log.debug('(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime): '+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime))
-				log.debug('(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)): '+(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)))
+				log.debug('(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.MATERNITE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)): '+(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)))
 	  			log.debug('(35/7)*absenceMap.get(AbsenceType.PATERNITE): '+(35/7)*absenceMap.get(AbsenceType.PATERNITE))
 				log.debug('(weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday: '+(weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday)
 				log.debug('absenceMap.get(AbsenceType.GROSSESSE)): '+absenceMap.get(AbsenceType.GROSSESSE))
@@ -2944,7 +3002,7 @@ class TimeManagerService {
 						3600*(
 								realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
 								+(Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS) - absenceMap.get(AbsenceType.INJUSTIFIE))/totalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime)
-								-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.INJUSTIFIE)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF))
+								-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.MATERNITE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.INJUSTIFIE)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF))
 								- (35/7)*absenceMap.get(AbsenceType.PATERNITE)
 								+ (weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday			
 							)
@@ -3105,6 +3163,7 @@ class TimeManagerService {
 		def siteAnnualCSS = 0
 		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
+		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0	
 		def siteAnnualDIF = 0
@@ -3126,6 +3185,7 @@ class TimeManagerService {
 			siteAnnualCSS += ((annualReportMap.get(employee)).get('annualCSS'))
 			siteAnnualINJUSTIFIE += ((annualReportMap.get(employee)).get('annualINJUSTIFIE'))
 			siteAnnualSickness += ((annualReportMap.get(employee)).get('annualSickness'))
+			siteAnnualMaternite += ((annualReportMap.get(employee)).get('annualMaternite'))		
 			siteAnnualDIF += ((annualReportMap.get(employee)).get('annualDIF'))
 			siteAnnualExceptionnel += ((annualReportMap.get(employee)).get('annualExceptionnel'))
 			siteAnnualPaternite += ((annualReportMap.get(employee)).get('annualPaternite'))
@@ -3146,6 +3206,7 @@ class TimeManagerService {
 			siteAnnualCSS:siteAnnualCSS,
 			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualMaternite:siteAnnualMaternite,
 			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,	
@@ -3970,6 +4031,7 @@ class TimeManagerService {
 		def dif = []
 		def rtt = []
 		def sickness = []
+		def maternite = []
 		def pregnancy = []
 		def sansSolde = []
 		def injustifie = []
@@ -4050,6 +4112,11 @@ class TimeManagerService {
 		}
 		
 		Absence.withTransaction{
+			maternite = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.MATERNITE])
+		}
+
+		
+		Absence.withTransaction{
 			holidays = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.VACANCE])
 		}
 
@@ -4115,6 +4182,7 @@ class TimeManagerService {
 			dif:dif.size(),
 			rtt:rtt.size(),
 			sickness:sickness.size(),
+			maternite:maternite.size(),
 			sansSolde:sansSolde.size(),
 			injustifie:injustifie.size(),
 			monthTheoritical:monthTheoritical,
@@ -4167,6 +4235,7 @@ class TimeManagerService {
 		def yearlyHolidays = []
 		def yearlyExceptionnel = []
 		def yearlyPaternite = []
+		def yearlyMaternite = []
 		def yearlyFormation = []
 		def yearlyDif = []
 		def yearlyRtt = []
@@ -4215,6 +4284,10 @@ class TimeManagerService {
 
 		Absence.withTransaction{
 			yearlySickness = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.MALADIE])
+		}
+		
+		Absence.withTransaction{
+			yearlyMaternite = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.MATERNITE])
 		}
 		
 		Absence.withTransaction{
@@ -4322,6 +4395,7 @@ class TimeManagerService {
 			yearlyDif:yearlyDif.size(),
 			yearlyRtt:yearlyRtt.size(),
 			yearlySickness:yearlySickness.size(),
+			yearlyMaternite:yearlyMaternite.size(),
 			yearlyTheoritical:yearTheoritical,
 			yearlyPregnancyCredit:yearlyPregnancyCredit,
 			yearlyTotalTime:totalTime,
@@ -4459,7 +4533,8 @@ class TimeManagerService {
 						def multiplier = 0
 						if ( absenceMap.get(AbsenceType.MALADIE) != null )
 							multiplier += absenceMap.get(AbsenceType.MALADIE) as long
-							
+						if ( absenceMap.get(AbsenceType.MATERNITE) != null )
+							multiplier += absenceMap.get(AbsenceType.MATERNITE) as long							
 						if ( absenceMap.get(AbsenceType.VACANCE) != null )
 							multiplier += absenceMap.get(AbsenceType.VACANCE) as long
 							
@@ -4500,6 +4575,7 @@ class TimeManagerService {
 	def getAbsencesBetweenDatesMultiThread(Employee employee,Date startDate,Date endDate){
 		def absenceMap = [:]
 		def sickness = []
+		def maternite = []
 		def holidays = []
 		def exceptionnel = []
 		def paternite = []
@@ -4515,7 +4591,12 @@ class TimeManagerService {
 			sickness = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.MALADIE])
 			absenceMap.put(AbsenceType.MALADIE, sickness.size())
 		}
-
+		
+		Absence.withTransaction{
+			maternite = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.MATERNITE])
+			absenceMap.put(AbsenceType.MATERNITE, maternite.size())
+		}
+		
 		Absence.withTransaction{
 			holidays = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.VACANCE])
 			absenceMap.put(AbsenceType.MALADIE, holidays.size())
@@ -4695,6 +4776,7 @@ class TimeManagerService {
 		def siteAnnualCSS = 0
 		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
+		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
 		def siteAnnualDIF = 0
@@ -4720,6 +4802,7 @@ class TimeManagerService {
 				 siteAnnualCSS += data.get('annualCSS')
 				 siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
 				 siteAnnualSickness += data.get('annualSickness')
+				 siteAnnualMaternite += data.get('annualMaternite')	 
 				 siteAnnualDIF += data.get('annualDIF')
 				 siteAnnualExceptionnel += data.get('annualExceptionnel')
 				 siteAnnualPaternite += data.get('annualPaternite')
@@ -4748,6 +4831,7 @@ class TimeManagerService {
 			siteAnnualCSS:siteAnnualCSS,
 			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualMaternite:siteAnnualMaternite,
 			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,

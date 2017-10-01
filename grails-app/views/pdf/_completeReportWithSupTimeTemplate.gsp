@@ -174,6 +174,21 @@
 	        					</td>
 							</tr>
 							<tr>
+								<td style="text-align:left;">${message(code: 'employee.maternite.count', default: 'report')} :</td>
+	 							<td>
+	 								<table border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${maternite as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td>${yearlyMaternite as float}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>
+							<tr>
 								<td style="text-align:left;">${message(code: 'employee.sanssolde.count', default: 'report')} :</td>
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >

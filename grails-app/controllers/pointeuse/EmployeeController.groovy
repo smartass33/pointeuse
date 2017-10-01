@@ -719,7 +719,8 @@ class EmployeeController {
 		headers.add(AbsenceType.PATERNITE)
 		headers.add(AbsenceType.CSS)
 		headers.add(AbsenceType.DIF)
-		headers.add(AbsenceType.GROSSESSE)		
+		headers.add(AbsenceType.GROSSESSE)	
+		headers.add(AbsenceType.MATERNITE)
 		headers.add(AbsenceType.MALADIE)				
 		def employeeDailyMap = result.get('employeeDailyMap')
 		def employeeAbsenceMap = result.get('employeeAbsenceMap')
@@ -778,6 +779,11 @@ class EmployeeController {
 				}
 				if (absenceMap.get(AbsenceType.GROSSESSE) != null){
 					dailyList.add(absenceMap.get(AbsenceType.GROSSESSE))
+				}else{
+					dailyList.add(0)
+				}
+				if (absenceMap.get(AbsenceType.MATERNITE) != null){
+					dailyList.add(absenceMap.get(AbsenceType.MATERNITE))
 				}else{
 					dailyList.add(0)
 				}
@@ -880,6 +886,7 @@ class EmployeeController {
 		def remainingRTTMap = [:]
 		def takenRTTMap = [:]
 		def takenSicknessMap = [:]
+		def takenMaterniteMap = [:]
 		def takenCSSMap = [:]
 		def takenAutreMap = [:]
 		def takenExceptionnelMap = [:]		
@@ -893,6 +900,7 @@ class EmployeeController {
 		def takenAutre
 		def takenExceptionnel
 		def takenPaternite
+		def takenMaternite
 		def takenDIF	
 		def formation
 		def employeeInstanceTotal
@@ -1042,7 +1050,23 @@ class EmployeeController {
 			}else{
 				takenSicknessMap.put(employee, 0)
 			}	
-							
+				
+			// MATERNITE
+			criteria = Absence.createCriteria()
+			takenMaternite = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.MATERNITE)
+				}
+			}
+			if (takenMaternite!=null){
+				takenMaterniteMap.put(employee, takenMaternite.size())
+			}else{
+				takenMaterniteMap.put(employee, 0)
+			}
+						
 			//CSS
 			criteria = Absence.createCriteria()
 			takenCSS = criteria.list {
@@ -1175,6 +1199,7 @@ class EmployeeController {
 		def takenAutre=[]
 		def formation=[]
 		def takenSickness = []
+		def takenMaternite = []
 		def takenRTTMap=[:]
 		def takenCAMap=[:]
 		def yearMap=[:]
@@ -1183,6 +1208,7 @@ class EmployeeController {
 		def initialRTTMap=[:]
 		def remainingRTTMap=[:]
 		def takenSicknessMap=[:]
+		def takenMaterniteMap=[:]
 		def takenCSSMap=[:]
 		def takenAutreMap=[:]
 		def formationMap=[:]
@@ -1281,12 +1307,29 @@ class EmployeeController {
 					eq('type',AbsenceType.MALADIE)
 				}
 			}
-			
 			if (takenSickness!=null){
 				takenSicknessMap.put(period.year, takenSickness.size())				
 			}else{
 				takenSicknessMap.put(period.year, 0)
-			}		
+			}	
+			
+			
+			criteria = Absence.createCriteria()
+			takenMaternite = criteria.list {
+				and {
+					eq('employee',employeeInstance)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.MATERNITE)
+				}
+			}
+			if (takenMaternite!=null){
+				takenMaterniteMap.put(period.year, takenMaternite.size())
+			}else{
+				takenMaterniteMap.put(period.year, 0)
+			}
+			
+				
 			
 			criteria = Absence.createCriteria()
 			takenCSS = criteria.list {
@@ -1504,6 +1547,9 @@ class EmployeeController {
 			
 			if (updatedSelection.equals('CP'))
 			updatedSelection = AbsenceType.PATERNITE
+			
+			if (updatedSelection.equals('CM'))
+			updatedSelection = AbsenceType.MATERNITE
 			
 			if (updatedSelection.equals('DIF'))
 			updatedSelection = AbsenceType.DIF

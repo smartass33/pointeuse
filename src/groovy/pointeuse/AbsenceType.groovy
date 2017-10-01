@@ -5,6 +5,7 @@ public enum AbsenceType {
 	VACANCE('V'),
 	MALADIE('M'),
 	GROSSESSE('G'),
+	MATERNITE('CM'),
 	RTT('RTT'),
 	AUTRE('R'),
 	ANNULATION('-'),

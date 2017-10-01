@@ -21,10 +21,11 @@
 		<th class='rotate-45'  style="width:45px"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
 		<th class='rotate-45'  style="width:50px"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
 		<th class='rotate-45'  style="width:50px"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>
-		<th class='rotate-45'  style="width:75px"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
-		<th class='rotate-45'  style="width:65x"><div><span><g:message code="employee.paternite.count"/></span></div></th>		
-		<th class='rotate-45'  style="width:50px"><div><span><g:message code="employee.formation.count"/></span></div></th>		
-		<th class='rotate-45'><div><span><g:message code="annual.report.supplementary.label"/></span></div></th>
+		<th class='rotate-45'  style="width:50px"><div><span><g:message code="annual.report.maternite.abreviation.label"/></span></div></th>
+		<th class='rotate-45'  style="width:50px"><div><span><g:message code="annual.report.exceptionnel.abreviation.label"/></span></div></th>
+		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.paternite.abreviation.label"/></span></div></th>		
+		<th class='rotate-45'  style="width:50px"><div><span><g:message code="annual.report.formation.label"/></span></div></th>		
+		<th class='rotate-45'  style="width:55px"><div><span><g:message code="annual.report.supplementary.abreviation.label"/></span></div></th>
 		<th class='rotate-45'  style="width:65px"><div><span><g:message code="annual.report.sunday.time.label"/></span></div></th>
 		<th class='rotate-45'><div><span><g:message code="annual.report.bank.holiday.time.label"/></span></div></th>
 	</thead>
@@ -57,6 +58,7 @@
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sansSolde')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('injustifie')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sickness')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('maternite')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('exceptionnel')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('paternite')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('formation')}</td>			
@@ -88,6 +90,7 @@
 		<td style="vertical-align: middle;text-align:center;">${annualCSS}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualINJUSTIFIE}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualSickness}</td>
+		<td style="vertical-align: middle;text-align:center;">${annualMaternite}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualExceptionnel}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualPaternite}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualFormation}</td>

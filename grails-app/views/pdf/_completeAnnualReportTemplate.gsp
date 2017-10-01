@@ -61,17 +61,17 @@
 	<table id="annual-report-table" >
 		<thead>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.month.label"/></th>	
-			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.theoritical.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.theoritical.abreviation.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.elapsed.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.holidays.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.RTT.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.CSS.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.INJUSTIFIE.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.sickness.label"/></th>
-			<th style="vertical-align: middle;text-align:center;width:"><g:message code="employee.exceptionnel.count"/></th>
-			<th style="vertical-align: middle;text-align:center;"><g:message code="employee.paternite.count"/></th>
-			<!-- th style="vertical-align: middle;text-align:center;"><g:message code="employee.formation.count"/></th-->
-			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.supplementary.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.maternite.abreviation.label"/></th>
+			<th style="vertical-align: middle;text-align:center;width:"><g:message code="annual.report.exceptionnel.abreviation.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.paternite.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.supplementary.abreviation.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.sunday.time.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.bank.holiday.time.label"/></th>
 		</thead>
@@ -101,6 +101,7 @@
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('sansSolde')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('injustifie')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('sickness')}</td>
+					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('maternite')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('exceptionnel')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('paternite')}</td>
 					<!--  td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('formation')}</td-->
@@ -125,6 +126,7 @@
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualCSS}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualINJUSTIFIE}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualSickness}</td>
+				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualMaternite}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualExceptionnel}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualPaternite}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">

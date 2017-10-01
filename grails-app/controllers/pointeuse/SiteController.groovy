@@ -214,6 +214,7 @@ class SiteController {
 		def siteAnnualCSS = 0
 		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
+		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
 		def siteAnnualDIF = 0
@@ -292,6 +293,7 @@ class SiteController {
 					employeeModel << ['annualINJUSTIFIE':annualEmployeeData.valueMap.get('annualINJUSTIFIE').toLong()]
 					employeeModel << ['annualDIF':annualEmployeeData.valueMap.get('annualDIF').toLong()]
 					employeeModel << ['annualSickness':annualEmployeeData.valueMap.get('annualSickness').toLong()]
+					employeeModel << ['annualMaternite':annualEmployeeData.valueMap.get('annualMaternite').toLong()]				
 					employeeModel << ['annualExceptionnel':annualEmployeeData.valueMap.get('annualExceptionnel').toLong()]
 					employeeModel << ['annualPaternite':annualEmployeeData.valueMap.get('annualPaternite').toLong()]
 					employeeModel << ['annualPayableSupTime':annualEmployeeData.valueMap.get('annualPayableSupTime').toLong()]
@@ -309,6 +311,7 @@ class SiteController {
 					siteAnnualCSS += annualEmployeeData.valueMap.get('annualCSS').toLong()
 					siteAnnualINJUSTIFIE += annualEmployeeData.valueMap.get('annualINJUSTIFIE').toLong()
 					siteAnnualSickness += annualEmployeeData.valueMap.get('annualSickness').toLong()
+					siteAnnualMaternite += annualEmployeeData.valueMap.get('annualMaternite').toLong()					
 					siteAnnualDIF += annualEmployeeData.valueMap.get('annualDIF').toLong()
 					siteAnnualExceptionnel += annualEmployeeData.valueMap.get('annualExceptionnel').toLong()
 					siteAnnualPaternite += annualEmployeeData.valueMap.get('annualPaternite').toLong()
@@ -329,6 +332,7 @@ class SiteController {
 				siteAnnualCSS:siteAnnualCSS,
 				siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 				siteAnnualSickness:siteAnnualSickness,
+				siteAnnualMaternite:siteAnnualMaternite,
 				siteAnnualDIF:siteAnnualDIF,
 				siteAnnualExceptionnel:siteAnnualExceptionnel,
 				siteAnnualPaternite:siteAnnualPaternite,
@@ -361,6 +365,7 @@ class SiteController {
 				 siteAnnualCSS += data.get('annualCSS')
 				 siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
 				 siteAnnualSickness += data.get('annualSickness')
+				 siteAnnualMaternite += data.get('annualMaternite')				 
 				 siteAnnualDIF += data.get('annualDIF')
 				 siteAnnualExceptionnel += data.get('annualExceptionnel')
 				 siteAnnualPaternite += data.get('annualPaternite')
@@ -387,6 +392,7 @@ class SiteController {
 			siteAnnualCSS:siteAnnualCSS,
 			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualMaternite:siteAnnualMaternite,
 			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,
@@ -457,6 +463,7 @@ class SiteController {
 					valueMap << ['annualINJUSTIFIE':String.valueOf(annualReportMap.get(employee).get('annualINJUSTIFIE'))]
 					valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
 					valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
+					valueMap << ['annualMaternite':String.valueOf(annualReportMap.get(employee).get('annualMaternite'))]
 					valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
 					valueMap << ['annualPaternite':String.valueOf(annualReportMap.get(employee).get('annualPaternite'))]
 					valueMap << ['annualPayableSupTime':String.valueOf(annualReportMap.get(employee).get('annualPayableSupTime'))]
@@ -501,6 +508,7 @@ class SiteController {
 		def siteAnnualCSS = 0
 		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
+		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
 		def siteAnnualDIF = 0
@@ -528,6 +536,7 @@ class SiteController {
 				siteAnnualCSS += data.get('annualCSS')
 				siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
 				siteAnnualSickness += data.get('annualSickness')
+				siteAnnualMaternite += data.get('annualMaternite')			
 				siteAnnualDIF += data.get('annualDIF')
 				siteAnnualExceptionnel += data.get('annualExceptionnel')
 				siteAnnualPaternite += data.get('annualPaternite')
@@ -560,6 +569,7 @@ class SiteController {
 			siteAnnualCSS:siteAnnualCSS,
 			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualMaternite:siteAnnualMaternite,		
 			siteAnnualDIF:siteAnnualDIF,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,
@@ -597,6 +607,7 @@ class SiteController {
 				valueMap << ['annualINJUSTIFIE':String.valueOf(annualReportMap.get(employee).get('annualINJUSITIFIE'))]
 				valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
 				valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
+				valueMap << ['annualMaternite':String.valueOf(annualReportMap.get(employee).get('annualMaternite'))]
 				valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
 				valueMap << ['annualPaternite':String.valueOf(annualReportMap.get(employee).get('annualPaternite'))]
 				valueMap << ['annualPayableSupTime':String.valueOf(annualReportMap.get(employee).get('annualPayableSupTime'))]
