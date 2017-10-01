@@ -9,7 +9,7 @@ import grails.plugin.springsecurity.annotation.Secured
 class PeriodController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
-	def utilServic
+	def utilService
 	private static final log = LogFactory.getLog(this)
 	
     def index() {
