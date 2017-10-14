@@ -21,7 +21,6 @@ class Employee{
 	Map extraData 
 	Title title
 	
-	
 	static hasMany = [
 		annualEmployeeData:AnnualEmployeeData,
 		payments:Payment,
@@ -46,7 +45,6 @@ class Employee{
 		birthName (blank: true,nullable:true)
 	}
 
-	
 	static mapping = {
 		site lazy: false
 	}
@@ -54,5 +52,4 @@ class Employee{
 	String toString(){
 		return 'employee: lastname:'+ this.lastName+' firstname:'+this.firstName + ' username:'+ this.userName+' id:'+ this.id + ' site:'+this.site.name
 	}
-	
 }
