@@ -314,7 +314,7 @@
 				                		controller="mileage" 
 				                		params="MyJSClass.dynamicParams"
 				                    	update="report_table_div"
-				                    	before="MyJSClass.setParams(${entries.key.format('yyyyMd')},${employee.id},${entries.key.format('yyyyMd')},${true})"
+				                    	before="MyJSClass.setParams(${entries.key.format('yyyyMd')},${employee.id},${entries.key.format('yyyyMMd')},${true})"
 				                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
 				                    	onComplete="document.getElementById('spinner').style.display = 'none';
 				                    				document.getElementById('reportTable').className='showDetail';
@@ -332,7 +332,7 @@
 				                <g:remoteLink action="modifyMileage" controller="mileage" 
 				                		params="MyJSClass.dynamicParams"
 				                    	update="report_table_div"
-				                    	before="MyJSClass.setParams(${entries.key.format('yyyyMd')},${employee.id},${entries.key.format('yyyyMd')},${true})"
+				                    	before="MyJSClass.setParams(${entries.key.format('yyyyMd')},${employee.id},${entries.key.format('yyyyMMd')},${true})"
 				                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
 				                    	onComplete="document.getElementById('spinner').style.display = 'none';
 				                    		    	document.getElementById('reportTable').className='showDetail';

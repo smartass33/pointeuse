@@ -3034,28 +3034,100 @@ class TimeManagerService {
 		return monthTheoritical
 	}
 	
-	def getDailyInAndOutsData(Site site,Date currentDate){
+	def getDailyInAndOutsData(def siteId, Date currentDate){
+		def maxSize = 0
+		def functionList = Function.list([sort: "ranking", order: "asc"])
+		def serviceList = Service.list([sort: "name", order: "asc"])
+		def employeeInstanceList
+		def criteria
+		def dailyTotal
+		def inAndOutList
+		def elapsedSeconds
+		def site
 		def dailyMap = [:]
 		def dailySupMap = [:]
 		def dailyInAndOutMap = [:]
-		def dailyTotal
-		def inAndOutList
-		def criteria
-		def elapsedSeconds
-		//def employeeInstanceList
+		def inAndOutsForEmployee = []
+		def inAndOutsForEmployeeMap = [:]
+		def employeeSubList
+		def localisationMap = [:]
 		def calendar = Calendar.instance
-		calendar.time=currentDate
-		def employeeInstanceList = []		
-		def functionList = Function.list([sort: "ranking", order: "asc"])
-		 for (Function function:functionList){
-			 employeeInstanceList.addAll(Employee.findAllBySiteAndFunction(site,function))
-		 }
-		
-		
-		//employeeInstanceList = Employee.findAllBySite(site)
+		calendar.time = currentDate
+			
+		if (siteId != null && !siteId.equals("")){
+			 site = Site.get(siteId)
+			 employeeInstanceList = []
+			 def foreignEmployees = []
+			 def foreignEmployeesIds = []
+			 criteria = DailyTotal.createCriteria()
+			 
+			 def dailyTotals = criteria.list{
+				 and {
+					 eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+					 eq('month',calendar.get(Calendar.MONTH)+1)
+					 eq('year',calendar.get(Calendar.YEAR))
+					 eq('site',site)
+				 }
+			 }
+			 for (DailyTotal dailyTotalIter : dailyTotals){
+				 if (dailyTotalIter.site != null && dailyTotalIter.site != dailyTotalIter.employee.site){
+					 foreignEmployees.add(dailyTotalIter.employee)
+					 foreignEmployeesIds.add(dailyTotalIter.employee.id)
+					 localisationMap.put(dailyTotalIter.employee,site)
+				 }
+			 }
+			 
+			 for (Function function:functionList){
+				 for (Service service:serviceList){
+					  criteria = Employee.createCriteria()
+					  
+					  if (foreignEmployeesIds != null && foreignEmployeesIds.size() > 0){
+						  employeeSubList = criteria.list{
+							  or{
+								  
+								  and {
+									  eq('function',function)
+									  eq('service',service)
+									  eq('site',site)
+								  }
+								  
+								  and {
+									  eq('function',function)
+									  eq('service',service)
+									  'in'("id",foreignEmployeesIds)
+								  }
+								  order('lastName','asc')
+							  }
+						  }
+					  }
+					  else{
+						  employeeSubList = criteria.list{
+							  or{
+								  and {
+									  eq('function',function)
+									  eq('service',service)
+									  eq('site',site)
+								  }
+								  order('lastName','asc')
+							  }
+						  }
+						  
+					  }
+					  employeeInstanceList.addAll(employeeSubList)
+				 }
+			 }
+		}else{
+			employeeInstanceList = []
+			for (Service service:serviceList){
+				for (Function function:functionList){
+					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
+				}
+			}
+		}
 		for (Employee employee:employeeInstanceList){
+			inAndOutsForEmployee = []
 			criteria = DailyTotal.createCriteria()
-			dailyTotal= criteria.get{
+			dailyTotal = criteria.get{
 				and {
 					eq('employee',employee)
 					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
@@ -3063,8 +3135,17 @@ class TimeManagerService {
 					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
 				}
 			}
+			
+			if (dailyTotal != null && dailyTotal.site != null && dailyTotal.site != site){
+				def tmpSite = Site.findByName(dailyTotal.site.name)
+				localisationMap.put(employee,tmpSite)
+			}else{
+				localisationMap.put(employee,site)
+			}
+			
+			
 			criteria = InAndOut.createCriteria()
-			inAndOutList= criteria.list{
+			inAndOutList = criteria.list{
 				and {
 						eq('employee',employee)
 						eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
@@ -3073,20 +3154,47 @@ class TimeManagerService {
 						eq('year',calendar.get(Calendar.YEAR))
 						order('time')
 					}
-			}		
-			dailyInAndOutMap.put(employee, inAndOutList)
-
-			elapsedSeconds = dailyTotal!=null ? (getDailyTotal(dailyTotal)).get("elapsedSeconds") : 0
-			if (elapsedSeconds > DailyTotal.maxWorkingTime){
-				dailySupMap.put(employee,getTimeAsText(computeHumanTime(elapsedSeconds-DailyTotal.maxWorkingTime),false))
-			}else{
-				dailySupMap.put(employee,getTimeAsText(computeHumanTime(0),false))
 			}
-			dailyMap.put(employee,getTimeAsText(computeHumanTime(elapsedSeconds),false))
-		}	
-		return [dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:currentDate]
-	}
+			
+			maxSize = (inAndOutList != null && inAndOutList.size() > maxSize) ? inAndOutList.size() : maxSize
+			
+			for (InAndOut inOrOut : inAndOutList){
+				inAndOutsForEmployee.add("'"+inOrOut.time.format('yyyy-MM-dd HH:mm:SS')+"'")
+			}
+		
+			if (inAndOutList.size() < maxSize){
+				def difference = maxSize - inAndOutList.size()
+				for (int j = 0 ;j < difference ; j++){
+					inAndOutsForEmployee.add(null)
+				}
+			}
+			dailyInAndOutMap.put(employee, inAndOutList)
+			elapsedSeconds = dailyTotal != null ? (getDailyTotal(dailyTotal)).get('elapsedSeconds') : 0
 	
+			if (elapsedSeconds > DailyTotal.maxWorkingTime){
+				dailySupMap.put(employee,elapsedSeconds-DailyTotal.maxWorkingTime)
+			}else{
+				dailySupMap.put(employee,0)
+			}
+			if (dailyTotal != null && (dailyTotal.site == site || dailyTotal.site == null)){
+				dailyMap.put(employee,elapsedSeconds)
+			}
+			
+			inAndOutsForEmployeeMap.put(employee,inAndOutsForEmployee)
+			
+		}
+
+		return [
+			dailyMap: dailyMap,
+			site:site,
+			dailySupMap:dailySupMap,
+			dailyInAndOutMap:dailyInAndOutMap,
+			currentDate:currentDate,
+			localisationMap:localisationMap,
+			maxSize:maxSize,
+			inAndOutsForEmployeeMap:inAndOutsForEmployeeMap
+			]
+	}
 	
 	def getPointageData(Employee employee){
 		def entranceStatus
@@ -4938,6 +5046,189 @@ class TimeManagerService {
 			]
 		return model
 				
+		
+	}
+	
+	String writeHumanTime(long inputSeconds){
+		boolean isNegative = (inputSeconds < 0) ? true : false
+		def outputString = ''
+		def diff = inputSeconds
+		long hours = TimeUnit.SECONDS.toHours(diff);
+		diff = diff - (hours*3600);
+		long minutes=TimeUnit.SECONDS.toMinutes(diff);
+		diff = diff - (minutes*60);
+		long seconds = TimeUnit.SECONDS.toSeconds(diff);
+		if (!isNegative){
+			if (hours < 10)
+				outputString += '0'
+			outputString += hours
+			outputString += ':'
+			
+			if (minutes < 10)
+				outputString += '0'
+			outputString += minutes
+		}else{
+			outputString += '-'
+			if (Math.abs(hours)<10)
+				outputString += '0'
+			outputString += Math.abs(hours)
+			outputString += ':'
+			if (Math.abs(minutes)<10)
+				outputString += '0'
+				outputString += Math.abs(minutes)
+		}
+		return outputString
+	}
+	
+	def getWeeklyReportData(def year, def site, def funtionCheckBoxesMap){
+		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
+		def weekList = []
+		def weeklyTotalByEmployee = [:]
+		def weeklyTotalByWeek = [:]
+		def lastWeekOfYearByEmployee = [:]
+		def criteria
+		def employeeSubList
+		def employeeInstanceList
+		def weeklyTotals
+		def lastWeekOfYearWeeklyTotals
+		def currentYear = year
+		def currentWeek = 0
+		def functionList = Function.list([sort: "ranking", order: "asc"])
+		def serviceList = Service.list([sort: "name", order: "asc"])
+		def totalByFunction = [:]
+		def weeklyFunctionTotalMap = [:]
+		def siteFunctionMap = [:]
+		
+		if (site != null){
+			employeeInstanceList = []
+			for (Function function:functionList){
+				for (Service service:serviceList){
+					 criteria = Employee.createCriteria()
+					 employeeSubList = criteria.list{
+						 and {
+							 eq('function',function)
+							 eq('service',service)
+							 eq('site',site)
+						 }
+						 order('lastName','asc')
+					 }
+					 employeeInstanceList.addAll(employeeSubList)
+				 }
+			 }
+		}else{
+			employeeInstanceList = []
+			for (Service service:serviceList){
+				for (Function function:functionList){
+					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
+				}
+			}
+		}
+		def rollingCal = Calendar.instance
+		rollingCal.set(Calendar.MONTH,5)
+		rollingCal.set(Calendar.DAY_OF_MONTH,1)
+		rollingCal.set(Calendar.YEAR,currentYear)
+		rollingCal.clearTime()
+		
+		def lastWeekOfYear = rollingCal.getActualMaximum(Calendar.WEEK_OF_YEAR)
+		def firstWeek = rollingCal.get(Calendar.WEEK_OF_YEAR)
+		def weekNumber = []
+		for (int i = firstWeek; i <= lastWeekOfYear;i++){
+			weekNumber.add(i)
+		}
+		def endOfPeriodCal =  Calendar.instance
+		endOfPeriodCal.set(Calendar.MONTH,4)
+		endOfPeriodCal.set(Calendar.DAY_OF_MONTH,endOfPeriodCal.getActualMaximum(Calendar.DAY_OF_MONTH))
+		endOfPeriodCal.set(Calendar.YEAR,currentYear + 1)
+		endOfPeriodCal.clearTime()
+		
+		for (int j = 1; j <= endOfPeriodCal.get(Calendar.WEEK_OF_YEAR);j++){
+			weekNumber.add(j)
+		}
+				
+		def iteratorYear = currentYear
+		for (week in weekNumber){
+			if (week < firstWeek){
+				iteratorYear = currentYear + 1
+			}
+			criteria = WeeklyTotal.createCriteria()
+			weeklyTotals = criteria.list {
+					and {
+						eq('year',iteratorYear)
+						eq('week',week)
+						
+						'in'('employee',employeeInstanceList)
+					}
+				order('employee', 'asc')
+			}
+
+			weeklyTotalByWeek.put(week,weeklyTotals)
+			weekList.add(week)
+			
+			if (iteratorYear == currentYear && week == lastWeekOfYear){
+				log.debug('we got the rest of the last week of year that is in the year + 1')
+				criteria = WeeklyTotal.createCriteria()
+				lastWeekOfYearWeeklyTotals = criteria.list {
+						and {
+							eq('year',currentYear + 1)
+							eq('week',week)
+							
+							'in'('employee',employeeInstanceList)
+						}
+					order('employee', 'asc')
+				}
+			}
+		}
+
+		for (WeeklyTotal weeklyTotal in lastWeekOfYearWeeklyTotals){
+			lastWeekOfYearByEmployee.put(weeklyTotal.employee,weeklyTotal)
+		}
+				
+		def weeklyTotalsByWeek = [:]
+		def weeklySubTotalsByWeek = [:]
+		for (int weekIter in weekList){
+			def weeklyTotalsByEmployee = [:]
+			def weeklyTotalsByFunction = [:]
+			for (Employee currentEmployee in employeeInstanceList){
+				for (WeeklyTotal weeklyTotal in weeklyTotalByWeek.get(weekIter)){
+					if (weeklyTotal.employee == currentEmployee){
+						if (weeklyTotalsByEmployee.get(currentEmployee) == null){
+							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotal.elapsedSeconds as long)
+						}else{
+							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + weeklyTotal.elapsedSeconds as long)
+						}
+						if (weekIter == lastWeekOfYear && lastWeekOfYearWeeklyTotals!= null && lastWeekOfYearByEmployee.get(currentEmployee) != null){
+							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + lastWeekOfYearByEmployee.get(currentEmployee).elapsedSeconds as long)
+						}
+						weeklyTotalsByWeek.put(weekIter,weeklyTotalsByEmployee)
+						if (funtionCheckBoxesMap.get(currentEmployee.function.name) != null && funtionCheckBoxesMap.get(currentEmployee.function.name) == true){
+							if (weeklySubTotalsByWeek.get(weekIter) != null){
+								weeklySubTotalsByWeek.put(weekIter,weeklySubTotalsByWeek.get(weekIter) + weeklyTotalsByEmployee.get(currentEmployee))
+							}else{
+								weeklySubTotalsByWeek.put(weekIter,weeklyTotalsByEmployee.get(currentEmployee))
+							}
+						}
+						if (weeklyTotalsByFunction.get(currentEmployee.function) == null){
+							weeklyTotalsByFunction.put(currentEmployee.function,weeklyTotal.elapsedSeconds as long)
+						}else{
+							weeklyTotalsByFunction.put(currentEmployee.function,weeklyTotalsByFunction.get(currentEmployee.function) + weeklyTotal.elapsedSeconds as long)
+						}
+						weeklyFunctionTotalMap.put(weekIter,weeklyTotalsByFunction)
+						
+					}
+				}
+				siteFunctionMap.put(currentEmployee.function.name,currentEmployee.function )
+			}
+		}
+		
+		return [
+			weeklyTotalsByWeek:weeklyTotalsByWeek,
+			weekList:weekList,
+			employeeInstanceList:employeeInstanceList,
+			siteFunctionMap:siteFunctionMap,
+			weeklySubTotalsByWeek:weeklySubTotalsByWeek,
+			weeklyFunctionTotalMap:weeklyFunctionTotalMap
+		]
+
 		
 	}
 }

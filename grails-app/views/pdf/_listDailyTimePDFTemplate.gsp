@@ -84,7 +84,7 @@
 						<td style="width:180px">${entry.key.firstName}</td>
 						<td style="width:120px;text-align:center">${entry.key.function.name}</td>
 						<td style="width:120px;text-align:center">${entry.key.site.name}</td>
-						<td style="width:90px;text-align:center">${entry.value}</td>
+						<td style="width:90px;text-align:center"><my:humanTimeTD id="entry_value" name="entry_value" value=" ${entry.value}"/></td>
 						<td style="width:120px;text-align:center">${dailySupMap.get(entry.key)}</td>
 						<g:each in="${dailyInAndOutMap.get(entry.key)}" var="inOrOut">
 							<g:if test="${inOrOut.type.equals('E')}">

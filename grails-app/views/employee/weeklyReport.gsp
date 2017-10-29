@@ -1,14 +1,22 @@
 <%@ page import="pointeuse.Employee"%>
 <%@ page import="pointeuse.Period"%>
 <%@ page import="pointeuse.Site"%>
+<%@ page import="grails.converters.JSON"%>
+
 <!doctype html>
 <html>
 <head>
-	
+	<r:require module='jquery' />
 	<g:javascript library="application"/> 		
 	<r:require module="report"/>		
 	<r:layoutResources/>		
-
+	<g:set var="funtionCheckBoxesMap" value="${[:]}"/>
+	<%
+		funtionCheckBoxesMap.put('Technicien',true)
+		funtionCheckBoxesMap.put('Infirmier',true)
+		funtionCheckBoxesMap.put('Coursier',false)
+		funtionCheckBoxesMap.put('Secrétaire',false)
+	%>
   	
 	<meta name="layout" content="main" id="mainLayout">
 	<g:set var="isNotSelected" value="true" />	
@@ -31,9 +39,7 @@
 			th {
 				padding: 2px 4px 2px 4px;
 			}
-
-		</style>
-		
+		</style>			
 </head>
 <body>
 	<div class="nav" id="nav">
@@ -74,8 +80,13 @@
 			                onComplete="document.getElementById('spinner').style.display = 'none';"
 							url="[controller:'employee', action:'weeklyReport']"
 						/>	
-					</li>						
+					</li>	
+					<li>
+						<g:actionSubmit class='excelButton' value="export excel"  action="weeklyReportExcelExport"/>	
+					</li>
+									
 				</ul>
+				<g:hiddenField name="funtionCheckBoxesMap" value="${funtionCheckBoxesMap as JSON} " />
 			</g:form>
 		</h1>
 		<g:if test="${flash.message}">

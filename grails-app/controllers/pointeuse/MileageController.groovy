@@ -115,7 +115,8 @@ class MileageController {
 		//def date_mileage_picker = params["date_mileage_picker"]//.split(" ").getAt(0)
 		def calendar = Calendar.instance
 		//if (date_mileage_picker != null && date_mileage_picker.size() > 0){
-		calendar.time = new Date().parse("yyyyMd", params["date_mileage_picker"])
+		def date_mileage = params["date_mileage_picker"]
+		calendar.time = new Date().parse("yyyyMMd", params["date_mileage_picker"])
 			
 		//}
 		log.error('calendar.time: '+calendar.time)

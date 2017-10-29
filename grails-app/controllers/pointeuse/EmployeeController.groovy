@@ -67,24 +67,10 @@ class EmployeeController {
 
 	@Secured(['ROLE_ADMIN'])
 	def dailyReport(){
-		def dailyMap = [:]
-		def dailySupMap = [:]
-		def dailyInAndOutMap = [:]
 		def siteId=params["site.id"]
-		def dailyTotal
-		def inAndOutList
-		def criteria
-		def site
-		def elapsedSeconds = 0
-		def employeeInstanceList
 		def currentDate
 		def calendar = Calendar.instance
 		def fromIndex=params.boolean('fromIndex')
-		def inAndOutsForEmployee = []
-		def inAndOutsForEmployeeMap = [:]
-		def employeeSubList 
-		def localisationMap = [:]
-		
 		
 		if (!fromIndex && (siteId == null || siteId.size() == 0)){
 			flash.message = message(code: 'ecart.site.selection.error')
@@ -92,330 +78,177 @@ class EmployeeController {
 			redirect(action: "dailyReport",params:params)
 			return
 		}
-		def maxSize = 0
+		
 		def date_picker =params["date_picker"]
 		if (date_picker != null && date_picker.size()>0){
 			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
 			calendar.time=currentDate
-		}
-		
-		def functionList = Function.list([sort: "ranking", order: "asc"])
-		def serviceList = Service.list([sort: "name", order: "asc"])
-		
-		if (siteId != null && !siteId.equals("")){
-			 site = Site.get(params.int('site.id'))
-			 employeeInstanceList = []
-			 
-			 def foreignEmployees = []
-			 def foreignEmployeesIds = []
-			 criteria = DailyTotal.createCriteria()
-			 
-			 def dailyTotals = criteria.list{
-				 and {
-					 eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-					 eq('month',calendar.get(Calendar.MONTH)+1)
-					 eq('year',calendar.get(Calendar.YEAR))
-					 eq('site',site)
-				 }
-			 }
-			 for (DailyTotal dailyTotalIter : dailyTotals){
-				 if (dailyTotalIter.site != null && dailyTotalIter.site != dailyTotalIter.employee.site){
-					 foreignEmployees.add(dailyTotalIter.employee)
-					 foreignEmployeesIds.add(dailyTotalIter.employee.id)
-					 localisationMap.put(dailyTotalIter.employee,site)
-				 }
-			 }
-			 
-			 for (Function function:functionList){
-				 for (Service service:serviceList){
-					  criteria = Employee.createCriteria()
-					  
-					  if (foreignEmployeesIds != null && foreignEmployeesIds.size() > 0){
-						  employeeSubList = criteria.list{
-							  or{
-								  
-								  and {
-									  eq('function',function)
-									  eq('service',service)
-									  eq('site',site)
-								  }
-								  
-								  and {
-									  eq('function',function)
-									  eq('service',service)
-									  'in'("id",foreignEmployeesIds)
-								  }
-								  order('lastName','asc')
-							  }
-						  }
-					  }
-					  else{
-						  employeeSubList = criteria.list{
-							  or{
-								  and {
-									  eq('function',function)
-									  eq('service',service)
-									  eq('site',site)
-								  }
-								  order('lastName','asc')
-							  }
-						  }
-						  
-					  }
-					  employeeInstanceList.addAll(employeeSubList)
-				 }							  
-			 }
 		}else{
-			employeeInstanceList = []
-			for (Service service:serviceList){
-				for (Function function:functionList){
-					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
-				}
-			}
+			currentDate = calendar.time
 		}
-		for (Employee employee:employeeInstanceList){	
-			inAndOutsForEmployee = []
-			criteria = DailyTotal.createCriteria()
-			dailyTotal = criteria.get{
-				and {
-					eq('employee',employee)
-					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
-					eq('year',calendar.get(Calendar.YEAR))
-					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-				}				
-			}
-			
-			if (dailyTotal != null && dailyTotal.site != null && dailyTotal.site != site){
-				def tmpSite = Site.findByName(dailyTotal.site.name)
-				localisationMap.put(employee,tmpSite)
-			}else{
-				localisationMap.put(employee,site)
-			}
-			
-			
-			criteria = InAndOut.createCriteria()			
-			inAndOutList = criteria.list{
-				and {
-						eq('employee',employee)
-						eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
-						eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-						eq('month',calendar.get(Calendar.MONTH)+1)			
-						eq('year',calendar.get(Calendar.YEAR))
-						order('time')				
-					}
-			}
-			
-			maxSize = (inAndOutList != null && inAndOutList.size() > maxSize) ? inAndOutList.size() : maxSize
-			
-			for (InAndOut inOrOut : inAndOutList){
-				inAndOutsForEmployee.add("'"+inOrOut.time.format('yyyy-MM-dd HH:mm:SS')+"'")
-			}
-		
-			if (inAndOutList.size() < maxSize){
-				def difference = maxSize - inAndOutList.size()
-				for (int j = 0 ;j < difference ; j++){
-					inAndOutsForEmployee.add(null)
-				}
-			}
-			
-			if (fromIndex){
-				return [site:site,fromIndex:fromIndex,currentDate:calendar.time]
-			}
-			
-			dailyInAndOutMap.put(employee, inAndOutList)	
-			elapsedSeconds = dailyTotal != null ? (timeManagerService.getDailyTotal(dailyTotal)).get('elapsedSeconds') : 0
-	
-			if (elapsedSeconds > DailyTotal.maxWorkingTime){
-				dailySupMap.put(employee,elapsedSeconds-DailyTotal.maxWorkingTime)
-			}else{
-				dailySupMap.put(employee,0)
-			}
-			if (dailyTotal != null && (dailyTotal.site == site || dailyTotal.site == null)){
-				dailyMap.put(employee,elapsedSeconds)
-			}
-			
-			inAndOutsForEmployeeMap.put(employee,inAndOutsForEmployee)
-		}		
-		
+		def model = timeManagerService.getDailyInAndOutsData(siteId, currentDate)
+
 		def startDate=calendar.time
 		startDate.putAt(Calendar.HOUR_OF_DAY,6)
 		startDate.putAt(Calendar.MINUTE,0)
 		
-		if (site!=null){
-			render template: "/employee/template/listDailyTimeTemplate", model:[
-				inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,
-				startDate:"'"+startDate.format('yyyy-MM-dd HH:mm:SS')+"'",
-				inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,
-				dailyMap: dailyMap,
-				site:site,
-				dailySupMap:dailySupMap,
-				dailyInAndOutMap:dailyInAndOutMap,
-				localisationMap:localisationMap,
-				maxSize:maxSize]
+		model << [startDate:"'"+startDate.format('yyyy-MM-dd HH:mm:SS')+"'"]
+		if (model.get('site') != null){
+			render template: "/employee/template/listDailyTimeTemplate", model:model
 			return	
 		}
-		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:calendar.time,maxSize:maxSize]
+		model
 	}
 	
 	
 	@Secured(['ROLE_ADMIN'])
-	def weeklyReport(){
-		log.error('weeklyReport called')
-		def weeklyMap = [:]
-		def criteria
-		def elapsedSeconds = 0
-		def employeeInstanceList
+	def weeklyReportExcelExport(){
+		def folder = grailsApplication.config.pdf.directory
+		log.error('entering weeklyReportExcelExport')
+		def siteValue = params.boolean('siteValue')
+		def siteFunction = params['siteFunction']
 		def currentDate
 		def calendar = Calendar.instance
 		def fromIndex=params.boolean('fromIndex')
-		def weeklyTotalByEmployee = [:]
-		def weeklyTotalByWeek = [:]
-		def lastWeekOfYearByEmployee = [:]
-		def weekList = []
-		def employeeSubList
-		def year
-		def weeklyTotals
-		def lastWeekOfYearWeeklyTotals
-		def period = Period.get(params.int('periodId'))
 		def site = Site.get(params.int('siteId'))
-		if (period != null){
-			year = period.year
-		 } else{
+		def funtionCheckBoxesMap = [:]
+		def period = Period.get(params.int('periodId'))
+		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
+		if (period == null && year != null){
 			period = Period.findByYear(year)
-		 }
-		 if (year == null){
-		 	year = calendar.get(Calendar.YEAR)
-		 }
-		 
-		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
-		def currentYear = year
-		def currentWeek = 0
-		def functionList = Function.list([sort: "ranking", order: "asc"])
-		def serviceList = Service.list([sort: "name", order: "asc"])
-		
-		if (site != null){
-			employeeInstanceList = []
-			for (Function function:functionList){
-				for (Service service:serviceList){
-					 criteria = Employee.createCriteria()
-					 employeeSubList = criteria.list{
-						 and {
-							 eq('function',function)
-							 eq('service',service)
-							 eq('site',site)
-						 }
-						 order('lastName','asc')
-					 }
-					 employeeInstanceList.addAll(employeeSubList)
-				 }
-			 }			 
-		}else{
-			employeeInstanceList = []
-			for (Service service:serviceList){
-				for (Function function:functionList){
-					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
-				}
-			}				
 		}
-		def rollingCal = Calendar.instance
-		rollingCal.set(Calendar.MONTH,5)
-		rollingCal.set(Calendar.DAY_OF_MONTH,1)
-		rollingCal.set(Calendar.YEAR,currentYear)
-		rollingCal.clearTime()
+		def calendarMonday = Calendar.instance
+		def calendarFriday = Calendar.instance
+		calendarMonday.set(Calendar.YEAR,year)
+		calendarFriday.set(Calendar.YEAR,year)
+
+
+
+		def model = timeManagerService.getWeeklyReportData(year, site, funtionCheckBoxesMap)
 		
-		def lastWeekOfYear = rollingCal.getActualMaximum(Calendar.WEEK_OF_YEAR)
-		def firstWeek = rollingCal.get(Calendar.WEEK_OF_YEAR)
-		def weekNumber = []
-		for (int i = firstWeek; i <= lastWeekOfYear;i++){
-			weekNumber.add(i)
-		}
-		def endOfPeriodCal =  Calendar.instance
-		endOfPeriodCal.set(Calendar.MONTH,4)
-		endOfPeriodCal.set(Calendar.DAY_OF_MONTH,endOfPeriodCal.getActualMaximum(Calendar.DAY_OF_MONTH))
-		endOfPeriodCal.set(Calendar.YEAR,currentYear + 1)
-		endOfPeriodCal.clearTime()
 		
-		for (int j = 1; j <= endOfPeriodCal.get(Calendar.WEEK_OF_YEAR);j++){
-			weekNumber.add(j)
+		def headers = [message(code: 'default.week')]
+		
+		for (Employee employee: model.get('employeeInstanceList')){
+			headers.add(employee.lastName)
 		}
-				
-		def iteratorYear = currentYear
-		for (week in weekNumber){
-			if (week < firstWeek){
-				iteratorYear = currentYear + 1
-			}
-			criteria = WeeklyTotal.createCriteria()
-			weeklyTotals = criteria.list {
-					and {
-						eq('year',iteratorYear)
-						eq('week',week)
+		
+		model.get('siteFunctionMap').each{key,value ->
+			headers.add(key)
+		}
+		
+		log.debug("headers: "+headers)
+		
+		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/weekly_report_template.xlsx').with {
+			setResponseHeaders(response)
+			def weekList = model.get('weekList')
+			def employeeInstanceList = model.get('employeeInstanceList')
+			def weeklyFunctionTotalMap = model.get('weeklyFunctionTotalMap')
+			def siteFunctionMap = model.get('siteFunctionMap')
+			setResponseHeaders(response)
+			fillHeader(headers)
+			
+			int i = 1
+			for (weekNumber in weekList){
+				def data = []
+				log.debug('weekNumber: '+weekNumber)
+				calendarMonday.set(Calendar.WEEK_OF_YEAR,weekNumber as int)
+				calendarMonday.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY)
+				calendarFriday.set(Calendar.WEEK_OF_YEAR,weekNumber as int)
+				calendarFriday.set(Calendar.DAY_OF_WEEK,Calendar.FRIDAY)
 						
-						'in'('employee',employeeInstanceList)
-					}			
-				order('employee', 'asc')
-			}
-
-			weeklyTotalByWeek.put(week,weeklyTotals)
-			weekList.add(week)		
-			
-			if (iteratorYear == currentYear && week == lastWeekOfYear){
-				log.error('we got the rest of the last week of year that is in the year + 1')
-				criteria = WeeklyTotal.createCriteria()
-				lastWeekOfYearWeeklyTotals = criteria.list {
-						and {
-							eq('year',currentYear + 1)
-							eq('week',week)
-							
-							'in'('employee',employeeInstanceList)
-						}				
-					order('employee', 'asc')
-				}						
-			}
-		}
-
-		for (WeeklyTotal weeklyTotal in lastWeekOfYearWeeklyTotals){
-			lastWeekOfYearByEmployee.put(weeklyTotal.employee,weeklyTotal)
-		}
-		
-			
-		def weeklyTotalsByWeek = [:]
-		for (int weekIter in weekList){
-			def weeklyTotalsByEmployee = [:]
-			for (Employee currentEmployee in employeeInstanceList){				
-				for (WeeklyTotal weeklyTotal in weeklyTotalByWeek.get(weekIter)){
-					if (weeklyTotal.employee == currentEmployee){
-						if (weeklyTotalsByEmployee.get(currentEmployee) == null){
-							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotal.elapsedSeconds as long)
-						}else{
-							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + weeklyTotal.elapsedSeconds as long)											
-						}
-						if (weekIter == lastWeekOfYear && lastWeekOfYearWeeklyTotals!= null && lastWeekOfYearByEmployee.get(currentEmployee) != null){							
-							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + lastWeekOfYearByEmployee.get(currentEmployee).elapsedSeconds as long)							
-						}
-						weeklyTotalsByWeek.put(weekIter,weeklyTotalsByEmployee)
+				if (weekNumber == 1){
+					calendarMonday.set(Calendar.YEAR,year + 1)
+					calendarFriday.set(Calendar.YEAR,year + 1)
+				}
+				
+				data.add(calendarMonday.time.format('EE dd/MM/yyyy') + '-' + calendarFriday.time.format('EE dd/MM/yy'))
+				for (Employee currentEmployee in employeeInstanceList){
+					log.debug('currentEmployee: '+currentEmployee)
+					def weeklyTotalsByWeek = model.get('weeklyTotalsByWeek')
+					if (weeklyTotalsByWeek != null && weeklyTotalsByWeek.get(weekNumber) != null && weeklyTotalsByWeek.get(weekNumber).get(currentEmployee) != null ){
+						data.add(timeManagerService.writeHumanTime(model.get('weeklyTotalsByWeek').get(weekNumber).get(currentEmployee) as long))
+					}else{
+						data.add(timeManagerService.writeHumanTime(0))
 					}
-				}	
-							
-			}			
+
+				}
+						
+				siteFunctionMap.each{key,value ->
+					log.debug("siteFunctionMap key: "+key)
+					if (weeklyFunctionTotalMap != null && weeklyFunctionTotalMap.get(weekNumber)!= null && weeklyFunctionTotalMap.get(weekNumber).get(value) != null){
+						data.add(timeManagerService.writeHumanTime(weeklyFunctionTotalMap.get(weekNumber).get(value) as long))
+					}else{
+						data.add(timeManagerService.writeHumanTime(0))
+					}
+				}
+				
+				fillRow(data,i)
+				i += 1
+			}
+			save(response.outputStream)
+			
+			
+			
+			
+			
+			//response.outputStream << retour[0]
 		}
-		
+		//response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.setContentType("application/octet-stream")
+	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def weeklyReport(){
+		log.error('weeklyReport called')
+		def siteValue = params.boolean('siteValue')
+		def siteFunction = params['siteFunction']
+		def currentDate
+		def calendar = Calendar.instance
+		def fromIndex=params.boolean('fromIndex')
+		def site = Site.get(params.int('siteId'))
+		def funtionCheckBoxesMap = [:]
+		def period = Period.get(params.int('periodId'))
+		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
+		if (period == null && year != null){
+			period = Period.findByYear(year)
+		}
+		if (params['simpleFuntionCheckBoxesMap']  == null){
+			def jsonSlurper = new JsonSlurper()
+			funtionCheckBoxesMap = params['funtionCheckBoxesMap'] != null ? jsonSlurper.parseText(params['funtionCheckBoxesMap']) : [:]
+		}else{
+			def words = []
+			words = (params['simpleFuntionCheckBoxesMap']).split("-")
+			for (int j = 0 ;j < words.size() ; j++){
+				if (j % 2 == 0){
+					funtionCheckBoxesMap.put(words[j],(words[j + 1]).toBoolean())
+				}
+			}
+		}
+	
+		if (siteFunction != null){
+			funtionCheckBoxesMap.put(siteFunction,siteValue)
+		}
+
+		def model = timeManagerService.getWeeklyReportData(year, site, funtionCheckBoxesMap)
+
 		if (!fromIndex && site == null){
 			flash.message = message(code: 'weeklyTime.site.selection.error')
 			params["fromIndex"]=true
 			redirect(action: "weeklyReport",params:params)
 			return
 		}
-		if (site!=null){
-			render template: "/employee/template/listWeeklyTimeTemplate", 
-			model:[
-				site:site,
-				period:period,
-				weeklyTotalsByWeek:weeklyTotalsByWeek,
-				weekList:weekList,
-				employeeInstanceList:employeeInstanceList,
-				firstYear:period.year,
-				lastYear:period.year+1,
-				]
+		
+		model << [
+			site:site,
+			period:period,
+			firstYear:period.year,
+			lastYear:period.year+1,	
+			funtionCheckBoxesMap:funtionCheckBoxesMap
+			]
+
+		if (site != null){
+			render template: "/employee/template/listWeeklyTimeTemplate", model:model
 			return
 		}
 		[currentDate:calendar.time]
@@ -565,6 +398,10 @@ class EmployeeController {
         }
         [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]
     }
+	
+
+	
+	
 	
 	@Secured(['ROLE_ADMIN'])
 	def employeeExcelExport(){
@@ -2732,7 +2569,7 @@ class EmployeeController {
 			calendar.time = new Date().parse("dd/MM/yyyy", date_picker)
 		}
 
-		if (params["site.id"]!=null && !params["site.id"].equals('')){
+		if (params["site.id"] != null && !params["site.id"].equals('')){
 			siteId = params["site.id"].toInteger()
 			site = Site.get(params.int("site.id"))
 		}else{
@@ -2741,6 +2578,7 @@ class EmployeeController {
 			return
 		}
 			
+		
 		def retour = PDFService.generateDailySheet(site,folder,calendar.time)
 		response.setContentType("application/octet-stream")
 		response.setHeader("Content-disposition", "filename=${retour[1]}")

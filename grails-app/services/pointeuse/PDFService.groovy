@@ -176,7 +176,7 @@ class PDFService {
 		def filename
 		OutputStream outputStream
 		File file
-		def modelDaily=timeManagerService.getDailyInAndOutsData(site,currentDate)
+		def modelDaily=timeManagerService.getDailyInAndOutsData(site.id,currentDate)
 		modelDaily << [site:site]
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/listDailyTimePDFTemplate', model: modelDaily)
 		def siteName = (site.name).replaceAll("\\s","").trim()
