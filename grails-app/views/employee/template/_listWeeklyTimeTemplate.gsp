@@ -34,32 +34,39 @@
 					<th style="vertical-align: middle;text-align:center;">${siteFunction.key} <br>
 						<g:if test="${funtionCheckBoxesMap.get(siteFunction.key)}">
 							<input id="checkBox_${siteFunction.key}" type="checkbox" checked="checked" 
-									
-			               	 		
-									onclick="${remoteFunction(
-										controller:'employee', 
-										action:'weeklyReport', 
-										update:'weeklyTable', 
-										onLoading:"document.getElementById('spinner').style.display = 'inline';",
-										onComplete:"document.getElementById('spinner').style.display = 'none';",
-										params:'  \'siteFunction=\'+\'' +siteFunction.key + '\'+  \'&siteValue=\' + this.checked  + \'&periodId=\' +\'' + period.id + '\' + \'&siteId=\' +\'' + site.id + '\' + \'&simpleFuntionCheckBoxesMap=\' +\'' + simpleFuntionCheckBoxesMap + '\'   '										
-										)}">
+								onclick="${remoteFunction(
+									controller:'employee', 
+									action:'weeklyReport', 
+									update:'weeklyTable', 
+									onLoading:"document.getElementById('spinner').style.display = 'inline';",
+									onComplete:"document.getElementById('spinner').style.display = 'none';",
+									params:'  \'siteFunction=\'+\'' +siteFunction.key + '\'+  \'&siteValue=\' + this.checked  + \'&periodId=\' +\'' + period.id + '\' + \'&siteId=\' +\'' + site.id + '\' + \'&simpleFuntionCheckBoxesMap=\' +\'' + simpleFuntionCheckBoxesMap + '\'   '										
+									)}">
 						</g:if>
 						<g:else>
 							<input id="checkBox_${siteFunction.key}" type="checkbox" value="${true}"
-									onclick="${
-										remoteFunction(controller:'employee', 
-										action:'weeklyReport', update:'weeklyTable',
-										onLoading:"document.getElementById('spinner').style.display = 'inline';",
-										onComplete:"document.getElementById('spinner').style.display = 'none';",
-										params:'  \'siteFunction=\'+\'' +siteFunction.key + '\'+  \'&siteValue=\' + this.checked  + \'&periodId=\' +\'' + period.id + '\' + \'&siteId=\' +\'' + site.id + '\' + \'&simpleFuntionCheckBoxesMap=\' +\'' + simpleFuntionCheckBoxesMap + '\'   '
-										)}">
-								</g:else>
+								onclick="${
+									remoteFunction(controller:'employee', 
+									action:'weeklyReport', update:'weeklyTable',
+									onLoading:"document.getElementById('spinner').style.display = 'inline';",
+									onComplete:"document.getElementById('spinner').style.display = 'none';",
+									params:'  \'siteFunction=\'+\'' +siteFunction.key + '\'+  \'&siteValue=\' + this.checked  + \'&periodId=\' +\'' + period.id + '\' + \'&siteId=\' +\'' + site.id + '\' + \'&simpleFuntionCheckBoxesMap=\' +\'' + simpleFuntionCheckBoxesMap + '\'   '
+									)}">
+						</g:else>
 					</th>
 				</g:each>
 			</g:if>
-			<th style="vertical-align: middle;text-align:center;">${message(code: 'sub.total')}</th>
+			<th style="vertical-align: middle;text-align:center;">${message(code: 'sub.total')} 	
+				<g:form>
+					<g:actionSubmit class='excelButton' value="export"  action="weeklyReportExcelExport"/>	
+					<g:hiddenField name="funtionCheckBoxesMap" id="funtionCheckBoxesMap" value="${funtionCheckBoxesMap as JSON} " />
+					<g:if test="${site != null}"><g:hiddenField name="siteId" id="siteId" value="${site.id} " /></g:if>
+					<g:if test="${period != null}"><g:hiddenField name="periodId" id="periodId" value="${period.id} " /></g:if>			
+				</g:form >				
+			</th>
+			<th style="vertical-align: middle;text-align:center;">${message(code: 'weekly.case')}</th>	
 		</thead>
+			
 		<tbody id='body_table' style="border:1px;">
 			<g:each in="${weekList}" status="i" var="weekNumber">	
 				<%
@@ -75,7 +82,7 @@
 				%>	
 				<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
 					<td style="vertical-align: middle;text-align:center;">
-						 ${calendarMonday.time.format('EE dd/MM/yyyy')}-${calendarFriday.time.format('EE dd/MM/yy')}					  
+						 ${calendarMonday.time.format('EE dd/MM/yy')}-${calendarFriday.time.format('EE dd/MM/yy')}					  
 					</td>
 	
 					<g:each in="${employeeInstanceList}" var="currentEmployee">	
@@ -106,7 +113,22 @@
 						<g:else>
 							<my:humanTimeTD id="weeklyGrandTotal" name="weeklyGrandTotal" value="${0}"/>		
 						</g:else>
-					</td>				
+
+					</td>	
+					
+					<td style="vertical-align: middle;text-align:center;width:10px;font-size: 12px;">
+						<g:textField id="${calendarMonday.time.format('yyyyMMdd')}" name="cases" class='mileageTextField' value="${weeklyCasesMap.get(weekNumber).value ?: '0'}" align="center" style="vertical-align: middle;width:35px"/>
+		                <g:remoteLink 
+		                		action="modifyCases" 
+		                		controller="employee"
+		                		before="WeekJSClass.setParams(${calendarMonday.time.format('yyyyMMdd')},${site.id})" 
+				                params="WeekJSClass.dynamicParams"		         
+		                    	update="weeklyTable"
+		                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
+		                    	onComplete="document.getElementById('spinner').style.display = 'none';">
+		                    	<g:img dir="images" file="skin/refresh.png" width="16" height="16" style="vertical-align: middle;"/>
+		                    </g:remoteLink>			
+					</td>					
 				</tr>
 			</g:each>		
 		</tbody>

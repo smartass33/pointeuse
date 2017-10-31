@@ -12,7 +12,7 @@ class Site {
 	CardTerminal cardTerminal
 	Date lastReportDate
 	
-	static hasMany = [employees: Employee,users:User]
+	static hasMany = [employees: Employee,users:User,weeklyCases:WeeklyCase]
 
     static constraints = {
 		cardTerminal nullable:true	

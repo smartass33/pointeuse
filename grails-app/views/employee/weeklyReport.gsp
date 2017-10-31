@@ -1,3 +1,4 @@
+<%@ page import="org.codehaus.groovy.grails.plugins.web.taglib.JavascriptValue"%>
 <%@ page import="pointeuse.Employee"%>
 <%@ page import="pointeuse.Period"%>
 <%@ page import="pointeuse.Site"%>
@@ -6,7 +7,6 @@
 <!doctype html>
 <html>
 <head>
-	<r:require module='jquery' />
 	<g:javascript library="application"/> 		
 	<r:require module="report"/>		
 	<r:layoutResources/>		
@@ -14,8 +14,9 @@
 	<%
 		funtionCheckBoxesMap.put('Technicien',true)
 		funtionCheckBoxesMap.put('Infirmier',true)
+		funtionCheckBoxesMap.put('Secrétaire',true)
 		funtionCheckBoxesMap.put('Coursier',false)
-		funtionCheckBoxesMap.put('Secrétaire',false)
+		funtionCheckBoxesMap.put('Agent entretien',false)
 	%>
   	
 	<meta name="layout" content="main" id="mainLayout">
@@ -39,7 +40,22 @@
 			th {
 				padding: 2px 4px 2px 4px;
 			}
-		</style>			
+		</style>
+		
+	<script type="text/javascript">
+	var WeekJSClass = {
+			  setParams: function(id,siteId) {
+				  val = document.getElementById(id);
+				  if(val === null){
+					  WeekJSClass.dynamicParams = {value:null,myDate:id,siteId:siteId};  
+				  }else{
+					  WeekJSClass.dynamicParams = {value:val.value,myDate:id,siteId:siteId};   
+						
+				  }   
+			      
+			  }
+			}
+	</script>		
 </head>
 <body>
 	<div class="nav" id="nav">
@@ -80,13 +96,11 @@
 			                onComplete="document.getElementById('spinner').style.display = 'none';"
 							url="[controller:'employee', action:'weeklyReport']"
 						/>	
-					</li>	
-					<li>
-						<g:actionSubmit class='excelButton' value="export excel"  action="weeklyReportExcelExport"/>	
-					</li>
-									
+					</li>							
 				</ul>
-				<g:hiddenField name="funtionCheckBoxesMap" value="${funtionCheckBoxesMap as JSON} " />
+				<g:if test="${funtionCheckBoxesMap != null}"><g:hiddenField name="funtionCheckBoxesMap" id="funtionCheckBoxesMap" value="${funtionCheckBoxesMap as JSON}" /></g:if>
+				<g:if test="${site != null}"><g:hiddenField name="siteId" id="siteId" value="${site.id} " /></g:if>
+				<g:if test="${period != null}"><g:hiddenField name="periodId" id="periodId" value="${period.id} " /></g:if>		
 			</g:form>
 		</h1>
 		<g:if test="${flash.message}">

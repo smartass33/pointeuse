@@ -102,6 +102,50 @@ class EmployeeController {
 	
 	
 	@Secured(['ROLE_ADMIN'])
+	def modifyCases(){
+		params.each{i->
+			log.error('param: '+i)
+			
+		}
+		def value = params.int("value")
+		def site = Site.get(params["siteId"])
+		def currentDate = params["myDate"]
+		SimpleDateFormat dateFormat
+		def calendar = Calendar.instance
+		def criteria
+		def weeklyCase
+
+		if (currentDate != null && currentDate instanceof String){
+			dateFormat = new SimpleDateFormat('yyyyMMdd');
+			currentDate = dateFormat.parse(currentDate)
+			calendar.time = currentDate
+		}
+		log.error('calendar.time: '+calendar.time)
+		
+		
+		criteria = WeeklyCase.createCriteria()
+		weeklyCase= criteria.get {
+			and {
+				eq('year',calendar.get(Calendar.YEAR))
+			//	eq('month',calendar.get(Calendar.MONTH)+1)
+				eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
+				eq('site',site)
+			}
+		}
+		if (weeklyCase != null){
+			//log.error('dailyTotal Empty: creating it for employee: '+employee+' and date: '+calendar.time)
+			//dailyTotal.weeklyTotal = weeklyTotal
+			weeklyCase.value = value as int
+			weeklyCase.save(flush:true)
+		}else{
+			weeklyCase = new WeeklyCase(value as int,currentDate,site)
+			weeklyCase.save(flush:true)
+		}
+		
+		
+	}
+	
+	@Secured(['ROLE_ADMIN'])
 	def weeklyReportExcelExport(){
 		def folder = grailsApplication.config.pdf.directory
 		log.error('entering weeklyReportExcelExport')
@@ -110,7 +154,8 @@ class EmployeeController {
 		def currentDate
 		def calendar = Calendar.instance
 		def fromIndex=params.boolean('fromIndex')
-		def site = Site.get(params.int('siteId'))
+		def siteId = params['siteId']
+		def site = Site.get(siteId)
 		def funtionCheckBoxesMap = [:]
 		def period = Period.get(params.int('periodId'))
 		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
@@ -121,14 +166,24 @@ class EmployeeController {
 		def calendarFriday = Calendar.instance
 		calendarMonday.set(Calendar.YEAR,year)
 		calendarFriday.set(Calendar.YEAR,year)
-
-
-
+		
+		if (params['simpleFuntionCheckBoxesMap']  == null){
+			def jsonSlurper = new JsonSlurper()
+			funtionCheckBoxesMap = params['funtionCheckBoxesMap'] != null ? jsonSlurper.parseText(params['funtionCheckBoxesMap']) : [:]
+		}else{
+			def words = []
+			words = (params['simpleFuntionCheckBoxesMap']).split("-")
+			for (int j = 0 ;j < words.size() ; j++){
+				if (j % 2 == 0){
+					funtionCheckBoxesMap.put(words[j],(words[j + 1]).toBoolean())
+				}
+			}
+		}
+		if (siteFunction != null){
+			funtionCheckBoxesMap.put(siteFunction,siteValue)
+		}
 		def model = timeManagerService.getWeeklyReportData(year, site, funtionCheckBoxesMap)
-		
-		
-		def headers = [message(code: 'default.week')]
-		
+		def headers = [message(code: 'default.week')]		
 		for (Employee employee: model.get('employeeInstanceList')){
 			headers.add(employee.lastName)
 		}
@@ -136,15 +191,16 @@ class EmployeeController {
 		model.get('siteFunctionMap').each{key,value ->
 			headers.add(key)
 		}
-		
-		log.debug("headers: "+headers)
-		
+		headers.add(message(code: 'sub.total'))
+		headers.add(message(code: 'weekly.case.noBR'))
 		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/weekly_report_template.xlsx').with {
 			setResponseHeaders(response)
 			def weekList = model.get('weekList')
 			def employeeInstanceList = model.get('employeeInstanceList')
 			def weeklyFunctionTotalMap = model.get('weeklyFunctionTotalMap')
 			def siteFunctionMap = model.get('siteFunctionMap')
+			def weeklySubTotalsByWeek = model.get('weeklySubTotalsByWeek')
+			def weeklyCasesMap = model.get('weeklyCasesMap')
 			setResponseHeaders(response)
 			fillHeader(headers)
 			
@@ -171,9 +227,7 @@ class EmployeeController {
 					}else{
 						data.add(timeManagerService.writeHumanTime(0))
 					}
-
-				}
-						
+				}				
 				siteFunctionMap.each{key,value ->
 					log.debug("siteFunctionMap key: "+key)
 					if (weeklyFunctionTotalMap != null && weeklyFunctionTotalMap.get(weekNumber)!= null && weeklyFunctionTotalMap.get(weekNumber).get(value) != null){
@@ -183,18 +237,23 @@ class EmployeeController {
 					}
 				}
 				
+				if (weeklySubTotalsByWeek != null && weeklySubTotalsByWeek.get(weekNumber)!= null){
+					data.add(timeManagerService.writeHumanTime(weeklySubTotalsByWeek.get(weekNumber) as long))
+				}else{
+					data.add(timeManagerService.writeHumanTime(0))
+				}
+				
+				if (weeklyCasesMap != null && weeklyCasesMap.get(weekNumber)!= null){
+					data.add(weeklyCasesMap.get(weekNumber))
+				}else{
+					data.add(0)
+				}
+				
 				fillRow(data,i)
 				i += 1
 			}
 			save(response.outputStream)
-			
-			
-			
-			
-			
-			//response.outputStream << retour[0]
 		}
-		//response.setHeader("Content-disposition", "filename=${retour[1]}")
 		response.setContentType("application/octet-stream")
 	}
 	
@@ -238,7 +297,6 @@ class EmployeeController {
 			redirect(action: "weeklyReport",params:params)
 			return
 		}
-		
 		model << [
 			site:site,
 			period:period,

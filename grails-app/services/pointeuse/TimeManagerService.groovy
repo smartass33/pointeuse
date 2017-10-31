@@ -5090,6 +5090,7 @@ class TimeManagerService {
 		def employeeSubList
 		def employeeInstanceList
 		def weeklyTotals
+		def weeklyCase
 		def lastWeekOfYearWeeklyTotals
 		def currentYear = year
 		def currentWeek = 0
@@ -5098,6 +5099,7 @@ class TimeManagerService {
 		def totalByFunction = [:]
 		def weeklyFunctionTotalMap = [:]
 		def siteFunctionMap = [:]
+		def weeklyCasesMap = [:]
 		
 		if (site != null){
 			employeeInstanceList = []
@@ -5155,14 +5157,26 @@ class TimeManagerService {
 					and {
 						eq('year',iteratorYear)
 						eq('week',week)
-						
 						'in'('employee',employeeInstanceList)
 					}
 				order('employee', 'asc')
 			}
-
 			weeklyTotalByWeek.put(week,weeklyTotals)
 			weekList.add(week)
+			
+			criteria = WeeklyCase.createCriteria()
+			weeklyCase = criteria.get {
+				and {
+					eq('year',iteratorYear)
+					eq('week',week)
+					eq('site',site)
+				}
+			}
+			if (weeklyCase != null){
+				weeklyCasesMap.put(week,weeklyCase.value)
+			}else{
+				weeklyCasesMap.put(week,0)
+			}
 			
 			if (iteratorYear == currentYear && week == lastWeekOfYear){
 				log.debug('we got the rest of the last week of year that is in the year + 1')
@@ -5170,12 +5184,11 @@ class TimeManagerService {
 				lastWeekOfYearWeeklyTotals = criteria.list {
 						and {
 							eq('year',currentYear + 1)
-							eq('week',week)
-							
+							eq('week',week)						
 							'in'('employee',employeeInstanceList)
 						}
 					order('employee', 'asc')
-				}
+				}	
 			}
 		}
 
@@ -5225,6 +5238,7 @@ class TimeManagerService {
 			weekList:weekList,
 			employeeInstanceList:employeeInstanceList,
 			siteFunctionMap:siteFunctionMap,
+			weeklyCasesMap:weeklyCasesMap,
 			weeklySubTotalsByWeek:weeklySubTotalsByWeek,
 			weeklyFunctionTotalMap:weeklyFunctionTotalMap
 		]
