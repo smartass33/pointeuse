@@ -267,27 +267,112 @@ img {
 	}
 
 
-
-#detailSelector {
-		background-image: url(../images/skin/information_green.png);
-	
-		background-position: 0.7em center;
+#domicileSelector {
+	background-image: url(../images/skin/minus.png);
+	background-position: 0.7em center;
 	background-repeat: no-repeat;
-	text-indent: 20px;
-	
-		color: #666666;
+	text-indent: 25px;
+	color: #666666;
 	display: block;
 	padding: 0.25em 0.7em;
 	text-decoration: none;
-	   -moz-border-radius: 0.3em;
+	-moz-border-radius: 0.3em;
 	-webkit-border-radius: 0.3em;
-	        border-radius: 0.3em;
-		background-position: 0.7em center;
+	border-radius: 0.3em;
+	background-position: 0.7em center;
 	background-repeat: no-repeat;
-		background-color: transparent;
-		outline: none;
-			border: none;
-		font-family: Verdana,Arial,sans-serif;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+    font-size: 1em;
+}
+
+#domicileSelector:active {
+	color: #666666;
+}
+
+#domicileSelector:visited {
+	color: #666666;
+}
+#domicileSelector:focus {
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
+	
+#domicileSelector:hover {
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	}
+
+#employeeSelector {
+	background-image: url(../images/skin/plus.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 25px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+	border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+    font-size: 1em;
+}
+
+#employeeSelector:active {
+	color: #666666;
+}
+
+#employeeSelector:visited {
+	color: #666666;
+}
+#employeeSelector:focus {
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
+	
+#employeeSelector:hover {
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	}
+
+
+
+#detailSelector {
+	background-image: url(../images/skin/information_green.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 20px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+	border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
     font-size: 1em;
 }
 
@@ -314,24 +399,23 @@ img {
 	}
 
 #principalSelector {
-		background-image: url(../images/skin/information_green.png);
-			background-position: 0.7em center;
+	background-image: url(../images/skin/information_green.png);
+	background-position: 0.7em center;
 	background-repeat: no-repeat;
 	text-indent: 20px;
-	
-		color: #666666;
+	color: #666666;
 	display: block;
 	padding: 0.25em 0.7em;
 	text-decoration: none;
-	   -moz-border-radius: 0.3em;
+	-moz-border-radius: 0.3em;
 	-webkit-border-radius: 0.3em;
-	        border-radius: 0.3em;
-		background-position: 0.7em center;
+	border-radius: 0.3em;
+	background-position: 0.7em center;
 	background-repeat: no-repeat;
-		background-color: transparent;
-		outline: none;
-			border: none;
-		font-family: Verdana,Arial,sans-serif;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
     font-size: 1em;
 }
 
@@ -1457,6 +1541,27 @@ a.skip {
 	color: #ffffff;
 	outline: none;
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.domicileSelector {
+	background-image: url(../images/skin/search_report.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 20px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+   	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+    border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+   	font-size: 1em;
 }
 
 .displayButton {

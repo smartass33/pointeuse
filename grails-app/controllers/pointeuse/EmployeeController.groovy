@@ -101,15 +101,166 @@ class EmployeeController {
 	}
 	
 	
+	
+	
+	@Secured(['ROLE_ADMIN'])
+	def annualSitesReportExcelExport(){
+		def folder = grailsApplication.config.pdf.directory
+		log.error('entering annualSitesReportExcelExport')
+		def siteValue = params.boolean('siteValue')
+		def siteFunction = params['siteFunction']
+		def currentDate
+		def calendar = Calendar.instance
+		def fromIndex=params.boolean('fromIndex')
+		def funtionCheckBoxesMap = [:]
+		def period = Period.get(params.int('periodId'))
+		//def sites = Site.findAll("from Site")
+		def sites = Site.list([sort: "name", order: "desc",max:3])
+		
+		def functions = Function.list([sort: "ranking", order: "asc"])
+		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
+		def annualSiteReportMap = [:]
+		if (period == null && year != null){
+			period = Period.findByYear(year)
+		}
+	
+		if (params['simpleFuntionCheckBoxesMap']  == null){
+			def jsonSlurper = new JsonSlurper()
+			funtionCheckBoxesMap = params['funtionCheckBoxesMap'] != null ? jsonSlurper.parseText(params['funtionCheckBoxesMap']) : [:]
+		}else{
+			def words = []
+			words = (params['simpleFuntionCheckBoxesMap']).split("-")
+			for (int j = 0 ;j < words.size() ; j++){
+				if (j % 2 == 0){
+					funtionCheckBoxesMap.put(words[j],(words[j + 1]).toBoolean())
+				}
+			}
+		}
+		if (siteFunction != null){
+			funtionCheckBoxesMap.put(siteFunction,siteValue)
+		}
+		sites.each{siteIter ->
+			log.debug('computing site: '+siteIter.name)
+			annualSiteReportMap.put(siteIter,timeManagerService.getWeeklyReportData(year, siteIter, funtionCheckBoxesMap))
+		}
+		log.error('annualSitesReportExcelExport - sites retrieved')
+				
+		def headers = [message(code: 'laboratory.label')]
+		functions.each{function ->
+			headers.add(function.name)		
+		}
+
+		headers.add(message(code: 'weekly.particularism.1.noBR'))
+		headers.add(message(code: 'weekly.particularism.2.noBR'))
+		headers.add(message(code: 'sub.total'))
+		headers.add(message(code: 'sub.total.minutes'))
+		headers.add(message(code: 'weekly.case.noBR'))
+		headers.add(message(code: 'weekly.home.assistance'))
+		headers.add(message(code: 'ratio.employees.cases'))
+
+		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/annual_report_template.xlsx').with {exporter ->
+			
+			def toto = exporter.getCellAt(0, 0)
+			setResponseHeaders(response)
+			fillHeader(headers)			
+			int i = 1			
+			annualSiteReportMap.each{site,siteReport->
+				log.debug('siteReport: '+siteReport)
+				def data = []
+				data.add(site.name)
+				functions.each{function ->	
+					data.add((siteReport != null && siteReport.get('yearlyTotalsByFunction') != null && siteReport.get('yearlyTotalsByFunction').get(function) != null) ? timeManagerService.computeHumanTimeAsText(siteReport.get('yearlyTotalsByFunction').get(function)) : timeManagerService.computeHumanTimeAsText(0))
+				}
+				data.add((siteReport != null && siteReport.get('yearlyParticularity1') != null) ? timeManagerService.computeHumanTimeAsText(siteReport.get('yearlyParticularity1')) : timeManagerService.computeHumanTimeAsText(0))
+				data.add((siteReport != null && siteReport.get('yearlyParticularity2') != null) ? timeManagerService.computeHumanTimeAsText(siteReport.get('yearlyParticularity2')) : timeManagerService.computeHumanTimeAsText(0))
+				data.add((siteReport != null && siteReport.get('yearlySubTotals') != null) ? timeManagerService.computeHumanTimeAsText(siteReport.get('yearlySubTotals')) : timeManagerService.computeHumanTimeAsText(0))
+				data.add((siteReport != null && siteReport.get('yearlySubTotals') != null) ? (siteReport.get('yearlySubTotals') / 60 as double) : 0)
+				
+				data.add((siteReport != null && siteReport.get('yearlyCases') != null) ? siteReport.get('yearlyCases') : 0)
+				data.add((siteReport != null && siteReport.get('yearlyHomeAssistance') != null) ? siteReport.get('yearlyHomeAssistance') : 0)
+				
+				//ratio
+				def ratio = 0
+				if (
+					((siteReport.get('yearlyHomeAssistance') != null && siteReport.get('yearlyHomeAssistance') != 0) 
+					|| 
+					(siteReport.get('yearlyCases') != null && siteReport.get('yearlyCases') != 0))
+					&& (siteReport.get('yearlySubTotals') != null && siteReport.get('yearlySubTotals') != 0))	{
+					ratio = ((siteReport.get('yearlySubTotals') as long) / 60)/ ((siteReport.get('yearlyHomeAssistance') as long) + (siteReport.get('yearlyCases') as long)) 
+				}	
+				data.add(ratio)
+				fillRow(data,i)
+				i += 1
+			}
+			save(response.outputStream)
+		}
+		response.setContentType("application/octet-stream")
+	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def annualSitesReport(){
+		params.each{i->log.debug('parameter of list: '+i)}
+		def siteValue = params.boolean('siteValue')
+		def siteFunction = params['siteFunction']
+		def period = Period.get(params.int('periodId'))
+		def fromWeeklyReport = params.boolean('fromWeeklyReport')
+		def calendar = Calendar.instance
+		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
+		def funtionCheckBoxesMap = [:]
+		def annualSiteReportMap = [:]
+		def model =[:]
+		def sites = Site.list([sort: "name", order: "desc",max:3])
+		//def sites = Site.list([sort: "name",order: "asc",max: 3])
+		//def sites = Site.findAll("from Site")
+		def functions = Function.list([sort: "ranking", order: "asc"])
+		
+	
+		if (!fromWeeklyReport){
+			if (params['simpleFuntionCheckBoxesMap']  == null){
+				def jsonSlurper = new JsonSlurper()
+				funtionCheckBoxesMap = params['funtionCheckBoxesMap'] != null ? jsonSlurper.parseText(params['funtionCheckBoxesMap']) : [:]
+			}else{
+				def words = []
+				words = (params['simpleFuntionCheckBoxesMap']).split("-")
+				for (int j = 0 ;j < words.size() ; j++){
+					if (j % 2 == 0){
+						funtionCheckBoxesMap.put(words[j],(words[j + 1]).toBoolean())
+					}
+				}
+			}
+			
+			if (siteFunction != null){
+				funtionCheckBoxesMap.put(siteFunction,siteValue)
+			}
+			
+			sites.each{siteIter ->
+				log.debug('computing site: '+siteIter.name)
+				annualSiteReportMap.put(siteIter,timeManagerService.getWeeklyReportData(year, siteIter, funtionCheckBoxesMap))
+			}
+			log.error('annualSitesReport - sites retrieved')
+			
+			model << [
+				annualSiteReportMap:annualSiteReportMap,
+				funtionCheckBoxesMap:funtionCheckBoxesMap,
+				siteFunctionList:functions,
+				siteList:sites,
+				period:period
+			]
+			render template: "/employee/template/listAnnualSiteTimeTemplate", model:model
+			return
+		}else{
+			[currentDate:calendar.time]
+			return
+		}
+	}
+	
 	@Secured(['ROLE_ADMIN'])
 	def modifyCases(){
-		params.each{i->
-			log.error('param: '+i)
-			
-		}
-		def value = params.int("value")
+		def type = params["type"]
+		def value = params["value"]
 		def site = Site.get(params["siteId"])
 		def currentDate = params["myDate"]
+		def funtionCheckBoxesMap = [:]
 		SimpleDateFormat dateFormat
 		def calendar = Calendar.instance
 		def criteria
@@ -120,28 +271,102 @@ class EmployeeController {
 			currentDate = dateFormat.parse(currentDate)
 			calendar.time = currentDate
 		}
-		log.error('calendar.time: '+calendar.time)
+		def period = Period.get(params.int('periodId'))
+		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)		
 		
+		if (params['simpleFuntionCheckBoxesMap']  == null){
+			def jsonSlurper = new JsonSlurper()
+			funtionCheckBoxesMap = params['funtionCheckBoxesMap'] != null ? jsonSlurper.parseText(params['funtionCheckBoxesMap']) : [:]
+		}else{
+			def words = []
+			words = (params['simpleFuntionCheckBoxesMap']).split("-")
+			for (int j = 0 ;j < words.size() ; j++){
+				if (j % 2 == 0){
+					funtionCheckBoxesMap.put(words[j],(words[j + 1]).toBoolean())
+				}
+			}
+		}
 		
 		criteria = WeeklyCase.createCriteria()
 		weeklyCase= criteria.get {
 			and {
 				eq('year',calendar.get(Calendar.YEAR))
-			//	eq('month',calendar.get(Calendar.MONTH)+1)
 				eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
 				eq('site',site)
 			}
 		}
 		if (weeklyCase != null){
-			//log.error('dailyTotal Empty: creating it for employee: '+employee+' and date: '+calendar.time)
-			//dailyTotal.weeklyTotal = weeklyTotal
-			weeklyCase.value = value as int
+			switch (type) {
+				case 'cases':
+					weeklyCase.cases = value as int
+					break
+				case 'home_assistance':
+					weeklyCase.home_assistance = value as int
+					break
+				case 'particularity1':
+					weeklyCase.particularity1 = timeManagerService.convertStringToTime(value) as int
+					break
+				case 'particularity2':
+					weeklyCase.particularity2 = timeManagerService.convertStringToTime(value) as int
+					break
+				default:
+					weeklyCase.cases = value as int
+					break
+			}
 			weeklyCase.save(flush:true)
 		}else{
-			weeklyCase = new WeeklyCase(value as int,currentDate,site)
+			switch (type) {
+				case 'cases':
+					weeklyCase = new WeeklyCase(value as int,currentDate,site)
+					break
+				case 'home_assistance':
+					weeklyCase = new WeeklyCase(0,currentDate,site)
+					weeklyCase.home_assistance = value as int
+					break
+				case 'particularity1':
+					weeklyCase = new WeeklyCase(0,currentDate,site)
+					weeklyCase.particularity1 = timeManagerService.convertStringToTime(value) as int
+					break
+				case 'particularity2':
+					weeklyCase = new WeeklyCase(0,currentDate,site)
+					weeklyCase.particularity2 = timeManagerService.convertStringToTime(value) as int
+					break
+				default:
+					weeklyCase = new WeeklyCase(value as int,currentDate,site)
+					break
+			}
 			weeklyCase.save(flush:true)
 		}
 		
+		
+		def model = timeManagerService.getWeeklyReportData(year, site, funtionCheckBoxesMap)
+		def weeklyCasesMap = model.get('weeklyCasesMap')
+		def weeklyCasesMapParticularity1Text = [:]
+		def weeklyCasesMapParticularity2Text = [:]
+		weeklyCasesMap.each{k,v->
+			def outputString
+			outputString = (v != null) ? timeManagerService.computeHumanTimeAsText(v.particularity1) : timeManagerService.computeHumanTimeAsText(0)
+			weeklyCasesMapParticularity1Text.put(k,outputString)
+			outputString = (v != null) ? timeManagerService.computeHumanTimeAsText(v.particularity2) : timeManagerService.computeHumanTimeAsText(0)
+			weeklyCasesMapParticularity2Text.put(k,outputString)
+		}
+		
+
+		
+		model << [
+			site:site,
+			period:period,
+			firstYear:period.year,
+			lastYear:period.year+1,
+			weeklyCasesMapParticularity1Text:weeklyCasesMapParticularity1Text,
+			weeklyCasesMapParticularity2Text:weeklyCasesMapParticularity2Text,
+			funtionCheckBoxesMap:funtionCheckBoxesMap
+			]
+
+		if (site != null){
+			render template: "/employee/template/listWeeklyTimeTemplate", model:model
+			return
+		}
 		
 	}
 	
@@ -163,9 +388,9 @@ class EmployeeController {
 			period = Period.findByYear(year)
 		}
 		def calendarMonday = Calendar.instance
-		def calendarFriday = Calendar.instance
+		def calendarSaturday = Calendar.instance
 		calendarMonday.set(Calendar.YEAR,year)
-		calendarFriday.set(Calendar.YEAR,year)
+		calendarSaturday.set(Calendar.YEAR,year)
 		
 		if (params['simpleFuntionCheckBoxesMap']  == null){
 			def jsonSlurper = new JsonSlurper()
@@ -191,8 +416,14 @@ class EmployeeController {
 		model.get('siteFunctionMap').each{key,value ->
 			headers.add(key)
 		}
+		headers.add(message(code: 'weekly.particularism.1.noBR'))
+		headers.add(message(code: 'weekly.particularism.2.noBR'))
 		headers.add(message(code: 'sub.total'))
+		headers.add(message(code: 'sub.total.minutes'))
 		headers.add(message(code: 'weekly.case.noBR'))
+		headers.add(message(code: 'weekly.home.assistance'))
+		headers.add(message(code: 'ratio.employees.cases'))
+
 		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/weekly_report_template.xlsx').with {
 			setResponseHeaders(response)
 			def weekList = model.get('weekList')
@@ -201,24 +432,27 @@ class EmployeeController {
 			def siteFunctionMap = model.get('siteFunctionMap')
 			def weeklySubTotalsByWeek = model.get('weeklySubTotalsByWeek')
 			def weeklyCasesMap = model.get('weeklyCasesMap')
+			def yearlyTotalsByFunction = model.get('yearlyTotalsByFunction')
+			def yearlyTotalsByEmployee = model.get('yearlyTotalsByEmployee')
 			setResponseHeaders(response)
 			fillHeader(headers)
 			
 			int i = 1
+			
 			for (weekNumber in weekList){
 				def data = []
 				log.debug('weekNumber: '+weekNumber)
 				calendarMonday.set(Calendar.WEEK_OF_YEAR,weekNumber as int)
 				calendarMonday.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY)
-				calendarFriday.set(Calendar.WEEK_OF_YEAR,weekNumber as int)
-				calendarFriday.set(Calendar.DAY_OF_WEEK,Calendar.FRIDAY)
+				calendarSaturday.set(Calendar.WEEK_OF_YEAR,weekNumber as int)
+				calendarSaturday.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY)
 						
 				if (weekNumber == 1){
 					calendarMonday.set(Calendar.YEAR,year + 1)
-					calendarFriday.set(Calendar.YEAR,year + 1)
+					calendarSaturday.set(Calendar.YEAR,year + 1)
 				}
 				
-				data.add(calendarMonday.time.format('EE dd/MM/yyyy') + '-' + calendarFriday.time.format('EE dd/MM/yy'))
+				data.add(calendarMonday.time.format('EE dd/MM/yyyy') + '-' + calendarSaturday.time.format('EE dd/MM/yy'))
 				for (Employee currentEmployee in employeeInstanceList){
 					log.debug('currentEmployee: '+currentEmployee)
 					def weeklyTotalsByWeek = model.get('weeklyTotalsByWeek')
@@ -237,21 +471,88 @@ class EmployeeController {
 					}
 				}
 				
-				if (weeklySubTotalsByWeek != null && weeklySubTotalsByWeek.get(weekNumber)!= null){
-					data.add(timeManagerService.writeHumanTime(weeklySubTotalsByWeek.get(weekNumber) as long))
+
+				//particularity
+				if (weeklyCasesMap != null && weeklyCasesMap.get(weekNumber) != null  && (weeklyCasesMap.get(weekNumber)).particularity1 != null){
+					data.add(timeManagerService.writeHumanTime(weeklyCasesMap.get(weekNumber).particularity1 as long))
+				}else{
+					data.add(timeManagerService.writeHumanTime(0))
+				}
+				if (weeklyCasesMap != null && weeklyCasesMap.get(weekNumber) != null  && (weeklyCasesMap.get(weekNumber)).particularity2 != null){
+					data.add(timeManagerService.writeHumanTime(weeklyCasesMap.get(weekNumber).particularity2 as long))
 				}else{
 					data.add(timeManagerService.writeHumanTime(0))
 				}
 				
-				if (weeklyCasesMap != null && weeklyCasesMap.get(weekNumber)!= null){
-					data.add(weeklyCasesMap.get(weekNumber))
+								
+				
+				if (weeklySubTotalsByWeek != null && weeklySubTotalsByWeek.get(weekNumber)!= null){
+					// sous total hebdo
+					data.add(timeManagerService.writeHumanTime(weeklySubTotalsByWeek.get(weekNumber) as long))
+					// sous total hebdo en minute
+					data.add(Math.round((weeklySubTotalsByWeek.get(weekNumber) as long) / 60))
 				}else{
+					data.add(timeManagerService.writeHumanTime(0))
 					data.add(0)
 				}
 				
+				if (weeklyCasesMap != null && weeklyCasesMap.get(weekNumber)!= null){					
+					data.add(weeklyCasesMap.get(weekNumber).cases)
+					data.add(weeklyCasesMap.get(weekNumber).home_assistance)
+				}else{
+					data.add(0)
+					data.add(0)
+				}
+				def dataSize = data.size()
+				// get subtotal minutes
+				if (dataSize > 3){
+					def subTotal = data[dataSize - 3]
+				// get last item : cases
+					def caseNubmers = data.last()
+					def home_assistances = data[dataSize - 2]
+				//apply ratio (minutes/cases)
+					if (caseNubmers > 0 || home_assistances > 0){
+						data.add((subTotal / (caseNubmers + home_assistances)).toDouble().round(2))
+					}else{
+						data.add(0)
+					}
+				}else{
+					data.add(0)
+				}
 				fillRow(data,i)
 				i += 1
 			}
+			// TOTALS:
+			def totalLine = []
+			totalLine.add(message(code: 'weekly.report.totals'))
+			for (Employee employeeIter in employeeInstanceList){
+				if (yearlyTotalsByEmployee != null && yearlyTotalsByEmployee.get(employeeIter) != null){
+					totalLine.add(timeManagerService.writeHumanTime(yearlyTotalsByEmployee.get(employeeIter)))
+				}else{
+					totalLine.add(timeManagerService.writeHumanTime(0))
+				}
+			}
+			siteFunctionMap.each{key,value ->
+				if (yearlyTotalsByFunction != null && yearlyTotalsByFunction.get(value) != null){
+					totalLine.add(timeManagerService.writeHumanTime(yearlyTotalsByFunction.get(value)))
+				}else{
+					totalLine.add(timeManagerService.writeHumanTime(0))
+				}		
+			}
+			
+			totalLine.add(timeManagerService.writeHumanTime(model.get('yearlyParticularity1')))
+			totalLine.add(timeManagerService.writeHumanTime(model.get('yearlyParticularity2')))
+			totalLine.add(timeManagerService.writeHumanTime(model.get('yearlySubTotals')))
+			totalLine.add(Math.round((model.get('yearlySubTotals') as long) / 60))
+			totalLine.add(model.get('yearlyCases'))
+			totalLine.add(model.get('yearlyHomeAssistance'))
+			
+			totalLine.add(((Math.round((model.get('yearlySubTotals') as long) / 60)) / (model.get('yearlyCases') + model.get('yearlyHomeAssistance'))).toDouble().round(2))
+			
+			
+			fillRow(totalLine,i)
+
+			
 			save(response.outputStream)
 		}
 		response.setContentType("application/octet-stream")
@@ -290,6 +591,7 @@ class EmployeeController {
 		}
 
 		def model = timeManagerService.getWeeklyReportData(year, site, funtionCheckBoxesMap)
+		
 
 		if (!fromIndex && site == null){
 			flash.message = message(code: 'weeklyTime.site.selection.error')
@@ -297,11 +599,25 @@ class EmployeeController {
 			redirect(action: "weeklyReport",params:params)
 			return
 		}
+		
+		def weeklyCasesMap = model.get('weeklyCasesMap')
+		def weeklyCasesMapParticularity1Text = [:]
+		def weeklyCasesMapParticularity2Text = [:]
+		weeklyCasesMap.each{k,v->			
+			def outputString
+			outputString = (v != null) ? timeManagerService.computeHumanTimeAsText(v.particularity1) : timeManagerService.computeHumanTimeAsText(0)
+			weeklyCasesMapParticularity1Text.put(k,outputString)
+			outputString = (v != null) ? timeManagerService.computeHumanTimeAsText(v.particularity2) : timeManagerService.computeHumanTimeAsText(0)
+			weeklyCasesMapParticularity2Text.put(k,outputString)
+		}
+	
 		model << [
 			site:site,
 			period:period,
 			firstYear:period.year,
 			lastYear:period.year+1,	
+			weeklyCasesMapParticularity1Text:weeklyCasesMapParticularity1Text,
+			weeklyCasesMapParticularity2Text:weeklyCasesMapParticularity2Text,
 			funtionCheckBoxesMap:funtionCheckBoxesMap
 			]
 

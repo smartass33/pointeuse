@@ -92,5 +92,8 @@ class EmployeeTagLib {
 		out<<render(template:"/employee/template/listWeeklyTimeTemplate")
 	}
 	
+	def annualSiteTime = {attrs,body->
+		out<<render(template:"/employee/template/listAnnualSiteTimeTemplate")
+	}
 
 }

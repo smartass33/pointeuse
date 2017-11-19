@@ -5,7 +5,8 @@ import groovy.time.TimeCategory;
 
 import java.text.SimpleDateFormat
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeUnit
+import java.util.logging.Logger;
 
 import org.springframework.transaction.annotation.Transactional
 import groovyx.gpars.*
@@ -583,7 +584,7 @@ class TimeManagerService {
 	}
 	
 	
-	def testMe(long inputSeconds){
+	def computeHumanTimeAsText(long inputSeconds){
 		boolean isNegative = false
 		if (inputSeconds < 0){
 			//inputSeconds = -inputSeconds
@@ -1629,7 +1630,31 @@ class TimeManagerService {
 		def mileageList
 		def mileageMinDate = Calendar.instance
 		def mileageMaxDate = Calendar.instance
+		mileageMinDate.set(Calendar.YEAR,year)
+		mileageMinDate.set(Calendar.MONTH,month - 1)
+		mileageMinDate.set(Calendar.DAY_OF_MONTH,1)
+		mileageMaxDate.set(Calendar.YEAR,year)
+		mileageMaxDate.set(Calendar.MONTH,month - 1)
+		mileageMaxDate.set(Calendar.DAY_OF_MONTH,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
 		
+		mileageList = criteria.list {
+			or{
+				and {
+					eq('employee',employee)
+					eq('month',month)
+					eq('year',year)
+					le('day',calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+				}
+				and {
+					eq('employee',employee)
+					eq('month',month)
+					eq('year',year)
+					ge('day',1)
+				}
+			}
+		}
+		
+		/*
 		if (month == 1){
 			mileageList = criteria.list {
 				or{
@@ -1677,6 +1702,10 @@ class TimeManagerService {
 			mileageMaxDate.set(Calendar.MONTH,month - 1)
 			mileageMaxDate.set(Calendar.DAY_OF_MONTH,20)
 		}
+		*/
+		
+		
+		
 		if (mileageList != null){
 			for (Mileage mileageIter : mileageList){
 				monthlyPeriodValue += mileageIter.value
@@ -5080,6 +5109,14 @@ class TimeManagerService {
 		return outputString
 	}
 	
+	def convertStringToTime(def inputString){
+		def splitTable = inputString.split(":")
+		def hours = splitTable[0] as long
+		def minutes = splitTable[1] as long
+		return hours*3600+minutes*60
+		
+	}
+	
 	def getWeeklyReportData(def year, def site, def funtionCheckBoxesMap){
 		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
 		def weekList = []
@@ -5100,6 +5137,16 @@ class TimeManagerService {
 		def weeklyFunctionTotalMap = [:]
 		def siteFunctionMap = [:]
 		def weeklyCasesMap = [:]
+		def yearlyTotalsByFunction = [:]
+		def yearlySubTotals = 0
+		def yearlyCases = 0
+		def yearlyParticularity1 = 0
+		def yearlyParticularity2 = 0
+		def yearlyHomeAssistance = 0
+		def yearlySubTotalsMinutes = 0
+		def yearlyTotalsByEmployee = [:]		
+		def weeklyTotalsByWeek = [:]
+		def weeklySubTotalsByWeek = [:]
 		
 		if (site != null){
 			employeeInstanceList = []
@@ -5142,6 +5189,7 @@ class TimeManagerService {
 		endOfPeriodCal.set(Calendar.DAY_OF_MONTH,endOfPeriodCal.getActualMaximum(Calendar.DAY_OF_MONTH))
 		endOfPeriodCal.set(Calendar.YEAR,currentYear + 1)
 		endOfPeriodCal.clearTime()
+		endOfPeriodCal.roll(Calendar.WEEK_OF_YEAR,-1)
 		
 		for (int j = 1; j <= endOfPeriodCal.get(Calendar.WEEK_OF_YEAR);j++){
 			weekNumber.add(j)
@@ -5172,10 +5220,15 @@ class TimeManagerService {
 					eq('site',site)
 				}
 			}
+			
+			log.debug('week: '+week)
+			log.debug('weeklyCase: '+weeklyCase)
 			if (weeklyCase != null){
-				weeklyCasesMap.put(week,weeklyCase.value)
+				weeklyCasesMap.put(week,weeklyCase)
+				yearlyCases += weeklyCase.cases
+				yearlyHomeAssistance += weeklyCase.home_assistance
 			}else{
-				weeklyCasesMap.put(week,0)
+				weeklyCasesMap.put(week,null)
 			}
 			
 			if (iteratorYear == currentYear && week == lastWeekOfYear){
@@ -5196,8 +5249,6 @@ class TimeManagerService {
 			lastWeekOfYearByEmployee.put(weeklyTotal.employee,weeklyTotal)
 		}
 				
-		def weeklyTotalsByWeek = [:]
-		def weeklySubTotalsByWeek = [:]
 		for (int weekIter in weekList){
 			def weeklyTotalsByEmployee = [:]
 			def weeklyTotalsByFunction = [:]
@@ -5215,9 +5266,9 @@ class TimeManagerService {
 						weeklyTotalsByWeek.put(weekIter,weeklyTotalsByEmployee)
 						if (funtionCheckBoxesMap.get(currentEmployee.function.name) != null && funtionCheckBoxesMap.get(currentEmployee.function.name) == true){
 							if (weeklySubTotalsByWeek.get(weekIter) != null){
-								weeklySubTotalsByWeek.put(weekIter,weeklySubTotalsByWeek.get(weekIter) + weeklyTotalsByEmployee.get(currentEmployee))
-							}else{
-								weeklySubTotalsByWeek.put(weekIter,weeklyTotalsByEmployee.get(currentEmployee))
+								weeklySubTotalsByWeek.put(weekIter,(weeklySubTotalsByWeek.get(weekIter) as long) + (weeklyTotal.elapsedSeconds as long))	
+							}else{							
+								weeklySubTotalsByWeek.put(weekIter,weeklyTotal.elapsedSeconds as long)
 							}
 						}
 						if (weeklyTotalsByFunction.get(currentEmployee.function) == null){
@@ -5226,14 +5277,46 @@ class TimeManagerService {
 							weeklyTotalsByFunction.put(currentEmployee.function,weeklyTotalsByFunction.get(currentEmployee.function) + weeklyTotal.elapsedSeconds as long)
 						}
 						weeklyFunctionTotalMap.put(weekIter,weeklyTotalsByFunction)
-						
 					}
 				}
 				siteFunctionMap.put(currentEmployee.function.name,currentEmployee.function )
+				if (weeklyTotalsByWeek != null && weeklyTotalsByWeek.get(weekIter) != null && (weeklyTotalsByWeek.get(weekIter)).get(currentEmployee) != null){
+					if (yearlyTotalsByEmployee != null && yearlyTotalsByEmployee.get(currentEmployee) != null){
+						yearlyTotalsByEmployee.put(currentEmployee, yearlyTotalsByEmployee.get(currentEmployee) + (weeklyTotalsByWeek.get(weekIter)).get(currentEmployee))
+					}else{
+						yearlyTotalsByEmployee.put(currentEmployee, (weeklyTotalsByWeek.get(weekIter)).get(currentEmployee))
+					}
+					if (yearlyTotalsByFunction != null && yearlyTotalsByFunction.get(currentEmployee.function) != null){
+						yearlyTotalsByFunction.put(currentEmployee.function, yearlyTotalsByFunction.get(currentEmployee.function) + (weeklyTotalsByWeek.get(weekIter)).get(currentEmployee))
+					}else{
+						yearlyTotalsByFunction.put(currentEmployee.function,(weeklyTotalsByWeek.get(weekIter)).get(currentEmployee))
+					}
+				}
+				
 			}
+			if (weeklySubTotalsByWeek != null && weeklySubTotalsByWeek.get(weekIter) != null && weeklyCasesMap.get(weekIter) != null &&  weeklyCasesMap.get(weekIter).particularity1 != null){
+				weeklySubTotalsByWeek.put(weekIter,weeklySubTotalsByWeek.get(weekIter) + weeklyCasesMap.get(weekIter).particularity1)
+				yearlyParticularity1 += weeklyCasesMap.get(weekIter).particularity1
+			}
+			
+			if (weeklySubTotalsByWeek != null && weeklySubTotalsByWeek.get(weekIter) != null && weeklyCasesMap.get(weekIter) != null &&  weeklyCasesMap.get(weekIter).particularity2 != null){
+				weeklySubTotalsByWeek.put(weekIter,weeklySubTotalsByWeek.get(weekIter) - weeklyCasesMap.get(weekIter).particularity2)
+				yearlyParticularity2 += weeklyCasesMap.get(weekIter).particularity2
+			}
+			if (weeklySubTotalsByWeek != null && weeklySubTotalsByWeek.get(weekIter) != null){
+				yearlySubTotals += weeklySubTotalsByWeek.get(weekIter) as long
+			}
+			
 		}
 		
 		return [
+			yearlyTotalsByEmployee:yearlyTotalsByEmployee,
+			yearlyTotalsByFunction:yearlyTotalsByFunction,
+			yearlySubTotals:yearlySubTotals,
+			yearlyHomeAssistance:yearlyHomeAssistance,
+			yearlyCases:yearlyCases,
+			yearlyParticularity1:yearlyParticularity1,
+			yearlyParticularity2:yearlyParticularity2,
 			weeklyTotalsByWeek:weeklyTotalsByWeek,
 			weekList:weekList,
 			employeeInstanceList:employeeInstanceList,

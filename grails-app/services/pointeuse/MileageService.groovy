@@ -66,6 +66,9 @@ class MileageService {
 		def supMonth
 		def infMonth
 		def monthlyPeriodValue = 0
+		def calendar = Calendar.instance
+		
+		
 		
 		if (site != null){
 			employeeInstanceList = Employee.findAllBySite(site,[sort:'lastName',order:'asc'])
@@ -76,34 +79,30 @@ class MileageService {
 					monthlyPeriodValue = 0
 					criteria = Mileage.createCriteria()					
 					supMonth = month + 1
-					infMonth = month
 					if (month < 6){
 						supYear = period.year + 1
-						infYear = period.year + 1						
-
 					}else{					
 							supYear = period.year
-							infYear = period.year
 							if (month == 12){
 								supYear = period.year + 1
-								infYear = period.year
 								supMonth = 1
-								infMonth = 12
 							}
 					}
+					calendar.set(Calendar.YEAR,supYear)
+					calendar.set(Calendar.MONTH,supMonth - 1)
 					mileageList = criteria.list {
 						or{
 							and {
 								eq('employee',employee)
 								eq('month',supMonth)
 								eq('year',supYear)
-								le('day',20)
+								le('day',calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
 							}
 							and {
 								eq('employee',employee)
-								eq('month',infMonth)
-								eq('year',infYear)
-								gt('day',20)
+								eq('month',supMonth)
+								eq('year',supYear)
+								ge('day',1)
 							}
 						}
 					}

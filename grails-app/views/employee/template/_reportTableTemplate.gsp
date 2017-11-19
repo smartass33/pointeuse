@@ -306,8 +306,6 @@
 		                  </g:each>
 		                 <form method="POST" >
 	                  <g:if test="${mileageMapByDay.get(entries.key) != null}">
-	                  
-
 	                    	<td class='mileageTD'>
 								<g:textField id="${entries.key.format('yyyyMd')}" name="mileage" class='mileageTextField' value="${mileageMapByDay.get(entries.key).value ?: '0'}" align="center" style="vertical-align: middle;"/>
 				                <g:remoteLink action="modifyMileage" 

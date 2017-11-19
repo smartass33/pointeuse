@@ -23,7 +23,9 @@ class WeeklyTotal {
 		this.elapsedSeconds=0
 		this.dailyTotals=[]
 	}
-
+	String toString(){
+		return 'weeklyTotal: '+ this.employee.lastName+', year: '+this.year+', month'+this.month+', week'+this.week+', elapsedSeconds'+this.elapsedSeconds
+	}
 	
   
 }

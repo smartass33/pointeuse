@@ -92,7 +92,7 @@
 						</tr>
 						<tr>
 							<td style="text-align:left;" >${message(code: 'employee.arrivalDate.short.label', default: 'report')}: <g:formatDate format="dd/MM/yyyy" date="${employee.arrivalDate}"/></td>
-						</tr>						
+						</tr>				
 					</table> 
 				</td>
 				<td width="85%">
@@ -418,15 +418,16 @@
 			</tbody>
 		</table>
 		<BR/><BR/>
-		<table  id="reportTable" style="border:1px solid black;width:690px;text-align:left;font-weight:bold;">
+		<table  id="reportTable" style="border:1px solid black;width:750px;text-align:left;font-weight:bold;">
 		    <thead>
-		      <th style="border:1px; solid black; width:100px;text-align:center">${message(code: 'report.table.date.label', default: 'report')}</th>
-		      <th style="border:1px;width:150px;text-align:center">${message(code: 'employee.site.label', default: 'report')}</th>
-		      <th style="border:1px;width:70px;text-align:center">${message(code: 'report.table.daily.total.label', default: 'report')}</th>    
-		      <th style="border:1px;width:40px;text-align:center">${message(code: 'report.table.HS.label', default: 'report')}</th>
-		      <th style="border:1px;width:55x;text-align:center">${message(code: 'report.table.absence.label', default: 'report')}</th>
-		      <th style="border:1px;width:400px;text-align:center">${message(code: 'events.label', default: 'report')}</th>
-		    </thead>	    
+		      <th style="border:1px; width:120px;text-align:center">${message(code: 'report.table.date.label', default: 'report')}</th>
+		      <th style="border:1px; width:150px;text-align:center">${message(code: 'employee.site.label', default: 'report')}</th>
+		      <th style="border:1px; width:70px;text-align:center">${message(code: 'report.table.daily.total.label', default: 'report')}</th>    
+		      <th style="border:1px; width:40px;text-align:center">${message(code: 'report.table.HS.label', default: 'report')}</th>
+		      <th style="border:1px; width:55x;text-align:center">${message(code: 'report.table.absence.label', default: 'report')}</th>
+			  <th style="border:1px; width:40px;text-align:center">${message(code: 'mileage.mini.label', default: 'report')}</th>
+		      <th style="border:1px; width:400px;text-align:center">${message(code: 'events.label', default: 'report')}</th>
+		    </thead>	   
 		</table>		
 		        <g:each in="${weeklyAggregate}" status="k" var="week">
 		        <table >
@@ -435,43 +436,56 @@
 				            <g:each in="${day.value}" status="m" var="entries">
 				              <g:if test="${entries!=null}">
 				                <tr>
-				                  	<g:if test="${dailyBankHolidayMap.get(entries.key) }"><td style="border:1px; width:100px; color:red; text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td></g:if>
+				                  	<g:if test="${dailyBankHolidayMap.get(entries.key) }">
+				                  		<td><i>${entries.key.format('E dd MMM yyyy')}</i></td>
+				                  	</g:if>
 									<g:else>
-						                <g:if test="${entries.key.getAt(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY}"><td style="border:1px;width:100px;font-weight:bold;text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td></g:if>
-						                <g:else><td style="border:1px;width:100px;text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td></g:else>		                
+						                <g:if test="${entries.key.getAt(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY}">
+						                	<td style="border:1px; width:100px;font-weight:bold;text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td>
+						                </g:if>
+						                <g:else>
+						                	<td style="border:1px; width:100px;text-align:left;"><i>${entries.key.format('E dd MMM yyyy')}</i></td>
+						                </g:else>		                
 						          	</g:else>          		
 					                <g:if test="${dailyTotalMap.get(entries.key) !=null}">	
 					                	<g:if test="${dailyTotalMap.get(entries.key).site != null}">
-							                <td style="border:1px;width:80px">  
+							                <td style="border:1px;width:80px;text-align:center;">  
 							                	${dailyTotalMap.get(entries.key).site}      											                  	
 									         </td>		
 									     </g:if>
 								         <g:else>
-							                <td style="border:1px;width:80px">  
+							                <td style="border:1px; width:120px;text-align:center;">  
 							                	${employee.site.name}        											                  	
 									         </td>								         
 								         </g:else>			                
-						                <td style="border:1px;width:70px"> 
+						                <td style="border:1px;width:60px;text-align:center;"> 
 						                	${dailyTotalTextMap.get(entries.key)} 											                  	
 								         </td>
 					                </g:if>
 				                	<g:else>
-				                		<td style="border:1px;width:100px">${employee.site.name}</td>
-				                		<td style="border:1px;width:70px">00:00</td>
+				                		<td style="border:1px; width:120px;text-align:center;">${employee.site.name}</td>
+				                		<td style="border:1px; width:60px;text-align:center;">00:00</td>
 				                	</g:else>
 				                  	<g:if test="${weeklySupTotal.get(employee) != null && weeklySupTotal.get(employee).get(day.key) !=null}">
 				                    	<g:if test="${dailySupTotalTextMap.get(entries.key) !=null}">
-				                            <td style="border:1px;width:40px">
+				                            <td style="border:1px;width:40px;text-align:center;">
 				                            	${dailySupTotalTextMap.get(entries.key)}
 				                            </td>
 				                         </g:if>
 					                    <g:else>
-				                    		<td style="border:1px;width:40px">-</td>
+				                    		<td style="border:1px;width:40px;text-align:center;">-</td>
 				                   		 </g:else>
 				                    </g:if>
-					            	<g:else><td style="border:1px;width:40px">-</td></g:else>
-				                  	<g:if test="${holidayMap.get(entries.key) != null}"><td style="border:1px;width:55px">${holidayMap.get(entries.key).type}</td></g:if>
-				                    <g:else><td style="border:1px;width:55px">-</td></g:else> 
+					            	<g:else><td style="border:1px;width:40px;text-align:center;">-</td></g:else>
+				                  	<g:if test="${holidayMap.get(entries.key) != null}"><td style="border:1px;width:55px;text-align:center;">${holidayMap.get(entries.key).type}</td></g:if>
+				                    <g:else><td style="border:1px;width:55px;text-align:center;">-</td></g:else> 
+					               	<g:if test="${mileageMapByDay.get(entries.key) != null}">
+	                  					<td style="border:1px; width:35px;text-align:center;">${mileageMapByDay.get(entries.key).value}</td>
+	                  				</g:if>
+	                  				<g:else>
+	                  					<td style="border:1px; width:35px;text-align:center;">0</td>
+	                  				</g:else>				                    
+				                    
 					                  <g:each in="${entries.value}" var="inOrOut">
 				                  		<g:if test="${inOrOut.type.equals('E')}">
 			                       			<td bgcolor="98FB98" style="height: 1px;text-align:center; width:40px">${inOrOut.time.format('HH:mm')}</td>
@@ -480,6 +494,8 @@
 			                       			<td bgcolor="#FFC0CB" style="height: 1px;text-align:center;width:40px">${inOrOut.time.format('HH:mm')}</td>
 			                    			 </g:else> 
 					                  </g:each>
+
+				                    
 					                </tr>
 					              </g:if>
 				            </g:each>
@@ -487,8 +503,8 @@
 		           	</table>
 		           	<table  style="border-width:1px; border-style:solid; border-color:black; width:91%">
 	            	<tr>
-	            	<td  colspan="34" style="font-style: bold;">
-	              ${day.key}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	            	<td  colspan="45" style="font-style: bold;">
+	              <i>${day.key}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	              <g:if test="${weeklyTotal.get(employee) != null && weeklyTotal.get(employee).get(day.key) !=null && !(weeklyTotal.get(employee).get(day.key)).equals('00:00')}">
 	                  	${weeklyTotal.get(employee).get(day.key)}
 	                  <g:if test="${weeklySupTotal != null && weeklySupTotal.get(employee) != null && !(weeklySupTotal.get(employee).get(day.key)).equals('00:00')}">
@@ -501,6 +517,7 @@
 	                   &nbsp;&nbsp;&nbsp;dont ${message(code: 'which.sup.time', default: 'Report')} ${(weeklySupTotal.get(employee)).get(day.key)}  
 	                </g:if>
 	              </g:else>
+	              </i>
 	              </td>
 	            </tr> 
 		       </g:each>        
@@ -514,6 +531,17 @@
 				<td>${message(code: 'report.verification.date.label', default: 'Report')}: ${new Date().format('EEEE dd MMM yyyy')}</td>
 			</tr>
 			<tr>
+				<td style="text-align:left;" >${message(code: 'mileage.month.label', default: 'report')}: 
+					<g:if test="${monthlyPeriodValue}">
+	 					${monthlyPeriodValue}KM
+     						 </g:if>	    
+			        <g:else>
+			        	 ${0}KM
+			        </g:else>
+				</td>
+			
+			</tr>		
+			<tr>
 				<td>${message(code: 'report.employee.signature.label', default: 'Report')}:</td>
 				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -522,6 +550,12 @@
 				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 				<td>${message(code: 'report.employer.signature.label', default: 'Report')}:</td>				
 			</tr>
-		</table>	    
+		</table>	 
+		
+		<BR/>
+		<BR/>
+		<BR/>
+		
+		   
 	</body>
 </html>

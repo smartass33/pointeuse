@@ -33,11 +33,11 @@
 						
 						
 						minCal.set(Calendar.MONTH,month_th - 1)
-						minCal.set(Calendar.DAY_OF_MONTH,21)
+						minCal.set(Calendar.DAY_OF_MONTH,1)
 						minCal.set(Calendar.YEAR,minYear)
 						
-						maxCal.set(Calendar.MONTH,month_th)
-						maxCal.set(Calendar.DAY_OF_MONTH,20)
+						maxCal.set(Calendar.MONTH,month_th - 1)
+						maxCal.set(Calendar.DAY_OF_MONTH,minCal.getActualMaximum(Calendar.DAY_OF_MONTH))
 						maxCal.set(Calendar.YEAR,maxYear)
 						
 						
@@ -58,11 +58,11 @@
 					   <g:hiddenField name="mileage" value="${mileageMap.value}" /> 
 	                    <g:hiddenField name="periodList" value="${period.year}" /> 
 	                    <% 
-							def counter = 5 
+							def counter = 5 as int
 						%>
 						<g:each in="${mileageMap}" var="mileage" >
 						         <% 
-								 	counter = counter + 1;
+								 	counter = counter + 1
 								 	total += mileage.value as long
 								  %>
 							<td style="vertical-align: middle;text-align:center;" class="eventTD">								
