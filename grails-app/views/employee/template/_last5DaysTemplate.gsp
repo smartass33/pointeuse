@@ -192,47 +192,44 @@
 				</div>
 
 			</li>
-			<sec:ifLoggedIn>		
-				<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">		
-					<li >
-						<a href="#mileage_form" id="mileage_pop" class="addMileageButton">${message(code: 'mileage.create.add.label', default: 'Report')}</a>
-						<a href="#x" class="overlay" id="mileage_form" style="background: transparent;"></a>
-						<div id="mileage_popup" class="popup">
-							<h2>${message(code: 'mileage.create.button', default: 'Report')}</h2>
-							<p>${message(code: 'mileage.create.info', default: 'Report')}</p>
-							<g:form action="create">
-								<table>
-									<tbody>
-										<tr class="prop">
-											<td class="eventTD" valign="top">${message(code: 'mileage.create.date.choice', default: 'Report')}:</td>
-											<td class="eventTD" valign="top"><input type="text" name="date_mileage_picker" id="date_mileage_picker" /> 
-												<script type="text/javascript">
-													datePickerLaunch();
-												</script>
-											</td>
-										</tr>
-										<tr class="prop">
-											<td class="eventTD" valign="top">${message(code: 'mileage.create.value', default: 'Report')}:</td>
-											<td class="eventTD" valign="top">
-												<g:textField name="mileageValue" value="${mileageValue}" />
-											</td>
-										</tr>
-									</tbody>
-								</table>
-								<g:hiddenField name="employeeId" value="${employee.id}" />
-								<g:hiddenField name="fromReport" value="${fromReport}" />
-								<g:submitToRemote class="listButton"
-			                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-			                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
-									update="last5days"
-									onSuccess="closePopup()"
-									url="[controller:'mileage', action:'addMileage']" value="${message(code: 'mileage.create.validation', default: 'Report')}"></g:submitToRemote>
-							</g:form>
-							<a class="close" id="closeId" href="#close"></a>
-						</div>
-					</li>
-				</sec:ifAnyGranted>
-			</sec:ifLoggedIn>	
+
+			<li >
+				<a href="#mileage_form" id="mileage_pop" class="addMileageButton">${message(code: 'mileage.create.add.label', default: 'Report')}</a>
+				<a href="#x" class="overlay" id="mileage_form" style="background: transparent;"></a>
+				<div id="mileage_popup" class="popup">
+					<h2>${message(code: 'mileage.create.button', default: 'Report')}</h2>
+					<p>${message(code: 'mileage.create.info', default: 'Report')}</p>
+					<g:form action="create">
+						<table>
+							<tbody>
+								<tr class="prop">
+									<td class="eventTD" valign="top">${message(code: 'mileage.create.date.choice', default: 'Report')}:</td>
+									<td class="eventTD" valign="top"><input type="text" name="date_mileage_picker" id="date_mileage_picker" /> 
+										<script type="text/javascript">
+											datePickerLaunch();
+										</script>
+									</td>
+								</tr>
+								<tr class="prop">
+									<td class="eventTD" valign="top">${message(code: 'mileage.create.value', default: 'Report')}:</td>
+									<td class="eventTD" valign="top">
+										<g:textField name="mileageValue" value="${mileageValue}" />
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<g:hiddenField name="employeeId" value="${employee.id}" />
+						<g:hiddenField name="fromReport" value="${fromReport}" />
+						<g:submitToRemote class="listButton"
+	                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
+	                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
+							update="last5days"
+							onSuccess="closePopup()"
+							url="[controller:'mileage', action:'addMileage']" value="${message(code: 'mileage.create.validation', default: 'Report')}"></g:submitToRemote>
+					</g:form>
+					<a class="close" id="closeId" href="#close"></a>
+				</div>
+			</li>
 			<li>
 				<g:link class="logoutButton"  url="${grailsApplication.config.serverURL}/${grailsApplication.config.context}">${message(code: 'employee.disconnect.label', default: 'Sortie')}</g:link>
 			</li>			

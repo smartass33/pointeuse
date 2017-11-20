@@ -69,15 +69,15 @@ class MileageController {
 	
 	def mileagePDF(){
 		log.error('calling mileagePDF')
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		def employee = Employee.get(params['employeeId'])
 		def folder = grailsApplication.config.pdf.directory
 		def calendarMax = Calendar.instance
-		calendarMax.time = new Date().parse("yyyyMd", params["mileageMaxDate"])
-		log.error('calendarMax: '+calendarMax.time)
+		calendarMax.time = new Date().parse("yyyyMMdd", params["mileageMaxDate"])
+		log.debug('calendarMax: '+calendarMax.time)
 		def calendarMin = Calendar.instance
-		calendarMin.time = new Date().parse("yyyyMd", params["mileageMinDate"])
-		log.error('calendarMin: '+calendarMin.time)
+		calendarMin.time = new Date().parse("yyyyMMdd", params["mileageMinDate"])
+		log.debug('calendarMin: '+calendarMin.time)
 		
 		def mileageList
 		def month = calendarMax.get(Calendar.MONTH) + 1
@@ -91,41 +91,26 @@ class MileageController {
 				monthlyPeriodValue += mileageIter.value
 			}
 		}
-		
-		
-		def retour = PDFService.generateUserMonthlyMileageSheet(calendarMin.time, calendarMax.time, employee, folder)
-	//	def file = new File(folder+'/'+retour[1])
 
+		def retour = PDFService.generateUserMonthlyMileageSheet(calendarMin.time, calendarMax.time, employee, folder)
 		response.setContentType("application/octet-stream")
 		response.setHeader("Content-disposition", "filename=${retour[1]}")
 		response.outputStream << retour[0]
-		
-		
-		
+	
 	}
 	
 	def modifyMileage(){
 		log.error('calling modifyMileage')
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		def period = Period.get(params['periodId'])
 		def employee = Employee.get(params['employeeId'])
 		def fromReport = params.boolean('fromReport')//.split(" ").getAt(0) as boolean
 		def value = params.long('value')
 		def monthlyPeriodValue = 0
-		//def date_mileage_picker = params["date_mileage_picker"]//.split(" ").getAt(0)
 		def calendar = Calendar.instance
-		//if (date_mileage_picker != null && date_mileage_picker.size() > 0){
 		def date_mileage = params["date_mileage_picker"]
 		calendar.time = new Date().parse("yyyyMMd", params["date_mileage_picker"])
-			
-		//}
-		log.error('calendar.time: '+calendar.time)
-		
-
-
-		//def month = (params["datemileage_picker"] != null && params["date_mileage_picker"].size() > 0) ? (params["date_mileage_picker"].split(" ").getAt(0)) as int : calendar.get(Calendar.MONTH) + 1
-		
-		//calendar.get(Calendar.MONTH) + 1//(params["month"].split(" ").getAt(0)) as int
+		log.debug('calendar.time: '+calendar.time)
 		def month = calendar.get(Calendar.MONTH) + 1
 		def year = calendar.get(Calendar.YEAR)//(month >= 6 ? period.year : period.year + 1)
 		if (period == null){
@@ -158,29 +143,6 @@ class MileageController {
 			log.error('Duplicate entry: '+qe.message)
 			return
 		}finally{
-		/*
-			criteria = Mileage.createCriteria()
-			def mileageList = criteria.list {
-				or{
-					and {
-						eq('employee',employee)
-						eq('month',month)
-						le('day',20)
-					}
-					and {
-						eq('employee',employee)
-						eq('month',month - 1)
-						gt('day',20)
-					}
-				}
-			}
-			if (mileageList != null){
-				for (Mileage mileageIter : mileageList){
-					monthlyPeriodValue += mileageIter.value
-				}
-			}
-			*/
-		
 			sleep(2000)
 			
 			//def model = mileageService.getReportData( period, employee.site)
@@ -194,11 +156,9 @@ class MileageController {
 			}else{
 				redirect(action: "employeeMileage", periodId: period.id,employeeId:employee.id,siteId:employee.site.id)
 				return
-			}
-			
+			}	
 		}
 	}
-	
 	
 	def list(Integer max) {
 		params.each{i->log.error('parameter of list: '+i)}

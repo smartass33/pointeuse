@@ -36,31 +36,29 @@
 		<tr>
 			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="payment" action='paymentReport'  id="${payment}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true]}">${message(code: 'employee.sup.time.label', default: 'Report')}</g:link></td>
 		</tr>
-		<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">
-			<tr>
-				<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="mileage" action='employeeMileage'  id="${milage}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true,employeeId:employee.id]}">Gestion des indemnités kilométriques</g:link></td>
-			</tr>
-			<tr>
-				<td class="cartoucheLeftTD"  style="font-weight: bold;">
-					<input type="button" id='detailSelector'    value="Masquer les kilomètres"  onclick="showVal();" />
-					<input type="button" id='principalSelector' value="Afficher les kilomètres" onclick="showVal();" />
-				</td>
-			</tr>	
-			<tr id="detailPDF">	
-				<td style="border-style:none;" >
-					<g:form controller="mileage">
-						<g:actionSubmit class="pdfButton" action="mileagePDF" 
-								value="PDF"
-								onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                onComplete="document.getElementById('spinner').style.display = 'none';"
-							/>						
-						<g:hiddenField name="mileageMinDate" value="${mileageMinDate.format('yyyyMd')}" /> 				
-						<g:hiddenField name="mileageMaxDate" value="${mileageMaxDate.format('yyyyMd')}" /> 	
-						<g:hiddenField name="employeeId" value="${employee.id}" /> 	
-					</g:form>	
-				</td>
-			</tr>			
-	</sec:ifAnyGranted>
+		<tr>
+			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="mileage" action='employeeMileage'  id="${milage}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true,employeeId:employee.id]}">Gestion des indemnités kilométriques</g:link></td>
+		</tr>
+		<tr>
+			<td class="cartoucheLeftTD"  style="font-weight: bold;">
+				<input type="button" id='detailSelector'    value="Masquer les kilomètres"  onclick="showVal();" />
+				<input type="button" id='principalSelector' value="Afficher les kilomètres" onclick="showVal();" />
+			</td>
+		</tr>	
+		<tr id="detailPDF">	
+			<td style="border-style:none;" >
+				<g:form controller="mileage">
+					<g:actionSubmit class="pdfButton" action="mileagePDF" 
+							value="PDF"
+							onLoading="document.getElementById('spinner').style.display = 'inline';"
+			                onComplete="document.getElementById('spinner').style.display = 'none';"
+						/>						
+					<g:hiddenField name="mileageMinDate" value="${mileageMinDate.format('yyyyMMdd')}" /> 				
+					<g:hiddenField name="mileageMaxDate" value="${mileageMaxDate.format('yyyyMMdd')}" /> 	
+					<g:hiddenField name="employeeId" value="${employee.id}" /> 	
+				</g:form>	
+			</td>
+		</tr>			
 	</table> 				
 	<table style="float: left; border:0px;border-width:0px;border-style:none;">
 		<tbody>

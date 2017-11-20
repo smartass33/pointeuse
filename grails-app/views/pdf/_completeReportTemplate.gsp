@@ -526,21 +526,22 @@
 		<table>
 			<thead></thead>
 			<tr><td></td></tr>
-			<tr><td></td></tr>			
-			<tr>
-				<td>${message(code: 'report.verification.date.label', default: 'Report')}: ${new Date().format('EEEE dd MMM yyyy')}</td>
-			</tr>
 			<tr>
 				<td style="text-align:left;" >${message(code: 'mileage.month.label', default: 'report')}: 
 					<g:if test="${monthlyPeriodValue}">
-	 					${monthlyPeriodValue}KM
+	 					${monthlyPeriodValue} KM
      						 </g:if>	    
 			        <g:else>
-			        	 ${0}KM
+			        	 ${0} KM
 			        </g:else>
 				</td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>
 			
-			</tr>		
+			<tr>
+				<td>${message(code: 'report.verification.date.label', default: 'Report')}: ${new Date().format('EEEE dd MMM yyyy')}</td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>		
 			<tr>
 				<td>${message(code: 'report.employee.signature.label', default: 'Report')}:</td>
 				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -550,12 +551,6 @@
 				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 				<td>${message(code: 'report.employer.signature.label', default: 'Report')}:</td>				
 			</tr>
-		</table>	 
-		
-		<BR/>
-		<BR/>
-		<BR/>
-		
-		   
+		</table>			   
 	</body>
 </html>
