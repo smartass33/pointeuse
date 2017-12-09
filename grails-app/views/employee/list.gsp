@@ -78,16 +78,17 @@
 						style="vertical-align: middle;"
 						params="\'q=\'+this.value+\'&isAdmin=\'+\'${isAdmin}+\'"/>
 					</li>
-					<li class="datePicker"><g:datePicker
+					<li class="datePicker">
+						<g:datePicker
 								name="myDate" value="${period ? period : new Date()}"  relativeYears="[-3..5]"
 								precision="month" noSelection="['':'-Choisissez-']" style="vertical-align: middle;"/>
-					</li>			
+					</li>	
 					<li style="vertical-align: middle;">
-						<g:actionSubmit disabled="${period!=null}"  value="PDF" action="getSitePDF" class="${period!=null ? 'pdfButtonDisabled':'pdfButton'}" />
+						<g:actionSubmit disabled="${period!=null}" value="pdf" action="getSitePDF" class="${period!=null ? 'pdfButtonDisabled':'pdfButton'}" />
 					</li>	
 					<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">								
 						<li>
-							<g:actionSubmit class='excelButton' value="export excel"  action="employeeExcelExport"/>
+							<g:actionSubmit class='excelButton' value="excel"  action="employeeExcelExport"/>
 						</li>		
 					</sec:ifAnyGranted>
 					

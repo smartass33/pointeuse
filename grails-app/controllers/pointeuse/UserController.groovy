@@ -23,29 +23,49 @@ class UserController extends grails.plugin.springsecurity.ui.UserController {
 	
 		def update() {
 			params.each{i->log.error('parameter of list: '+i)}
+			
+			def allSites = Site.findAll()
+			def userSites = []
+			if (params['siteId'] instanceof String){
+				userSites.add(Site.get(params['siteId']))
+			}else{
+				params['siteId'].each {
+					userSites.add(Site.get(it))
+				}
+			
+			}
+			
+			
 			doUpdate { user ->
-				
-				def site
 				user.properties = params
 				
-						if (params['siteId'] instanceof String){
-							site = Site.get(params['siteId'])
-							if (site.users == null){
-								site.users = []
-							}
-							site.users.add(user)
-							site.save()
-						}else{
-							params['siteId'].each {
-								log.error('siteId: '+it)
-								site = Site.get(it)
-								if (site.users == null){
-									site.users = []
-								}
-								site.users.add(user)
-								site.save()
-							  }
+				
+
+				allSites.each { currentSite ->
+					if (userSites.contains(currentSite)){
+						log.error('user has authorization: '+currentSite)
+						if (currentSite.users == null){
+							currentSite.users = []
 						}
+						currentSite.users.add(user)
+					}else{
+						log.error('user not authorized: '+currentSite)
+						currentSite.users.remove(user)
+					}
+					currentSite.save()
+				}
+							/*
+								params['siteId'].each {
+									log.error('siteId: '+it)
+									site = Site.get(it)
+									if (site.users == null){
+										site.users = []
+									}
+									site.users.add(user)
+									site.save()
+								  }
+								  */
+						
 				
 				if (params['password'] != null){					
 					user.password = springSecurityService.encodePassword(params.password, user.username)

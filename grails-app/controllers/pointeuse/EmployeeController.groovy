@@ -114,8 +114,8 @@ class EmployeeController {
 		def fromIndex=params.boolean('fromIndex')
 		def funtionCheckBoxesMap = [:]
 		def period = Period.get(params.int('periodId'))
-		//def sites = Site.findAll("from Site")
-		def sites = Site.list([sort: "name", order: "desc",max:3])
+		def sites = Site.findAll("from Site")
+	//	def sites = Site.list([sort: "name", order: "desc",max:3])
 		
 		def functions = Function.list([sort: "ranking", order: "asc"])
 		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
@@ -209,9 +209,9 @@ class EmployeeController {
 		def funtionCheckBoxesMap = [:]
 		def annualSiteReportMap = [:]
 		def model =[:]
-		def sites = Site.list([sort: "name", order: "desc",max:3])
+		//def sites = Site.list([sort: "name", order: "desc",max:3])
 		//def sites = Site.list([sort: "name",order: "asc",max: 3])
-		//def sites = Site.findAll("from Site")
+		def sites = Site.findAll("from Site")
 		def functions = Function.list([sort: "ranking", order: "asc"])
 		
 	
@@ -256,6 +256,10 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def modifyCases(){
+		params.each{i->
+			log.debug('param: '+i)
+			
+		}
 		def type = params["type"]
 		def value = params["value"]
 		def site = Site.get(params["siteId"])
@@ -2445,6 +2449,7 @@ class EmployeeController {
 		def dailyBankHolidayMap = [:]
 		def dailySupTotalMap = [:]
 		def holidayMap = [:]
+		def mileageMap = [:]
 		def employee
 		def mapByDay = [:]
 		def dailyTotalId=0
@@ -2587,12 +2592,40 @@ class EmployeeController {
 				}
 			}
 			holidayMap.put(tmpDate, dailyAbsence)
+			
+			def mileageCriteria = Mileage.createCriteria()
+			def dailyMileage = mileageCriteria.get {
+				and {
+					eq('employee',employee)
+					eq('year',calendarLoop.get(Calendar.YEAR))
+					eq('month',calendarLoop.get(Calendar.MONTH)+1)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			mileageMap.put(tmpDate,dailyMileage)
+			
+			
 			weeklyAggregate.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), mapByDay)	
 			if (calendarLoop.get(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 				break
 			}
 			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
 		}	
+		def maxDate = calendarLoop.time
+		def minCal = Calendar.instance
+		minCal.set(Calendar.HOUR_OF_DAY,23)
+		minCal.set(Calendar.MINUTE,59)
+		minCal.set(Calendar.SECOND,59)
+		
+		minCal.set(Calendar.DAY_OF_MONTH,1)
+		minCal.set(Calendar.YEAR,year)
+		minCal.set(Calendar.MONTH,month - 1)
+		def minDate = minCal.time
+		
+		
+		
+		//def mileageFigures = timeManagerService.getMileage(minDate, maxDate, employee)
+			
 		try {
 			if (userId != null){
 				def cartoucheTable = timeManagerService.getCartoucheData(employee,year,month)
@@ -2622,6 +2655,7 @@ class EmployeeController {
 				}
 	
 				def model=[
+					mileageMap:mileageMap,
 					isAdmin:false,
 					siteId:siteId,
 					currentContract:currentContract,				
@@ -2710,16 +2744,19 @@ class EmployeeController {
 
 	def pointage(Long id){	
 		log.error('pointage called')
-		log.error('IP address: '+request.getHeader("X-Forwarded-For"))
-		log.error('request.remoteAddr: '+request.remoteAddr)
+		log.debug('IP address: '+request.getHeader("X-Forwarded-For"))
+		log.debug('request.remoteAddr: '+request.remoteAddr)
 		def clientIP = request.getHeader("X-Forwarded-For")
 		def authorizedIPList = grailsApplication.config.ip.authorized
+		def isIPAuthorizationOn = grailsApplication.config.ip.authorization.on
 		
-		if (!authorizedIPList.contains(clientIP) && !authorizedIPList.contains(request.remoteAddr)){
+		if (isIPAuthorizationOn && !authorizedIPList.contains(clientIP) && !authorizedIPList.contains(request.remoteAddr)){
 			log.error('found no matching IP, exiting...')
 			flash.message = message(code: 'employee.pointage.wrong.ip')
 			redirect(uri:'/')
 		}
+		
+		
 		try {	
 			def username = params["username"]
 			def employee
@@ -2728,19 +2765,18 @@ class EmployeeController {
 			def totalByDay=[:]
 			def dailyCriteria
 			def elapsedSeconds=0
-			if (id!=null){
+			if (id != null){
 				employee = Employee.get(id)		
 			}
-			if (username!=null && !username.equals("")){
+			if (username != null && !username.equals("")){
 				employee = Employee.findByUserName(username)	
 			}
 			
-			if (employee==null){
+			if (employee == null){
 				throw new NullPointerException("unknown employee("+username+")")
 			}else{
 				log.error('employee successfully authenticated='+employee)
 			}
-			
 			def calendar = Calendar.instance	
 			def inAndOutsCriteria = InAndOut.createCriteria()
 			def systemGeneratedEvents = inAndOutsCriteria.list {
@@ -2750,24 +2786,20 @@ class EmployeeController {
 					eq('systemGenerated',true)
 					order('time','asc')
 				}
-			}
-			
+			}		
 			if (systemGeneratedEvents!=null && systemGeneratedEvents.size()>0){
 				log.error('redirecting user to regularization page')
 				render(view: "regularize", model: [systemGeneratedEvents: systemGeneratedEvents,employee:employee])
 				return
-			}
-				
+			}			
 			def model = timeManagerService.getPointageData(employee)
 			model << [userId: employee.id,employee: employee]
-			return model
-			
+			return model	
 		}
 		catch (Exception e){
 			log.error('error with application: '+e.toString())		
 			flash.message = message(code: 'employee.not.found.label',args:[params["username"]])
-			redirect(uri:'/')
-			
+			redirect(uri:'/')		
 		}
 	}	
 
@@ -3845,7 +3877,7 @@ class EmployeeController {
 		def user = User.get(1)
 		def calendar = Calendar.instance
 		def folder = grailsApplication.config.pdf.directory
-		Resource myResource = assetResourceLocator.findAssetForURI('biolab3.png')
+		Resource myResource = assetResourceLocator.findAssetForURI(grailsApplication.config.laboratory.logo)
 		
 		def filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)).toString() +'-'+site.name+'.pdf'
 		def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)).toString() +'-'+site.name+'.pdf')
@@ -3859,7 +3891,7 @@ class EmployeeController {
 			multipart true
 			to 'henri.martin@gmail.com'
 			subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
-			inline 'biolab33', 'image/png', logoFile
+			inline grailsApplication.config.laboratory.logo, 'image/png', logoFile
 			html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
 			attachBytes filename,'application/pdf', file.readBytes()
 		}
@@ -3912,7 +3944,7 @@ class EmployeeController {
 		}
 		thTime.join()
 		
-		Resource myResource = assetResourceLocator.findAssetForURI('biolab3.png')
+		Resource myResource = assetResourceLocator.findAssetForURI(grailsApplication.config.laboratory.logo)
 		def logoFile = new File('logo')
 		def fileUtil = new FileUtils()
 		def addingLogo = false
@@ -3938,7 +3970,7 @@ class EmployeeController {
 							multipart true
 							to user.email
 							subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
-							inline 'biolab33', 'image/png', logoFile
+							inline grailsApplication.config.laboratory.logo, 'image/png', logoFile
 							html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
 							attachBytes filename,'application/pdf', file.readBytes()
 						}
@@ -3962,7 +3994,7 @@ class EmployeeController {
 		def folder = grailsApplication.config.pdf.directory
 		Calendar calendar = Calendar.instance
 		
-		Resource myResource = assetResourceLocator.findAssetForURI('biolab3.png')
+		Resource myResource = assetResourceLocator.findAssetForURI(grailsApplication.config.laboratory.logo)
 		def logoFile = new File('logo')
 		def fileUtil = new FileUtils()
 		def addingLogo = false
@@ -3990,7 +4022,7 @@ class EmployeeController {
 							multipart true
 							to 'henri.martin@gmail.com'
 							subject message(code: 'user.email.title')+' '+site.name+' '+message(code: 'user.email.site')+' '+calendar.time.format("MMM yyyy")
-							inline 'biolab33', 'image/png', logoFile				
+							inline grailsApplication.config.laboratory.logo, 'image/png', logoFile				
 							html g.render(template: "/employee/template/mailTemplate", model:[user:user,site:site,date:calendar.time.format("MMM yyyy")])
 							attachBytes filename,'application/pdf', file.readBytes()
 						}
@@ -4325,5 +4357,33 @@ class EmployeeController {
 			 }	
 		}	
 		return 'CloseDay done!'	
+	}
+	
+	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
+	def randomize(){
+		log.error('randomize called')
+		
+		def employeeList = Employee.findAll("from Employee")
+		for (employee in employeeList){
+			https://randomuser.me
+			def base = "https://randomuser.me/api/?format=json&nat=fr"
+			def url = new URL(base)
+			def connection = url.openConnection()
+			if(connection.responseCode == 200){
+				def employeeAnonymizer = new JsonSlurper().parseText(connection.content.text)
+				log.error('employeeAnonymizer')
+				def last = employeeAnonymizer.results.name.last[0]
+				def first = employeeAnonymizer.results.name.first[0]
+				log.error(first+' '+last)
+				employee.firstName = first
+				employee.lastName = last
+				def userName = employee.firstName.take(1) + employee.lastName.take(1) + employee.lastName.reverse().take(1).reverse()
+				employee.userName = userName
+				employee.matricule = userName
+				employee.save()
+				
+			}
+		}
+		
 	}
 }

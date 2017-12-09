@@ -1183,6 +1183,17 @@ class TimeManagerService {
 				eq('type',AbsenceType.INJUSTIFIE)
 			}
 		}
+		
+		criteria = Absence.createCriteria()
+		def yearlyFormation = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.FORMATION)
+			}
+		}
+		
 						
 		if (month>=6){
 			criteria = MonthlyTotal.createCriteria()	
@@ -1301,6 +1312,7 @@ class TimeManagerService {
 			yearlyDif:yearlyDif.size(),	
 			yearlyRtt:yearlyRtt.size(),
 			yearlySickness:yearlySickness.size(),
+			yearlyFormation:yearlyFormation.size(),
 			yearlyMaternite:yearlyMaternite.size(),
 			yearlyTheoritical:yearTheoritical,
 			yearlyPregnancyCredit:yearlyPregnancyCredit,
@@ -1654,57 +1666,7 @@ class TimeManagerService {
 			}
 		}
 		
-		/*
-		if (month == 1){
-			mileageList = criteria.list {
-				or{
-					and {
-						eq('employee',employee)
-						eq('month',month)
-						eq('year',year)
-						le('day',20)
-					}
-					and {
-						eq('employee',employee)
-						eq('month',12)
-						eq('year',year - 1)
-						gt('day',20)
-					}
-				}
-			}
-			mileageMinDate.set(Calendar.YEAR,year - 1)
-			mileageMinDate.set(Calendar.MONTH,11)
-			mileageMinDate.set(Calendar.DAY_OF_MONTH,21)
-			mileageMaxDate.set(Calendar.YEAR,year)
-			mileageMaxDate.set(Calendar.MONTH,0)
-			mileageMaxDate.set(Calendar.DAY_OF_MONTH,20)
-		}else{
-			mileageList = criteria.list {
-				or{
-					and {
-						eq('employee',employee)
-						eq('month',month)
-						eq('year',year)
-						le('day',20)
-					}
-					and {
-						eq('employee',employee)
-						eq('month',month - 1)
-						eq('year',year)
-						gt('day',20)
-					}
-				}
-			}
-			mileageMinDate.set(Calendar.YEAR,year)
-			mileageMinDate.set(Calendar.MONTH,month - 2)
-			mileageMinDate.set(Calendar.DAY_OF_MONTH,21)
-			mileageMaxDate.set(Calendar.YEAR,year)
-			mileageMaxDate.set(Calendar.MONTH,month - 1)
-			mileageMaxDate.set(Calendar.DAY_OF_MONTH,20)
-		}
-		*/
-		
-		
+	
 		
 		if (mileageList != null){
 			for (Mileage mileageIter : mileageList){
@@ -2260,18 +2222,21 @@ class TimeManagerService {
 			
 			// computing totals.		
 			annualSupTimeAboveTheoritical += monthlyTotalTime
-			def currentPeriod = (currentMonth < 6) ? Period.findByYear(currentYear-1) : Period.findByYear(currentYear)
-			
+			def currentPeriod = (currentMonth < 6) ? Period.findByYear(currentYear-1) : Period.findByYear(currentYear)			
 			criteria = SupplementaryTime.createCriteria()
-			log.debug('getting monthlySupTotalTime for: '+employee+' and month: '+currentMonth+' and period: '+currentPeriod)
-			monthlySupTotalTime = criteria.get {
-				and {
-					eq('employee',employee)
-					eq('month',currentMonth)
-					eq('period',currentPeriod)
+			try {
+				monthlySupTotalTime = criteria.get {
+					and {
+						eq('employee',employee)
+						eq('month',currentMonth)
+						eq('period',currentPeriod)
+					}
 				}
+				log.debug('monthlySupTotalTime: '+monthlySupTotalTime)
+			
+			}catch(org.hibernate.NonUniqueResultException ex){
+				log.error('error getting monthlySupTotalTime for: '+employee+' and month: '+currentMonth+' and period: '+currentPeriod)
 			}
-			log.debug('monthlySupTotalTime: '+monthlySupTotalTime)
 			//monthlySupTotalTime = weeklyTotals.get('monthlySupTime')//getMonthlySupTime(employee,currentMonth, currentYear)
 			if (monthlySupTotalTime != null){
 				annualMonthlySupTime += monthlySupTotalTime.value as long
@@ -2559,9 +2524,7 @@ class TimeManagerService {
 		for (Payment payment:paymentList){
 			annualPaidHS += payment.amountPaid as long
 		}
-		
-		
-		
+
 		return [
 			monthlyQuotaIncludingExtra:monthlyQuotaIncludingExtra,
 			monthlyTakenHolidays:monthlyTakenHolidays,
@@ -5001,14 +4964,15 @@ class TimeManagerService {
 		return model
 	}
 	
+	/*
 	def getMileage(Date minDate, Date maxDate, Employee employee){
 		def mileageMaxDay = 20
 		Calendar maxCalendar = Calendar.instance
 		maxCalendar.time = maxDate
 		maxCalendar.set(Calendar.DAY_OF_MONTH,1)
 		Calendar minCalendar = Calendar.instance
-		minCalendar.time = minDate 
-		def dailyMileage 
+		minCalendar.time = minDate
+		def dailyMileage
 		def totalPeriodMileage = 0
 		def year
 		def month
@@ -5022,7 +4986,7 @@ class TimeManagerService {
 			def criteria = Mileage.createCriteria()
 			dailyMileage = criteria.get {
 				and {
-					eq('employee',employee)				
+					eq('employee',employee)
 					eq('year',minCalendar.get(Calendar.YEAR))
 					eq('month',minCalendar.get(Calendar.MONTH) + 1)
 					eq('day',minCalendar.get(Calendar.DAY_OF_MONTH))
@@ -5035,7 +4999,7 @@ class TimeManagerService {
 			else {
 				mileageMap.put(minCalendar.time,0)
 			}
-			if (minCalendar.get(Calendar.DAY_OF_MONTH) == minCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){			
+			if (minCalendar.get(Calendar.DAY_OF_MONTH) == minCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 				break
 			}
 			minCalendar.roll(Calendar.DAY_OF_MONTH, 1)
@@ -5048,7 +5012,7 @@ class TimeManagerService {
 					eq('employee',employee)
 					eq('year',maxCalendar.get(Calendar.YEAR))
 					eq('month',maxCalendar.get(Calendar.MONTH) + 1)
-					eq('day',maxCalendar.get(Calendar.DAY_OF_MONTH))		
+					eq('day',maxCalendar.get(Calendar.DAY_OF_MONTH))
 				}
 			}
 			if (dailyMileage != null){
@@ -5065,6 +5029,59 @@ class TimeManagerService {
 		}
 		
 
+		
+		model << [
+				mileageMap:mileageMap,
+				totalPeriodMileage:totalPeriodMileage,
+				minDate:minDate,
+				maxDate:maxDate,
+				employee:employee
+			]
+		return model
+				
+		
+	}
+	
+	*/
+	
+	def getMileage(Date minDate, Date maxDate, Employee employee){
+		Calendar maxCalendar = Calendar.instance
+		Calendar minCalendar = Calendar.instance
+		minCalendar.time = minDate
+		maxCalendar.time = maxDate
+
+		def dailyMileage 
+		def totalPeriodMileage = 0
+		def year
+		def month
+		def day
+		def model = [:]
+		 
+		
+		def mileageMap = [:]
+		while(minCalendar.get(Calendar.DAY_OF_MONTH) <= minCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			def tmpDate = minCalendar.time
+			def criteria = Mileage.createCriteria()
+			dailyMileage = criteria.get {
+				and {
+					eq('employee',employee)				
+					eq('year',minCalendar.get(Calendar.YEAR))
+					eq('month',minCalendar.get(Calendar.MONTH) + 1)
+					eq('day',minCalendar.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			if (dailyMileage != null){
+				mileageMap.put(tmpDate,dailyMileage.value)
+				totalPeriodMileage += dailyMileage.value
+			}
+			else {
+				mileageMap.put(tmpDate,0)
+			}
+			if (minCalendar.get(Calendar.DAY_OF_MONTH) == minCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)){			
+				break
+			}
+			minCalendar.roll(Calendar.DAY_OF_MONTH, 1)
+		}
 		
 		model << [
 				mileageMap:mileageMap,

@@ -28,8 +28,13 @@ class GeocoderService {
 				//isPartialMatch = geoCodeResultJSON.results.partial_match[0]
 				jsonMap.lat = geoCodeResultJSON.results.geometry.location.lat[0]
 				jsonMap.lng = geoCodeResultJSON.results.geometry.location.lng[0]
-				jsonMap.address = geoCodeResultJSON.results.formatted_address[0]			
-				jsonMap.postCode=geoCodeResultJSON.results.address_components[0].get(geoCodeResultJSON.results.address_components[0].size()-1).short_name as int
+				jsonMap.address = geoCodeResultJSON.results.formatted_address[0]
+				
+				if ( geoCodeResultJSON.results.address_components[0].get(geoCodeResultJSON.results.address_components[0].size()-1).types.equals('postal_code')){			
+					jsonMap.postCode=geoCodeResultJSON.results.address_components[0].get(geoCodeResultJSON.results.address_components[0].size()-1).short_name as int
+				}else{
+					jsonMap.postCode=00000
+				}
 			}
 			else{
 				log.error("GeocoderService.geocodeAddress FAILED")

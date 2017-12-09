@@ -11,7 +11,7 @@
 <g:layoutHead/>
 	</head>
 	<body>
-		<div id="grailsLogo" role="banner" style="background-color:#abbf78;"><a href="${grailsApplication.config.serverURL}/${grailsApplication.config.context}"><asset:image src="biolab3.png"/></a></div>		
+		<div id="grailsLogo" role="banner" style="background-color:#abbf78;"><a href="${grailsApplication.config.serverURL}/${grailsApplication.config.context}"><asset:image src="${grailsApplication.config.laboratory.logo}"/></a></div>		
 		<div>
 			<div>
 				<ul class="jd_menu jd_menu_slate">

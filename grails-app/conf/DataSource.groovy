@@ -38,6 +38,30 @@ environments {
 		}
     }
 	
+	demo_aws {
+		dataSource {
+			pooled = true
+			dbCreate = "update"
+			url = "jdbc:mariadb://pointeuse.cjwt4qnapscg.eu-west-1.rds.amazonaws.com:3306/pointeuseLABM"
+			driverClassName = "org.mariadb.jdbc.Driver"
+			username = "pointeuseLABM"
+			password = "Wichita3*"
+			properties {
+				maxActive = 50
+				maxIdle = 25
+				minIdle = 5
+				initialSize = 5
+				minEvictableIdleTimeMillis=60000
+				timeBetweenEvictionRunsMillis=60000
+				numTestsPerEvictionRun=3
+				testOnBorrow=true
+				testWhileIdle=true
+				testOnReturn=true
+				validationQuery="SELECT 1"
+			}
+		}
+	}
+	
 	aws {
 		dataSource {
 			pooled = true

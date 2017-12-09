@@ -13,7 +13,7 @@ class WeeklyTotal {
 	MonthlyTotal monthlyTotal
 	Employee employee
 	static hasMany = [dailyTotals:DailyTotal]
-	static belongsTo = [MonthlyTotal]
+	static belongsTo = [monthlyTotal:MonthlyTotal]
 	
 	WeeklyTotal(Employee employee,Date currentDate){
 		this.employee=employee

@@ -11,7 +11,6 @@ import java.util.Date;
 import org.hibernate.QueryException
 
 @Transactional(readOnly = true)
-@Secured(['ROLE_ADMIN'])
 class MileageController {
 
 	def mileageService
@@ -21,8 +20,9 @@ class MileageController {
 	
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
+	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
 	def addMileage(){
-		log.error('calling addMileage')
+		log.debug('calling addMileage')
 		params.each{i->log.error('parameter of list: '+i)}
 		//def period = Period.get(params['periodId'])
 		def employee = Employee.get(params['employeeId'])
@@ -47,7 +47,12 @@ class MileageController {
 		}
 		try{
 			if (mileage == null){
-				mileage = new Mileage( employee, period, day, month, year,  value,springSecurityService.currentUser)
+				if (springSecurityService.currentUser != null){
+					mileage = new Mileage(employee, period, day, month, year,  value,springSecurityService.currentUser)
+				}else {
+					mileage = new Mileage(employee, period, day, month, year,  value)
+				}
+			
 				 mileage.save flush:true
 			}else{
 				mileage.value = value
@@ -66,7 +71,7 @@ class MileageController {
 		
 	}
 	
-	
+	@Secured(['ROLE_ADMIN'])
 	def mileagePDF(){
 		log.error('calling mileagePDF')
 		params.each{i->log.debug('parameter of list: '+i)}
@@ -99,6 +104,8 @@ class MileageController {
 	
 	}
 	
+	
+	@Secured(['ROLE_ADMIN'])
 	def modifyMileage(){
 		log.error('calling modifyMileage')
 		params.each{i->log.debug('parameter of list: '+i)}
@@ -160,6 +167,7 @@ class MileageController {
 		}
 	}
 	
+	@Secured(['ROLE_ADMIN'])
 	def list(Integer max) {
 		params.each{i->log.error('parameter of list: '+i)}
 		def period = Period.get(params['periodId'])
@@ -193,6 +201,7 @@ class MileageController {
 		return
 	}
 	
+	@Secured(['ROLE_ADMIN'])
 	def employeeMileage(Integer max) {
 		params.each{i->log.error('parameter of list: '+i)}
 		def period = Period.get(params['periodId'])

@@ -55,23 +55,14 @@
 				  setParams: function(type,id,siteId,periodId,simpleFuntionCheckBoxesMap) {
 					  var res = type.concat('-', id);
 					  val = document.getElementById(res);
-					  if 
 					  if(val === null){
 						  WeekJSClass.dynamicParams = {value:null,myDate:id,siteId:siteId,type:type,periodId:periodId,simpleFuntionCheckBoxesMap:simpleFuntionCheckBoxesMap};  
 					  }else{
-
-	
-						
-						  if (val.indexOf(":") !== -1;){
-							  alert("OK");
-						  	WeekJSClass.dynamicParams = {value:val.value,myDate:id,siteId:siteId,type:type,periodId:periodId,simpleFuntionCheckBoxesMap:simpleFuntionCheckBoxesMap};   		
-						  }else{
-							  alert("Must input numbers");
-							  return;
-							}			
+						  WeekJSClass.dynamicParams = {value:val.value,myDate:id,siteId:siteId,type:type,periodId:periodId,simpleFuntionCheckBoxesMap:simpleFuntionCheckBoxesMap};   		
+						}		
 					  }   		      
 				  }
-				}
+				
 	</script>		
 
 </head>

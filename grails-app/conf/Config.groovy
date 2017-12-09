@@ -14,10 +14,11 @@ import pointeuse.EventLogAppender
 //grails.config.locations = ["file:${userHome}/.grails/${appName}-config.groovy","file:/opt/tomcat/${appName}-config.groovy"]
 
 
- if (System.properties["${appName}.config.location"]) {
-   grails.config.locations << "file:" + System.properties["${appName}.config.location"]
- }
 
+// grails.config.locations = [ "classpath:${appName}-config.properties"]
+ 
+
+ 
 grails.views.javascript.library = "jquery"
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
@@ -76,8 +77,11 @@ grails.plugins.remotepagination.enableBootstrap=false
 environments {
     development {
 		ip.authorized = ['90.80.193.12','0:0:0:0:0:0:0:1']
+		ip.authorization.on=false
+		laboratory.logo='LABM.png'
+		laboratory.name='LABM'
 		pdf.directory='/Users/henri/pointeuse'
-		mysqldump.directory='/usr/local/mysql/bin'
+		mysqldump.directory='/usr/local/bin/'
 		grails.app.context=pointeuse
         grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
@@ -100,10 +104,49 @@ environments {
 		}
     }
 
+	demo_aws {
+		ip.authorized = ['90.80.193.12','90.120.222.39','0:0:0:0:0:0:0:1']
+		ip.authorization.on=false
+		pdf.directory='/opt/tomcat/pdf'
+		laboratory.logo='LABM.png'
+		laboratory.name='LABM'
+		mysqldump.directory='/usr/bin'
+		grails.app.context='pointeuseLABM'
+		grails.logging.jul.usebridge = true
+		grails.resources.processing.enabled=false
+		serverURL = "http://ec2-54-171-101-4.eu-west-1.compute.amazonaws.com"
+		//serverURL = "http://pointeuse.biolab33.com"
+		
+		context=''
+		log4j = {
+				'null' name:'stacktrace'
+				appenders {
+					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuseDEMO.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+				}
+			//	warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
+				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
+					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+					   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
+					   'org.codehaus.groovy.grails.commons',            // core / classloading
+					   'org.codehaus.groovy.grails.plugins',            // plugins
+					   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
+					   'org.springframework',
+					   'org.hibernate',
+					   'net.sf.ehcache.hibernate'
+				warn 'org.springframework.security'
+				root {
+					warn 'myAppender'//,'rollingFile'
+			}
+		}
+	}
+	
 	aws {
 		ip.authorized = ['90.80.193.12','90.120.222.39','0:0:0:0:0:0:0:1']
+		ip.authorization.on=true
 		pdf.directory='/opt/tomcat/pdf'
 		mysqldump.directory='/usr/bin'
+		laboratory.logo='biolab3.png'
+		laboratory.name='biolab'
 		grails.app.context=''
 		grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
@@ -214,13 +257,13 @@ Bonjour $user.username,<br/>
 <br/>
 Vous (ou quelqu'un prétendant être vous) a demandé la réinitialisation de votre mot de passe.<br/>
 <br/>
-Si vous n'êtes pas à l'origine de cette demande, veuillez igoner ce message.<br/>
+Si vous n'êtes pas à l'origine de cette demande, veuillez ignorer ce message.<br/>
 <br/>
 Si en revanche vous souhaitez réinitialiser votre mot passe, merci de cliquer <a href="$url">ici</a>.
 '''
 
 	
-grails.plugin.springsecurity.ui.forgotPassword.emailSubject = 'Réinitialisation du mot de passe pointeuse.biolab33'
+grails.plugin.springsecurity.ui.forgotPassword.emailSubject = 'Réinitialisation du mot de passe de la pointeuse'
 //grails.plugin.springsecurity.ui.register.emailBody = '...'
 //grails.plugin.springsecurity.ui.register.emailSubject = '...'
 grails.plugin.springsecurity.ui.register.postRegisterUrl = '/'

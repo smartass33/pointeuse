@@ -113,7 +113,7 @@
 						</td>
 					</g:each>
 					
-					<td style="vertical-align: middle;text-align:center;font-size: 12px;">
+					<td style="vertical-align:middle;text-align:center;font-size:12px;">
 						<g:textField id="${'particularity1-'+calendarMonday.time.format('yyyyMMdd')}" name="cases" class='weeklyTextField' value="${weeklyCasesMap != null && weeklyCasesMap.get(weekNumber) != null  && (weeklyCasesMap.get(weekNumber)).particularity1 != null ? weeklyCasesMapParticularity1Text.get(weekNumber) :'00:00'}" align="center" style="vertical-align: middle;width:50px"/>
 		                <g:remoteLink 
 		                		action="modifyCases" 

@@ -53,11 +53,7 @@ class MileageService {
 		log.error('calling Mileage getReportData with period: '+period+' and site: '+site)
 		def monthList=[6,7,8,9,10,11,12,1,2,3,4,5]
 		def mileageMap = [:]
-		//def mileageIDMap = [:]
 		def mileageMapByEmployee = [:]
-		//def mileageMapByStringByEmployee = [:]
-		//def mileageMapAsString = [:]
-		//def mileageIDMapByEmployee = [:]
 		def employeeInstanceList
 		def criteria
 		def mileageList
@@ -68,8 +64,6 @@ class MileageService {
 		def monthlyPeriodValue = 0
 		def calendar = Calendar.instance
 		
-		
-		
 		if (site != null){
 			employeeInstanceList = Employee.findAllBySite(site,[sort:'lastName',order:'asc'])
 			for (Employee employee:employeeInstanceList){
@@ -78,7 +72,7 @@ class MileageService {
 				for (int month in monthList ){
 					monthlyPeriodValue = 0
 					criteria = Mileage.createCriteria()					
-					supMonth = month + 1
+					supMonth = month
 					if (month < 6){
 						supYear = period.year + 1
 					}else{					

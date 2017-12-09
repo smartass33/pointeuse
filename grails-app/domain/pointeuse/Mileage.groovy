@@ -28,6 +28,7 @@ class Mileage {
 	
 	static constraints = {
 		month (unique:['employee','period','month','year','day'])
+		user (nullable:true)
 	}
 	
 	Mileage(Employee employee,Period period,def day,def month,def year, def value,User user){
@@ -38,6 +39,16 @@ class Mileage {
 		this.year = year
 		this.value = value
 		this.user = user
+		this.loggingTime = new Date()
+	}
+	
+	Mileage(Employee employee,Period period,def day,def month,def year, def value){
+		this.employee = employee
+		this.period = period
+		this.day = day
+		this.month = month
+		this.year = year
+		this.value = value
 		this.loggingTime = new Date()
 	}
 }

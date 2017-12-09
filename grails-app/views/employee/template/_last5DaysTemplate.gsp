@@ -225,7 +225,8 @@
 	                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
 							update="last5days"
 							onSuccess="closePopup()"
-							url="[controller:'mileage', action:'addMileage']" value="${message(code: 'mileage.create.validation', default: 'Report')}"></g:submitToRemote>
+							url="[controller:'mileage', action:'addMileage']" value="${message(code: 'mileage.create.validation', default: 'Report')}">
+						</g:submitToRemote>
 					</g:form>
 					<a class="close" id="closeId" href="#close"></a>
 				</div>

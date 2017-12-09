@@ -10,7 +10,7 @@ class WeeklyCase {
 	int home_assistance
 	Date loggingDate
 	Site site
-	static belongsTo = [Site]
+	static belongsTo = [site:Site]
 	
 	static constraints = {
 		particularity1 (blank: true,nullable:true)
@@ -20,7 +20,6 @@ class WeeklyCase {
 	
 	WeeklyCase(int value,Date currentDate,def site){
 		this.year=currentDate.getAt(Calendar.YEAR)
-		//this.month=currentDate.getAt(Calendar.MONTH + 1)
 		this.week=currentDate.getAt(Calendar.WEEK_OF_YEAR)
 		this.cases=value
 		this.site=site

@@ -5,7 +5,7 @@
 	<head>
 		<meta name="layout" content="main" />
 		<resource:tabView />		
-		<title>${message(code: 'pointeuse.entreprise.label', default: 'Create')}</title>
+		<title>${grailsApplication.config.laboratory.name}</title>
 		<script type="text/javascript">	
 			function closePopup ( ){
 				window.location = $('#closeId').attr('href');
@@ -87,7 +87,7 @@
 			</richui:tabView>
 		</div>
 		<div class="standardNav" role="main">
-			<h1><font size="5"><g:message code="welcome.label" default="Welcome"/>, il est: <span id='clock'><g:formatDate format="HH:mm:ss" date="${new Date()}"/></span>
+			<h1><font size="5"><g:message code="welcome.label" default="Welcome"/> ${grailsApplication.config.laboratory.name}, il est: <span id='clock'><g:formatDate format="HH:mm:ss" date="${new Date()}"/></span>
 			</font></h1>
 			<BR>
 			<p><g:message code="explanation.label" default="Welcome"/></p>
