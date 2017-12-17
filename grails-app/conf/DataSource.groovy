@@ -44,7 +44,7 @@ environments {
 			dbCreate = "update"
 			url = "jdbc:mariadb://pointeuse.cjwt4qnapscg.eu-west-1.rds.amazonaws.com:3306/pointeuseLABM"
 			driverClassName = "org.mariadb.jdbc.Driver"
-			username = "pointeuseLABM"
+			username = "pointeuse"
 			password = "Wichita3*"
 			properties {
 				maxActive = 50

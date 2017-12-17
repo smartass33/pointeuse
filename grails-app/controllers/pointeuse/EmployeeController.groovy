@@ -2537,8 +2537,7 @@ class EmployeeController {
 				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
 				dailyTotalId=dailyTotal.id
 			} 
-			
-			
+						
 			criteria = InAndOut.createCriteria()
 			def entriesByDay = criteria{
 				and {

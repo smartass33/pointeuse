@@ -88,10 +88,7 @@
 							<span class="property-value" aria-labelledby="function-label">${employeeInstance?.function.name}</span>		
 					</li>
 				</g:if>									
-			
 			</ol>
-				
-				
 			<g:form>
 				<g:hiddenField name="userId" value="${employeeInstance?.id}" />
 				<g:hiddenField name="siteId" value="${siteId}" />   	      							

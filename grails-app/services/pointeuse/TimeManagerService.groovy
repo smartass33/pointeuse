@@ -517,6 +517,7 @@ class TimeManagerService {
 			
 			
 			while(calendarIter.get(Calendar.DAY_OF_YEAR) <= endDate.getAt(Calendar.DAY_OF_YEAR)){
+				log.debug('calendarIter.time: '+calendarIter.time)
 				if (calendarIter.get(Calendar.DAY_OF_WEEK)!=Calendar.SUNDAY){
 					openedDays += 1
 				}
@@ -2974,8 +2975,9 @@ class TimeManagerService {
 					log.debug('departure month. recomputing open days')
 						Calendar exitCalendar = Calendar.instance
 						exitCalendar.time = currentStatus.date
-						exitCalendar.roll(Calendar.DAY_OF_YEAR, -1)
+						//exitCalendar.roll(Calendar.DAY_OF_YEAR, -1)
 						realOpenDays = openDaysBetweenDates(startCalendar.time,exitCalendar.time)
+						totalNumberOfDays = openDaysBetweenDates(startCalendar.time,exitCalendar.time)
 					}else{
 						realOpenDays = 0
 						isOut = true
@@ -3002,13 +3004,13 @@ class TimeManagerService {
 				}else{
 					
 					def tem = totalNumberOfDays!= 0 ? (Employee.Pentecote)*((realOpenDays - absenceMap.get(AbsenceType.CSS) - absenceMap.get(AbsenceType.INJUSTIFIE))/montlyTotalNumberOfDays)*(weeklyContractTime/Employee.legalWeekTime) : 0	
-					/*
-					 * def A = realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
+					
+					def A = realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
 					def B = tem
 					def C = -(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.MATERNITE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.INJUSTIFIE)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF))
 					def D = - (35/7)*absenceMap.get(AbsenceType.PATERNITE)		
 					def E = (weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday	
-					*/
+					
 					
 					monthTheoritical += (
 						3600*(

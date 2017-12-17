@@ -114,7 +114,7 @@ environments {
 		grails.app.context='pointeuseLABM'
 		grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
-		serverURL = "http://ec2-54-171-101-4.eu-west-1.compute.amazonaws.com"
+		serverURL = "http://ec2-54-171-101-4.eu-west-1.compute.amazonaws.com/demo"
 		//serverURL = "http://pointeuse.biolab33.com"
 		
 		context=''
