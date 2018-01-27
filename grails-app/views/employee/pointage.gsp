@@ -2,6 +2,7 @@
 <%@ page import="pointeuse.InAndOut"%>
 <%@ page import="pointeuse.Employee"%>
 <%@ page import="pointeuse.Reason"%>
+<%@ page import="java.util.Calendar"%>
 
 <html>
 	<head>
@@ -12,6 +13,9 @@
 		<script src="${grailsApplication.config.context}/js/jquery-ui-timepicker-addon.js"></script>
 		<meta name="layout" content="main" />
 		<title><g:message code="daily.pointeuse.label" /></title>
+		
+		<g:set var="calendar" value="${Calendar.instance}"/>
+		
 		<script type="text/javascript">
 
 			function closePopup ( ){
@@ -85,7 +89,7 @@
 						});		
 
 						$( "#date_mileage_picker" ).datetimepicker({
-							defaultDate:new Date(${period.getAt(Calendar.YEAR)},${period.getAt(Calendar.MONTH)},1)
+							defaultDate:new Date(${calendar.time.getAt(Calendar.YEAR)},${calendar.time.getAt(Calendar.MONTH)},1)
 						});				
 			}
 			

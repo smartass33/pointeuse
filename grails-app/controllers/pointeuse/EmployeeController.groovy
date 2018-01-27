@@ -114,9 +114,7 @@ class EmployeeController {
 		def fromIndex=params.boolean('fromIndex')
 		def funtionCheckBoxesMap = [:]
 		def period = Period.get(params.int('periodId'))
-		def sites = Site.findAll("from Site")
-	//	def sites = Site.list([sort: "name", order: "desc",max:3])
-		
+		def sites = Site.findAll("from Site")		
 		def functions = Function.list([sort: "ranking", order: "asc"])
 		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
 		def annualSiteReportMap = [:]
@@ -164,31 +162,17 @@ class EmployeeController {
 			setResponseHeaders(response)
 			fillHeader(headers)			
 			int i = 1			
-			annualSiteReportMap.each{site,siteReport->
-				log.debug('siteReport: '+siteReport)
+			annualSiteReportMap.each{site,mileageByEmployeeYear->
+				log.debug('siteReport: '+mileageByEmployeeYear)
 				def data = []
 				data.add(site.name)
-				functions.each{function ->	
-					data.add((siteReport != null && siteReport.get('yearlyTotalsByFunction') != null && siteReport.get('yearlyTotalsByFunction').get(function) != null) ? timeManagerService.computeHumanTimeAsText(siteReport.get('yearlyTotalsByFunction').get(function)) : timeManagerService.computeHumanTimeAsText(0))
+				mileageByEmployeeYear.each{employee,employeeMileageYearMap ->	
+					employeeMileageYearMap.each{iterYear,employeeYearlyMileage ->
+						data.add(employee.lastName)
+						data.add(employeeYearlyMileage)
+					}
 				}
-				data.add((siteReport != null && siteReport.get('yearlyParticularity1') != null) ? timeManagerService.computeHumanTimeAsText(siteReport.get('yearlyParticularity1')) : timeManagerService.computeHumanTimeAsText(0))
-				data.add((siteReport != null && siteReport.get('yearlyParticularity2') != null) ? timeManagerService.computeHumanTimeAsText(siteReport.get('yearlyParticularity2')) : timeManagerService.computeHumanTimeAsText(0))
-				data.add((siteReport != null && siteReport.get('yearlySubTotals') != null) ? timeManagerService.computeHumanTimeAsText(siteReport.get('yearlySubTotals')) : timeManagerService.computeHumanTimeAsText(0))
-				data.add((siteReport != null && siteReport.get('yearlySubTotals') != null) ? (siteReport.get('yearlySubTotals') / 60 as double) : 0)
-				
-				data.add((siteReport != null && siteReport.get('yearlyCases') != null) ? siteReport.get('yearlyCases') : 0)
-				data.add((siteReport != null && siteReport.get('yearlyHomeAssistance') != null) ? siteReport.get('yearlyHomeAssistance') : 0)
-				
-				//ratio
-				def ratio = 0
-				if (
-					((siteReport.get('yearlyHomeAssistance') != null && siteReport.get('yearlyHomeAssistance') != 0) 
-					|| 
-					(siteReport.get('yearlyCases') != null && siteReport.get('yearlyCases') != 0))
-					&& (siteReport.get('yearlySubTotals') != null && siteReport.get('yearlySubTotals') != 0))	{
-					ratio = ((siteReport.get('yearlySubTotals') as long) / 60)/ ((siteReport.get('yearlyHomeAssistance') as long) + (siteReport.get('yearlyCases') as long)) 
-				}	
-				data.add(ratio)
+			
 				fillRow(data,i)
 				i += 1
 			}
@@ -634,7 +618,7 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
-		log.debug('entering list for employee')
+		log.error('entering list for employee')
 		params.each{i->log.debug('parameter of list: '+i)}
 		params.sort='site'
 		params.max = Math.min(max ?: 20, 100)
@@ -698,10 +682,24 @@ class EmployeeController {
 		def newList = employeeInstanceList.take(20 + offset)
 		def newList2 = newList.drop(offset)
 		if (params["offset"] != null){
-			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+			render template: "/employee/template/listEmployeeTemplate", model:[
+				employeeInstanceList: newList2, 
+				employeeInstanceTotal: employeeInstanceTotal,
+				username:username
+				,isAdmin:isAdmin
+				,siteId:siteId
+				,site:site
+			]
 			return
 		}
-		[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]	
+		[
+			employeeInstanceList: newList2, 
+			employeeInstanceTotal: employeeInstanceTotal,
+			username:username,
+			isAdmin:isAdmin,
+			siteId:siteId,
+			site:site
+		]	
     }
 	
 	@Secured(['ROLE_ADMIN'])
@@ -750,6 +748,7 @@ class EmployeeController {
 	def search() {
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].split(" ").getAt(0).equals("true")) ? true : false
 		def query = "*"+params.q+"*"
+		log.error('query: '+query)
 		if(query){
 			def srchResults = searchableService.search(query)
 			def employeeList = []
@@ -757,7 +756,12 @@ class EmployeeController {
 				def tmpEmployee = Employee.get(employee.id)
 				employeeList.add(tmpEmployee)
 			}
-			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: employeeList, employeeInstanceTotal: employeeList.size(),isAdmin:isAdmin]
+			render template: "/employee/template/listEmployeeTemplate", model:
+			[
+				employeeInstanceList: employeeList, 
+				employeeInstanceTotal: employeeList.size(),
+				isAdmin:isAdmin
+				]
 			return
 		}else{
 			redirect(action: "list")

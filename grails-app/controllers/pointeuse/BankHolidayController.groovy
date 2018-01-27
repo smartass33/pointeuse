@@ -25,7 +25,7 @@ class BankHolidayController {
 		for (holidayInstance in bankHolidayInstanceList){
 			if (yearlyCounts.get(holidayInstance.year)==null){
 				yearlyCounts.put(holidayInstance.year,BankHoliday.findAllByYear(holidayInstance.year))
-			}
+			}   
 		}
         [bankHolidayInstanceTotal:bankHolidayInstanceTotal,yearlyCounts:yearlyCounts]
     }

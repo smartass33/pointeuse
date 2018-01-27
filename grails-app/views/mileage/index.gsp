@@ -1,66 +1,86 @@
-
 <%@ page import="pointeuse.Mileage" %>
+<%@ page import="pointeuse.Site" %>
+<%@ page import="pointeuse.Period" %>
+
 <!DOCTYPE html>
 <html>
 	<head>
+		<g:javascript library="jquery" plugin="jquery" />
+	
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'mileage.label', default: 'Milage')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>
 	</head>
 	<body>
 		<a href="#list-milage" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
+		
 		<div class="nav" role="navigation">
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
-				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
+				<li><g:link class="logout" action="" controller="logout"><g:message code='admin.logout.label' default='Régul' />  </g:link></li>
+				
 			</ul>
 		</div>
-		<div id="list-milage" class="content scaffold-list" role="main">
-			<h1><g:message code="default.list.label" args="[entityName]" /></h1>
-			<g:if test="${flash.message}">
-				<div class="message" role="status">${flash.message}</div>
-			</g:if>
-			<table>
-			<thead>
-					<tr>
+	<div id="site-mileage" class="standardNav">
+		<h1>	
+				<g:if test="${site}"><g:message code="site..followup" /> ${site.name}</g:if>
+				<g:else><g:message code="mileage.report.label" /></g:else>
+				<br>
+				<br>
+				<g:form method="POST" url="[controller:'mileage', action:'siteMileagePDF']">
+					<ul>
+					<li><g:message code="laboratory.label" default="Search" style="vertical-align: middle;" /></li>
+					<li>	
+						<g:if test="${siteId != null && !siteId.equals('')}">
+							<g:select name="site.id" from="${Site.list([sort:'name'])}"
+								noSelection="${['':site.name]}" optionKey="id" optionValue="name"
+								style="vertical-align: middle;" />
+						</g:if>
+						<g:else>
+							<g:select name="site.id" from="${Site.list([sort:'name'])}" id='siteSelect'
+								noSelection="${['':(site?site.name:'-')]}" optionKey="id" optionValue="name"
+								style="vertical-align: middle;" />						
+						</g:else>
+					</li>							
+					<li style="vertical-align: bottom;" class="datePicker">
+						<g:datePicker name="infYear" value="${period ? period : new Date()}"
+						relativeYears="[-4..0]"
+						 precision="year" noSelection="['':'-Choisissez-']"/>
+					</li>
 					
-						<th><g:message code="milage.employee.label" default="Employee" /></th>
+					<li style="vertical-align: bottom;" class="datePicker">
+						<g:datePicker name="supYear" value="${period ? period : new Date()}"
+						relativeYears="[-4..0]"
+						 precision="year" noSelection="['':'-Choisissez-']"/>
+					</li>
 					
-						<g:sortableColumn property="loggingTime" title="${message(code: 'milage.loggingTime.label', default: 'Logging Time')}" />
-					
-						<g:sortableColumn property="month" title="${message(code: 'milage.month.label', default: 'Month')}" />
-					
-						<th><g:message code="milage.period.label" default="Period" /></th>
-					
-						<th><g:message code="milage.user.label" default="User" /></th>
-					
-						<g:sortableColumn property="value" title="${message(code: 'milage.value.label', default: 'Value')}" />
-					
-					</tr>
-				</thead>
-				<tbody>
-				<g:each in="${milageInstanceList}" status="i" var="milageInstance">
-					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
-					
-						<td><g:link action="show" id="${milageInstance.id}">${fieldValue(bean: milageInstance, field: "employee")}</g:link></td>
-					
-						<td><g:formatDate date="${milageInstance.loggingTime}" /></td>
-					
-						<td>${fieldValue(bean: milageInstance, field: "month")}</td>
-					
-						<td>${fieldValue(bean: milageInstance, field: "period")}</td>
-					
-						<td>${fieldValue(bean: milageInstance, field: "user")}</td>
-					
-						<td>${fieldValue(bean: milageInstance, field: "value")}</td>
-					
-					</tr>
-				</g:each>
-				</tbody>
-			</table>
-			<div class="pagination">
-				<g:paginate total="${milageInstanceCount ?: 0}" />
-			</div>
+					<li>	
+						<g:submitToRemote class='displayButton' 
+							update="mileageFollowupDiv"
+							onLoading="document.getElementById('spinner').style.display = 'inline';"  
+							onComplete="document.getElementById('spinner').style.display = 'none';"
+							url="[controller:'mileage', action:'index']" value="${message(code: 'default.search.label')}">
+						</g:submitToRemote>
+					<li>	
+						<g:actionSubmit class='pdfButton' value="PDF" controller="mileage" action="siteMileagePDF"/>				
+					</li>	
+					<li>
+						<g:actionSubmit class='excelButton' value="excel"  action="siteMileageEXCEL"/>	
+						
+					</li>		
+					<g:if test="${site != null}">	
+						<g:hiddenField name="site.id" value="${site.id}" />			
+					</g:if>							
+					<g:hiddenField name="siteId" value="${siteId}" />
+					<g:hiddenField name="isAdmin" value="${isAdmin}" />		
+					<g:hiddenField name="fromMileagePage" value="${true}" />					
+					</ul>
+				</g:form>		
+			</h1>
+		</div>
+		
+		<div id="mileageFollowupDiv">
+			<my:mileageSiteTable/>
 		</div>
 	</body>
 </html>

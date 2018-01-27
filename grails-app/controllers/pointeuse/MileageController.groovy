@@ -7,6 +7,8 @@ import grails.transaction.Transactional
 import grails.plugin.springsecurity.annotation.Secured
 import java.text.SimpleDateFormat
 import java.util.Date;
+import pl.touk.excel.export.WebXlsxExporter
+
 
 import org.hibernate.QueryException
 
@@ -33,8 +35,8 @@ class MileageController {
 			calendar.time = new Date().parse("d/M/yyyy HH:mm", date_mileage_picker)
 		}
 		Period period = (calendar.get(Calendar.MONTH) < 5) ? Period.findByYear(calendar.get(Calendar.YEAR) - 1) : Period.findByYear(calendar.get(Calendar.YEAR))
-		def month = calendar.get(Calendar.MONTH) + 1//(params["month"].split(" ").getAt(0)) as int
-		def year = calendar.get(Calendar.YEAR)//(month >= 6 ? period.year : period.year + 1)
+		def month = calendar.get(Calendar.MONTH) + 1
+		def year = calendar.get(Calendar.YEAR)
 		def criteria = Mileage.createCriteria()
 		def day = calendar.get(Calendar.DAY_OF_MONTH)
 		def mileage = criteria.get {
@@ -62,12 +64,72 @@ class MileageController {
 			log.error('Duplicate entry: '+qe.message)
 			return
 		}finally{
-			//sleep(2000)
-			//def model = mileageService.getReportData( period, employee.site)
-			//render template:"/mileage/template/mileageTemplate",model:model
-			//redirect(action: "employeeMileage", periodId: period.id,employeeId:employee.id,siteId:employee.site.id,site:employee.site)
 			return
 		}
+		
+	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def siteMileagePDF(){
+		log.error('calling siteMileagePDF')
+		def calendar = Calendar.instance
+		def infYear = (params['infYear_year'] != null) ? params.int('infYear_year') : calendar.get(Calendar.YEAR)
+		def supYear = (params['supYear_year'] != null) ? params.int('supYear_year') : (calendar.get(Calendar.YEAR) - 2)
+		def site = (params['site.id'] != null && !params['site.id'].equals('')) ? Site.get(params['site.id']) : null
+		def siteList = site == null ? Site.findAll() : [site]			
+		def folder = grailsApplication.config.pdf.directory
+		def retour = PDFService.generateYearSiteMileageSheet(infYear, supYear, siteList, folder)
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.outputStream << retour[0]
+	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def siteMileageEXCEL(){
+		log.error('calling siteMileagePDF')
+		def folder = grailsApplication.config.pdf.directory
+		def calendar = Calendar.instance
+		def infYear = (params['infYear_year'] != null) ? params.int('infYear_year') : calendar.get(Calendar.YEAR)
+		def supYear = (params['supYear_year'] != null) ? params.int('supYear_year') : (calendar.get(Calendar.YEAR) - 2)
+		def site = (params['site.id'] != null && !params['site.id'].equals('')) ? Site.get(params['site.id']) : null
+		def siteList = site == null ? Site.findAll() : [site]
+		def mileageSiteReportMap = [:]
+		
+		def model = mileageService.getAllSitesOverPeriod(siteList,infYear,supYear)
+		def mileageBySiteMap = model.get('mileageBySiteMap')
+		def data = []
+	
+		
+		
+		def headers = [message(code: 'laboratory.label')]
+		for (int k = infYear;k <=supYear;k++){
+			headers.add(k)
+		}
+		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/km_report_template.xlsx').with {exporter ->
+			setResponseHeaders(response)
+			fillHeader(headers)
+			int i = 1
+			mileageBySiteMap.each{iterSite,mileageByEmployeeYear->
+				fillRow([iterSite.name],i)
+				i += 1
+
+				mileageByEmployeeYear.each{employee,employeeMileageYearMap->
+					data = []
+					data.add(employee.lastName)
+					employeeMileageYearMap.each{iterYear,employeeYearlyMileage->
+						data.add(employeeYearlyMileage)
+				
+					}
+					fillRow(data,i)
+					i += 1
+				}
+
+			
+			}
+			save(response.outputStream)
+		}
+		response.setContentType("application/octet-stream")
+		
 		
 	}
 	
@@ -150,14 +212,9 @@ class MileageController {
 			log.error('Duplicate entry: '+qe.message)
 			return
 		}finally{
-			sleep(2000)
-			
-			//def model = mileageService.getReportData( period, employee.site)
+			sleep(2000)		
 			if (fromReport){
 				def report = timeManagerService.getReportData(null, employee,  null, month, year,true)
-				
-				//log.error('monthlyPeriodValue: '+monthlyPeriodValue)
-				//report << [ monthlyPeriodValue:monthlyPeriodValue ]
 				render template: "/employee/template/reportTableTemplate", model: report
 				return
 			}else{
@@ -203,13 +260,7 @@ class MileageController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def employeeMileage(Integer max) {
-		params.each{i->log.error('parameter of list: '+i)}
-		def period = Period.get(params['periodId'])
-		def employee = Employee.get(params['employeeId'])
-		def fromIndex=params.boolean('fromIndex')
-		
-		def fromAnnualReport = (params['fromAnnualReport'] != null) ? params.boolean('fromAnnualReport') :false		
-		def site = (params['siteId'] != null && !params['siteId'].equals('') ? Site.get(params['siteId']) : employee.site  )
+		params.each{i->log.debug('parameter of list: '+i)}
 		SimpleDateFormat dateFormat
 		def calendar = Calendar.instance
 		def criteria
@@ -218,6 +269,15 @@ class MileageController {
 		def mileageIDMap = [:]
 		def mileageMapByEmployee = [:]
 		def milageIDMapByEmployee = [:]
+		def period = Period.get(params['periodId'])
+		def employee = Employee.get(params['employeeId'])
+		def fromIndex=params.boolean('fromIndex')
+		
+		def fromAnnualReport = (params['fromAnnualReport'] != null) ? params.boolean('fromAnnualReport') :false		
+		def site = (params['siteId'] != null && !params['siteId'].equals('') ? Site.get(params['siteId']) : employee.site  )
+		
+		
+
 		def month =  calendar.get(Calendar.MONTH) + 1
 		def year = (month < 6) ? calendar.get(Calendar.YEAR) - 1 : calendar.get(Calendar.YEAR)
 		def myDate = params["myDate"]
@@ -243,9 +303,62 @@ class MileageController {
 		return
 	}
 	
+	@Secured(['ROLE_ADMIN'])
+	def siteMileage(){
+		log.error('entering siteMileage')
+		params.each{i->log.debug('parameter of list: '+i)}
+		def employeeSiteList
+		def calendar = Calendar.instance
+		def year = calendar.get(Calendar.YEAR)
+		def historyYear = year - 4
+		def criteria
+		def mileageBySiteMap = [:]
+		def siteList = Site.findAll()
+		for (Site site in siteList){
+			employeeSiteList = site.employees 
+			def employeeMileageYearMap = [:]
+			def mileageByEmployeeYear = [:]
+			for (employee in employeeSiteList){
+				criteria = Mileage.createCriteria()		
+				for (int i = historyYear; i <= year; i++){
+					def employeeYearlyMileage = 0				
+					def yearMileageList = Mileage.findAllByEmployeeAndYear(employee,i)
+					for (Mileage mileage in yearMileageList){
+						employeeYearlyMileage += mileage.value
+					}	
+					employeeMileageYearMap.put(year,employeeYearlyMileage)
+					mileageByEmployeeYear.put(employee,employeeMileageYearMap)
+				}
+			}
+			mileageBySiteMap.put(site,mileageByEmployeeYear)
+		}
+		return mileageBySiteMap
+	}
+	
+	@Secured(['ROLE_ADMIN'])
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond Mileage.list(params), model:[milageInstanceCount: Mileage.count()]
+		log.error('entering index for mileage')
+		params.each{i->log.debug('parameter of list: '+i)}
+		def fromMileagePage = (params['fromMileagePage'] != null) ? params.boolean('fromMileagePage') : false
+		def employeeSiteList
+		def calendar = Calendar.instance
+		def criteria
+		def mileageBySiteMap = [:]
+		def employeeMileageYearMap = [:]
+		def mileageByEmployeeYear = [:]
+		def site = (params['site.id'] != null && !params['site.id'].equals('')) ? Site.get(params['site.id']) : null		
+		def siteList = site == null ? Site.findAll() : [site]		
+		def infYear = (params['infYear_year'] != null) ? params.int('infYear_year') : calendar.get(Calendar.YEAR)
+		def supYear = (params['supYear_year'] != null) ? params.int('supYear_year') : (calendar.get(Calendar.YEAR) - 2)
+		if (fromMileagePage){
+			def model = mileageService.getAllSitesOverPeriod(siteList,infYear,supYear)
+			model << [supYear:supYear,infYear:infYear]
+			render template:"/mileage/template/mileageFollowup",model:model
+			return			
+		}else{
+			[supYear:supYear,infYear:infYear,isIndex:true]	
+		}
     }
 
     def show(Mileage milageInstance) {

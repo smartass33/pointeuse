@@ -7,6 +7,7 @@
 		<g:javascript library="jquery" plugin="jquery" />
 		<meta name="layout" content="main" id="mainLayout">
 		<g:set var="isNotSelected" value="true" />
+		<g:set var="searchString" value="" />
 		<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>
 		<link rel="shortcut icon" href="../favicon.ico"> 
@@ -73,7 +74,7 @@
 					<li><g:remoteField id="q" action="search" update="divId"
 						onclick="if (this.value=='chercher un salarié') {this.value = '';}"
 						onLoading="document.getElementById('spinner').style.display = 'inline';"
-				        onComplete="document.getElementById('spinner').style.display = 'none';"
+				        onComplete="document.getElementById('spinner').style.display = 'none';document.getElementById('searchString') = this.value;"
 						name="q" value="${params.q ?: 'chercher un salarié'}" paramName="q"
 						style="vertical-align: middle;"
 						params="\'q=\'+this.value+\'&isAdmin=\'+\'${isAdmin}+\'"/>

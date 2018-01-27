@@ -42,7 +42,8 @@
 					<g:if test="${username != null}">
 						<li><g:link class="list" action="" controller="logout">
 								${message(code: 'admin.logout.label', default: 'Logout')}
-							</g:link></li>
+							</g:link>
+						</li>
 					</g:if>
 					<li class="datePicker">
 						<g:select name="year" from="${Period.list([sort:'year'])}"

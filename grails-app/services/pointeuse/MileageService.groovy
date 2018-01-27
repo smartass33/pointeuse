@@ -122,4 +122,33 @@ class MileageService {
 		]
 	}
 	
+	def getAllSitesOverPeriod(def siteList,def infYear, def supYear){
+		def employeeSiteList
+		def mileageByEmployeeYear = [:]
+		def employeeMileageYearMap = [:]
+		def mileageBySiteMap = [:]
+		
+		for (Site site in siteList){
+			employeeSiteList = site.employees
+			mileageByEmployeeYear = [:]
+			for (employee in employeeSiteList){
+				employeeMileageYearMap = [:]
+				for (int i = infYear; i <= supYear; i++){
+					def employeeYearlyMileage = 0
+					def yearMileageList = Mileage.findAllByEmployeeAndYear(employee,i)
+
+					for (Mileage mileage in yearMileageList){
+						employeeYearlyMileage += mileage.value
+					}
+					employeeMileageYearMap.put(i,employeeYearlyMileage)
+					
+				}
+				mileageByEmployeeYear.put(employee,employeeMileageYearMap)
+			}
+			mileageBySiteMap.put(site,mileageByEmployeeYear)
+		}
+		return [mileageBySiteMap:mileageBySiteMap]
+	}
+	
+	
 }

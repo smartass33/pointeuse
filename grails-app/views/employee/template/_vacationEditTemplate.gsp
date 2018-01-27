@@ -22,12 +22,13 @@
 			def sameLine=false
 		%>
 			<g:each in="${orderedVacationList}" status="i" var="vacationInstance">
-				<% if (iterator==vacationInstance.period.year){
-					iterator=iterator+1
-					sameLine=true
-				}else{
-					sameLine=false
-				}
+				<% 
+					if (iterator == vacationInstance.period.year){
+						iterator = iterator + 1
+						sameLine = true
+					}else{
+						sameLine = false
+					}
 				 %>
 				<g:if test="${sameLine}">
 					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">				
@@ -45,8 +46,8 @@
 			        		</div>
 						</td>								
 						</g:if>	
-						<g:else>
-							<td>				
+						<g:else>	
+							<td>			
 						        <div>
 				            		<input type="number" name="name"          		
 					           			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 

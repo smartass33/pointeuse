@@ -13,6 +13,7 @@ import org.hibernate.StaleObjectStateException
 class PDFService {
 	def timeManagerService
 	def paymentService
+	def mileageService
 	def pdfRenderingService
 	def grailsApplication
 	
@@ -132,6 +133,30 @@ class PDFService {
 		file = new File(folder+'/'+filename)
 		return [file.bytes,file.name]
 	}
+	
+	
+	def generateYearSiteMileageSheet(def infYear, def supYear, def siteList , folder){
+		log.error('generateYearSiteMileageSheet called between year: '+infYear+' and year '+supYear)
+		def filename
+		Calendar calendar = Calendar.instance
+		OutputStream outputStream
+		File file
+		boolean entityUpdate = true
+		def modelReport = mileageService.getAllSitesOverPeriod(siteList,infYear,supYear)
+		modelReport << [infYear:infYear,supYear:supYear]
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeYearSiteMileageTemplate', model: modelReport)
+		filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString()+'-Kilometres-'+infYear+'-'+supYear+'-Sites'+'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
 
 	def generateUserAnnualTimeSheet(int year,int month,Employee employee,String folder){
 		def filename

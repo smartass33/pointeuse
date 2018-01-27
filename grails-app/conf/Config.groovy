@@ -111,10 +111,10 @@ environments {
 		laboratory.logo='LABM.png'
 		laboratory.name='LABM'
 		mysqldump.directory='/usr/bin'
-		grails.app.context='pointeuseLABM'
+		grails.app.context=''
 		grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
-		serverURL = "http://ec2-54-171-101-4.eu-west-1.compute.amazonaws.com/demo"
+		serverURL = "http://pointeuse.ddns.net"
 		//serverURL = "http://pointeuse.biolab33.com"
 		
 		context=''

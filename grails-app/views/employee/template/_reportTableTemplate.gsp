@@ -18,7 +18,7 @@
 	      <th>${message(code: 'report.table.daily.total.label', default: 'report')}</th>
 	      <th>${message(code: 'report.table.HS.label', default: 'report')}</th>
 	      <th>
-	      	${message(code: 'report.table.absence.labe@l', default: 'report')}    
+	      	${message(code: 'report.table.absence.label', default: 'report')}    
              <g:select width="50px"
                     onchange="${remoteFunction(action:'modifyAllAbsence', update:'report_table_div', 
 					onLoading: "document.getElementById('spinner').style.display = 'inline';",
