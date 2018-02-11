@@ -535,8 +535,16 @@ class EmployeeController {
 			totalLine.add(model.get('yearlyCases'))
 			totalLine.add(model.get('yearlyHomeAssistance'))
 			
-			totalLine.add(((Math.round((model.get('yearlySubTotals') as long) / 60)) / (model.get('yearlyCases') + model.get('yearlyHomeAssistance'))).toDouble().round(2))
 			
+			
+			
+			log.error("(model.get('yearlyCases') + model.get('yearlyHomeAssistance'))": +(model.get('yearlyCases') + model.get('yearlyHomeAssistance')))
+			
+			if (model.get('yearlyCases') + model.get('yearlyHomeAssistance') != 0 ){
+				totalLine.add(((Math.round((model.get('yearlySubTotals') as long) / 60)) / (model.get('yearlyCases') + model.get('yearlyHomeAssistance'))).toDouble().round(2))
+			}else{
+				totalLine.add((0).toDouble().round(2))
+			}
 			
 			fillRow(totalLine,i)
 

@@ -74,9 +74,22 @@ class MileageController {
 		log.error('calling siteMileagePDF')
 		def calendar = Calendar.instance
 		def infYear = (params['infYear_year'] != null) ? params.int('infYear_year') : calendar.get(Calendar.YEAR)
-		def supYear = (params['supYear_year'] != null) ? params.int('supYear_year') : (calendar.get(Calendar.YEAR) - 2)
-		def site = (params['site.id'] != null && !params['site.id'].equals('')) ? Site.get(params['site.id']) : null
-		def siteList = site == null ? Site.findAll() : [site]			
+		def supYear = (params['supYear_year'] != null) ? params.int('supYear_year') : (calendar.get(Calendar.YEAR) - 2)		
+		def siteList = []
+		def sites = params['sites']
+		
+		if (sites == null){
+			siteList = Site.findAll()
+		}
+		if (sites != null && sites.length == 0){
+			siteList = Site.findAll()
+		}
+		if (sites != null && sites.length > 0){
+			for (def siteName in sites){
+				siteList.add(Site.findByName(siteName))
+			}
+		}
+		//def siteList = site == null ? Site.findAll() : [site]				
 		def folder = grailsApplication.config.pdf.directory
 		def retour = PDFService.generateYearSiteMileageSheet(infYear, supYear, siteList, folder)
 		response.setContentType("application/octet-stream")
@@ -91,8 +104,23 @@ class MileageController {
 		def calendar = Calendar.instance
 		def infYear = (params['infYear_year'] != null) ? params.int('infYear_year') : calendar.get(Calendar.YEAR)
 		def supYear = (params['supYear_year'] != null) ? params.int('supYear_year') : (calendar.get(Calendar.YEAR) - 2)
-		def site = (params['site.id'] != null && !params['site.id'].equals('')) ? Site.get(params['site.id']) : null
-		def siteList = site == null ? Site.findAll() : [site]
+		//def site = (params['site.id'] != null && !params['site.id'].equals('')) ? Site.get(params['site.id']) : null	
+		
+		def siteList = []
+		def sites = params['sites']
+		
+		if (sites == null){
+			siteList = Site.findAll()
+		}
+		if (sites != null && sites.length == 0){
+			siteList = Site.findAll()
+		}
+		if (sites != null && sites.length > 0){
+			for (def siteName in sites){
+				siteList.add(Site.findByName(siteName))
+			}
+		}
+		//def siteList = site == null ? Site.findAll() : [site]		
 		def mileageSiteReportMap = [:]
 		
 		def model = mileageService.getAllSitesOverPeriod(siteList,infYear,supYear)
@@ -339,7 +367,7 @@ class MileageController {
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
 		log.error('entering index for mileage')
-		params.each{i->log.debug('parameter of list: '+i)}
+		params.each{i->log.error('parameter of list: '+i)}
 		def fromMileagePage = (params['fromMileagePage'] != null) ? params.boolean('fromMileagePage') : false
 		def employeeSiteList
 		def calendar = Calendar.instance
@@ -347,8 +375,23 @@ class MileageController {
 		def mileageBySiteMap = [:]
 		def employeeMileageYearMap = [:]
 		def mileageByEmployeeYear = [:]
-		def site = (params['site.id'] != null && !params['site.id'].equals('')) ? Site.get(params['site.id']) : null		
-		def siteList = site == null ? Site.findAll() : [site]		
+		//def site = (params['site.id'] != null && !params['site.id'].equals('')) ? Site.get(params['site.id']) : null	
+		
+		def siteList = []
+		def sites = params['sites']
+		
+		if (sites == null){
+			siteList = Site.findAll()
+		}
+		if (sites != null && sites.length == 0){
+			siteList = Site.findAll()
+		}
+		if (sites != null && sites.length > 0){
+			for (def siteName in sites){
+				siteList.add(Site.findByName(siteName))
+			}
+		}
+		//def siteList = site == null ? Site.findAll() : [site]		
 		def infYear = (params['infYear_year'] != null) ? params.int('infYear_year') : calendar.get(Calendar.YEAR)
 		def supYear = (params['supYear_year'] != null) ? params.int('supYear_year') : (calendar.get(Calendar.YEAR) - 2)
 		if (fromMileagePage){

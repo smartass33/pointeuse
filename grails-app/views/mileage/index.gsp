@@ -10,6 +10,8 @@
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'mileage.label', default: 'Milage')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>
+		<ui:resources includeJQuery="true"/>
+		
 	</head>
 	<body>
 		<a href="#list-milage" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
@@ -31,16 +33,13 @@
 					<ul>
 					<li><g:message code="laboratory.label" default="Search" style="vertical-align: middle;" /></li>
 					<li>	
-						<g:if test="${siteId != null && !siteId.equals('')}">
-							<g:select name="site.id" from="${Site.list([sort:'name'])}"
-								noSelection="${['':site.name]}" optionKey="id" optionValue="name"
-								style="vertical-align: middle;" />
-						</g:if>
-						<g:else>
-							<g:select name="site.id" from="${Site.list([sort:'name'])}" id='siteSelect'
-								noSelection="${['':(site?site.name:'-')]}" optionKey="id" optionValue="name"
-								style="vertical-align: middle;" />						
-						</g:else>
+						 <ui:multiSelect 
+						 	name="sites"
+		                     multiple="yes"
+		                     from="${Site.list()}" 
+		                     optionValue="name"
+		                     isLeftAligned="true"
+		                     noSelection="['':'Selection']" />
 					</li>							
 					<li style="vertical-align: bottom;" class="datePicker">
 						<g:datePicker name="infYear" value="${period ? period : new Date()}"

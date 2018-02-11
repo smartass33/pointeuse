@@ -5,6 +5,18 @@
 <!doctype html>
 <html>
 	<head>
+			
+			
+	<script src="${grailsApplication.config.context}/js/jquery/jquery.min.js"></script>
+	<script src="${grailsApplication.config.context}/js/jquery/jquery-ui.js"></script>
+	<script src="${grailsApplication.config.context}/js/moment.min.js"></script>
+	<script src="${grailsApplication.config.context}/js/jquery.comiseo.daterangepicker.js"></script>
+	<link href="${grailsApplication.config.context}/css/jquery-ui.min.css" rel="stylesheet"/>
+	<link href="${grailsApplication.config.context}/css/jjquery.comiseo.daterangepicker.css" rel="stylesheet"/>
+
+
+
+    
 		<style type="text/css">
 			body {
 				font-family: Verdana, Arial, sans-serif;
@@ -145,6 +157,11 @@
 					$('#paidHSDiv').load('${createLink(controller:'employee', action:'getSupplementaryTime',params:[id:employeeInstance?.id])}');
 			     });
 			</script>
+		</div>
+		<div id="sickLeave">
+		    <input id="e1" name="e1">
+		
+		
 		</div>
 	</body>
 </html>

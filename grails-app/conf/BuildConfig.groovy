@@ -58,7 +58,8 @@ grails.project.dependency.resolution = {
 		compile 'log4j:apache-log4j-extras:1.0'
 		runtime 'mysql:mysql-connector-java:5.1.21'
 		compile 'com.itextpdf:itextpdf:5.4.1'
-		build 'org.codehaus.gpars:gpars:1.2.1'		
+		build 'org.codehaus.gpars:gpars:1.2.1'	
+	   
     }
 
     plugins {
@@ -76,13 +77,12 @@ grails.project.dependency.resolution = {
 		compile ":google-visualization:0.6.2"
 		compile ":jquery-ui:1.10.3"
 		compile ":jquery-ui-timepicker:0.9.8.1"
-		compile ":jquery-date-time-picker:0.1.1"
+		//compile ":jquery-date-time-picker:0.1.1"
 		compile ":tooltip:0.8"		
 		runtime ":prototype:1.0"
 		compile ":spring-security-core:2.0.0"
 		compile "org.grails.plugins:spring-security-ui:1.0-RC3"
 		compile "org.grails.plugins:asset-pipeline:2.12.4"
-		//compile "org.grails.plugins:asset-pipeline:1.9.9"
 		compile ":rendering:0.4.4"
 		compile ":quartz2:2.1.6.2"
 		compile ":richui:0.8"
@@ -93,5 +93,7 @@ grails.project.dependency.resolution = {
 		compile ":csv:0.3.1"
 		compile ":ajax-uploader:1.1"
 		compile "org.grails.plugins:remote-pagination:0.4.8"
+		compile "org.grails.plugins:multi-select:0.2"
+		compile ':jquery-date-time-picker:0.2.0'
     }
 }
