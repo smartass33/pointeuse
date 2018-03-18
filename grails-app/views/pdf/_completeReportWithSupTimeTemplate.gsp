@@ -251,8 +251,7 @@
 	        							<tr><td>${yearlyDif as float}</td></tr>
 	        						</table>
 	        					</td>
-							</tr>								
-											
+							</tr>																			
 							<tr>
 								<td style="text-align:left;">${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
 								<td>

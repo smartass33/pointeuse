@@ -119,18 +119,16 @@ class UtilService  {
 		}
 	}
 	
-	def initiateVacations(Period year){
-		
+	def initiateVacations(Period year){		
 		def user = springSecurityService.currentUser
-
-		for (Employee employee:Employee.findAll("from Employee")){
+		for (Employee employee:Employee.findAll()){
 			def vacationCA = new Vacation()
 			vacationCA.employee = employee
 			vacationCA.loggingTime = new Date()
 			if (user){
 				vacationCA.user=user
-			}
-			vacationCA.counter=32
+			}			
+			vacationCA.counter = (employee.status.type == StatusType.ACTIF) ? 32 : 0
 			vacationCA.type=VacationType.CA
 			vacationCA.period=year
 			vacationCA.save()
@@ -141,7 +139,7 @@ class UtilService  {
 			if (user){
 				vacationRTT.user=user
 			}
-			vacationRTT.counter = employee.weeklyContractTime==35 ? 4 : 0
+			vacationRTT.counter = (employee.weeklyContractTime == 35 && employee.status.type == StatusType.ACTIF) ? 4 : 0
 			vacationRTT.type=VacationType.RTT
 			vacationRTT.period=year
 			vacationRTT.save()
@@ -149,9 +147,7 @@ class UtilService  {
 	}
 	
 	def initiateVacations(Employee employee){
-		
 		def user = springSecurityService.currentUser
-
 		for (Period period:Period.findAll("from Period")){
 			def vacationCA = new Vacation()
 			vacationCA.employee = employee

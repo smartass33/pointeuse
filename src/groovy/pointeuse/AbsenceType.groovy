@@ -14,6 +14,7 @@ public enum AbsenceType {
 	EXCEPTIONNEL('CE'),
 	PATERNITE('CP'),
 	DIF('DIF'),
+	DON('DON'),
 	FORMATION('FO'),
 	INJUSTIFIE('AI')
 	

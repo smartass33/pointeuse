@@ -30,6 +30,7 @@ import groovyx.gpars.GParsConfig
 import groovyx.gpars.GParsPool
 
 
+
 class EmployeeController {	
 	def PDFService
 	def utilService
@@ -100,7 +101,42 @@ class EmployeeController {
 		model
 	}
 	
-	
+	@Secured(['ROLE_ADMIN'])
+	def sickLeaveDailyReport(){
+		def siteId=params["site.id"]
+		def currentDate
+		def calendar = Calendar.instance
+		def fromIndex=params.boolean('fromIndex')
+		
+		if (!fromIndex && (siteId == null || siteId.size() == 0)){
+			flash.message = message(code: 'sickLeave.site.selection.error')
+			params["fromIndex"]=true
+			redirect(action: "sickLeaveDailyReport",params:params)
+			return
+		}
+		
+		def date_picker =params["date_picker"]
+		if (date_picker != null && date_picker.size()>0){
+			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
+			calendar.time=currentDate
+		}else{
+			currentDate = calendar.time
+		}
+		
+		
+		def model = timeManagerService.getDailySickLeaveData(siteId, currentDate,AbsenceType.MALADIE)
+
+		def startDate=calendar.time
+		startDate.putAt(Calendar.HOUR_OF_DAY,6)
+		startDate.putAt(Calendar.MINUTE,0)
+		
+		model << [startDate:"'"+startDate.format('yyyy-MM-dd HH:mm:SS')+"'"]
+		if (model.get('site') != null){
+			render template: "/employee/template/listSickLeaveDailyTemplate", model:model
+			return
+		}
+		model
+	}
 	
 	
 	@Secured(['ROLE_ADMIN'])
@@ -946,6 +982,7 @@ class EmployeeController {
 		headers.add(AbsenceType.PATERNITE)
 		headers.add(AbsenceType.CSS)
 		headers.add(AbsenceType.DIF)
+		headers.add(AbsenceType.DON)
 		headers.add(AbsenceType.GROSSESSE)	
 		headers.add(AbsenceType.MATERNITE)
 		headers.add(AbsenceType.MALADIE)				
@@ -1001,6 +1038,11 @@ class EmployeeController {
 				}
 				if (absenceMap.get(AbsenceType.DIF) != null){
 					dailyList.add(absenceMap.get(AbsenceType.DIF))
+				}else{
+					dailyList.add(0)
+				}
+				if (absenceMap.get(AbsenceType.DON) != null){
+					dailyList.add(absenceMap.get(AbsenceType.DON))
 				}else{
 					dailyList.add(0)
 				}
@@ -1098,6 +1140,9 @@ class EmployeeController {
 
 	@Secured(['ROLE_ADMIN'])
 	def vacationFollowup(){
+		log.error('vacationFollowup called')
+		params.each{i->log.error(i)}
+		
 		def year = params["year"]
 		def max = params["max"] != null ? params.int("max") : 20
 		def offset = params["offset"] != null ? params.int("offset") : 0	
@@ -1119,6 +1164,7 @@ class EmployeeController {
 		def takenExceptionnelMap = [:]		
 		def takenPaterniteMap = [:]
 		def takenDifMap = [:]
+		def takenDonMap = [:]
 		def formationMap = [:]
 		def takenSickness
 		def takenRTT
@@ -1129,25 +1175,16 @@ class EmployeeController {
 		def takenPaternite
 		def takenMaternite
 		def takenDIF	
+		def takenDON
 		def formation
 		def employeeInstanceTotal
 		
-		if (params["siteId"]!=null && !params["siteId"].equals("")){
-			site = Site.get(params["siteId"])
+		
+		
+		
+		if (params["site.id"]!=null && !params["site.id"].equals("")){
+			site = Site.get(params["site.id"] as long)
 			siteId=site.id	
-		}else{
-			if (params["site.id"]!=null && !params["site.id"].equals("")){
-				def tmpSite = params["site.id"]
-				if (tmpSite instanceof String[]){
-					if (tmpSite[0]!=""){
-						tmpSite=tmpSite[0]!=""?tmpSite[0].toInteger():tmpSite[1].toInteger()
-					}
-				}else {
-					tmpSite=tmpSite.toInteger()
-				}
-				site = Site.get(tmpSite)						
-				siteId=site.id			
-			}
 		}
 		
 		if (year!=null && !year.equals("")){		
@@ -1184,9 +1221,13 @@ class EmployeeController {
 			employeeInstanceList = Employee.findAllBySite(site,[max:max,offset:offset])
 			
 		}else{
-			employeeInstanceList = Employee.findAll("from Employee")
+			employeeInstanceList = []
+				def statusList = Status.findAllByType(StatusType.ACTIF)
+			for (Status status in statusList){
+				employeeInstanceList.add(status.employee)
+			}
 			employeeInstanceTotal = employeeInstanceList.size()
-			employeeInstanceList = Employee.findAll("from Employee",[max:max,offset:offset])	
+			//employeeInstanceList = Employee.findAllByStatus(StatusType.ACTIF,[max:max,offset:offset])	
 		}
 				
 		// for each employee, retrieve absences
@@ -1388,6 +1429,22 @@ class EmployeeController {
 				takenDifMap.put(employee, takenDIF.size())
 			}else{
 				takenDifMap.put(employee, 0)
+			}
+			
+			//DON
+			criteria = Absence.createCriteria()
+			takenDON = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.DON)
+				}
+			}
+			if (takenDON!=null){
+				takenDonMap.put(employee, takenDON.size())
+			}else{
+				takenDonMap.put(employee, 0)
 			}
 		}
 		log.debug("done")
@@ -1635,7 +1692,12 @@ class EmployeeController {
 		def myDate = params["myDate"] 
 		def siteId=params["siteId"]
 		def orderedVacationList=[]
+		def orderedCAMap = [:]
+		def orderedRTTMap = [:]
+		
 		def previousContracts
+		def previousSickness
+		def criteria = Vacation.createCriteria()
 		// starting calendar: 1 of June of the period
 		def startCalendar = Calendar.instance		
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
@@ -1649,14 +1711,36 @@ class EmployeeController {
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
 		
-		def periodList= Period.findAll("from Period as p order by year asc")
+		def periodList = Period.findAll("from Period as p order by year asc")
 		
 		for (Period period:periodList){
-			def vacations = Vacation.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
-			for (Vacation vacation:vacations){
-				orderedVacationList.add(vacation)
-			}			
+			//get RTT
+			criteria = Vacation.createCriteria()
+			
+			def rtt = criteria.get {
+				and {
+					eq('employee',employeeInstance)
+					eq('period',period)
+					eq('type',VacationType.RTT)
+				}
+			}
+			orderedRTTMap.put(period, rtt)
+			
+			//get CA
+			criteria = Vacation.createCriteria()
+			def ca = criteria.get {
+				and {
+					eq('employee',employeeInstance)
+					eq('period',period)
+					eq('type',VacationType.CA)
+				}
+			}
+			orderedCAMap.put(period, ca)
+			
 		}				
+		
+
+		
 		previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'startDate',order:'desc'])
         if (!employeeInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'employee.label', default: 'Employee'), id])
@@ -1664,11 +1748,10 @@ class EmployeeController {
             return
         }
 		def arrivalDate = employeeInstance.arrivalDate		
-		def criteria = EmployeeDataListMap.createCriteria()
 		def employeeDataListMap= EmployeeDataListMap.find("from EmployeeDataListMap")
 		def dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
 		def authorizationInstanceList = Authorization.findAllByEmployee(employeeInstance)
-		
+	
 		def retour = [
 			authorizationInstanceList:authorizationInstanceList,
 			fromEditEmployee:true,
@@ -1676,14 +1759,106 @@ class EmployeeController {
 			myDateFromEdit:myDate,
 			previousContracts:previousContracts,
 			arrivalDate:arrivalDate,
-			orderedVacationList:orderedVacationList,
-			orderedVacationListfromSite:fromSite,
+			orderedCAMap:orderedCAMap,
+			orderedRTTMap:orderedRTTMap,
+			periodList:periodList,
 			employeeInstance: employeeInstance,
 			isAdmin:isAdmin,siteId:siteId,
 			employeeDataListMapInstance:employeeDataListMap,
 			dataListRank:dataListRank
 		]		
 		return retour
+	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def sickLeaveReport(){
+		params.each{i-> log.error('param: '+i) }
+		
+		log.error('sickLeaveReport called')
+		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
+		def fromSite = (params["fromSite"] != null  && params["fromSite"].equals("true")) ? true : false
+		def back = (params["back"] != null  && params["back"].equals("true")) ? true : false
+		def employee = Employee.get(params["employeeId"])
+		def myDate = params["myDate"]
+		def siteId=params["siteId"]
+
+		def criteria
+		def previousSickness
+		
+		// list sick leave period
+		criteria = Absence.createCriteria()
+		def sickLeaveList = criteria.list {
+			and {
+				eq('type',AbsenceType.MALADIE)
+				eq('employee',employee)
+				order('date','asc')
+			}
+		}
+		
+		
+		//def periodList = Period.findAll()
+		def sickLeaveMap = [:]
+		def leaveCouple = [null,null]
+		def leaveList = []
+		def period
+		def sickness
+		
+		def sicknessCalendar = Calendar.instance
+		def previousSicknessCalendar = Calendar.instance
+		
+		if (sickLeaveList != null && sickLeaveList.size() > 0){
+			
+			// initialization
+			leaveCouple[0] = sickLeaveList.get(0)
+			previousSickness = sickLeaveList.get(0)
+			
+			// now that we have all sick leave, we are going to group them by 2 based on date continuity
+
+			for (int i = 1;i < sickLeaveList.size();i++){
+				sickness = sickLeaveList.get(i)				
+				sicknessCalendar.time = sickness.date
+				previousSicknessCalendar.time = previousSickness.date	
+			
+				log.error('sickness: '+sickness)
+				log.error('sicknessCalendar.time: '+sicknessCalendar.time)
+				log.error('previousSicknessCalendar.time: '+previousSicknessCalendar.time)
+				if (
+					(sicknessCalendar.get(Calendar.DAY_OF_YEAR) == previousSicknessCalendar.get(Calendar.DAY_OF_YEAR) + 1)
+					||
+					(sicknessCalendar.get(Calendar.DAY_OF_YEAR) == sicknessCalendar.getActualMinimum(Calendar.DAY_OF_YEAR) && previousSicknessCalendar.get(Calendar.DAY_OF_YEAR)  == previousSicknessCalendar.getActualMaximum(Calendar.DAY_OF_YEAR))
+					){
+					leaveCouple[1] = sickness
+					log.error("dates are consecutive")
+					if (i == sickLeaveList.size() - 1){
+						leaveList.add(leaveCouple)
+					}
+				}else{
+						log.error("dates not are consecutive")
+						leaveCouple[1] = previousSickness
+						leaveList.add(leaveCouple)
+					//	period = ((leaveCouple[0]).date.getAt(Calendar.MONTH) >= 5) ? Period.findByYear((leaveCouple[0]).date.getAt(Calendar.YEAR)) : Period.findByYear((leaveCouple[0]).date.getAt(Calendar.YEAR) - 1)
+					//	sickLeaveMap.put(period, leaveList)
+						
+						leaveCouple = [sickness,null]
+				}
+				previousSickness = sickness
+			}		
+		}
+			
+		 log.error("finalizing list")
+		 return [
+			 leaveList:leaveList,
+			 fromEditEmployee:true,
+			 back:back,
+			 myDateFromEdit:myDate,
+			 employeeInstance: employee,
+			 employeeId:employee.id,
+			 isAdmin:isAdmin,
+			 siteId:employee.site.id
+		//	 sickLeaveMap:sickLeaveMap
+			 ]
+
+		 
 	}
 	
 	@Secured(['ROLE_ADMIN'])
@@ -1757,32 +1932,36 @@ class EmployeeController {
 		if (updatedSelection.equals('CE'))
 			updatedSelection = AbsenceType.EXCEPTIONNEL
 		
-			if (updatedSelection.equals('RTT'))
+		if (updatedSelection.equals('RTT'))
 			updatedSelection = AbsenceType.RTT
-			
-			if (updatedSelection.equals('V'))
+		
+		if (updatedSelection.equals('V'))
 			updatedSelection = AbsenceType.VACANCE
-			
-			if (updatedSelection.equals('R'))
+		
+		if (updatedSelection.equals('R'))
 			updatedSelection = AbsenceType.AUTRE
-			
-			if (updatedSelection.equals('CSS'))
+		
+		if (updatedSelection.equals('CSS'))
 			updatedSelection = AbsenceType.CSS
-			
-			if (updatedSelection.equals('F'))
+		
+		if (updatedSelection.equals('F'))
 			updatedSelection = AbsenceType.FERIE
-			
-			if (updatedSelection.equals('CP'))
+		
+		if (updatedSelection.equals('CP'))
 			updatedSelection = AbsenceType.PATERNITE
-			
-			if (updatedSelection.equals('CM'))
+		
+		if (updatedSelection.equals('CM'))
 			updatedSelection = AbsenceType.MATERNITE
-			
-			if (updatedSelection.equals('DIF'))
+		
+		if (updatedSelection.equals('DIF'))
 			updatedSelection = AbsenceType.DIF
+		
+		if (updatedSelection.equals('DON'))
+			updatedSelection = AbsenceType.DON
 			
-			if (updatedSelection.equals('AI'))
+		if (updatedSelection.equals('AI'))
 			updatedSelection = AbsenceType.INJUSTIFIE
+			
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 		Date date = dateFormat.parse(params["period"])
 		def calendarLoop= Calendar.instance
@@ -2702,6 +2881,7 @@ class EmployeeController {
 
 	@Secured(['ROLE_ADMIN'])
 	def report(Long userId,int monthPeriod,int yearPeriod){
+		params.each{i-> log.error('param: '+i) }
 		def siteId=params["siteId"]
 		def myDate = params["myDate"]
 		def myDateFromEdit = params["myDateFromEdit"]
@@ -2721,7 +2901,7 @@ class EmployeeController {
 		}	
 		
 		
-		if (userId==null && params["userId"] != null ){
+		if (userId == null && params["userId"] != null ){
 			employee = Employee.get(params["userId"])
 		}else{
 			employee = Employee.get(userId)
@@ -2786,6 +2966,9 @@ class EmployeeController {
 			if (employee == null){
 				throw new NullPointerException("unknown employee("+username+")")
 			}else{
+				if (employee.status.type.equals(StatusType.SUSPENDU) || employee.status.type.equals(StatusType.TERMINE)){
+					throw new NullPointerException("unknown employee("+username+")")
+				}
 				log.error('employee successfully authenticated='+employee)
 			}
 			def calendar = Calendar.instance	
@@ -3215,7 +3398,66 @@ class EmployeeController {
 		return retour
 	}
 	 
+	 
+	 @Secured(['ROLE_ADMIN'])
+	 def addSickLeave (){
+		 params.each{i->log.error(i)}
+		 Employee employee = Employee.get(params['employeeId'])
+		 def period = Period.get(params['periodId'])
+		 def site = Site.get(params['siteId'])
+		 def sickStartDate 
+		 def sickEndDate
+		 def criteria
+		 def newSickLeave
+		 def previousSickness
+		 def nextSickness
+		 def type = AbsenceType.MALADIE
+		 log.error('sickLeaveReport called')
+		 def dateFormat = new SimpleDateFormat('d/M/yyyy');
+		 if (params['sickStartDate'] != null)
+			 sickStartDate = dateFormat.parse(params['sickStartDate'])
+		 if (params['sickEndDate'] != null )
+			 sickEndDate = dateFormat.parse(params['sickEndDate'])
+			 
+		def startCalendar = Calendar.instance
+		startCalendar.time = sickStartDate
+		log.error('startCalendar: '+startCalendar.time)
+		
+		def endCalendar = Calendar.instance
+		endCalendar.time = sickEndDate
+		log.error('endCalendar: '+endCalendar.time)
+		
+		
+		while (startCalendar <= endCalendar){
+			log.error("startCalendar: "+startCalendar.time)
+			//check if an absence (sickness or other) has been already set. If not, add absence.
+			criteria = Absence.createCriteria()
+			previousSickness = criteria.get{
+				and {
+					eq('employee',employee)
+					eq('day',startCalendar.get(Calendar.DAY_OF_MONTH))
+					eq('month',startCalendar.get(Calendar.MONTH)+1)
+					eq('year',startCalendar.get(Calendar.YEAR))
+				}
+			}
+			if (previousSickness == null){ 
+				newSickLeave = new Absence(employee, startCalendar.time, type)
+				newSickLeave.save(flush: true)
+			}
+			
+			if(startCalendar.get(Calendar.DATE) == endCalendar.get(Calendar.DATE)){
+				//TODO
+				
+				break;
+			}
+			startCalendar.add(Calendar.DATE,1)
+		}
 
+		 
+		 redirect(action: "sickLeaveReport", params: [id:employee.id,isAdmin:false,employeeId:employee.id,periodId:params['periodId'],siteId:params['siteId']])
+		 
+	 }
+	 
 	@Secured(['ROLE_ADMIN'])
 	def addNewContract (){
 		log.error('addNewContract called')
@@ -3686,7 +3928,7 @@ class EmployeeController {
 		log.error('there are '+employees.size()+' employees found')
 		def counter = 1
 		for (Employee employee: employees){
-			Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)	
+			Period period = (month > 5)?Period.findByYear(year):Period.findByYear(year - 1)	
 			def data = timeManagerService.getYearSupTime(employee,year,month,false)		
 			def criteria = SupplementaryTime.createCriteria()
 			def supTime = criteria.get {

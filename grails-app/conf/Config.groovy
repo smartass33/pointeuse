@@ -234,7 +234,8 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/**/images/**':    			['permitAll'],
 	'/register/**':    				['permitAll'],
 	'/**/favicon.ico':  			['permitAll'],
-	'/plugins/**':					['permitAll']
+	'/plugins/**':					['permitAll'],
+	'/range.html': ['permitAll']
 	
 	// special URL to be accessed via cron
 	

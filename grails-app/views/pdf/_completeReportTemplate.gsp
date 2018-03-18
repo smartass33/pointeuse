@@ -255,8 +255,7 @@
 	        							<tr><td>${yearlyDif as float}</td></tr>
 	        						</table>
 	        					</td>
-							</tr>								
-											
+							</tr>											
 							<tr>
 								<td style="text-align:left;">${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
 								<td>
@@ -350,8 +349,8 @@
 							</g:if>	
 							
 
-							<g:if test="${employee.weeklyContractTime!=35}">
-								<g:if test="${payableCompTime!=null}">						
+							<g:if test="${employee.weeklyContractTime != 35}">
+								<g:if test="${payableCompTime != null}">						
 									<tr>
 										<td style="text-align:left;">${message(code: 'employee.monthly.comp.time', default: 'report')} :</td>				
 										<td>
@@ -407,7 +406,7 @@
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="yearTimeOffHours"  name="yearTimeOffHours" value="${yearTimeOffHours}"/>${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeOffHoursDecimal"  name="yearTimeOffHoursDecimal" value="${yearTimeOffHours}"/></td></tr>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="yearTimeOffHours"  name="yearTimeOffHours" value="${yearTimeOffHours}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeOffHoursDecimal"  name="yearTimeOffHoursDecimal" value="${yearTimeOffHours}"/></td></tr>
 	        						</table>
 	        					</td>
 							</tr>																											

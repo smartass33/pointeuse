@@ -288,6 +288,7 @@ class MileageController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def employeeMileage(Integer max) {
+		log.error('employeeMileage called')
 		params.each{i->log.debug('parameter of list: '+i)}
 		SimpleDateFormat dateFormat
 		def calendar = Calendar.instance

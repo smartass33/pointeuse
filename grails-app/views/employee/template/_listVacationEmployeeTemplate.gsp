@@ -3,18 +3,18 @@
 
 <table id="table-header-rotated" style="width:100%;"class="table table-striped table-header-rotated" >
 	<thead>
-			<th class='rotate-45' ><div><span><g:message code="employee.lastName.label"/></span></div></th>
-			<th class='rotate-45'><div><span><g:message code="vacation.reference.label"/></span></div></th>
-			<th class='rotate-45'><div><span><g:message code="vacation.taken.label"/></span></div></th>
-			<th class='rotate-45'><div><span><g:message code="vacation.remainder.label"/></span></div></th>
-			<th class='rotate-45'><div><span><g:message code="rtt.reference.label"/></span></div></th>
-			<th class='rotate-45'><div><span><g:message code="rtt.taken.label"/></span></div></th>
-			<th class='rotate-45'><div><span><g:message code="rtt.remainder.label"/></span></div></th>
-			<th class='rotate-45'><div><span><g:message code="css.taken.label"/></span></div></th>
-			<th class='rotate-45'><div><span><g:message code="sickness.taken.label"/></span></div></th>		
-			<th class='rotate-45'><div><span><g:message code="other.vacation.label"/></span></div></th>
-			<th class='rotate-45'><div><span><g:message code="exceptionnal.vacation.label"/></span></div></th>
-			<th class='rotate-45'><div><span><g:message code="paternite.vacation.label"/></span></div></th>
+			<th class='rotate-45' ><div><span><font size="1"><g:message code="employee.lastName.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="vacation.reference.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="vacation.taken.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="vacation.remainder.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="rtt.reference.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="rtt.taken.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="rtt.remainder.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="css.taken.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="sickness.taken.label"/></font></span></div></th>		
+			<th class='rotate-45'><div><span><font size="1"><g:message code="other.vacation.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="exceptionnal.vacation.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="paternite.vacation.label"/></font></span></div></th>
 	</thead>
 	<tbody>
 	<g:if test="${employeeInstanceList!=null}">

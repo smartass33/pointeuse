@@ -218,6 +218,7 @@ class SiteController {
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
 		def siteAnnualDIF = 0
+		def siteAnnualDON = 0
 		def siteAnnualPayableSupTime = 0
 		def siteAnnualTheoriticalIncludingExtra = 0
 		def siteAnnualSupTimeAboveTheoritical = 0
@@ -311,6 +312,7 @@ class SiteController {
 					siteAnnualSickness += (annualEmployeeData.valueMap.get('annualSickness') != null ? annualEmployeeData.valueMap.get('annualSickness').toLong() : 0)
 					siteAnnualMaternite += (annualEmployeeData.valueMap.get('annualMaternite') != null ? annualEmployeeData.valueMap.get('annualMaternite').toLong() : 0)				
 					siteAnnualDIF += (annualEmployeeData.valueMap.get('annualDIF') != null ? annualEmployeeData.valueMap.get('annualDIF').toLong() : 0)
+					siteAnnualDON += (annualEmployeeData.valueMap.get('annualDON') != null ? annualEmployeeData.valueMap.get('annualDON').toLong() : 0)
 					siteAnnualExceptionnel += (annualEmployeeData.valueMap.get('annualExceptionnel') != null ? annualEmployeeData.valueMap.get('annualExceptionnel').toLong() : 0)
 					siteAnnualPaternite += (annualEmployeeData.valueMap.get('annualPaternite') != null ? annualEmployeeData.valueMap.get('annualPaternite').toLong() : 0)
 					siteAnnualPayableSupTime += (annualEmployeeData.valueMap.get('annualPayableSupTime') != null ? annualEmployeeData.valueMap.get('annualPayableSupTime').toLong() : 0)
@@ -332,6 +334,7 @@ class SiteController {
 				siteAnnualSickness:siteAnnualSickness,
 				siteAnnualMaternite:siteAnnualMaternite,
 				siteAnnualDIF:siteAnnualDIF,
+				siteAnnualDON:siteAnnualDON,
 				siteAnnualExceptionnel:siteAnnualExceptionnel,
 				siteAnnualPaternite:siteAnnualPaternite,
 				siteAnnualPayableSupTime:siteAnnualPayableSupTime,
@@ -349,63 +352,6 @@ class SiteController {
 			]
 		render template: "/site/template/siteMonthlyTemplate", model:model
 		return
-		/*
-		else{
-			GParsExecutorsPool.withPool {		 
-				 employeeList.iterator().eachParallel {
-					 data = timeManagerService.getAnnualReportDataNOHS(period.year, it)
-					 annualReportMap.put(it,data)	
-					 if (data != null){
-						 siteAnnualEmployeeWorkingDays += (data.get('yearOpenDays') != null ? data.get('yearOpenDays') : 0)
-						 siteAnnualTheoritical += (data.get('annualTheoritical') != null ? data.get('annualTheoritical') : 0)
-						 siteAnnualTotal += (data.get('annualTotal') != null ? data.get('annualTotal') : 0)
-						 siteAnnualHoliday += (data.get('annualHoliday') != null ? data.get('annualHoliday') : 0)
-						 siteRemainingCA += (data.get('remainingCA') != null ? data.get('remainingCA') : 0)
-						 siteAnnualRTT += (data.get('annualRTT') != null ? data.get('annualRTT') : 0)
-						 siteAnnualCSS += (data.get('annualCSS') != null ? data.get('annualCSS') : 0)
-						 siteAnnualINJUSTIFIE += (data.get('annualINJUSTIFIE') != null ? data.get('annualINJUSTIFIE') : 0)
-						 siteAnnualSickness += (data.get('annualSickness') != null ? data.get('annualSickness') : 0)
-						 siteAnnualMaternite += (data.get('annualMaternite') != null ? data.get('annualMaternite') : 0)			 
-						 siteAnnualDIF += (data.get('annualDIF') != null ? data.get('annualDIF') : 0)
-						 siteAnnualExceptionnel += (data.get('annualExceptionnel') != null ? data.get('annualExceptionnel') : 0)
-						 siteAnnualPaternite += (data.get('annualPaternite') != null ? data.get('annualPaternite') : 0)
-						 siteAnnualPayableSupTime += (data.get('annualPayableSupTime') != null ? data.get('annualPayableSupTime') as long : 0)
-						 siteAnnualTheoriticalIncludingExtra += (data.get('annualTheoriticalIncludingExtra') != null ? data.get('annualTheoriticalIncludingExtra') as long : 0)
-						 siteAnnualSupTimeAboveTheoritical += (data.get('annualSupTimeAboveTheoritical') != null ? data.get('annualSupTimeAboveTheoritical') as long : 0)
-						 siteAnnualGlobalSupTimeToPay += (data.get('annualGlobalSupTimeToPay') != null ? data.get('annualGlobalSupTimeToPay') : 0)
-					 }
-				 }
-			 }	
-			use (TimeCategory){executionTime = new Date() - startDate}
-			log.error('execution time: '+executionTime)
-			model << [flash:flash]
-			model << [period2:period,
-				site:site,
-				siteId:siteId,
-				employeeList:employeeList,
-				annualReportMap:annualReportMap,
-				siteAnnualEmployeeWorkingDays:siteAnnualEmployeeWorkingDays,
-				siteAnnualTheoritical:siteAnnualTheoritical,
-				siteAnnualTotal:siteAnnualTotal,
-				siteAnnualHoliday:siteAnnualHoliday,
-				siteRemainingCA:siteRemainingCA,
-				siteAnnualRTT:siteAnnualRTT,
-				siteAnnualCSS:siteAnnualCSS,
-				siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
-				siteAnnualSickness:siteAnnualSickness,
-				siteAnnualMaternite:siteAnnualMaternite,
-				siteAnnualDIF:siteAnnualDIF,
-				siteAnnualExceptionnel:siteAnnualExceptionnel,
-				siteAnnualPaternite:siteAnnualPaternite,
-				siteAnnualPayableSupTime:siteAnnualPayableSupTime,
-				siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
-				siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
-				siteAnnualGlobalSupTimeToPay:siteAnnualGlobalSupTimeToPay
-			]	
-			render template: "/site/template/siteMonthlyTemplate", model:model
-			return
-		}
-		*/
 	}
 	
 	@Secured(['ROLE_ANONYMOUS'])
@@ -515,6 +461,7 @@ class SiteController {
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
 		def siteAnnualDIF = 0
+		def siteAnnualDON = 0
 		def siteAnnualPayableSupTime = 0
 		def siteAnnualTheoriticalIncludingExtra = 0
 		def siteAnnualSupTimeAboveTheoritical = 0
@@ -541,6 +488,7 @@ class SiteController {
 				siteAnnualSickness += data.get('annualSickness')
 				siteAnnualMaternite += data.get('annualMaternite')			
 				siteAnnualDIF += data.get('annualDIF')
+				siteAnnualDON += data.get('annualDON')
 				siteAnnualExceptionnel += data.get('annualExceptionnel')
 				siteAnnualPaternite += data.get('annualPaternite')
 				siteAnnualPayableSupTime += data.get('annualPayableSupTime') as long
@@ -574,6 +522,7 @@ class SiteController {
 			siteAnnualSickness:siteAnnualSickness,
 			siteAnnualMaternite:siteAnnualMaternite,		
 			siteAnnualDIF:siteAnnualDIF,
+			siteAnnualDON:siteAnnualDON,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,
 			siteAnnualPayableSupTime:siteAnnualPayableSupTime,

@@ -57,13 +57,17 @@
 							<td class="cartoucheLeftTD"  width="30%">
 								<table width="100%" >
 									<tr>
-										<td style="font-weight: bold" >${employee.firstName} ${employee.lastName}</td>
+										<td style="font-weight: bold" >
+											<g:if test="${employee != null}">
+												${employee.firstName} ${employee.lastName}
+											</g:if>
+										</td>
 									</tr>
 									<tr>
-										<td>${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: ${currentContract.weeklyLength}</td>
+										<td>${message(code: 'employee.weeklyContractTime.short.label', default: 'report')}: <g:if test="${currentContract != null}">${currentContract.weeklyLength}</g:if></td>
 									</tr>
 									<tr>
-										<td>${message(code: 'employee.matricule.label', default: 'report')}: ${employee.matricule}</td>
+										<td>${message(code: 'employee.matricule.label', default: 'report')}: <g:if test="${employee != null}">${employee.matricule}</g:if></td>
 									</tr>
 								</table> 
 							</td>
@@ -124,7 +128,14 @@
 									</g:each>
 									<tr>
 										<th class="eventTD">${day.key}</th>
-										<th class="eventTD" colspan="15" scope="colgroup">${message(code: 'weekly.total.label', default: 'Report')} : <my:humanTimeTD id="weeklyTotal"  name="weeklyTotal" value="${weeklyTotal.get(employee).get(day.key)}"/></th>
+										<th class="eventTD" colspan="15" scope="colgroup">${message(code: 'weekly.total.label', default: 'Report')} : 
+											<g:if test="${weeklyTotal.get(employee) != null }">
+												<my:humanTimeTD id="weeklyTotal" name="weeklyTotal" value="${weeklyTotal.get(employee).get(day.key)}"/>
+											</g:if>
+											<g:else>
+												<my:humanTimeTD id="weeklyTotal" name="weeklyTotal" value="${0}"/>
+											</g:else>
+										</th>
 									</tr>	
 								</g:each>
 							</form>

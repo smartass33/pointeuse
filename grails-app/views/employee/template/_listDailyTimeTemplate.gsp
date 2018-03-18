@@ -85,7 +85,16 @@
 						</g:if>
 					</td>
 				</g:if>
-
+			</tr>
+		</g:each>
+		<g:each in="${sickEmployeeList}" status="i" var="sickEmployee">
+			<tr>
+				<td style="width:90px;text-align:center;valign:middle;">${sickEmployee.lastName}<BR>${sickEmployee.firstName}</td>
+				<td style="width:120px;text-align:center;valign:middle;">-</td>
+				<td style="width:120px;text-align:center;valign:middle;">${sickEmployee.function.name}</td>
+				<td style="width:120px;text-align:center;valign:middle;">${sickEmployee.service.name}</td>
+				<td>ARRET MALADIE</td>
+				<td>n/a</td>
 			</tr>
 		</g:each>
 	</tbody>

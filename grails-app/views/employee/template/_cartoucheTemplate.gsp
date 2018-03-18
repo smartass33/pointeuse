@@ -37,7 +37,10 @@
 			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="payment" action='paymentReport'  id="${payment}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true]}">${message(code: 'employee.sup.time.label', default: 'Report')}</g:link></td>
 		</tr>
 		<tr>
-			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="mileage" action='employeeMileage'  id="${milage}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true,employeeId:employee.id]}">Gestion des indemnités kilométriques</g:link></td>
+			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="mileage" action='employeeMileage'  id="${milage}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true,employeeId:employee.id]}">${message(code: 'mileage.management', default: 'Report')}</g:link></td>
+		</tr>
+		<tr>
+			<td class="cartoucheLeftTD"  style="font-weight: bold;"><g:link style="text-decoration: none;" controller="employee" action='sickLeaveReport'  id="${employee.id}" params="${[periodId:period2.id,siteId:siteId,fromIndex:true,employeeId:employee.id]}">${message(code: 'sickleave.management', default: 'Report')}</g:link></td>
 		</tr>
 		<tr>
 			<td class="cartoucheLeftTD"  style="font-weight: bold;">
@@ -124,6 +127,12 @@
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.dif.count', default: 'report')} :</td>	
 						<td class="cartoucheRightFiguresTD">${dif as java.lang.Float}</td>        					
 		     			<td class="cartoucheRightFiguresTD">${yearlyDif as java.lang.Float}</td>
+		     			<td class="cartoucheRightFiguresTD">
+					</tr>	
+					<tr>		
+						<td class="cartoucheRightTitleTD" >${message(code: 'employee.don.count', default: 'report')} :</td>	
+						<td class="cartoucheRightFiguresTD">${don as java.lang.Float}</td>        					
+		     			<td class="cartoucheRightFiguresTD">${yearlyDon as java.lang.Float}</td>
 		     			<td class="cartoucheRightFiguresTD">
 					</tr>										
 					<tr>

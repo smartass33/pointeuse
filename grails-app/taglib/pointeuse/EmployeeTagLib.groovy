@@ -23,6 +23,10 @@ class EmployeeTagLib {
 		
 	}
 	
+	def listDailySickLeave ={attrs,body->
+		out<<render(template:"/employee/template/listSickLeaveDailyTemplate")
+		
+	}
 	
 	def annualReportTable ={attrs,body->
 		out<<render(template:"/employee/template/annualReportTemplate")
@@ -32,6 +36,11 @@ class EmployeeTagLib {
 	
 	def vacationEditTable ={attrs,body->
 		out<<render(template:"/employee/template/vacationEditTemplate")
+		
+	}
+	
+	def sickLeave ={attrs,body->
+		out<<render(template:"/employee/template/sickLeaveTemplate")
 		
 	}
 	

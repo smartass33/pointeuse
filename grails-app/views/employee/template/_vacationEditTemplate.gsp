@@ -17,51 +17,44 @@
 		<tbody>
 		<%
 			def firstYear = (Period.findAll("from Period as p order by year asc",[max:1])).year
-			def lastYear = (Period.findAll("from Period as p order by year desc",[max:1])).year 
-			def iterator = firstYear.get(0) as int
-			def sameLine=false
+			def iterator = firstYear
+			def sameLine = true
 		%>
-			<g:each in="${orderedVacationList}" status="i" var="vacationInstance">
-				<% 
-					if (iterator == vacationInstance.period.year){
-						iterator = iterator + 1
-						sameLine = true
-					}else{
-						sameLine = false
-					}
-				 %>
-				<g:if test="${sameLine}">
-					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">				
-						<td>${vacationInstance.period}</td>					
-						<td>				
-					        <div>
+		<g:if test="${orderedCAMap != null &&  orderedRTTMap != null}">
+			<g:each in="${periodList}" status="i" var="period">
+				<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
+					<td>${period.year}/${period.year + 1}</td>
+					<td>
+						<g:if test="${orderedCAMap.get(period) != null}">							
+							<div>
 			            		<input type="number" name="name"          		
 				           			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
 											  	params:'\'userId=' + employeeInstance.id 						  
-													+ '&vacationId=' + vacationInstance.id
+													+ '&vacationId=' + orderedCAMap.get(period).id
 											  		+ '&counter=\' + this.value')}"
-				                    value="${vacationInstance.counter}" 
+				                    value="${orderedCAMap.get(period).counter}" 
 									min="0"
 				            	/>
 			        		</div>
-						</td>								
-						</g:if>	
-						<g:else>	
-							<td>			
-						        <div>
-				            		<input type="number" name="name"          		
-					           			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
-												  	params:'\'userId=' + employeeInstance.id 						  
-														+ '&vacationId=' + vacationInstance.id
-												  		+ '&counter=\' + this.value')}"
-					                    value="${vacationInstance.counter}" 
-										min="0"
-					            	/>
-				        		</div>
-							</td>
-					</tr>	
-				</g:else>									
+						</g:if>
+					</td>
+					<td>
+						<g:if test="${orderedRTTMap.get(period) != null}">							
+							<div>
+			            		<input type="number" name="name"          		
+				           			onchange="${remoteFunction(action:'changeValue', controller:'vacation', 
+											  	params:'\'userId=' + employeeInstance.id 						  
+													+ '&vacationId=' + orderedRTTMap.get(period).id
+											  		+ '&counter=\' + this.value')}"
+				                    value="${orderedRTTMap.get(period).counter}" 
+									min="0"
+				            	/>
+			        		</div>
+						</g:if>
+					</td>
+				</tr>
 			</g:each>
+		</g:if>
 		</tbody>
 	</table>
 </body>

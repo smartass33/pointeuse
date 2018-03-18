@@ -24,14 +24,13 @@
 		<div class="message" role="status">${flash.message2}</div>
 	</g:if>
 
-
 	<table class="form-table" id="customFields">
 		<thead>
-			<th>Date de début</th>
-			<th>Date de fin</th>
+			<th><g:message code="contract.start.date"/></th>
+			<th><g:message code="contract.end.date"/></th>
 			<th><g:message code="employee.weeklyContractTime.label"/></th>
-			<th>Statut</th>	
-			<th>Effacer</th>								
+			<th><g:message code="message"/></th>	
+			<th><g:message code="contract.delete.label"/></th>								
 		</thead>
 		<tbody>
 			<g:if test='${previousContracts != null}'>

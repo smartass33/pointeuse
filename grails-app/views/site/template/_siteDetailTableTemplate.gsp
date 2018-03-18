@@ -19,6 +19,7 @@
 			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
 			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
 			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.DIF.label"/></span></div></th>
+			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.DON.label"/></span></div></th>
 			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>		
 			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
 			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="employee.paternite.count"/></span></div></th>
@@ -39,6 +40,7 @@
 						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualCSS')}</g:if></td>
 						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualINJUSTIFIE')}</g:if></td>
 						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualDIF')}</g:if></td>
+						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualDON')}</g:if></td>
 						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualSickness')}</g:if></td>
 						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualExceptionnel')}</g:if></td>
 						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualPaternite')}</g:if></td>
@@ -58,6 +60,7 @@
 						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualCSS}</td>
 						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualINJUSTIFIE}</td>
 						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualDIF}</td>
+						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualDON}</td>
 						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualSickness}</td>
 						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualExceptionnel}</td>
 						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualPaternite}</td>

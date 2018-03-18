@@ -91,6 +91,7 @@ class PeriodController {
     }
 
     def delete(Long id) {
+
         def periodInstance = Period.get(id)
         if (!periodInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'period.label', default: 'Year'), id])
@@ -111,10 +112,6 @@ class PeriodController {
 	
 	def changeValue(){
 		log.error("entering changeValue")
-		/*
-		params.each{i->
-			log.error(i);
-		}*/
 		def year = params["yearAsString"] as long
 		def yearAsString = year.toString()+'/'+(year+1).toString()
 		render template: "/common/periodBoxTemplate", model:[yearAsString:yearAsString]
