@@ -1139,6 +1139,343 @@ class EmployeeController {
 	}
 
 	@Secured(['ROLE_ADMIN'])
+	def absenceFollowup(){
+		log.error('absenceFollowup called')
+		params.each{i->log.error(i)}
+		boolean isMonthlyView = false
+		boolean isYearlyView = false
+		boolean isDailyView = false
+		def folder = grailsApplication.config.pdf.directory
+		def reportSpan = params["id"]		
+		def max = params["max"] != null ? params.int("max") : 20
+		def offset = params["offset"] != null ? params.int("offset") : 0
+		def siteId
+		def site
+		def employeeInstanceList
+		def criteria
+		def absenceList
+		def employeeInstanceTotal
+		def currentCalendar = Calendar.instance
+		def date_picker = params["date_picker"]
+		def absenceMapByEmployee = [:]
+		def absenceMapByDay = [:]
+		def dayList = []
+		def headers = ['nom']
+		def period = (currentCalendar.get(Calendar.MONTH) >= 5) ? Period.findByYear(currentCalendar.get(Calendar.YEAR)) : Period.findByYear(currentCalendar.get(Calendar.YEAR) - 1)	
+		def firstDayOfPeriod = Calendar.instance
+		def initialDayOfPeriod = Calendar.instance
+		
+		def lastDayOfPeriod = Calendar.instance
+		firstDayOfPeriod.set(Calendar.YEAR,period.year)
+		firstDayOfPeriod.set(Calendar.MONTH,5)
+		firstDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		firstDayOfPeriod.clearTime()
+		
+		initialDayOfPeriod.set(Calendar.YEAR,period.year)
+		initialDayOfPeriod.set(Calendar.MONTH,5)
+		initialDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		initialDayOfPeriod.clearTime()
+		
+		lastDayOfPeriod.set(Calendar.YEAR,period.year + 1)
+		lastDayOfPeriod.set(Calendar.MONTH,5)
+		lastDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		lastDayOfPeriod.clearTime()
+		
+		if (date_picker != null && date_picker.size() > 0){
+			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+		}
+		
+		
+		
+		if (params["site.id"]!=null && !params["site.id"].equals("")){
+			site = Site.get(params["site.id"] as long)
+			siteId = site.id
+		}
+		
+		if (site != null){
+			employeeInstanceList = Employee.findAllBySite(site)
+			employeeInstanceTotal = employeeInstanceList.size()
+			employeeInstanceList = Employee.findAllBySite(site,[max:max,offset:offset])
+			
+		}else{
+			employeeInstanceList = Employee.findAll()
+			employeeInstanceTotal = employeeInstanceList.size()
+		}
+		switch (reportSpan) {
+			// case daily
+			case 'dailyView':
+				isDailyView = true
+				criteria = Absence.createCriteria()
+				absenceList = criteria.list {
+					and {
+						'in'("employee",employeeInstanceList)
+						eq('day',currentCalendar.get(Calendar.DAY_OF_MONTH))
+						eq('month',currentCalendar.get(Calendar.MONTH) + 1)
+						eq('year',currentCalendar.get(Calendar.YEAR))
+					}
+				}
+				break
+			// case monthly
+			case 'monthlyView':
+				isMonthlyView = true
+				
+				
+				for (Employee employee in employeeInstanceList){
+					criteria = Absence.createCriteria()
+					absenceList = criteria.list {
+						and {
+							eq('employee',employee)
+							//'in'("employee",employeeInstanceList)
+							eq('month',currentCalendar.get(Calendar.MONTH) + 1)
+							eq('year',currentCalendar.get(Calendar.YEAR))
+						}
+					}
+					
+					absenceMapByDay = [:]
+					for (Absence absence in absenceList){
+						absenceMapByDay.put(absence.day as int, absence)
+					
+					}
+					
+					absenceMapByEmployee.put(employee, absenceMapByDay)
+				}
+				
+				
+				
+				
+				break
+			// case yearly
+			case 'yearlyView':
+				isYearlyView = true
+				while(firstDayOfPeriod.get(Calendar.MONTH) <= 11){
+					log.debug('refCalendar: '+firstDayOfPeriod.time.format('d-M-yyyy'))
+					dayList.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+					if (firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) == firstDayOfPeriod.getActualMaximum(Calendar.DAY_OF_YEAR)){
+						break
+					}
+					firstDayOfPeriod.roll(Calendar.DAY_OF_YEAR, 1)
+				}
+				firstDayOfPeriod.set(Calendar.MONTH,0)
+				firstDayOfPeriod.set(Calendar.YEAR,period.year + 1)
+				while(firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) <= lastDayOfPeriod.get(Calendar.DAY_OF_YEAR)){
+					log.debug('firstDayOfPeriod: '+firstDayOfPeriod.time.format('d-M-yyyy'))
+					dayList.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+					firstDayOfPeriod.roll(Calendar.DAY_OF_YEAR, 1)
+					if (firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) == lastDayOfPeriod.get(Calendar.DAY_OF_YEAR)){
+						break
+					}
+				}
+				
+				
+				for (Employee employee in employeeInstanceList){
+					absenceMapByDay = [:]
+					criteria = Absence.createCriteria()
+					absenceList = criteria.list {
+						and {
+							eq('employee',employee)
+							//'in'("employee",employeeInstanceList)
+							ge('date',initialDayOfPeriod.time)
+							lt('date',lastDayOfPeriod.time)
+						}
+					}
+					
+					for (Absence absence in absenceList){
+						absenceMapByDay.put(absence.day+'-'+absence.month+'-'+absence.year, absence)
+					}
+					
+					for (int k = 0;k < dayList.size();k++){
+						if (absenceMapByDay.get(dayList[k]) == null){
+							absenceMapByDay.put(dayList[k],'-')
+							headers.add(dayList[k])
+						}
+					}
+					absenceMapByEmployee.put(employee, absenceMapByDay)
+				}
+				break
+
+			default:
+				break
+		}
+			
+		if (isYearlyView){
+			WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/employee_list_template.xlsx').with {
+				def data = []
+				int i = 1
+				setResponseHeaders(response)
+				fillHeader(headers)
+				absenceMapByEmployee.each{employeeInstance,absenceMapByDayInstance->
+					data.add(employeeInstance)
+					absenceMapByDayInstance.each{k,v->
+						if (!v.equals('-')){
+							data.add(v.type)
+						}else{
+							data.add('-')
+						}
+					}
+					fillRow(data,i)
+					i++
+				}
+				save(response.outputStream)
+				response.setContentType("application/octet-stream")
+			}
+			
+			return
+		}
+		
+		def model = 
+			[
+				period:period,
+				employeeInstanceList:employeeInstanceList,
+				isYearlyView:isYearlyView,
+				isMonthlyView:isMonthlyView,
+				isDailyView:isDailyView,
+				dayList:dayList,
+				currentDate:currentCalendar.time,
+				absenceMapByEmployee:absenceMapByEmployee,
+				absenceList:absenceList
+			]
+		
+		if (isDailyView || isMonthlyView || isYearlyView){
+			render template: "/employee/template/listAbsenceEmployeeTemplate", model: model
+			return 	
+		}
+		model
+		
+	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def vacationFollowAnnualExcel(){
+		params.each{i->log.error(i)}
+		def folder = grailsApplication.config.pdf.directory
+		def max = params["max"] != null ? params.int("max") : 20
+		def offset = params["offset"] != null ? params.int("offset") : 0
+		def siteId
+		def site
+		def employeeInstanceList
+		def criteria
+		def absenceList
+		def employeeInstanceTotal
+		def currentCalendar = Calendar.instance
+		def absenceMapByEmployee = [:]
+		def absenceMapByDay = [:]
+		def dayList = []
+		def data = []
+		def date_picker = params["date_picker"]
+		def headers = ['nom']
+		def period = (currentCalendar.get(Calendar.MONTH) >= 5) ? Period.findByYear(currentCalendar.get(Calendar.YEAR)) : Period.findByYear(currentCalendar.get(Calendar.YEAR) - 1)
+		def firstDayOfPeriod = Calendar.instance
+		def initialDayOfPeriod = Calendar.instance
+		
+		def lastDayOfPeriod = Calendar.instance
+		firstDayOfPeriod.set(Calendar.YEAR,period.year)
+		firstDayOfPeriod.set(Calendar.MONTH,5)
+		firstDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		firstDayOfPeriod.clearTime()
+		
+		initialDayOfPeriod.set(Calendar.YEAR,period.year)
+		initialDayOfPeriod.set(Calendar.MONTH,5)
+		initialDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		initialDayOfPeriod.clearTime()
+		
+		lastDayOfPeriod.set(Calendar.YEAR,period.year + 1)
+		lastDayOfPeriod.set(Calendar.MONTH,5)
+		lastDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		lastDayOfPeriod.clearTime()
+
+		if (date_picker != null && date_picker.size() > 0){
+			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+		}
+		
+		if (params["site.id"]!=null && !params["site.id"].equals("")){
+			site = Site.get(params["site.id"] as long)
+			siteId = site.id
+		}
+		
+		if (site != null){
+			employeeInstanceList = Employee.findAllBySite(site)
+			employeeInstanceTotal = employeeInstanceList.size()
+			employeeInstanceList = Employee.findAllBySite(site,[max:max,offset:offset])
+			
+		}else{
+			employeeInstanceList = Employee.findAll()
+			employeeInstanceTotal = employeeInstanceList.size()
+		}
+		
+		while(firstDayOfPeriod.get(Calendar.MONTH) <= 11){
+			log.error('refCalendar: '+firstDayOfPeriod.time.format('d-M-yyyy'))
+			dayList.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+			headers.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+			if (firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) == firstDayOfPeriod.getActualMaximum(Calendar.DAY_OF_YEAR)){
+				break
+			}
+			firstDayOfPeriod.roll(Calendar.DAY_OF_YEAR, 1)
+		}
+		firstDayOfPeriod.set(Calendar.MONTH,0)
+		firstDayOfPeriod.set(Calendar.YEAR,period.year + 1)
+		while(firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) <= lastDayOfPeriod.get(Calendar.DAY_OF_YEAR)){
+			log.error('firstDayOfPeriod: '+firstDayOfPeriod.time.format('d-M-yyyy'))
+			dayList.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+			headers.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+			firstDayOfPeriod.roll(Calendar.DAY_OF_YEAR, 1)
+			if (firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) == lastDayOfPeriod.get(Calendar.DAY_OF_YEAR)){
+				break
+			}
+		}
+		
+		for (Employee employee in employeeInstanceList){
+			absenceMapByDay = [:]
+			criteria = Absence.createCriteria()
+			absenceList = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',initialDayOfPeriod.time)
+					lt('date',lastDayOfPeriod.time)
+				}
+			}
+			
+			for (Absence absence in absenceList){
+				absenceMapByDay.put(absence.day+'-'+absence.month+'-'+absence.year, absence)
+			}
+			
+			for (int k = 0;k < dayList.size();k++){
+				if (absenceMapByDay.get(dayList[k]) == null){
+					absenceMapByDay.put(dayList[k],'-')
+				}
+			}
+			absenceMapByEmployee.put(employee, absenceMapByDay)
+		}
+		
+		
+		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/employee_list_template.xlsx').with {
+			
+			int i = 1
+			setResponseHeaders(response)
+			fillHeader(headers)
+			absenceMapByEmployee.each{employeeInstance,absenceMapByDayInstance->
+				data = []
+				data.add(employeeInstance.lastName+' '+employeeInstance.firstName)
+				
+				for (int l = 0;l < dayList.size();l++){
+					if (!(absenceMapByDayInstance.get(dayList[l])).equals('-')){
+						data.add(absenceMapByDayInstance.get(dayList[l]).type)
+					}else{
+						data.add('-')
+					}
+				}
+
+				fillRow(data,i)
+				i++
+			}
+			save(response.outputStream)
+			response.setContentType("application/octet-stream")
+		}
+		
+
+		
+		
+	}
+	
+	@Secured(['ROLE_ADMIN'])
 	def vacationFollowup(){
 		log.error('vacationFollowup called')
 		params.each{i->log.error(i)}
@@ -2999,7 +3336,6 @@ class EmployeeController {
 
 	@Secured(['ROLE_ADMIN'])
 	def ecartEXCEL(){
-		params.each{i-> log.debug('param: '+i) }
 		def folder = grailsApplication.config.pdf.directory
 		def totalMonthlyTheoritical = params["totalMonthlyTheoritical"] as long
 		def totalMonthlyActual = params["totalMonthlyActual"] as long 

@@ -55,6 +55,11 @@ class EmployeeTagLib {
 		
 	}
 	
+	def listAbsences ={attrs,body->
+		out<<render(template:"/employee/template/listAbsenceEmployeeTemplate")
+		
+	}
+	
 	
 	def employeeContractTable ={attrs,body->
 		out<<render(template:"/employee/template/contractTable")
