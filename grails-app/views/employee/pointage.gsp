@@ -42,9 +42,6 @@
 				return i;
 			}
 
-
-			
-
 			function datePickerLaunch (){
 				$.datepicker.regional['fr'] = {
 							closeText: 'Fermer',

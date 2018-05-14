@@ -27,6 +27,12 @@ class PeriodController {
         [periodInstance: new Period(params)]
     }
 
+	def initializeVacation(){
+		def period = Period.findByYear(params.int('year'))	
+		utilService.initiateVacations(period)
+		return	
+	}
+	
     def save() {
         def periodInstance = new Period(params)
         if (!periodInstance.save(flush: true)) {

@@ -3557,9 +3557,7 @@ class EmployeeController {
 		String paperSize = "A4"
 		String url = "http://localhost:8080/pointeuse/employee/dailyReport?isAdmin=false&max=20&fromIndex=true" //url of your web page to which you want to convert into pdf
 		File outputFile = File.createTempFile("sample", ".pdf") //file in which you want to save your pdf
-		 
-		//TODO: also do exception handling stuff . i am not doing this for simplicity
-		 
+		 		 
 		Process process = Runtime.getRuntime().exec(pathToPhantomJS + " " + pathToRasterizeJS + " " + url + " " + outputFile.absolutePath + " " + paperSize);
 		int exitStatus = process.waitFor(); //do a wait here to prevent it running for ever
 		if (exitStatus != 0) {
@@ -3782,7 +3780,6 @@ class EmployeeController {
 			}
 			
 			if(startCalendar.get(Calendar.DATE) == endCalendar.get(Calendar.DATE)){
-				//TODO
 				
 				break;
 			}
