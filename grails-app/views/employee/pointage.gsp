@@ -119,7 +119,7 @@
 			</div>
 			<div id="last5days" style='padding:10px;'>
 				<g:last5days />
-			</div>					
+			</div>			
 			<g:hiddenField name="userId" value="${userId}" />
 			<g:hiddenField name="fromReport" value="${false}" />
 		</g:form>
