@@ -41,7 +41,7 @@ environments {
 			url = "jdbc:mariadb://localhost:3306/pointeuse"
 			driverClassName = "org.mariadb.jdbc.Driver"
 			username = "root"
-			password = ""
+			password = "root"
 			
 			properties {
 				maxActive = 50
