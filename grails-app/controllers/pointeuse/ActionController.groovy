@@ -38,6 +38,8 @@ class ActionController {
         respond new Action(params)
     }
 	
+
+	
 	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
 	def addAction(){
 		log.error('addAction called')
@@ -61,8 +63,6 @@ class ActionController {
 		def action = new Action(itinerary, new Date(), site, employee, actionType) 	
 		action.save flush:true
 		log.error('done')
-
-		
 	}
 	
     @Transactional

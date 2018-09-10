@@ -77,7 +77,6 @@ grails.project.dependency.resolution = {
 		compile ":google-visualization:0.6.2"
 		compile ":jquery-ui:1.10.3"
 		compile ":jquery-ui-timepicker:0.9.8.1"
-		//compile ":jquery-date-time-picker:0.1.1"
 		compile ":tooltip:0.8"		
 		runtime ":prototype:1.0"
 		compile ":spring-security-core:2.0.0"
@@ -86,7 +85,6 @@ grails.project.dependency.resolution = {
 		compile ":rendering:0.4.4"
 		compile ":quartz2:2.1.6.2"
 		compile ":richui:0.8"
-		//runtime ":searchable:0.6."	
 		runtime ":searchable:0.6.7"
 		compile ":codenarc:0.20"
 		compile ":mail:1.0.4"		
@@ -94,7 +92,7 @@ grails.project.dependency.resolution = {
 		compile ":csv:0.3.1"
 		compile ":ajax-uploader:1.1"
 		compile "org.grails.plugins:remote-pagination:0.4.8"
-		compile "org.grails.plugins:multi-select:0.2"
+		compile "org.grails.plugins:multi-select:0.2"	
 		compile ':jquery-date-time-picker:0.2.0'
     }
 }

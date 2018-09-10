@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<g:javascript library="jquery" plugin="jquery" />
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'itinerary.label', default: 'Itinerary')}" />
 		<title><g:message code="default.create.label" args="[entityName]" /></title>
@@ -27,12 +28,15 @@
 			</g:hasErrors>
 			<g:form url="[resource:itineraryInstance, action:'save']" >
 				<fieldset class="form">
-					<g:render template="form"/>
+					<div id="itineraryForm">
+					<g:render template="form" />
+					</div>
 				</fieldset>
 				<fieldset class="buttons">
 					<g:submitButton name="create" class="save" value="${message(code: 'default.button.create.label', default: 'Create')}" />
 				</fieldset>
 			</g:form>
+			</tr>	
 		</div>
 	</body>
 </html>

@@ -37,7 +37,7 @@
 
 				<g:employeeDataListTable/>
 			</div>
-			<g:form method="post" >			
+			<g:form method="post">			
 				<script>		
 					$(document).ready(
 					    function() {

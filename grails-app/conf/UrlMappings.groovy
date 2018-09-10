@@ -7,6 +7,7 @@ class UrlMappings {
 			}
 		}
 		"/redirection"(uri: "/redirection.html")
+		"/time"(uri: "/time.html")
 		
 		"/"(view:"/index")
 		//"500"(view:'/error')
