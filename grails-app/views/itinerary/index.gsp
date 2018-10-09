@@ -40,51 +40,11 @@
 		<div class="nav" role="navigation">
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
-				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
+				<li><g:link class="create" action="create"><g:message code="default.feminine.new.label" args="[entityName]" /></g:link></li>
 			</ul>
 		</div>
-		<div id="actions" class="standardNav">
+
 		
-			<g:form method="POST" url="[controller:'action', action:'showItineraryActions']">
-			<ul>
-						<li><g:message code="itinerary.label" default="Search" style="vertical-align: middle;" /></li>
-						<li>
-							<g:if test="${itineraryId != null && !itineraryId.equals('')}">
-								<g:select name="itineraryId" from="${Itinerary.list([sort:'name'])}"
-									noSelection="${['':itinerary.name]}" optionKey="id" optionValue="name"
-									style="vertical-align: middle;" />
-							</g:if>
-							<g:else>
-								<g:select name="itineraryId" from="${Itinerary.list([sort:'name'])}"
-									noSelection="${['':(itinerary?itinerary.name:'-')]}" optionKey="id" optionValue="name"
-									style="vertical-align: middle;" />						
-							</g:else>				
-						</li>
-						
-						<li>
-							<input type="text" id="date_picker" name="date_picker" />
-						</li>
-						<li>	
-							<g:submitToRemote class="displayButton"
-								value="${message(code:'absence.report.daily.view')}"
-								update="absenceList" 
-								onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                onComplete="document.getElementById('spinner').style.display = 'none';"
-								url="[controller:'itinerary', action:'showItineraryActions',id:'dailyView']"
-							/>	
-						</li>		
-						<li>
-							<g:submitToRemote class="displayButton"
-								value="${message(code:'absence.report.monthly.view')}"
-								update="absenceList" 
-								onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                onComplete="document.getElementById('spinner').style.display = 'none';"
-								url="[controller:'itinerary', action:'showItineraryActions',id:'monthlyView']"
-							/>	
-						</li>		
-					</ul>
-			</g:form>
-		</div>
 		<div id="list-itinerary" class="content scaffold-list" role="main">
 			<h1><g:message code="default.list.label" args="[entityName]" /></h1>
 			<g:if test="${flash.message}">
@@ -96,6 +56,7 @@
 						<g:sortableColumn property="name" title="${message(code: 'itinerary.name.label', default: 'Name')}" />
 						<th><g:message code="itinerary.creationUser.label" default="Creation User" /></th>
 						<th><g:message code="itinerary.deliveryBoy.label" default="Delivery Boy" /></th>
+						<th>action<th>
 					</tr>
 				</thead>
 				<tbody>
@@ -103,7 +64,8 @@
 					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">					
 						<td><g:link action="show" id="${itineraryInstance.id}">${fieldValue(bean: itineraryInstance, field: "name")}</g:link></td>
 						<td>${itineraryInstance.creationUser.lastName} ${itineraryInstance.creationUser.firstName}</td>				
-						<td>${itineraryInstance.deliveryBoy.lastName} ${itineraryInstance.deliveryBoy.firstName}</td>							
+						<td>${itineraryInstance.deliveryBoy.lastName} ${itineraryInstance.deliveryBoy.firstName}</td>	
+						<td><g:link class="create" action="itineraryReport">Obtenir le rapport</g:link></td>						
 					</tr>
 				</g:each>
 				</tbody>

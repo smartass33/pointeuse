@@ -30,6 +30,7 @@ import java.util.concurrent.*
 import groovyx.gpars.GParsConfig
 import groovyx.gpars.GParsPool
 
+import groovy.time.TimeCategory;
 
 import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional
@@ -46,47 +47,212 @@ class ItineraryController {
     }
 
 
-	    def show(Itinerary itineraryInstance) {
+	def addAction(){
+		log.error('addAction called')
+		
+	}
+	
+	def show(Itinerary itineraryInstance) {
         respond itineraryInstance
     }
 
     def create() {
-        respond new Itinerary(params)
+		def isExpanded = false
+		def coursierFunction = Function.findByName('Coursier')
+		def employeeList = Employee.findAllByFunction(coursierFunction)
+		[employeeList:employeeList,checked:isExpanded]
     }
+	
+	@Secured(['ROLE_ADMIN'])
+	def trash(){
+		log.error('trash called')
+		params.each{i->log.error('parameter of list: '+i)}
+		def action = Action.get(params["actionItemId"])
+		def itinerary = action.itinerary
+		action.delete flush:true
+		def actionsList
+		def criteria = Action.createCriteria()
+		actionsList= criteria.list {
+			and {
+				eq('itinerary',itinerary)
+				eq('isTheoritical',true)
+				order('date','asc')
+			}
+		}
+		render template: "/itinerary/template/theoriticalActionTable", model: [
+			itineraryInstance:itinerary,theoriticalActionsList:actionsList
+		]
+		return
+	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def addTheoriticalAction(){
+		log.error('addAction called')
+		params.each{i->log.error('parameter of list: '+i)}
+		def site
+		def itinerary
+		def actionType
+		def employee
+		if (params['employeeId'] != null)
+			employee = Employee.get(params.int('employeeId'))
+		if (params['siteId'] != null)
+			site = Site.get(params.int('siteId'))
+		if (params['itineraryId'] != null)
+			itinerary = Itinerary.get(params.int('itineraryId'))
 
+		def currentDate =  new Date().parse("kk:mm", params['time_picker'])
+			
+		actionType = params['nature']
+		if (actionType != null){
+			
+			actionType = actionType.equals('ARRIVEE') ? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
+		}
+		def action = new Action(itinerary, currentDate, site, itinerary.deliveryBoy, actionType)
+		action.isTheoritical = true
+		action.save flush:true
+		def actionsList
+		def criteria = Action.createCriteria()
+		actionsList= criteria.list {
+			and {
+				eq('itinerary',itinerary)
+				eq('isTheoritical',true)
+				order('date','asc')
+			}
+		}
+		render template: "/itinerary/template/theoriticalActionTable", model: [
+			itineraryInstance:itinerary,theoriticalActionsList:actionsList
+			]
+		return
+	}
+	
+	def itineraryReport(){
+		
+	}
+	
 	
 	def showItineraryActions(){
 		log.error('showItineraryActions called')
-		params.each{i->log.error('parameter of list: '+i)}
+	//	params.each{i->log.error('parameter of list: '+i)}
 		def itinerary
 		def currentCalendar = Calendar.instance
 		def criteria 
-		def actionList
+		def actionsList
+		def theoriticalActionsList
 		def date_picker = params['date_picker'] 
+		def viewType = params['id']
+		def timeDiff
+		def timeDiffMap = [:]
+		def actionListMap = [:]
+		def calendar = Calendar.instance
+		def monthCalendar = Calendar.instance
+		def i = 0
+		def hasDiscrepancy = false
 		
 		if (params['itineraryId'] != null)
-			itinerary = Itinerary.get(params.int('itineraryId'))
-		//	date_picker=04/07/2018
-	
-		if (date_picker != null && date_picker.size() > 0){
+			itinerary = Itinerary.get(params.int('itineraryId'))	
+		if (date_picker != null && date_picker.size() > 0)
 			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
-		}
-		log.error('currentCalendar: '+currentCalendar.time)
 		
 		criteria = Action.createCriteria()
-		actionList = criteria.list {
+
+		switch (viewType) {
+				case 'dailyView':
+					actionsList = criteria.list {
+						and {
+							eq('itinerary',itinerary)
+							eq('day',currentCalendar.get(Calendar.DAY_OF_MONTH))
+							eq('month',currentCalendar.get(Calendar.MONTH) + 1)
+							eq('year',currentCalendar.get(Calendar.YEAR))
+							eq('isTheoritical',false)
+						}
+					}
+					break
+				case 'monthlyView':
+				/*
+					actionsList = criteria.list {
+						and {
+							eq('itinerary',itinerary)
+							eq('month',currentCalendar.get(Calendar.MONTH) + 1)
+							eq('year',currentCalendar.get(Calendar.YEAR))
+							eq('isTheoritical',false)
+						}
+					}		
+				*/
+					
+					monthCalendar = currentCalendar
+					monthCalendar.set(Calendar.DAY_OF_MONTH,1)
+					def lastDay = currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+					
+					for (int j = 1;j < lastDay + 1;j++){
+						
+						criteria = Action.createCriteria()
+						actionsList = criteria.list {
+							and {
+								eq('itinerary',itinerary)
+								eq('day',monthCalendar.get(Calendar.DAY_OF_MONTH))
+								eq('month',monthCalendar.get(Calendar.MONTH) + 1)
+								eq('year',monthCalendar.get(Calendar.YEAR))
+								eq('isTheoritical',false)
+							}
+						}
+						actionListMap.put(monthCalendar.time,actionsList)
+						monthCalendar.roll(Calendar.DAY_OF_MONTH,1)
+					}
+					
+								
+					break
+				default:
+					actionsList = criteria.list {
+						and {
+							eq('itinerary',itinerary)
+							eq('day',currentCalendar.get(Calendar.DAY_OF_MONTH))
+							eq('month',currentCalendar.get(Calendar.MONTH) + 1)
+							eq('year',currentCalendar.get(Calendar.YEAR))
+							eq('isTheoritical',false)
+						}
+					}
+					break
+			}
+		
+		criteria = Action.createCriteria()
+		theoriticalActionsList = criteria.list {
 			and {
 				eq('itinerary',itinerary)
-				eq('day',currentCalendar.get(Calendar.DAY_OF_MONTH))
-				eq('month',currentCalendar.get(Calendar.MONTH) + 1)
-				eq('year',currentCalendar.get(Calendar.YEAR))
+				eq('isTheoritical',true)
+				order('date','asc')
 			}
 		}
-		return [
-			actionList:actionList,
-			itineraryId:params['itineraryId']
-		]
-		//log.error('done')
+
+		hasDiscrepancy = (actionsList != null && actionsList.size() != theoriticalActionsList.size()) ? true : false
+		
+		if (actionsList != null && actionsList.size() > 0){
+			for (Action action in theoriticalActionsList){
+				calendar.setTime(action.date)
+				calendar.set(Calendar.DAY_OF_MONTH,currentCalendar.get(Calendar.DAY_OF_MONTH))		
+				calendar.set(Calendar.MONTH,currentCalendar.get(Calendar.MONTH))
+				calendar.set(Calendar.YEAR,currentCalendar.get(Calendar.YEAR))
+			//	action.date = calendar.time
+				
+				if (actionsList.size() > i && actionsList.get(i) != null){
+					use (TimeCategory){timeDiff = calendar.time - actionsList.get(i).date}
+					timeDiffMap.put(i, timeDiff)
+				}else{
+					timeDiffMap.put(i, 0)
+				}
+				i++
+			}
+		}
+		
+		render template: "/itinerary/template/itineraryReportTemplate", model: [
+			itineraryInstance:itinerary,
+			actionsList:actionsList,
+			theoriticalActionsList:theoriticalActionsList,
+			hasDiscrepancy:hasDiscrepancy,
+			actionListMap:actionListMap,
+			timeDiffMap:timeDiffMap,
+			viewType:viewType
+			]
+		return
 	}
 	
     @Transactional
@@ -110,15 +276,52 @@ class ItineraryController {
 
         request.withFormat {
             form {
-                flash.message = message(code: 'default.created.message', args: [message(code: 'itineraryInstance.label', default: 'Itinerary'), itineraryInstance.id])
+                flash.message = message(code: 'default.created.message', args: [message(code: 'itinerary.label', default: 'Itinerary'), itineraryInstance.name])
                 redirect itineraryInstance
             }
             '*' { respond itineraryInstance, [status: CREATED] }
         }
     }
+	
+	
+	def changeDeliveryBoy(){
+			
+		log.error('changeDeliveryBoy called')
+		params.each{i->log.error('parameter of list: '+i)}
+		def itinerary = Itinerary.get(params.int('itineraryInstanceId'))
+		def deliveryBoy = Employee.get(params.int('deliveryBoyId'))
+		itinerary.deliveryBoy = deliveryBoy
+		itinerary.save flush:true
+		def coursierFunction = Function.findByName('Coursier')
+		def employeeList = Employee.findAllByFunction(coursierFunction)
+		def theoriticalActionsList
+		def criteria = Action.createCriteria()
+		theoriticalActionsList= criteria.list {
+			and {
+				eq('itinerary',itineraryInstance)
+				eq('isTheoritical',true)
+				order('date','asc')
+			}
+		}
+		return
+	 //  [itineraryInstance:itinerary,theoriticalActionsList:theoriticalActionsList,employeeList:employeeList]
 
+	}
+	
+	
     def edit(Itinerary itineraryInstance) {
-        respond itineraryInstance
+		def coursierFunction = Function.findByName('Coursier')
+		def employeeList = Employee.findAllByFunction(coursierFunction)
+		def theoriticalActionsList
+		def criteria = Action.createCriteria()
+		theoriticalActionsList= criteria.list {
+			and {
+				eq('itinerary',itineraryInstance)
+				eq('isTheoritical',true)
+				order('date','asc')
+			}
+		}
+       [itineraryInstance:itineraryInstance,theoriticalActionsList:theoriticalActionsList,employeeList:employeeList]
     }
 
     @Transactional
@@ -137,7 +340,7 @@ class ItineraryController {
 
         request.withFormat {
             form {
-                flash.message = message(code: 'default.updated.message', args: [message(code: 'Itinerary.label', default: 'Itinerary'), itineraryInstance.id])
+                flash.message = message(code: 'default.updated.message', args: [message(code: 'itinerary.label', default: 'Itinerary'), itineraryInstance.name])
                 redirect itineraryInstance
             }
             '*'{ respond itineraryInstance, [status: OK] }
@@ -156,7 +359,7 @@ class ItineraryController {
 
         request.withFormat {
             form {
-                flash.message = message(code: 'default.deleted.message', args: [message(code: 'Itinerary.label', default: 'Itinerary'), itineraryInstance.id])
+                flash.message = message(code: 'default.deleted.message', args: [message(code: 'itinerary.label', default: 'Itinerary'), itineraryInstance.name])
                 redirect action:"index", method:"GET"
             }
             '*'{ render status: NO_CONTENT }
@@ -166,7 +369,7 @@ class ItineraryController {
     protected void notFound() {
         request.withFormat {
             form {
-                flash.message = message(code: 'default.not.found.message', args: [message(code: 'itineraryInstance.label', default: 'Itinerary'), params.id])
+                flash.message = message(code: 'default.not.found.message', args: [message(code: 'itinerary.label', default: 'Itinerary'), params.id])
                 redirect action: "index", method: "GET"
             }
             '*'{ render status: NOT_FOUND }

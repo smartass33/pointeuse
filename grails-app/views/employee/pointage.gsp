@@ -13,9 +13,7 @@
 		<script src="${grailsApplication.config.context}/js/jquery-ui-timepicker-addon.js"></script>
 		<meta name="layout" content="main" />
 		<title><g:message code="daily.pointeuse.label" /></title>
-		
 		<g:set var="calendar" value="${Calendar.instance}"/>
-		
 		<script type="text/javascript">
 
 			function closePopup ( ){

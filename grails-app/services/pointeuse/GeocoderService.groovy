@@ -18,7 +18,9 @@ class GeocoderService {
 		}else{
 			address = Normalizer.normalize(address, Normalizer.Form.NFKD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
 			town = Normalizer.normalize(town, Normalizer.Form.NFKD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-			def base = "http://maps.googleapis.com/maps/api/geocode/json?sensor=true&"
+			def base = "https://maps.googleapis.com/maps/api/geocode/json?sensor=true&key=AIzaSyAOyiQIBZjYVOFf7YjnYvs2zH9PKDqV5lc&"
+			//def base = "https://maps.googleapis.com/maps/api/json?key=AIzaSyDe7ETx3_ZvrVhaOBiVYJkilpECgkazoEg&"
+			//def base="https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyAOyiQIBZjYVOFf7YjnYvs2zH9PKDqV5lc&"
 			def qs = []
 			qs << "address=" + URLEncoder.encode(address) + ","+URLEncoder.encode(town)
 			def url = new URL(base + qs.join("&"))

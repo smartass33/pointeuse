@@ -286,7 +286,6 @@
 					<a class="close" id="closeId" href="#close"></a>
 				</div>
 			</li>			
-			
 			<li>
 				<g:link class="logoutButton"  url="${grailsApplication.config.serverURL}/${grailsApplication.config.context}">${message(code: 'employee.disconnect.label', default: 'Sortie')}</g:link>
 			</li>			

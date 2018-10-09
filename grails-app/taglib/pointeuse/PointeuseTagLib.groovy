@@ -16,4 +16,23 @@ class PointeuseTagLib {
 	def authorizationCategoryTable ={attrs,body->
 		out<<render(template:"/authorization/template/authorizationCategoryTable",model:[showEmployee:attrs.showEmployee])
 	}
+	
+	def itineraryActionTable ={attrs,body->
+		out<<render(template:"/itinerary/template/theoriticalActionTable")
+	}
+	def loggedActionTable ={attrs,body->
+		out<<render(template:"/itinerary/template/loggedActionTable")
+	}
+	def theoriticalActionTable ={attrs,body->
+		out<<render(template:"/itinerary/template/theoriticalActionTable")
+	}
+	def theoriticalActionForm ={attrs,body->
+		out<<render(template:"/itinerary/template/theoriticalActionForm")
+	}
+	def itineraryReportTemplate ={attrs,body->
+		out<<render(template:"/itinerary/template/itineraryReportTemplate")
+	}
+	def mergedActionTable ={attrs,body->
+		out<<render(template:"/itinerary/template/mergedActionTable")
+	}
 }

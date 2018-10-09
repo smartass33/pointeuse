@@ -1,6 +1,5 @@
 <%@ page import="pointeuse.Itinerary" %>
-
-
+	
 <div class="fieldcontain ${hasErrors(bean: itineraryInstance, field: 'name', 'error')} ">
 	<label for="name">
 		<g:message code="itinerary.name.label" default="Name" />
@@ -8,31 +7,54 @@
 	</label>
 	<g:textField name="name" value="${itineraryInstance?.name}"/>
 </div>
-
-<div class="fieldcontain ${hasErrors(bean: itineraryInstance, field: 'deliveryBoy', 'error')} required">
+<div id ='' class="fieldcontain ${hasErrors(bean: itineraryInstance, field: 'deliveryBoy', 'error')} required">
 	<label for="deliveryBoy">
 		<g:message code="itinerary.deliveryBoy.label" default="Delivery Boy" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:select id="deliveryBoy" name="deliveryBoy.id" from="${pointeuse.Employee.list()}" optionKey="id" optionValue="lastName" required="" value="${itineraryInstance?.deliveryBoy?.id}" class="many-to-one"/>
-</div>
-
-
-
-
-<div class="fieldcontain ${hasErrors(bean: itineraryInstance, field: 'actions', 'error')} ">
-	<label for="actions">
-		<g:message code="itinerary.actions.label" default="Actions" />
-		
-	</label>
-	
-<ul class="one-to-many">
-<g:each in="${itineraryInstance?.actions?}" var="a">
-    <li><g:link controller="action" action="show" id="${a.id}">${a?.encodeAsHTML()}</g:link></li>
-</g:each>
-<li class="add">
-<g:link controller="action" action="create" params="['itinerary.id': itineraryInstance?.id]">${message(code: 'default.add.label', args: [message(code: 'action.label', default: 'Action')])}</g:link>
-</li>
-</ul>
-
+	<g:if test="${itineraryInstance != null }">
+		<g:select 
+			id="deliveryBoy" 
+			name="deliveryBoyId" 
+			from="${employeeList}" 
+			optionKey="id"
+			optionValue="lastName" 
+			value="${itineraryInstance.deliveryBoy}" 
+			noSelection="${['':itineraryInstance?.deliveryBoy.lastName]}"
+			class="many-to-one"/>	
+	</g:if>	
+	<g:else>
+			<g:select 
+			id="deliveryBoy" 
+			name="deliveryBoyId" 
+			from="${employeeList}" 
+			optionKey="id"
+			optionValue="lastName" 
+			value="${deliveryBoy}" 
+			noSelection="${['':'']}"
+			class="many-to-one"/>	
+	</g:else>
+	<g:message code="itinerary.delivery.boy.filter" default="Name"/>
+	<g:if test="${checked}">
+		<input id="checkBox" type="checkbox"  checked="checked"
+			onclick="${
+				remoteFunction(controller:'employee', 
+				action:'expandList',
+				update:'itineraryForm',
+				onLoading:"document.getElementById('spinner').style.display = 'inline';",
+				onComplete:"document.getElementById('spinner').style.display = 'none';",
+				params:'   \'&value=\' + this.checked  '
+				)}">
+	</g:if>
+	<g:else>
+		<input id="checkBox" type="checkbox" 
+			onclick="${
+				remoteFunction(controller:'employee', 
+				action:'expandList',
+				update:'itineraryForm',
+				onLoading:"document.getElementById('spinner').style.display = 'inline';",
+				onComplete:"document.getElementById('spinner').style.display = 'none';",
+				params:'   \'&value=\' + this.checked  '
+				)}">
+	</g:else>
 </div>

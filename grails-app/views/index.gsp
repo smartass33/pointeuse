@@ -53,9 +53,12 @@
 								<li class="controller"><g:link controller="employee" action='ecartFollowup' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="ecart.followup" default="Last Name" /></g:link></li>	
 								<li class="controller"><g:link controller="mileage" action='index' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="mileage.followup" default="Last Name" /></g:link></li>	
 								<li class="controller"><g:link controller="payment" action='paymentReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="payment.management" default="Last Name" /></g:link></li>	
+
 								<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">								
 									<li class="controller"><g:link controller="authorization" action='index' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="authorization.management" default="Last Name" /></g:link></li>	
 								</sec:ifAnyGranted>
+								<li class="controller"><g:link controller="itinerary" action='index' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="itinerary.followup" default="Last Name" /></g:link></li>	
+								
 								<li><BR></li>
 								<li class="controller"><g:link controller="logout" class="adminLogout"><g:message code="admin.logout.label" default="Last Name" /></g:link></li>							
 							</ul>

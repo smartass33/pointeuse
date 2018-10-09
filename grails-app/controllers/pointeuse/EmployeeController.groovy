@@ -65,6 +65,24 @@ class EmployeeController {
 		[absenceCount:absenceCount]
 	}
 	
+	@Secured(['ROLE_ADMIN'])
+	def expandList(){
+		log.error('expandList called')
+		params.each{i->log.error('parameter of list: '+i)}
+		def employeeList
+		
+		def isExpanded = params.boolean('value')
+		if (isExpanded){
+			employeeList =	Employee.list([sort: "lastName", order: "asc"])	
+		}else{
+			def function = Function.findByName('Coursier')
+			employeeList = Employee.findAllByFunction(function)
+		}
+			log.error('isExpanded:'+isExpanded)
+			render template: "/itinerary/form", model:[employeeList : employeeList,checked:isExpanded]
+
+			return		
+		}
 
 	@Secured(['ROLE_ADMIN'])
 	def dailyReport(){
@@ -88,7 +106,6 @@ class EmployeeController {
 			currentDate = calendar.time
 		}
 		def model = timeManagerService.getDailyInAndOutsData(siteId, currentDate)
-
 		def startDate=calendar.time
 		startDate.putAt(Calendar.HOUR_OF_DAY,6)
 		startDate.putAt(Calendar.MINUTE,0)
@@ -123,9 +140,7 @@ class EmployeeController {
 			currentDate = calendar.time
 		}
 		
-		
 		def model = timeManagerService.getDailySickLeaveData(siteId, currentDate,AbsenceType.MALADIE)
-
 		def startDate=calendar.time
 		startDate.putAt(Calendar.HOUR_OF_DAY,6)
 		startDate.putAt(Calendar.MINUTE,0)
@@ -229,12 +244,9 @@ class EmployeeController {
 		def funtionCheckBoxesMap = [:]
 		def annualSiteReportMap = [:]
 		def model =[:]
-		//def sites = Site.list([sort: "name", order: "desc",max:3])
-		//def sites = Site.list([sort: "name",order: "asc",max: 3])
 		def sites = Site.findAll("from Site")
 		def functions = Function.list([sort: "ranking", order: "asc"])
 		
-	
 		if (!fromWeeklyReport){
 			if (params['simpleFuntionCheckBoxesMap']  == null){
 				def jsonSlurper = new JsonSlurper()
