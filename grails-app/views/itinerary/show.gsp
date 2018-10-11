@@ -40,11 +40,7 @@
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
 				<li><g:link class="list" action="index"><g:message code="default.list.label" args="[entityName]" /></g:link></li>
-<<<<<<< HEAD
 				<li><g:link class="create" action="create"><g:message code="default.feminine.new.label" args="[entityName]" /></g:link></li>
-=======
-				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 			</ul>
 		</div>
 	
@@ -61,7 +57,6 @@
 				</li>
 				</g:if>
 				<g:if test="${itineraryInstance?.creationUser}">
-<<<<<<< HEAD
 					<li class="fieldcontain">
 						<span id="creationUser-label" class="property-label"><g:message code="itinerary.creationUser.label" default="Creation User" /></span>
 						<span class="property-value" aria-labelledby="creationUser-label">${itineraryInstance?.creationUser?.lastName} ${itineraryInstance?.creationUser?.firstName}</span>					
@@ -72,12 +67,6 @@
 						<span id="creationUser-label" class="property-label"><g:message code="itinerary.creationDate.label" default="creationDate User" /></span>
 						<span class="property-value" aria-labelledby="creationDate-label">${itineraryInstance?.creationDate.format('dd/MM/yyyy')}</span>					
 					</li>
-=======
-				<li class="fieldcontain">
-					<span id="creationUser-label" class="property-label"><g:message code="itinerary.creationUser.label" default="Creation User" /></span>
-					<span class="property-value" aria-labelledby="creationUser-label">${itineraryInstance?.creationUser?.lastName} ${itineraryInstance?.creationUser?.firstName}</span>					
-				</li>
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 				</g:if>
 				<g:if test="${itineraryInstance?.deliveryBoy}">
 				<li class="fieldcontain">

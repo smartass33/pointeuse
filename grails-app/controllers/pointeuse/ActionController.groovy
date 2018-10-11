@@ -6,20 +6,13 @@ import java.util.Date;
 import grails.plugin.springsecurity.annotation.Secured
 import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional
-<<<<<<< HEAD
 import groovy.time.TimeCategory
-=======
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
-
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import uk.co.desirableobjects.ajaxuploader.exception.FileUploadException
 import javax.servlet.http.HttpServletRequest
-<<<<<<< HEAD
 import java.text.SimpleDateFormat
-=======
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 
 import grails.converters.JSON
 
@@ -45,7 +38,6 @@ class ActionController {
     def create() {
         respond new Action(params)
     }
-<<<<<<< HEAD
 
 	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
 	def modifyTheoriticalAction(){
@@ -225,10 +217,6 @@ class ActionController {
 		return
 		
 	}
-=======
-	
-
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 	
 	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
 	def addAction(){
@@ -334,8 +322,4 @@ class ActionController {
             '*'{ render status: NOT_FOUND }
         }
     }
-	
-	
-	
-
 }

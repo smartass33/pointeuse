@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 <%@ page import="java.util.Calendar"%>
-=======
-
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 <%@ page import="pointeuse.Itinerary" %>
 <!DOCTYPE html>
 <html>
@@ -13,10 +9,8 @@
 		<g:javascript library="application"/> 		
  		<r:require module="report"/>		
 		<r:layoutResources/>	
-<<<<<<< HEAD
 		<g:set var="calendar" value="${Calendar.instance}"/>
-=======
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
+
 		<script>
 			jQuery(function($){
 			   $.datepicker.regional['fr'] = {
@@ -40,7 +34,6 @@
 			   $.datepicker.setDefaults($.datepicker.regional['fr']);			   
 			   $("#date_picker").datepicker({dateFormat: "dd/mm/yy"}).datepicker("setDate", "${currentDate}");
 			});
-<<<<<<< HEAD
 			
 			function closePopup ( ){
 				window.location = $('#closeId').attr('href');
@@ -139,8 +132,6 @@
 						$( "#date_action_picker_"+datePickerId ).timepicker();	
 			}
 
-=======
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 		</script>
 	</head>
 	<body>

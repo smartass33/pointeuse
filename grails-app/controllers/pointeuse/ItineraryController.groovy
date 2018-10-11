@@ -46,11 +46,6 @@ class ItineraryController {
         respond Itinerary.list(params), model:[itineraryInstanceCount: Itinerary.count()]
     }
 
-<<<<<<< HEAD
-=======
-	
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
-
 	def addAction(){
 		log.error('addAction called')
 		
@@ -133,10 +128,7 @@ class ItineraryController {
 		
 	}
 	
-<<<<<<< HEAD
-	
-=======
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
+
 	def showItineraryActions(){
 		log.error('showItineraryActions called')
 	//	params.each{i->log.error('parameter of list: '+i)}
@@ -146,18 +138,12 @@ class ItineraryController {
 		def actionsList
 		def theoriticalActionsList
 		def date_picker = params['date_picker'] 
-<<<<<<< HEAD
 		def viewType = params['id']
 		def timeDiff
 		def timeDiffMap = [:]
 		def actionListMap = [:]
 		def calendar = Calendar.instance
 		def monthCalendar = Calendar.instance
-=======
-		def timeDiff
-		def timeDiffMap = [:]
-		def calendar = Calendar.instance
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 		def i = 0
 		def hasDiscrepancy = false
 		
@@ -165,7 +151,6 @@ class ItineraryController {
 			itinerary = Itinerary.get(params.int('itineraryId'))	
 		if (date_picker != null && date_picker.size() > 0)
 			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
-<<<<<<< HEAD
 		
 		criteria = Action.createCriteria()
 
@@ -229,10 +214,6 @@ class ItineraryController {
 			}
 		
 		criteria = Action.createCriteria()
-		theoriticalActionsList = criteria.list {
-=======
-				
-		criteria = Action.createCriteria()
 		actionsList = criteria.list {
 			and {
 				eq('itinerary',itinerary)
@@ -242,20 +223,17 @@ class ItineraryController {
 				eq('isTheoritical',false)			
 			}
 		}		
+
 		
 		criteria = Action.createCriteria()
 		theoriticalActionsList= criteria.list {
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 			and {
 				eq('itinerary',itinerary)
 				eq('isTheoritical',true)
 				order('date','asc')
 			}
 		}
-<<<<<<< HEAD
-
 		hasDiscrepancy = (actionsList != null && actionsList.size() != theoriticalActionsList.size()) ? true : false
-=======
 		
 		log.error("actionsList.size():" +actionsList.size())
 		log.error("theoriticalActionsList.size():" +theoriticalActionsList.size())
@@ -263,7 +241,6 @@ class ItineraryController {
 		if (actionsList != null && actionsList.size() != theoriticalActionsList.size()){
 			hasDiscrepancy = true
 		}
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 		
 		if (actionsList != null && actionsList.size() > 0){
 			for (Action action in theoriticalActionsList){
@@ -288,13 +265,10 @@ class ItineraryController {
 			actionsList:actionsList,
 			theoriticalActionsList:theoriticalActionsList,
 			hasDiscrepancy:hasDiscrepancy,
-<<<<<<< HEAD
 			actionListMap:actionListMap,
 			timeDiffMap:timeDiffMap,
-			viewType:viewType
-=======
+			viewType:viewType,
 			timeDiffMap:timeDiffMap
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 			]
 		return
 	}
@@ -320,17 +294,13 @@ class ItineraryController {
 
         request.withFormat {
             form {
-<<<<<<< HEAD
                 flash.message = message(code: 'default.created.message', args: [message(code: 'itinerary.label', default: 'Itinerary'), itineraryInstance.name])
-=======
-                flash.message = message(code: 'default.created.message', args: [message(code: 'itineraryInstance.label', default: 'Itinerary'), itineraryInstance.id])
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
+
                 redirect itineraryInstance
             }
             '*' { respond itineraryInstance, [status: CREATED] }
         }
     }
-<<<<<<< HEAD
 	
 	
 	def changeDeliveryBoy(){
@@ -361,10 +331,6 @@ class ItineraryController {
     def edit(Itinerary itineraryInstance) {
 		def coursierFunction = Function.findByName('Coursier')
 		def employeeList = Employee.findAllByFunction(coursierFunction)
-=======
-
-    def edit(Itinerary itineraryInstance) {
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 		def theoriticalActionsList
 		def criteria = Action.createCriteria()
 		theoriticalActionsList= criteria.list {
@@ -374,11 +340,7 @@ class ItineraryController {
 				order('date','asc')
 			}
 		}
-<<<<<<< HEAD
        [itineraryInstance:itineraryInstance,theoriticalActionsList:theoriticalActionsList,employeeList:employeeList]
-=======
-       [itineraryInstance:itineraryInstance,theoriticalActionsList:theoriticalActionsList]
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
     }
 
     @Transactional
@@ -397,11 +359,7 @@ class ItineraryController {
 
         request.withFormat {
             form {
-<<<<<<< HEAD
                 flash.message = message(code: 'default.updated.message', args: [message(code: 'itinerary.label', default: 'Itinerary'), itineraryInstance.name])
-=======
-                flash.message = message(code: 'default.updated.message', args: [message(code: 'Itinerary.label', default: 'Itinerary'), itineraryInstance.id])
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
                 redirect itineraryInstance
             }
             '*'{ respond itineraryInstance, [status: OK] }
@@ -420,11 +378,7 @@ class ItineraryController {
 
         request.withFormat {
             form {
-<<<<<<< HEAD
                 flash.message = message(code: 'default.deleted.message', args: [message(code: 'itinerary.label', default: 'Itinerary'), itineraryInstance.name])
-=======
-                flash.message = message(code: 'default.deleted.message', args: [message(code: 'Itinerary.label', default: 'Itinerary'), itineraryInstance.id])
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
                 redirect action:"index", method:"GET"
             }
             '*'{ render status: NO_CONTENT }
@@ -434,11 +388,7 @@ class ItineraryController {
     protected void notFound() {
         request.withFormat {
             form {
-<<<<<<< HEAD
                 flash.message = message(code: 'default.not.found.message', args: [message(code: 'itinerary.label', default: 'Itinerary'), params.id])
-=======
-                flash.message = message(code: 'default.not.found.message', args: [message(code: 'itineraryInstance.label', default: 'Itinerary'), params.id])
->>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
                 redirect action: "index", method: "GET"
             }
             '*'{ render status: NOT_FOUND }
