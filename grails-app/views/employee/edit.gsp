@@ -140,8 +140,6 @@
 				<g:contractStatus/>
 				<g:sickLeave/>	
 			</g:form>
-
-
 			<g:vacationEditTable/>	
 			<script type="text/javascript">
 				$(function(){

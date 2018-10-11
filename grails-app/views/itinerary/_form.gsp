@@ -12,6 +12,7 @@
 		<g:message code="itinerary.deliveryBoy.label" default="Delivery Boy" />
 		<span class="required-indicator">*</span>
 	</label>
+<<<<<<< HEAD
 	<g:if test="${itineraryInstance != null }">
 		<g:select 
 			id="deliveryBoy" 
@@ -34,6 +35,17 @@
 			noSelection="${['':'']}"
 			class="many-to-one"/>	
 	</g:else>
+=======
+	<g:select 
+		id="deliveryBoy" 
+		name="deliveryBoy.id" 
+		from="${employeeList}" 
+		optionKey="id"
+		optionValue="lastName" 
+		value="${itineraryInstance.deliveryBoy.id}" 
+		noSelection="${['':itineraryInstance?.deliveryBoy.lastName]}"
+		class="many-to-one"/>		
+>>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 	<g:message code="itinerary.delivery.boy.filter" default="Name"/>
 	<g:if test="${checked}">
 		<input id="checkBox" type="checkbox"  checked="checked"

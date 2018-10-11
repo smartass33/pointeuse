@@ -1,9 +1,12 @@
 <%@ page import="pointeuse.Itinerary" %>
 
+<<<<<<< HEAD
 <g:set var="realCal" 		value="${Calendar.instance}"/>
 <g:set var="theoriticalCal" value="${Calendar.instance}"/>
 <g:set var="outActionItem"/>
 
+=======
+>>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 <g:if test="${theoriticalActionsList != null && theoriticalActionsList.size() > 0}">
 	<div>
 		<table>
@@ -17,6 +20,7 @@
 				<g:each in="${theoriticalActionsList}" var='theoriticalActionItem' status="k">
 					<tr class="${(k % 2) == 0 ? 'even' : 'odd'}">
 						<td>${theoriticalActionItem.nature}</td>
+<<<<<<< HEAD
 						<td>${theoriticalActionItem.site.name}</td>		
 						<td>
 							<a href="#itinerary_action_form_${k}" id="itinerary_action_pop_${k}">${theoriticalActionItem.date.format('kk:mm')}</a>
@@ -40,6 +44,10 @@
 								</g:form>
 								<a class="close" id="closeId" href="#close"></a>
 						</td>
+=======
+						<td>${theoriticalActionItem.site.name}</td>
+						<td>${theoriticalActionItem.date.format('kk:mm')}</td>
+>>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 						<td>
 							<g:remoteLink action="trash" controller="itinerary" id="${theoriticalActionItem.id}" params="[actionItemId:theoriticalActionItem.id]"
 				                    	update="theoriticalActionTableDiv"

@@ -4,8 +4,11 @@
 	<head>
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'itinerary.label', default: 'Itinerary')}" />
+<<<<<<< HEAD
 		<g:javascript library="application"/> 		
 		
+=======
+>>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>		
 		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
 		<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
@@ -35,6 +38,7 @@
 					});	
 			
 		}
+<<<<<<< HEAD
 		function closePopup ( ){
 			window.location = $('#closeId').attr('href');
 		}
@@ -88,6 +92,9 @@
 					});		
 	
 		}
+=======
+
+>>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 		</script>
 
 		<style type="text/css">
@@ -120,18 +127,23 @@
 			<g:form url="[resource:itineraryInstance, action:'update']" method="PUT" >
 				<g:hiddenField name="version" value="${itineraryInstance?.version}" />
 				<fieldset class="form">
+<<<<<<< HEAD
 					<div class="fieldcontain ${hasErrors(bean: itineraryInstance, field: 'name', 'error')} ">
 						<label for="name">
 							<g:message code="itinerary.name.label" default="Name" />
 						</label>
 						<g:textField name="name" value="${itineraryInstance?.name}"/>
 					</div>
+=======
+					<g:render template="form"/>
+>>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 				</fieldset>
 				<fieldset class="buttons">
 					<g:actionSubmit class="save" action="update" value="${message(code: 'default.button.update.label', default: 'Update')}" />
 				</fieldset>
 			</g:form>
 		</div>
+<<<<<<< HEAD
 		
 		
 		<div id="changeDeliveryBoy">
@@ -200,6 +212,11 @@
 		
 		<g:form url="[resource:itineraryInstance, controller:'itinerary' ,action:'addTheoriticalAction']" method="POST">
 			<g:theoriticalActionForm/>
+=======
+		<g:form url="[resource:itineraryInstance, controller:'itinerary' ,action:'addTheoriticalAction']" method="POST">
+			<g:theoriticalActionForm/>
+		
+>>>>>>> f97e9cdf9e03a347c03000841888e04cc6c7f400
 			<div id="theoriticalActionTableDiv">
 				<g:theoriticalActionTable/>
 			</div>
