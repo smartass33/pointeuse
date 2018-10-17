@@ -39,6 +39,7 @@ import grails.transaction.Transactional
 @Secured(['ROLE_ADMIN'])
 class ItineraryController {
 	def springSecurityService
+	def itineraryService
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
     def index(Integer max) {
@@ -131,7 +132,7 @@ class ItineraryController {
 
 	def showItineraryActions(){
 		log.error('showItineraryActions called')
-	//	params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		def itinerary
 		def currentCalendar = Calendar.instance
 		def criteria 
@@ -146,14 +147,21 @@ class ItineraryController {
 		def monthCalendar = Calendar.instance
 		def i = 0
 		def hasDiscrepancy = false
+		def serviceResponse 
 		
-		if (params['itineraryId'] != null)
+		if (params['itineraryId'] != null){
+			itinerary = params['itineraryId']
 			itinerary = Itinerary.get(params.int('itineraryId'))	
-		if (date_picker != null && date_picker.size() > 0)
+		}
+		if (date_picker != null && date_picker.size() > 0){
 			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+			log.error('currentCalendar.time: '+currentCalendar.time)
+		}
+		if (params['id'] != null)
+			viewType = params['id']
 		
-		criteria = Action.createCriteria()
-
+		serviceResponse = itineraryService.getActionList(viewType, itinerary, currentCalendar)
+		/*
 		switch (viewType) {
 				case 'dailyView':
 					actionsList = criteria.list {
@@ -167,17 +175,6 @@ class ItineraryController {
 					}
 					break
 				case 'monthlyView':
-				/*
-					actionsList = criteria.list {
-						and {
-							eq('itinerary',itinerary)
-							eq('month',currentCalendar.get(Calendar.MONTH) + 1)
-							eq('year',currentCalendar.get(Calendar.YEAR))
-							eq('isTheoritical',false)
-						}
-					}		
-				*/
-					
 					monthCalendar = currentCalendar
 					monthCalendar.set(Calendar.DAY_OF_MONTH,1)
 					def lastDay = currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -213,6 +210,8 @@ class ItineraryController {
 					break
 			}
 		
+		*/
+		/*
 		criteria = Action.createCriteria()
 		actionsList = criteria.list {
 			and {
@@ -223,7 +222,7 @@ class ItineraryController {
 				eq('isTheoritical',false)			
 			}
 		}		
-
+*/
 		
 		criteria = Action.createCriteria()
 		theoriticalActionsList= criteria.list {
@@ -233,16 +232,16 @@ class ItineraryController {
 				order('date','asc')
 			}
 		}
-		hasDiscrepancy = (actionsList != null && actionsList.size() != theoriticalActionsList.size()) ? true : false
+		hasDiscrepancy = (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() != theoriticalActionsList.size()) ? true : false
 		
-		log.error("actionsList.size():" +actionsList.size())
-		log.error("theoriticalActionsList.size():" +theoriticalActionsList.size())
+		log.debug("actionsList.size():" +serviceResponse.get('actionsList') .size())
+		log.debug("theoriticalActionsList.size():" +theoriticalActionsList.size())
 		
-		if (actionsList != null && actionsList.size() != theoriticalActionsList.size()){
+		if (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() != theoriticalActionsList.size()){
 			hasDiscrepancy = true
 		}
 		
-		if (actionsList != null && actionsList.size() > 0){
+		if (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() > 0){
 			for (Action action in theoriticalActionsList){
 				calendar.setTime(action.date)
 				calendar.set(Calendar.DAY_OF_MONTH,currentCalendar.get(Calendar.DAY_OF_MONTH))		
@@ -250,8 +249,8 @@ class ItineraryController {
 				calendar.set(Calendar.YEAR,currentCalendar.get(Calendar.YEAR))
 			//	action.date = calendar.time
 				
-				if (actionsList.size() > i && actionsList.get(i) != null){
-					use (TimeCategory){timeDiff = calendar.time - actionsList.get(i).date}
+				if (serviceResponse.get('actionsList').size() > i && serviceResponse.get('actionsList').get(i) != null){
+					use (TimeCategory){timeDiff = calendar.time - serviceResponse.get('actionsList').get(i).date}
 					timeDiffMap.put(i, timeDiff)
 				}else{
 					timeDiffMap.put(i, 0)
@@ -262,10 +261,10 @@ class ItineraryController {
 		
 		render template: "/itinerary/template/itineraryReportTemplate", model: [
 			itineraryInstance:itinerary,
-			actionsList:actionsList,
+			actionsList:serviceResponse.get('actionsList'),
+			actionListMap:serviceResponse.get('actionListMap'),
 			theoriticalActionsList:theoriticalActionsList,
 			hasDiscrepancy:hasDiscrepancy,
-			actionListMap:actionListMap,
 			timeDiffMap:timeDiffMap,
 			viewType:viewType,
 			timeDiffMap:timeDiffMap

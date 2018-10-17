@@ -18,9 +18,11 @@ class Action {
 	static belongsTo = [itinerary:Itinerary]
 	
 	public Action(){
-		
 	}
 	
+	static constraints = {
+		employeeLogger (blank: true,nullable:true)
+	}
 	
 	public Action(Itinerary itinerary, Date date, Site site, Employee employeeLogger, ItineraryNature nature) {
 		this.itinerary = itinerary

@@ -1,5 +1,8 @@
 <%@ page import="java.util.Calendar"%>
 <%@ page import="pointeuse.Itinerary" %>
+<%@ page import="pointeuse.Site" %>
+<%@ page import="pointeuse.ItineraryNature" %>
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -39,6 +42,54 @@
 				window.location = $('#closeId').attr('href');
 			}
 
+			function datePickerCreate (datePickerId){
+				$.datepicker.regional['fr'] = {
+							closeText: 'Fermer',
+							prevText: '<Précédent',
+							nextText: 'Suivant>',
+							currentText: 'Сегодня',
+							monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin',
+							'Juillet','Aout','Septembre','Octobre','Novembre','Décembre'],
+							monthNamesShort: ['Jan','Fev','Mar','Avr','Mai','Jun',
+							'Jui','Аou','Sep','Oct','Nov','Dec'],
+							dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+							dayNamesShort: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
+							dayNamesMin: ['D','L','M','M','J','V','S'],
+							weekHeader: 'Semaine',
+							dateFormat: 'dd/mm/yy',
+							firstDay: 1,
+							isRTL: false,
+							showMonthAfterYear: false,
+							yearSuffix: ''
+						};
+												
+						$.timepicker.regional['fr'] = {
+							timeOnlyTitle: 'Horaire',
+							timeText: 'Horaire',
+							hourText: 'Heure',
+							minuteText: 'Minute',
+							secondText: 'Seconde',
+							millisecText: 'Milliseconde',
+							timezoneText: 'Fuseau Horaire',
+							currentText: 'Horaire Actuel',
+							closeText: 'Fermer',
+							timeFormat: 'HH:mm',
+							amNames: ['AM', 'A'],
+							pmNames: ['PM', 'P'],
+							isRTL: false
+						};
+						
+						$.timepicker.setDefaults($.timepicker.regional['fr']);
+						$.datepicker.setDefaults($.datepicker.regional['fr']);		
+					
+
+	
+						$( "#date_action_picker_"+datePickerId ).datetimepicker({
+							defaultDate:new Date(${calendar.time.getAt(Calendar.YEAR)},${calendar.time.getAt(Calendar.MONTH)},1)
+						});	
+			
+			}
+			
 			function datePickerLaunch (datePickerId){
 				$.datepicker.regional['fr'] = {
 							closeText: 'Fermer',
@@ -83,7 +134,7 @@
 						$( "#date_in_action_picker_"+datePickerId ).timepicker({
 							format: 'LT'
 						});	
-						$( "#date_out_action_picker_"+datePickerId ).timepicker({
+						$( "#date_action_picker_"+datePickerId ).timepicker({
 							format: 'LT'
 						});		
 			
@@ -130,8 +181,8 @@
 						$.datepicker.setDefaults($.datepicker.regional['fr']);		
 
 						$( "#date_action_picker_"+datePickerId ).timepicker();	
+						
 			}
-
 		</script>
 	</head>
 	<body>
@@ -144,10 +195,10 @@
 			</ul>
 		</div>
 		<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
-		
 		<div id="actions" class="standardNav">
-			<g:form method="POST" url="[controller:'action', action:'showItineraryActions']">
-			<ul>
+			
+				<ul>
+					<g:form method="POST" url="[controller:'action', action:'showItineraryActions']">
 						<li><g:message code="itinerary.label" default="Search" style="vertical-align: middle;" /></li>
 						<li>
 							<g:if test="${itineraryId != null && !itineraryId.equals('')}">
@@ -181,9 +232,9 @@
 				                onComplete="document.getElementById('spinner').style.display = 'none';"
 								url="[controller:'itinerary', action:'showItineraryActions',id:'monthlyView']"
 							/>	
-						</li>		
-					</ul>
-			</g:form>
+						</li> 	
+					</g:form>
+				</ul>
 		</div>
 		<div id="itineraryReportTemplate">
 			<g:itineraryReportTemplate/>

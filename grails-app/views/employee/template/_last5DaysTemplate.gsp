@@ -74,8 +74,6 @@
 						</g:else>
 					</th>			
 				</g:else>
-			
-
 			</g:each>
 		</thead>
 		<tbody>
@@ -247,7 +245,6 @@
 								          noSelection="${['':'-']}"          
 								          optionKey="id" optionValue="name"
 								          />
-									
 									</td>	
 								</tr>
 								<tr class="prop">
@@ -258,7 +255,6 @@
 								          noSelection="${['':'-']}"          
 								          optionKey="id" optionValue="name"
 								          />
-									
 									</td>	
 								</tr>
 								<tr class="prop">
@@ -279,8 +275,7 @@
 	                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
 							update="last5days"
 							onSuccess="closePopup()"
-							url="[controller:'action', action:'addAction']" value="${message(code: 'mileage.create.validation', default: 'Report')}">
-							
+							url="[controller:'action', action:'addAction']" value="${message(code: 'mileage.create.validation', default: 'Report')}">				
 						</g:submitToRemote>
 					</g:form>
 					<a class="close" id="closeId" href="#close"></a>

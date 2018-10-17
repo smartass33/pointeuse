@@ -8,13 +8,13 @@
 	<h1>Tournée Théorique</h1>
 <BR>
 <div id="theoriticalTableDiv">
-		<table style="width: 50%;">
+		<table style="table-layout:fixed;">
 			<tbody>
 				<tr>
 					<g:each in="${theoriticalActionsList}" var='actionItem' status="j">
 						<g:if test="${outActionItem != null && outActionItem.site.equals(actionItem.site)}">
 							<td class="itineraryReportTD" >${actionItem.site.name}<br>	
-								<a href="#itinerary_out_action_form_${j}" id="itinerary_out_action_pop_${j}"><font color="green">${outActionItem.date.format('kk:mm')}</font></a>
+								<a href="#itinerary_out_action_form_${j}" id="itinerary_out_action_pop_${j}"><font color="red">${outActionItem.date.format('kk:mm')}</font></a>
 								<a href="#x" class="overlay" id="itinerary_out_action_form_${j}" style="background: transparent;"></a>
 								<div id="itinerary_out_action_popup_${j}" class="popup">
 									<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
@@ -40,7 +40,7 @@
 
 								 - 
 								 
-								<a href="#itinerary_in_action_form_${j}" id="itinerary_in_action_pop_${j}"><font color="red">${actionItem.date.format('kk:mm')}</font></a>
+								<a href="#itinerary_in_action_form_${j}" id="itinerary_in_action_pop_${j}"><font color="green">${actionItem.date.format('kk:mm')}</font></a>
 								<a href="#x" class="overlay" id="itinerary_in_action_form_${j}" style="background: transparent;"></a>
 								<div id="itinerary_in_action_popup_${j}" class="popup">
 									<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
@@ -68,7 +68,7 @@
 						<g:else>
 							<g:if test="${outActionItem == null}">
 								<td class="itineraryReportTD">${actionItem.site.name}<br>
-									<a href="#itinerary_action_form_${j}" id="itinerary_action_pop_${j}"><font color="red">${actionItem.date.format('kk:mm')}</font></a>
+									<a href="#itinerary_action_form_${j}" id="itinerary_action_pop_${j}"><font color="green">${actionItem.date.format('kk:mm')}</font></a>
 									<a href="#x" class="overlay" id="itinerary_action_form_${j}" style="background: transparent;"></a>
 									<div id="itinerary_action_popup_${j}" class="popup">
 										<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
@@ -102,9 +102,9 @@
 			</tbody>
 		</table>
 
+	</div>
 </div>
-</div>
-
-<div style="float:left;">
+<BR><BR><BR><BR><BR>
+<div >
 	<g:loggedActionTable/>
 </div>

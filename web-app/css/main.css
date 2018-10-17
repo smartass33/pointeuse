@@ -2495,7 +2495,7 @@ a.modalbox {
 		height: 13px;
 	}
 	
-	
+	theoriticalTableDiv
 	.annualReportTitleTD {
     font:14px Georgia, serif;
     padding:2px 2px;
@@ -2522,14 +2522,33 @@ a.modalbox {
 }
 
 .itineraryReportTD {
-    font:14px Georgia, serif;
-    padding:2px 2px;
+    font:11px Georgia, serif;
+    padding:0px 0px;
     text-align:center;
-    border: 0px solid white;
-    -moz-border-radius:2px;
-    -webkit-border-radius:2px;
+    border: 1px solid #c0c0c0;
+    -moz-border-radius:1px;
+    -webkit-border-radius:1px;
     color:#666;
     text-shadow:1px 1px 1px #fff;
-    border: 3px solid black;
-    width:100px;
+    border: 1px solid #c0c0c0;
+    width:68px;
+
+}
+
+.itineraryReportDateTD {
+    font:11px Georgia, serif;
+    padding:0px 0px;
+    text-align:center;
+    valign:middle;
+    border: 1px solid #c0c0c0;
+    -moz-border-radius:1px;
+    -webkit-border-radius:1px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    border: 1px solid #c0c0c0;
+    width:63px;
+   // overflow: hidden;
+   // display: inline-block;
+   // white-space: nowrap;
+
 }
