@@ -23,7 +23,7 @@
 								<g:select name="itineraryId"
 						          from="${Itinerary.list([sort:'name'])}"
 						          noSelection="${['':'-']}"          
-						          optionKey="id" optionValue="name"
+						          optionKey="id" optionValue="${{it.description != null ? it.name+' '+it.description : it.name}}"
 						          />
 							</td>	
 						</tr>
@@ -47,9 +47,10 @@
 							</td>	
 						</tr>
 						<tr>
+							<td class="eventTD" valign="top">${message(code: 'action.time', default: 'Report')}:</td>
 							<td><input type="text" name="date_action_picker_daily" id="date_action_picker_daily" value="${null}"/> </td>
 							<script type="text/javascript">
-								datePickerCreate('daily');
+								timePickerLaunch ("date_action_picker_daily","date");
 							</script>	
 						</tr>
 					</tbody>
@@ -66,15 +67,13 @@
 			</g:form>
 			<a class="close" id="closeId" href="#close"></a>
 		</div>
-	
-	
 	<g:if test="${actionsList == null || actionsList.size() == 0}">
 		${message(code: 'action.list.empty', default: 'Report')}
 	</g:if>
 	<g:else>
 		<table style="table-layout:fixed;">
 			<tbody>
-				<tr>
+				<tr><td class="itineraryReportTD">${actionsList.get(0).date.format('dd/MM/yyyy')}</td>
 					<g:each in="${actionsList}" var='actionItem' status="j">
 							<td class="itineraryReportTD" >${actionItem.site.name}<br>	
 								<a href="#itinerary_action_form_${j}" id="itinerary_action_pop_${j}">		
@@ -92,7 +91,7 @@
 									<g:form action="create">	
 										<input type="text" name="date_action_picker_${j}" id="date_action_picker_${j}" value="${actionItem.date.format('kk:mm')}"/>
 										<script type="text/javascript">
-											datePickerLaunch(${j});
+											timePickerLaunch ("date_action_picker_${j}","date");						
 										</script>	
 											<BR>	
 										${message(code: 'inAndOut.create.event', default: 'Report')}:				
@@ -145,7 +144,7 @@
 								<g:select name="itineraryId"
 						          from="${Itinerary.list([sort:'name'])}"
 						          noSelection="${['':'-']}"          
-						          optionKey="id" optionValue="name"
+						          optionKey="id" optionValue="${{it.description != null ? it.name+' '+it.description : it.name}}"
 						          />
 							</td>	
 						</tr>
@@ -169,9 +168,10 @@
 							</td>	
 						</tr>
 						<tr>
+							<td class="eventTD" valign="top">${message(code: 'action.time', default: 'Report')}:</td>
 							<td><input type="text" name="date_action_picker_monthly" id="date_action_picker_monthly" value="${null}"/> </td>
 							<script type="text/javascript">
-							datePickerCreate('monthly');
+								timePickerLaunch ("date_action_picker_monthly","date");							
 							</script>	
 						</tr>
 					</tbody>
@@ -198,8 +198,8 @@
 					<tr>
 						<td class="itineraryReportDateTD">${(actionListItem.key).format('dd/MM/yyyy')}</td>
 						<g:each in="${actionListItem.value}" var='actionItem' status="n">
-							<td class="itineraryReportTD" >${actionItem.site.name}<br>	
-								<a href="#itinerary_action_form_${n}" id="itinerary_action_pop_${n}">							
+							<td class="itineraryReportTD" >${actionItem.site.name}<br>
+								<a href="#itinerary_action_form_${m}_${n}" id="itinerary_action_pop_${m}_${n}">							
 								<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
 									<font color="red">
 								</g:if>
@@ -207,14 +207,14 @@
 									<font color="green">
 								</g:else>				
 								${actionItem.date.format('kk:mm')}</font></a>
-								<a href="#x" class="overlay" id="itinerary_action_form_${n}" style="background: transparent;"></a>
-								<div id="itinerary_action_popup_${n}" class="popup">
+								<a href="#x" class="overlay" id="itinerary_action_form_${m}_${n}" style="background: transparent;"></a>
+								<div id="itinerary_action_popup_${m}_${n}" class="popup">
 									<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
 									<p>${message(code: 'action.create.info', default: 'Report')}</p>
 									<g:form action="create">
-										<input type="text" name="date_action_picker_${m}" id="date_action_picker_${n}" value="${actionItem.date.format('kk:mm')}"/>
+										<input type="text" name="date_action_picker_${m}_${n}" id="date_action_picker_${m}_${n}" value="${actionItem.date.format('kk:mm')}"/>
 										<script type="text/javascript">
-											datePickerLaunch(${n});
+											timePickerLaunch ("date_action_picker_${m}_${n}","time");
 										</script>	
 											<BR>${message(code: 'inAndOut.create.event', default: 'Report')}:									
 										<g:select

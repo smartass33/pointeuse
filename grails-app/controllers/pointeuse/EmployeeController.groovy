@@ -1457,9 +1457,7 @@ class EmployeeController {
 			absenceMapByEmployee.put(employee, absenceMapByDay)
 		}
 		
-		
-		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/employee_list_template.xlsx').with {
-			
+		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/employee_list_template.xlsx').with {	
 			int i = 1
 			setResponseHeaders(response)
 			fillHeader(headers)
@@ -1481,10 +1479,6 @@ class EmployeeController {
 			save(response.outputStream)
 			response.setContentType("application/octet-stream")
 		}
-		
-
-		
-		
 	}
 	
 	@Secured(['ROLE_ADMIN'])
@@ -1527,9 +1521,6 @@ class EmployeeController {
 		def takenDON
 		def formation
 		def employeeInstanceTotal
-		
-		
-		
 		
 		if (params["site.id"]!=null && !params["site.id"].equals("")){
 			site = Site.get(params["site.id"] as long)

@@ -5,7 +5,6 @@ import java.util.Calendar;
 
 
 class Action {
-	
 	Date date
 	int day
 	int month
@@ -15,6 +14,7 @@ class Action {
 	boolean isTheoritical
 	ItineraryNature nature
 	Itinerary itinerary
+	boolean isSaturday
 	static belongsTo = [itinerary:Itinerary]
 	
 	public Action(){
@@ -33,7 +33,7 @@ class Action {
 		this.site = site
 		this.employeeLogger = employeeLogger
 		this.isTheoritical = false
-		this.nature = nature
+ 		this.nature = nature
 	}
 	
 	String toString(){

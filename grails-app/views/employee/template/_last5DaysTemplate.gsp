@@ -2,6 +2,8 @@
 <%@ page import="pointeuse.Site" %>
 <%@ page import="pointeuse.Itinerary" %>
 
+
+
 <div id="last5days" >
 	<h1><g:message code="daily.last.3.events" default="Last Name" /></h1>
 		<table border="1" style="padding:15px;">
@@ -95,7 +97,7 @@
 		</tbody>
 	</table>
 </g:if>
-<g:else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pas d'évenement pour le jour en cours <BR>
+<g:else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${message(code: 'inAndOut.no.element')}<BR>
 	<BR>
 </g:else>
 	
@@ -154,7 +156,7 @@
 									<td class="eventTD" valign="top">${message(code: 'inAndOut.create.date.choice', default: 'Report')}:</td>
 									<td class="eventTD" valign="top"><input type="text" name="date_picker" id="date_picker" /> 
 										<script type="text/javascript">
-											datePickerLaunch();
+											timePickerLaunch("date_picker","date");
 										</script>
 									</td>
 								</tr>
@@ -203,7 +205,7 @@
 									<td class="eventTD" valign="top">${message(code: 'mileage.create.date.choice', default: 'Report')}:</td>
 									<td class="eventTD" valign="top"><input type="text" name="date_mileage_picker" id="date_mileage_picker" /> 
 										<script type="text/javascript">
-											datePickerLaunch();
+											timePickerLaunch("date_mileage_picker","date");
 										</script>
 									</td>
 								</tr>
@@ -243,7 +245,7 @@
 										<g:select name="itineraryId"
 								          from="${Itinerary.list([sort:'name'])}"
 								          noSelection="${['':'-']}"          
-								          optionKey="id" optionValue="name"
+								          optionKey="id" optionValue="${{it.description != null ? it.name+' '+it.description : it.name}}"
 								          />
 									</td>	
 								</tr>
@@ -257,6 +259,15 @@
 								          />
 									</td>	
 								</tr>
+								<tr class="prop">
+									<td class="eventTD" valign="top">${message(code: 'action.time', default: 'Report')}:</td>
+									<td>	
+										<input type="text" name="time_picker" id="time_picker" value="${(new Date()).format('dd/MM/yyyy HH:mm') }" /> 
+										<script type="text/javascript">
+											timePickerLaunch("time_picker","date");
+										</script>
+									</td>
+								</tr>						
 								<tr class="prop">
 									<td class="eventTD" valign="top">${message(code: 'action.nature.label', default: 'Report')}:</td>
 									<td>

@@ -41,6 +41,7 @@
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
 				<li><g:link class="create" action="create"><g:message code="default.feminine.new.label" args="[entityName]" /></g:link></li>
+				<li><g:link class="list" action="itinerarySiteView"><g:message code="itinerary.site.report" args="[entityName]" /></g:link></li>
 			</ul>
 		</div>
 		
@@ -53,6 +54,7 @@
 			<thead>
 					<tr>
 						<g:sortableColumn property="name" title="${message(code: 'itinerary.name.label', default: 'Name')}" />
+						<g:sortableColumn property="description" title="${message(code: 'itinerary.description.label', default: 'Name')}" />
 						<th><g:message code="itinerary.creationUser.label" default="Creation User" /></th>
 						<th><g:message code="itinerary.deliveryBoy.label" default="Delivery Boy" /></th>
 						<th>action<th>
@@ -62,6 +64,7 @@
 				<g:each in="${itineraryInstanceList}" status="i" var="itineraryInstance">
 					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">					
 						<td><g:link action="show" id="${itineraryInstance.id}">${fieldValue(bean: itineraryInstance, field: "name")}</g:link></td>
+						<td><g:link action="show" id="${itineraryInstance.id}">${fieldValue(bean: itineraryInstance, field: "description")}</g:link></td>
 						<td>${itineraryInstance.creationUser.lastName} ${itineraryInstance.creationUser.firstName}</td>				
 						<td>${itineraryInstance.deliveryBoy.lastName} ${itineraryInstance.deliveryBoy.firstName}</td>	
 						<td><g:link class="create" action="itineraryReport">Obtenir le rapport</g:link></td>						

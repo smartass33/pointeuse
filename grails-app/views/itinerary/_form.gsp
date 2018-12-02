@@ -7,6 +7,9 @@
 	</label>
 	<g:textField name="name" value="${itineraryInstance?.name}"/>
 </div>
+
+
+
 <div id ='' class="fieldcontain ${hasErrors(bean: itineraryInstance, field: 'deliveryBoy', 'error')} required">
 	<label for="deliveryBoy">
 		<g:message code="itinerary.deliveryBoy.label" default="Delivery Boy" />

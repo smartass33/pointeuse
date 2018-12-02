@@ -35,4 +35,22 @@ class PointeuseTagLib {
 	def mergedActionTable ={attrs,body->
 		out<<render(template:"/itinerary/template/mergedActionTable")
 	}
+	def itinerarySiteReportTemplate ={attrs,body->
+		out<<render(template:"/itinerary/template/itinerarySiteReportTemplate")
+	}
+	def itineraryTheoriticalTemplate ={attrs,body->
+		out<<render(template:"/itinerary/template/itineraryTheoriticalTemplate")
+	}
+	def itineraryTheoriticalSiteView ={attrs,body->
+		out<<render(template:"/itinerary/template/itineraryTheoriticalSiteView")
+	}
+	def itineraryTheoriticalItineraryView ={attrs,body->
+		out<<render(template:"/itinerary/template/itineraryTheoriticalItineraryView")
+	}
+	def itinerarySiteDailyView ={attrs,body->
+		out<<render(template:"/itinerary/template/itinerarySiteDailyView")
+	}
+	def itinerarySiteMonthlyView ={attrs,body->
+		out<<render(template:"/itinerary/template/itinerarySiteMonthlyView")
+	}
 }

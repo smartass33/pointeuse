@@ -35,11 +35,14 @@ import groovy.time.TimeCategory;
 import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional
 
+import java.text.ParseException;
+
 //@Transactional(readOnly = true)
-@Secured(['ROLE_ADMIN'])
+@Secured(['ROLE_ADMIN','ROLE_TOURNEE'])
 class ItineraryController {
 	def springSecurityService
 	def itineraryService
+	def PDFService
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
     def index(Integer max) {
@@ -63,16 +66,59 @@ class ItineraryController {
 		[employeeList:employeeList,checked:isExpanded]
     }
 	
-	@Secured(['ROLE_ADMIN'])
+	@Secured(['ROLE_ADMIN','ROLE_TOURNEE'])
+	def itineraryPDF(){
+		log.error('itinerarySitePDF called')
+		params.each{i->log.error('parameter of list: '+i)}
+		def folder = grailsApplication.config.pdf.directory
+		def itinerary
+		def viewType
+		def siteTemplate
+		def site
+		def date_picker
+		def serviceResponse
+		def retour
+		def currentCalendar = Calendar.instance
+		
+		params.each { name, value ->
+			if (name.contains('itineraryId'))
+				itinerary = Itinerary.get(params.int(name))
+			if (name.contains('id')){
+				viewType = params[name]
+				siteTemplate = viewType.contains('BySite') ? true : false
+			}
+			if (name.contains('siteId'))
+				site = Site.get(params.int(name))
+			if (name.contains('date_picker')){
+				date_picker = params[name]
+				if (date_picker != null && date_picker.size() > 0){
+					currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+					log.debug('currentCalendar.time: '+currentCalendar.time)
+				}
+			}
+		}	
+		
+		if (siteTemplate){
+			retour = PDFService.generateItineraryMonthlyReportBySite(viewType, itinerary, currentCalendar, site, folder)
+		}else{
+			retour = PDFService.generateItineraryMonthlyReportByItinerary(viewType, itinerary, currentCalendar, folder)
+		}
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.outputStream << retour[0]
+	}
+	
+	@Secured(['ROLE_ADMIN','ROLE_TOURNEE'])
 	def trash(){
 		log.error('trash called')
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
+		def actionsList
+		def criteria
 		def action = Action.get(params["actionItemId"])
 		def itinerary = action.itinerary
 		action.delete flush:true
-		def actionsList
-		def criteria = Action.createCriteria()
-		actionsList= criteria.list {
+		criteria = Action.createCriteria()
+		actionsList = criteria.list {
 			and {
 				eq('itinerary',itinerary)
 				eq('isTheoritical',true)
@@ -85,7 +131,7 @@ class ItineraryController {
 		return
 	}
 	
-	@Secured(['ROLE_ADMIN'])
+	@Secured(['ROLE_ADMIN','ROLE_TOURNEE'])
 	def addTheoriticalAction(){
 		log.error('addAction called')
 		params.each{i->log.error('parameter of list: '+i)}
@@ -93,22 +139,29 @@ class ItineraryController {
 		def itinerary
 		def actionType
 		def employee
-		if (params['employeeId'] != null)
-			employee = Employee.get(params.int('employeeId'))
-		if (params['siteId'] != null)
-			site = Site.get(params.int('siteId'))
-		if (params['itineraryId'] != null)
-			itinerary = Itinerary.get(params.int('itineraryId'))
-
-		def currentDate =  new Date().parse("kk:mm", params['time_picker'])
-			
-		actionType = params['nature']
-		if (actionType != null){
-			
-			actionType = actionType.equals('ARRIVEE') ? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
+		def currentDate
+		
+		params.each { name, value ->
+			if (name.contains('itineraryId'))
+				itinerary = Itinerary.get(params.int(name))
+			if (name.contains('employeeId'))
+				employee = Employee.get(params.int(name))
+			if (name.contains('siteId'))
+				site = Site.get(params.int(name))
+			if (name.contains('time_picker')){		
+				try {
+				currentDate =  new Date().parse("dd/MM/yyyy HH:mm", params[name])
+				} catch (ParseException e) {
+					currentDate =  new Date().parse("HH:mm", params[name])
+				}
+			}
+			if (name.contains('action.type'))
+				actionType = (params[name]).equals('ARRIVEE') ? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
 		}
+		
 		def action = new Action(itinerary, currentDate, site, itinerary.deliveryBoy, actionType)
 		action.isTheoritical = true
+		action.isSaturday = itinerary.isSaturday
 		action.save flush:true
 		def actionsList
 		def criteria = Action.createCriteria()
@@ -129,6 +182,9 @@ class ItineraryController {
 		
 	}
 	
+	def itinerarySiteView(){
+		
+	}
 
 	def showItineraryActions(){
 		log.error('showItineraryActions called')
@@ -138,8 +194,9 @@ class ItineraryController {
 		def criteria 
 		def actionsList
 		def theoriticalActionsList
-		def date_picker = params['date_picker'] 
-		def viewType = params['id']
+		def theoriticalSaturdayActionsList
+		def date_picker
+		def viewType
 		def timeDiff
 		def timeDiffMap = [:]
 		def actionListMap = [:]
@@ -148,94 +205,46 @@ class ItineraryController {
 		def i = 0
 		def hasDiscrepancy = false
 		def serviceResponse 
+		def site
+		def siteTemplate
+		def theoriticalActionsMap = [:]
+		def theoriticalSaturdayActionsMap = [:]
 		
-		if (params['itineraryId'] != null){
-			itinerary = params['itineraryId']
-			itinerary = Itinerary.get(params.int('itineraryId'))	
+		params.each { name, value ->
+			if (name.contains('itineraryId'))
+				itinerary = Itinerary.get(params.int(name))
+			if (name.contains('id')){
+				viewType = params[name]
+				siteTemplate = viewType.contains('BySite') ? true : false
+			}
+			if (name.contains('siteId'))
+				site = Site.get(params.int(name))	
+			if (name.contains('date_picker')){
+				date_picker = params[name]
+				if (date_picker != null && date_picker.size() > 0){
+					currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+					log.debug('currentCalendar.time: '+currentCalendar.time)
+				}
+			}
 		}
-		if (date_picker != null && date_picker.size() > 0){
-			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
-			log.error('currentCalendar.time: '+currentCalendar.time)
-		}
-		if (params['id'] != null)
-			viewType = params['id']
+				
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, currentCalendar, site)
 		
-		serviceResponse = itineraryService.getActionList(viewType, itinerary, currentCalendar)
+		if (siteTemplate){
+			theoriticalActionsMap         = itineraryService.getTheoriticalActionMap(site,false)
+			theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true) 
+		}else{
+			theoriticalActionsList         = itineraryService.getTheoriticalActionList(itinerary,false)
+			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
+		}
 		/*
-		switch (viewType) {
-				case 'dailyView':
-					actionsList = criteria.list {
-						and {
-							eq('itinerary',itinerary)
-							eq('day',currentCalendar.get(Calendar.DAY_OF_MONTH))
-							eq('month',currentCalendar.get(Calendar.MONTH) + 1)
-							eq('year',currentCalendar.get(Calendar.YEAR))
-							eq('isTheoritical',false)
-						}
-					}
-					break
-				case 'monthlyView':
-					monthCalendar = currentCalendar
-					monthCalendar.set(Calendar.DAY_OF_MONTH,1)
-					def lastDay = currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-					
-					for (int j = 1;j < lastDay + 1;j++){
-						
-						criteria = Action.createCriteria()
-						actionsList = criteria.list {
-							and {
-								eq('itinerary',itinerary)
-								eq('day',monthCalendar.get(Calendar.DAY_OF_MONTH))
-								eq('month',monthCalendar.get(Calendar.MONTH) + 1)
-								eq('year',monthCalendar.get(Calendar.YEAR))
-								eq('isTheoritical',false)
-							}
-						}
-						actionListMap.put(monthCalendar.time,actionsList)
-						monthCalendar.roll(Calendar.DAY_OF_MONTH,1)
-					}
-					
-								
-					break
-				default:
-					actionsList = criteria.list {
-						and {
-							eq('itinerary',itinerary)
-							eq('day',currentCalendar.get(Calendar.DAY_OF_MONTH))
-							eq('month',currentCalendar.get(Calendar.MONTH) + 1)
-							eq('year',currentCalendar.get(Calendar.YEAR))
-							eq('isTheoritical',false)
-						}
-					}
-					break
-			}
+		theoriticalActionsList = siteTemplate ? itineraryService.getTheoriticalActionList(site,false) : itineraryService.getTheoriticalActionList(itinerary,false)
+		theoriticalSaturdayActionsList = siteTemplate ? itineraryService.getTheoriticalActionList(site,true) : itineraryService.getTheoriticalActionList(itinerary,true)
+			
+			*/
 		
-		*/
 		/*
-		criteria = Action.createCriteria()
-		actionsList = criteria.list {
-			and {
-				eq('itinerary',itinerary)
-				eq('day',currentCalendar.get(Calendar.DAY_OF_MONTH))
-				eq('month',currentCalendar.get(Calendar.MONTH) + 1)
-				eq('year',currentCalendar.get(Calendar.YEAR))
-				eq('isTheoritical',false)			
-			}
-		}		
-*/
-		
-		criteria = Action.createCriteria()
-		theoriticalActionsList= criteria.list {
-			and {
-				eq('itinerary',itinerary)
-				eq('isTheoritical',true)
-				order('date','asc')
-			}
-		}
 		hasDiscrepancy = (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() != theoriticalActionsList.size()) ? true : false
-		
-		log.debug("actionsList.size():" +serviceResponse.get('actionsList') .size())
-		log.debug("theoriticalActionsList.size():" +theoriticalActionsList.size())
 		
 		if (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() != theoriticalActionsList.size()){
 			hasDiscrepancy = true
@@ -247,7 +256,6 @@ class ItineraryController {
 				calendar.set(Calendar.DAY_OF_MONTH,currentCalendar.get(Calendar.DAY_OF_MONTH))		
 				calendar.set(Calendar.MONTH,currentCalendar.get(Calendar.MONTH))
 				calendar.set(Calendar.YEAR,currentCalendar.get(Calendar.YEAR))
-			//	action.date = calendar.time
 				
 				if (serviceResponse.get('actionsList').size() > i && serviceResponse.get('actionsList').get(i) != null){
 					use (TimeCategory){timeDiff = calendar.time - serviceResponse.get('actionsList').get(i).date}
@@ -258,24 +266,49 @@ class ItineraryController {
 				i++
 			}
 		}
-		
-		render template: "/itinerary/template/itineraryReportTemplate", model: [
-			itineraryInstance:itinerary,
-			actionsList:serviceResponse.get('actionsList'),
-			actionListMap:serviceResponse.get('actionListMap'),
-			theoriticalActionsList:theoriticalActionsList,
-			hasDiscrepancy:hasDiscrepancy,
-			timeDiffMap:timeDiffMap,
-			viewType:viewType,
-			timeDiffMap:timeDiffMap
-			]
-		return
+		*/
+		if (siteTemplate){
+			render template: "/itinerary/template/itinerarySiteReportTemplate", model: [
+				itineraryInstance:itinerary,
+				actionsList:serviceResponse.get('actionsList'),
+				actionListMap:serviceResponse.get('actionListMap'),
+				dailyActionMap:serviceResponse.get('dailyActionMap'),
+				theoriticalActionsList:theoriticalActionsList,
+				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+				theoriticalActionsMap:theoriticalActionsMap,
+				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
+				hasDiscrepancy:hasDiscrepancy,
+				timeDiffMap:timeDiffMap,
+				viewType:viewType,
+				siteTemplate:siteTemplate,
+				site:site,
+				timeDiffMap:timeDiffMap
+				]
+			return
+		}else{
+			render template: "/itinerary/template/itineraryReportTemplate", model: [
+				itineraryInstance:itinerary,
+				actionsList:serviceResponse.get('actionsList'),
+				actionListMap:serviceResponse.get('actionListMap'),
+				dailyActionMap:serviceResponse.get('dailyActionMap'),
+				theoriticalActionsList:theoriticalActionsList,
+				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+				hasDiscrepancy:hasDiscrepancy,
+				timeDiffMap:timeDiffMap,
+				viewType:viewType,
+				siteTemplate:siteTemplate,
+				timeDiffMap:timeDiffMap
+				]
+			return
+		}
 	}
 	
     @Transactional
     def save(Itinerary itineraryInstance) {
 		def user = springSecurityService.currentUser
-		
+		params.each{i->log.error('parameter of list: '+i)}
+		def deliveryBoy = Employee.get(params.int('deliveryBoyId'))
+		itineraryInstance.deliveryBoy = deliveryBoy
 		itineraryInstance.creationUser = user
 		itineraryInstance.creationDate = new Date()
 		itineraryInstance.validate()
@@ -302,10 +335,9 @@ class ItineraryController {
     }
 	
 	
-	def changeDeliveryBoy(){
-			
+	def changeDeliveryBoy(){		
 		log.error('changeDeliveryBoy called')
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		def itinerary = Itinerary.get(params.int('itineraryInstanceId'))
 		def deliveryBoy = Employee.get(params.int('deliveryBoyId'))
 		itinerary.deliveryBoy = deliveryBoy
@@ -323,7 +355,6 @@ class ItineraryController {
 		}
 		return
 	 //  [itineraryInstance:itinerary,theoriticalActionsList:theoriticalActionsList,employeeList:employeeList]
-
 	}
 	
 	
@@ -344,6 +375,8 @@ class ItineraryController {
 
     @Transactional
     def update(Itinerary itineraryInstance) {
+		
+		params.each{i->log.debug('parameter of list: '+i)}
         if (itineraryInstance == null) {
             notFound()
             return

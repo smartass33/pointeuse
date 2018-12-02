@@ -18,15 +18,15 @@
 	<div id="newActionForm">
 		<table>
 			<tr>
-				<td><g:select name="nature" from="${pointeuse.ItineraryNature?.values()}" keys="${pointeuse.ItineraryNature.values()*.name()}" required="" /></td>
+				<td><g:select name="action.type" from="${pointeuse.ItineraryNature?.values()}" keys="${pointeuse.ItineraryNature.values()*.name()}" required="" /></td>
 				<td>	
 					<input type="text" name="time_picker" id="time_picker" /> 
 					<script type="text/javascript">
-						datePickerLaunch();
+						timePickerLaunch("time_picker","time");
 					</script>
 				</td>
 				<td><g:select id="site" name="siteId" from="${pointeuse.Site.list()}" optionKey="id" required=""  class="many-to-one"/></td>
-			    <td><a href="#" id="cancelAction">Annuler</a></td>
+			    <td><a href="#" id="cancelAction"><g:message code="default.button.cancel.label"/></a></td>
 			    <td>
 			    	<g:submitToRemote class="listButton"
 						onLoading="document.getElementById('spinner').style.display = 'inline';"

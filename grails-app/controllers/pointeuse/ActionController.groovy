@@ -13,18 +13,20 @@ import org.springframework.web.multipart.MultipartHttpServletRequest
 import uk.co.desirableobjects.ajaxuploader.exception.FileUploadException
 import javax.servlet.http.HttpServletRequest
 import java.text.SimpleDateFormat
+import java.text.ParseException
 
 import grails.converters.JSON
 
 @Transactional(readOnly = true)
 
+@Secured(['ROLE_ADMIN','ROLE_TOURNEE'])
 class ActionController {
 
 	def ajaxUploaderService
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 	def itineraryService
 
-	@Secured(['ROLE_ADMIN'])
+	@Secured(['ROLE_ADMIN','ROLE_TOURNEE'])
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
         respond Action.list(params), model:[actionInstanceCount: Action.count()]
@@ -40,7 +42,7 @@ class ActionController {
         respond new Action(params)
     }
 
-	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
+	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS','ROLE_TOURNEE'])
 	def modifyTheoriticalAction(){
 		log.error('modifyTheoriticalAction called')
 		def calendar = Calendar.instance
@@ -50,7 +52,7 @@ class ActionController {
 		def itinerary
 		def date_action_picker
 		def dateFormat
-		def myDate
+		def currentDate
 
 		params.each { name, value ->
 			if (name.contains('actionItemId')){
@@ -58,16 +60,24 @@ class ActionController {
 				itinerary = action.itinerary
 				calendar.time = action.date
 			}		
-			if (name.contains('date_action_picker')){
+
+			
+			if (name.contains('action_picker')){
 				date_action_picker = params[name]
+				try {
+					currentDate =  new Date().parse("dd/MM/yyyy HH:mm", params[name])
+				} catch (ParseException e) {
+					currentDate =  new Date().parse("HH:mm", params[name])
+				}
+				
 			}
+			
+			
 		}			
 
 		
-		dateFormat = new SimpleDateFormat('HH:mm');
-		myDate = dateFormat.parse(date_action_picker)
-		calendar.set(Calendar.HOUR_OF_DAY,myDate.getAt(Calendar.HOUR_OF_DAY))
-		calendar.set(Calendar.MINUTE,myDate.getAt(Calendar.MINUTE))
+		calendar.set(Calendar.HOUR_OF_DAY,currentDate.getAt(Calendar.HOUR_OF_DAY))
+		calendar.set(Calendar.MINUTE,currentDate.getAt(Calendar.MINUTE))
 		log.error('calendar.time : '+calendar.time)
 		action.date = calendar.time
 		action.save flush:true
@@ -85,10 +95,10 @@ class ActionController {
 		return
 	}
 	
-	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
+	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS','ROLE_TOURNEE'])
 	def trash(){
 		log.error('trash called')
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		def viewType
 		def itinerary
 		def action
@@ -99,50 +109,55 @@ class ActionController {
 		def actionsList
 		def actionListMap = [:]
 		def timeDiffMap = [:]
+		def theoriticalActionsMap = [:]
+		def theoriticalSaturdayActionsMap = [:]
 		def monthCalendar = Calendar.instance
 		def theoriticalActionsList
+		def theoriticalSaturdayActionsList
 		def hasDiscrepancy = false
 		def i = 0
 		def timeDiff
 		def myDate
 		def actionType
 		def serviceResponse
-
-		
+		def site
+		def siteTemplate
 		
 		params.each { name, value ->
 			if (name.contains('ActionItemId')){
 				action = Action.get(params.int(name))
 				itinerary = action.itinerary
 				calendar.time = action.date
+				site = action.site
 				action.delete flush:true
 			}
 			if (name.contains('action_picker')){
 				date_action_picker = params[name]
 			}
-
+			if (name.contains('viewType')){
+				viewType = params[name]
+				siteTemplate = (params[name]).contains('BySite') ? true : false
+			}
 		}		
 		
-		if (params['viewType'] != null)
-			viewType = params['viewType']
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary,calendar,site)
 
-		serviceResponse = itineraryService.getActionList(viewType, itinerary,currentCalendar)
-	
-		criteria = Action.createCriteria()
-		theoriticalActionsList = criteria.list {
-			and {
-				eq('itinerary',itinerary)
-				eq('isTheoritical',true)
-				order('date','asc')
-			}
+		if (siteTemplate){
+			theoriticalActionsMap = itineraryService.getTheoriticalActionMap(site,false)
+			theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true)
+		}else{
+			theoriticalActionsList = itineraryService.getTheoriticalActionList(itinerary,false)
+			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
 		}
-	
+		
+/*
 		hasDiscrepancy = (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() != theoriticalActionsList.size()) ? true : false
 		
-		if (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() > 0){
+		actionsList = serviceResponse.get('actionsList')
+		if (actionsList != null && actionsList.size() > 0){
 			for (Action actionIter in theoriticalActionsList){
 				calendar.setTime(actionIter.date)
-				if (serviceResponse.get('actionsList').size() > i && serviceResponse.get('actionsList').get(i) != null){
+				if (actionsList.size() > i && actionsList.get(i) != null){
 					use (TimeCategory){timeDiff = calendar.time - actionsList.get(i).date}
 					timeDiffMap.put(i, timeDiff)
 				}else{
@@ -152,25 +167,48 @@ class ActionController {
 			}
 		}
 		
-		render template: "/itinerary/template/itineraryReportTemplate", model: [
-			itineraryInstance:itinerary,
-			actionsList:serviceResponse.get('actionsList'),
-			theoriticalActionsList:theoriticalActionsList,
-			hasDiscrepancy:hasDiscrepancy,
-			actionListMap:serviceResponse.get('actionListMap'),
-			timeDiffMap:timeDiffMap,
-			viewType:viewType
-			]
-		return
-		
-		
+		*/
+		if (siteTemplate){
+			render template: "/itinerary/template/itinerarySiteReportTemplate", model: [
+				itineraryInstance:itinerary,
+				actionsList:actionsList,
+				actionListMap:serviceResponse.get('actionListMap'),
+				dailyActionMap:serviceResponse.get('dailyActionMap'),
+				theoriticalActionsMap:theoriticalActionsMap,
+				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
+				theoriticalActionsList:theoriticalActionsList,
+				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+				hasDiscrepancy:hasDiscrepancy,
+				siteTemplate:siteTemplate,
+				viewType:viewType,
+				site:site,
+				timeDiffMap:timeDiffMap
+				]
+			return
+		}else{
+			render template: "/itinerary/template/itineraryReportTemplate", model: [
+				itineraryInstance:itinerary,
+				actionsList:actionsList,
+				actionListMap:serviceResponse.get('actionListMap'),
+				theoriticalActionsList:theoriticalActionsList,
+				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+				theoriticalActionsMap:theoriticalActionsMap,
+				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
+				hasDiscrepancy:hasDiscrepancy,
+				siteTemplate:siteTemplate,
+				viewType:viewType,
+				timeDiffMap:timeDiffMap
+				]
+			return
+		}
+
 	}
 	
 	
-	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
+	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS','ROLE_TOURNEE'])
 	def regularizeAction(){
 		log.error('regularizeAction called')
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		def site
 		def itinerary
 		def employee
@@ -182,14 +220,18 @@ class ActionController {
 		def actionsList
 		def actionListMap = [:]
 		def timeDiffMap = [:]
+		def theoriticalActionsMap = [:]
+		def theoriticalSaturdayActionsMap = [:]
 		def monthCalendar = Calendar.instance
 		def theoriticalActionsList
+		def theoriticalSaturdayActionsList
 		def hasDiscrepancy = false
 		def i = 0
 		def timeDiff
 		def myDate
 		def actionType
 		def serviceResponse
+		def siteTemplate
 		
 		params.each { name, value ->
 			if (name.contains('action_picker')){
@@ -198,53 +240,48 @@ class ActionController {
 			if (name.contains('itineraryId')){
 				itinerary = Itinerary.get(params.int(name))
 			}
-			if (name.contains('itineraryId')){
+			if (name.contains('siteId')){
 				site = Site.get(params.int(name))
 			}
 			if (name.contains('employeeId')){
 				employee = Employee.get(params.int(name))
 			}
 			if (name.contains('action.type')){
-				actionType = params['action.type']
+				actionType = (params[name]).equals('ARR') ? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
+			}
+			if (name.contains('viewType')){
+				viewType = params[name]
+				siteTemplate = viewType.contains('BySite') ? true : false			
 			}
 		}
-		
 		
 		dateFormat = new SimpleDateFormat('dd/MM/yyyy HH:mm');
 		myDate = dateFormat.parse(date_action_picker)
-		//calendar.set(Calendar.HOUR_OF_DAY,myDate.getAt(Calendar.HOUR_OF_DAY))
-		//calendar.set(Calendar.MINUTE,myDate.getAt(Calendar.MINUTE))
 		calendar.time = myDate
 			
-		///actionType = params['action.type']
-		if (actionType != null){
-			actionType = actionType.equals('ARR') ? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
-		}
 		def action = new Action(itinerary, calendar.time, site, employee, actionType)
 		action.save flush:true
-		log.error('done')
-		
-		if (params['viewType'] != null)
-			viewType = params['viewType']
 	
-		serviceResponse = itineraryService.getActionList(viewType, itinerary, calendar)
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, calendar,site)
 		
-		criteria = Action.createCriteria()
-		theoriticalActionsList = criteria.list {
-			and {
-				eq('itinerary',itinerary)
-				eq('isTheoritical',true)
-				order('date','asc')
-			}
+		if (siteTemplate){
+			theoriticalActionsMap = itineraryService.getTheoriticalActionMap(site,false)
+			theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true) 
+		}else{
+			theoriticalActionsList = itineraryService.getTheoriticalActionList(itinerary,false)
+			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
 		}
-	
+		
+	/*
 		hasDiscrepancy = (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() != theoriticalActionsList.size()) ? true : false
 		
-		if (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() > 0){
+		
+		actionsList = serviceResponse.get('actionsList')
+		if (actionsList != null && actionsList.size() > 0){
 			for (Action actionIter in theoriticalActionsList){
 				calendar.setTime(actionIter.date)
-				if (serviceResponse.get('actionsList').size() > i && serviceResponse.get('actionsList').get(i) != null){
-					use (TimeCategory){timeDiff = calendar.time - serviceResponse.get('actionsList').get(i).date}
+				if (actionsList.size() > i && actionsList.get(i) != null){
+					use (TimeCategory){timeDiff = calendar.time - actionsList.get(i).date}
 					timeDiffMap.put(i, timeDiff)
 				}else{
 					timeDiffMap.put(i, 0)
@@ -252,21 +289,45 @@ class ActionController {
 				i++
 			}
 		}
+		*/
 		
-		render template: "/itinerary/template/itineraryReportTemplate", model: [
-			itineraryInstance:itinerary,
-			actionsList:serviceResponse.get('actionsList'),
-			theoriticalActionsList:theoriticalActionsList,
-			hasDiscrepancy:hasDiscrepancy,
-			actionListMap:serviceResponse.get('actionListMap'),
-			timeDiffMap:timeDiffMap,
-			viewType:viewType
-			]
-		return
-
+		if (siteTemplate){
+			render template: "/itinerary/template/itinerarySiteReportTemplate", model: [
+				itineraryInstance:itinerary,
+				actionsList:actionsList,
+				actionListMap:serviceResponse.get('actionListMap'),
+				dailyActionMap:serviceResponse.get('dailyActionMap'),
+				theoriticalActionsList:theoriticalActionsList,
+				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+				theoriticalActionsMap:theoriticalActionsMap,
+				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
+				hasDiscrepancy:hasDiscrepancy,
+				siteTemplate:siteTemplate,
+				viewType:viewType,
+				site:site,
+				timeDiffMap:timeDiffMap
+				]
+			return
+		}else{
+			render template: "/itinerary/template/itineraryReportTemplate", model: [
+				itineraryInstance:itinerary,
+				actionsList:actionsList,
+				actionListMap:serviceResponse.get('actionListMap'),
+				dailyActionMap:serviceResponse.get('dailyActionMap'),
+				theoriticalActionsList:theoriticalActionsList,
+				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+				theoriticalActionsMap:theoriticalActionsMap,
+				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
+				hasDiscrepancy:hasDiscrepancy,
+				siteTemplate:siteTemplate,
+				viewType:viewType,
+				timeDiffMap:timeDiffMap
+				]
+			return
+		}
 	}
 	
-	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
+	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS','ROLE_TOURNEE'])
 	def modifyAction(){
 		log.error('modifyAction called')
 		params.each{i->log.error('parameter of list: '+i)}
@@ -281,62 +342,80 @@ class ActionController {
 		def actionsList
 		def actionListMap = [:]
 		def timeDiffMap = [:]
+		def theoriticalActionsMap = [:]
+		def theoriticalSaturdayActionsMap = [:]
 		def monthCalendar = Calendar.instance
 		def theoriticalActionsList
+		def theoriticalSaturdayActionsList
 		def hasDiscrepancy = false
 		def i = 0
 		def timeDiff
 		def myDate
 		def actionType
-
+		def serviceResponse
+		def site
+		def siteTemplate
+		def currentDate
 			
 		params.each { name, value ->
 			if (name.contains('ActionItemId')){
 				action = Action.get(params.int(name))
 				itinerary = action.itinerary
 				calendar.time = action.date
+				log.error('calendar.time: '+calendar.time)
 			}
+			if (name.contains('actionType')){
+				if (params[name].size() > 0)
+					action.nature = (params['name'].equals('ARR') )? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
+			}
+
+			
 			if (name.contains('action_picker')){
 				date_action_picker = params[name] 
+				try {
+					currentDate =  new Date().parse("dd/MM/yyyy HH:mm", params[name])
+				} catch (ParseException e) {
+					currentDate =  new Date().parse("HH:mm", params[name])
+				}
+				
 			}
 			if (name.contains('itineraryId')){
 				itinerary = Itinerary.get(params.int(name))			
 			}
-		}
-		if (params['actionType'] != null ){
-			action.nature = (params['actionType']).equals('ARR') ? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
-		}
-		
-		dateFormat = new SimpleDateFormat('HH:mm');
-		myDate = dateFormat.parse(date_action_picker)	
-		calendar.set(Calendar.HOUR_OF_DAY,myDate.getAt(Calendar.HOUR_OF_DAY))
-		calendar.set(Calendar.MINUTE,myDate.getAt(Calendar.MINUTE))
-		log.error('calendar.time : '+calendar.time)
-		action.date = calendar.time
-		action.save flush:true
-					
-		
-		if (params['viewType'] != null)
-			viewType = params['viewType'] 
-	
-		serviceResponse = itineraryService.getActionList(viewType, itinerary,currentCalendar)	
-		
-		criteria = Action.createCriteria()
-		theoriticalActionsList = criteria.list {
-			and {
-				eq('itinerary',itinerary)
-				eq('isTheoritical',true)
-				order('date','asc')
+			if (name.contains('viewType')){
+				viewType = params['viewType']
+				siteTemplate = viewType.contains('BySite') ? true : false
 			}
 		}
-	
+		
+		calendar.set(Calendar.HOUR_OF_DAY,currentDate.getAt(Calendar.HOUR_OF_DAY))
+		calendar.set(Calendar.MINUTE,currentDate.getAt(Calendar.MINUTE))
+		log.error('calendar.time: '+calendar.time)
+		action.date = calendar.time
+		action.save flush:true
+		
+		if (siteTemplate){
+			site = action.site
+		}
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, calendar, site)	
+		
+		if (siteTemplate){
+			theoriticalActionsMap = itineraryService.getTheoriticalActionMap(site,false)
+			theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true) 
+		}else{
+			theoriticalActionsList = itineraryService.getTheoriticalActionList(itinerary,false)
+			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
+		}
+		
+/*
 		hasDiscrepancy = (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() != theoriticalActionsList.size()) ? true : false
 		
-		if (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() > 0){
+		actionsList = serviceResponse.get('actionsList')
+		if (actionsList != null && actionsList.size() > 0){
 			for (Action actionIter in theoriticalActionsList){
 				calendar.setTime(actionIter.date)				
-				if (serviceResponse.get('actionsList').size() > i && serviceResponse.get('actionsList').get(i) != null){
-					use (TimeCategory){timeDiff = calendar.time - serviceResponse.get('actionsList').get(i).date}
+				if (actionsList.size() > i && actionsList.get(i) != null){
+					use (TimeCategory){timeDiff = calendar.time - actionsList.get(i).date}
 					timeDiffMap.put(i, timeDiff)
 				}else{
 					timeDiffMap.put(i, 0)
@@ -344,43 +423,71 @@ class ActionController {
 				i++
 			}
 		}
+		*/
 		
-		render template: "/itinerary/template/itineraryReportTemplate", model: [
-			itineraryInstance:itinerary,
-			actionsList:serviceResponse.get('actionsList'),
-			theoriticalActionsList:theoriticalActionsList,
-			hasDiscrepancy:hasDiscrepancy,
-			actionListMap:serviceResponse.get('actionListMap'),
-			timeDiffMap:timeDiffMap,
-			viewType:viewType
-			]
-		return
-		
+		if (siteTemplate){
+			render template: "/itinerary/template/itinerarySiteReportTemplate", model: [
+				itineraryInstance:itinerary,
+				actionsList:actionsList,
+				actionListMap:serviceResponse.get('actionListMap'),
+				dailyActionMap:serviceResponse.get('dailyActionMap'),
+				theoriticalActionsList:theoriticalActionsList,
+				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+				theoriticalActionsMap:theoriticalActionsMap,
+				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
+				hasDiscrepancy:hasDiscrepancy,
+				siteTemplate:siteTemplate,
+				viewType:viewType,
+				site:site,
+				timeDiffMap:timeDiffMap
+				]
+			return
+		}else{
+			render template: "/itinerary/template/itineraryReportTemplate", model: [
+				itineraryInstance:itinerary,
+				actionsList:actionsList,
+				actionListMap:serviceResponse.get('actionListMap'),
+				theoriticalActionsList:theoriticalActionsList,
+				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+				theoriticalActionsMap:theoriticalActionsMap,
+				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
+				hasDiscrepancy:hasDiscrepancy,
+				siteTemplate:siteTemplate,
+				viewType:viewType,
+				timeDiffMap:timeDiffMap
+				]
+			return
+		}
 	}
 	
-	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
+	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS','ROLE_TOURNEE'])
 	def addAction(){
 		log.error('addAction called')
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		def site
 		def itinerary
 		def actionType
 		def employee
-		if (params['employeeId'] != null)
-			employee = Employee.get(params.int('employeeId'))
-		if (params['siteId'] != null)
-			site = Site.get(params.int('siteId'))
-		if (params['itineraryId'] != null)
-			itinerary = Itinerary.get(params.int('itineraryId'))
-			
-		actionType = params['action.type']
-		if (actionType != null){
-			
-			actionType = actionType.equals('ARR') ? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
+		def currentDate
+		
+		params.each { name, value ->
+			if (name.contains('employeeId')){
+				employee = Employee.get(params.int(name))
+			}
+			if (name.contains('itineraryId')){
+				itinerary = Itinerary.get(params.int(name))
+			}
+			if (name.contains('siteId')){
+				site = Site.get(params.int(name))
+			}
+			if (name.contains('time_picker'))
+				currentDate =  new Date().parse("dd/MM/yyyy HH:mm", params[name])
+			if (name.contains('action.type'))
+				actionType = (params[name]).equals('ARR') ? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
 		}
-		def action = new Action(itinerary, new Date(), site, employee, actionType) 	
+		
+		def action = new Action(itinerary, currentDate, site, employee, actionType) 	
 		action.save flush:true
-		log.error('done')
 	}
 	
     @Transactional
@@ -433,7 +540,7 @@ class ActionController {
         }
     }
 
-	@Secured(['ROLE_ADMIN'])
+	@Secured(['ROLE_ADMIN','ROLE_TOURNEE'])
     @Transactional
     def delete(Action actionInstance) {
 

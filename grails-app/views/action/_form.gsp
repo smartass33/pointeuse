@@ -28,8 +28,7 @@
 
 <div class="fieldcontain ${hasErrors(bean: actionInstance, field: 'isTheoritical', 'error')} ">
 	<label for="isTheoritical">
-		<g:message code="action.isTheoritical.label" default="Is Theoritical" />
-		
+		<g:message code="action.isTheoritical.label" default="Is Theoritical" />	
 	</label>
 	<g:checkBox name="isTheoritical" value="${actionInstance?.isTheoritical}" />
 </div>

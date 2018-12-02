@@ -40,7 +40,7 @@
 
 	<table style="table-layout: fixed;width:100%;"  >
 		<thead>
-			<th class="eventTD" />
+			<th class="eventTD"/>
 			<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th'>
 				<g:if test="${month_th>5}">
 					<th class="eventTD" style="width:50px">${period.year}</th>

@@ -9,9 +9,7 @@
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'itinerary.label', default: 'Itinerary')}" />
 		<title><g:message code="default.show.label" args="[entityName]" /></title>
-		<g:javascript library="application"/> 
-		<resource:tooltip />
-				
+		<g:javascript library="application"/> 		
  		<r:require module="report"/>		
 		<r:layoutResources/>	
 		<g:set var="calendar" value="${Calendar.instance}"/>
@@ -98,66 +96,55 @@
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
 				<li><g:link class="list" action="index"><g:message code="default.list.label" args="[entityName]" /></g:link></li>
-				<li><g:link class="create" action="create"><g:message code="default.new.feminine.label" args="[entityName]" /></g:link></li>
-				<li><g:link class="list" action="itinerarySiteView"><g:message code="itinerary.site.report" args="[entityName]" /></g:link></li>
-				<li>
-					<a  class='legend' id="legend" title="
-					<table  id='legendTable'>
-						<tr><td style='color : red;font-weight: bold;'><g:message code='itinerary.name.ARR' default='Régul' /></td></tr>
-						<tr><td style='color : green;font-weight: bold;'><g:message code='itinerary.name.DEP' default='Régul' /></td></tr>
-						</table>"><g:message code='legend.label' default='Régul' /></a> <richui:tooltip id="legend" />
-			</li>
-				
+				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
 			</ul>
 		</div>
 		<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
-		<div id="actions" class="standardNav">
-			
-				<ul>
-					<g:form method="POST">
-						<li><g:message code="itinerary.label" default="Search" style="vertical-align: middle;" /></li>
-						<li>
-							<g:if test="${itineraryId != null && !itineraryId.equals('')}">
-								<g:select name="itineraryId" from="${Itinerary.list([sort:'name'])}"
-									noSelection="${['':itinerary.name]}" optionKey="id" optionValue="name"
-									style="vertical-align: middle;" />
-							</g:if>
-							<g:else>
-								<g:select name="itineraryId" from="${Itinerary.list([sort:'name'])}"
-									noSelection="${['':(itinerary?itinerary.name:'-')]}" optionKey="id" optionValue="${{it.description != null ? it.name+' '+it.description : it.name}}"
-									style="vertical-align: middle;" />						
-							</g:else>				
-						</li>
-						<li>
-							<input type="text" id="date_picker" name="date_picker" />
-						</li>
-						<li>	
-							<g:submitToRemote class="displayButton"
-								value="${message(code:'absence.report.daily.view')}"
-								update="itineraryReportTemplate" 
-								onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                onComplete="document.getElementById('spinner').style.display = 'none';"
-								url="[controller:'itinerary', action:'showItineraryActions',id:'dailyView']"
-							/>	
-						</li>		
-						<li>
-							<g:submitToRemote class="displayButton"
-								value="${message(code:'absence.report.monthly.view')}"
-								update="itineraryReportTemplate" 
-								onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                onComplete="document.getElementById('spinner').style.display = 'none';"
-								url="[controller:'itinerary', action:'showItineraryActions',id:'monthlyView']"
-							/>	
-						</li> 	
-						<li>
-							<g:actionSubmit value="PDF" action="itineraryPDF" class="pdfButton" />
-							<g:hiddenField name="id" value="monthlyView"/>
-						</li>
-					</g:form>
-				</ul>
+		<div id="actions" class="standardNav">		
+			<ul>
+				<g:form method="POST">
+					<li><g:message code="employee.site.label" default="Search" style="vertical-align: middle;" /></li>
+					<li>
+						<g:if test="${siteId != null && !siteId.equals('')}">
+							<g:select name="siteId" from="${Site.list([sort:'name'])}"
+								noSelection="${['':itinerary.name]}" optionKey="id" optionValue="name"
+								style="vertical-align: middle;" />
+						</g:if>
+						<g:else>
+							<g:select name="siteId" from="${Site.list([sort:'name'])}"
+								noSelection="${['':(itinerary?itinerary.name:'-')]}" optionKey="id" optionValue="name"
+								style="vertical-align: middle;" />						
+						</g:else>				
+					</li>
+					<li>
+						<input type="text" id="date_picker" name="date_picker" />
+					</li>
+					<li>	
+						<g:submitToRemote class="displayButton"
+							value="${message(code:'absence.report.daily.view')}"
+							update="itinerarySiteReportTemplate" 
+							onLoading="document.getElementById('spinner').style.display = 'inline';"
+			                onComplete="document.getElementById('spinner').style.display = 'none';"
+							url="[controller:'itinerary', action:'showItineraryActions',id:'dailyViewBySite']"/>	
+					</li>		
+					<li>
+						<g:submitToRemote class="displayButton"
+							value="${message(code:'absence.report.monthly.view')}"
+							update="itinerarySiteReportTemplate" 
+							onLoading="document.getElementById('spinner').style.display = 'inline';"
+			                onComplete="document.getElementById('spinner').style.display = 'none';"
+							url="[controller:'itinerary', action:'showItineraryActions',id:'monthlyViewBySite']"/>	
+					</li> 	
+					<li>
+						<g:actionSubmit value="PDF" action="itineraryPDF" class="pdfButton" />
+						<g:hiddenField name="id" value="monthlyViewBySite"/>
+
+					</li>
+				</g:form>
+			</ul>
 		</div>
-		<div id="itineraryReportTemplate">
-			<g:itineraryReportTemplate/>
+		<div id="itinerarySiteReportTemplate">
+			<g:itinerarySiteReportTemplate/>
 		</div>
 	</body>
 </html>

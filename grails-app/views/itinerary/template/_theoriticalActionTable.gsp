@@ -27,7 +27,7 @@
 								<g:form action="create">
 									<input type="text" name="date_action_picker_${k}" id="date_action_picker_${k}" value="${theoriticalActionItem.date.format('kk:mm')}"/> 
 									<script type="text/javascript">
-										datePickerLaunch(${k});
+										timePickerLaunch ("date_action_picker_${k}","time");
 									</script>	
 									<g:submitToRemote class="listButton"
 				                    	onLoading="document.getElementById('spinner').style.display = 'inline';"

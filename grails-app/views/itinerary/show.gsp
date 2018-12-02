@@ -56,6 +56,12 @@
 					<span class="property-value" aria-labelledby="name-label"><g:fieldValue bean="${itineraryInstance}" field="name"/></span>
 				</li>
 				</g:if>
+				<g:if test="${itineraryInstance?.description}">
+				<li class="fieldcontain">
+					<span id="name-label" class="property-label"><g:message code="itinerary.description.label" default="description" /></span>
+					<span class="property-value" aria-labelledby="name-label"><g:fieldValue bean="${itineraryInstance}" field="description"/></span>
+				</li>
+				</g:if>
 				<g:if test="${itineraryInstance?.creationUser}">
 					<li class="fieldcontain">
 						<span id="creationUser-label" class="property-label"><g:message code="itinerary.creationUser.label" default="Creation User" /></span>

@@ -13,34 +13,23 @@
 		<script src="${grailsApplication.config.context}/js/jquery-ui-timepicker-addon.js"></script>
 		
 		<script type="text/javascript">
-		function datePickerLaunch (){										
-					$.timepicker.regional['fr'] = {
-						timeOnlyTitle: 'Horaire',
-						timeText: 'Horaire',
-						hourText: 'Heure',
-						minuteText: 'Minute',
-						secondText: 'Seconde',
-						millisecText: 'Milliseconde',
-						timezoneText: 'Fuseau Horaire',
-						currentText: 'Horaire Actuel',
-						closeText: 'Fermer',
-						timeFormat: 'HH:mm',
-						amNames: ['AM', 'A'],
-						pmNames: ['PM', 'P'],
-						isRTL: false
-					};
-					
-					$.timepicker.setDefaults($.timepicker.regional['fr']);
-					$( "#time_picker" ).timepicker({
-					});	
-			
-		}
-		function closePopup ( ){
-			window.location = $('#closeId').attr('href');
-		}
-
-		function datePickerLaunch (datePickerId){
-			$.datepicker.regional['fr'] = {
+			function timePickerLaunch (datePickerId,type){										
+				$.timepicker.regional['fr'] = {
+					timeOnlyTitle: 'Horaire',
+					timeText: 'Horaire',
+					hourText: 'Heure',
+					minuteText: 'Minute',
+					secondText: 'Seconde',
+					millisecText: 'Milliseconde',
+					timezoneText: 'Fuseau Horaire',
+					currentText: 'Horaire Actuel',
+					closeText: 'Fermer',
+					timeFormat: 'HH:mm',
+					amNames: ['AM', 'A'],
+					pmNames: ['PM', 'P'],
+					isRTL: false
+				};
+				$.datepicker.regional['fr'] = {
 						closeText: 'Fermer',
 						prevText: '<Précédent',
 						nextText: 'Suivant>',
@@ -59,35 +48,22 @@
 						showMonthAfterYear: false,
 						yearSuffix: ''
 					};
-											
-					$.timepicker.regional['fr'] = {
-						timeOnlyTitle: 'Horaire',
-						timeText: 'Horaire',
-						hourText: 'Heure',
-						minuteText: 'Minute',
-						secondText: 'Seconde',
-						millisecText: 'Milliseconde',
-						timezoneText: 'Fuseau Horaire',
-						currentText: 'Horaire Actuel',
-						closeText: 'Fermer',
-						timeFormat: 'HH:mm',
-						amNames: ['AM', 'A'],
-						pmNames: ['PM', 'P'],
-						isRTL: false
-					};
-					
-					$.timepicker.setDefaults($.timepicker.regional['fr']);
-					$.datepicker.setDefaults($.datepicker.regional['fr']);		
-				
-
-					$( "#date_action_picker" ).timepicker({
-						format: 'LT'
-					});	
-					$( "#date_action_picker_"+datePickerId ).timepicker({
-						format: 'LT'
-					});		
 	
-		}
+				$.timepicker.setDefaults($.timepicker.regional['fr']);
+				$.datepicker.setDefaults($.datepicker.regional['fr']);		
+	
+				if (type == 'time'){
+					$( "#"+datePickerId ).timepicker({});		
+				}
+				if (type == 'date'){
+					$( "#"+datePickerId ).datetimepicker({});		
+				}	
+			}
+
+			function closePopup ( ){
+				window.location = $('#closeId').attr('href');
+			}
+
 		</script>
 
 		<style type="text/css">
@@ -125,6 +101,18 @@
 							<g:message code="itinerary.name.label" default="Name" />
 						</label>
 						<g:textField name="name" value="${itineraryInstance?.name}"/>
+					</div>
+					<div class="fieldcontain ${hasErrors(bean: itineraryInstance, field: 'description', 'error')} ">
+						<label for="description">
+							<g:message code="itinerary.description.label" default="description" />
+						</label>
+						<g:textField name="description" value="${itineraryInstance?.description}"/>
+					</div>					
+					<div class="fieldcontain ${hasErrors(bean: itineraryInstance, field: 'isSaturday', 'error')} ">
+						<label for="isSaturday">
+							<g:message code="itinerary.saturday.label" default="Is isSaturday" />	
+						</label>
+						<g:checkBox name="isSaturday" value="${itineraryInstance?.isSaturday}" />
 					</div>
 				</fieldset>
 				<fieldset class="buttons">

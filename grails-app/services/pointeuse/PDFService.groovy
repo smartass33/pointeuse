@@ -13,10 +13,89 @@ import org.hibernate.StaleObjectStateException
 class PDFService {
 	def timeManagerService
 	def paymentService
+	def itineraryService
 	def mileageService
 	def pdfRenderingService
 	def grailsApplication
 	
+	
+	def generateItineraryMonthlyReportByItinerary(def viewType, def itinerary, def currentCalendar, def folder){
+		log.error('generateItineraryMonthlyReport called for itinerary: '+itinerary.name+' and date: '+currentCalendar.time)
+		def model
+		def filename
+		OutputStream outputStream
+		File file
+		def theoriticalActionsList = []
+		def theoriticalSaturdayActionsList = []
+		
+		model = itineraryService.getActionMap(viewType, itinerary, currentCalendar, null)
+		theoriticalActionsList         = itineraryService.getTheoriticalActionList(itinerary,false)
+		theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
+	
+		model << [
+			itinerary : itinerary,
+			currentDate : currentCalendar.time,
+			theoriticalActionsList:theoriticalActionsList,
+			theoriticalSaturdayActionsList:theoriticalSaturdayActionsList
+		]
+
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeItineraryReportTemplate', model: model)
+		filename = currentCalendar.get(Calendar.YEAR).toString()+ '-' + (currentCalendar.get(Calendar.MONTH)+1).toString()+'-'+itinerary.name+'-itineraire.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
+	def generateItineraryMonthlyReportBySite(def viewType, def itinerary, def currentCalendar, def site, def folder){
+		log.error('generateItineraryMonthlyReport called for site: '+site.name+' and date: '+currentCalendar.time)
+		def model
+		def filename
+		OutputStream outputStream
+		File file
+		def theoriticalActionsMap = [:]
+		def theoriticalSaturdayActionsMap = [:]
+		
+		
+		//siteTemplate = true as it is bySite
+		
+		model = itineraryService.getActionMap(viewType, itinerary, currentCalendar, site)
+		
+		theoriticalActionsMap         = itineraryService.getTheoriticalActionMap(site,false)
+		theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true)
+		
+		/*
+		actionsList:serviceResponse.get('actionsList'),
+		actionListMap:serviceResponse.get('actionListMap'),
+		dailyActionMap:serviceResponse.get('dailyActionMap'),
+		*/
+
+		model << [
+			currentDate : currentCalendar.time,
+			site:site,
+			theoriticalActionsMap:theoriticalActionsMap,
+			theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap
+		]
+
+
+
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeItineraryReportBySiteTemplate', model: model)
+		filename = currentCalendar.get(Calendar.YEAR).toString()+ '-' + (currentCalendar.get(Calendar.MONTH)+1).toString()+'-'+site.name+'-itineraire.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
 	
 	def generateSiteMonthlyTimeSheet(Date myDate,Site site,String folder){
 		log.error('generateSiteMonthlyTimeSheet called for site: '+site.name+' and date: '+myDate)		
