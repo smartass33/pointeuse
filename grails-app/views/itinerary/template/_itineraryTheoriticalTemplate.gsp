@@ -6,113 +6,99 @@
 
 <g:if test="${!siteTemplate}">
 	<g:if test="${theoriticalActionsList != null }">
+	
+	<g:set var="nextActionItem" value="${theoriticalActionsList.get(1)}"/>
+	<g:set var="hasNext" value="${true}"/>
+	
 		<h1><g:message code="itinerary.theoritical.label"/></h1>
 	</g:if>
 	<table style="table-layout:fixed;">
 		<tbody>
+		
+			<tr>
+				<g:each in="${theoriticalActionsList}" var='actionItem' status="j">
+					<td class="itineraryReportTD">
+						${actionItem.site.name}
+						<br> 
+						<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
+							<font color="red">${actionItem.date.format('kk:mm')} </font>
+						</g:if>
+						<g:else>
+							<font color="green">${actionItem.date.format('kk:mm')} </font>
+						</g:else>
+					</td>
+				</g:each>
+			
+			</tr>
+		
+		
+			<tr>
+				<g:each in="${theoriticalActionsList}" var='actionItem' status="j">
+					${j}
+					<g:if test="${nextActionItem != null && nextActionItem.site.equals(actionItem.site)}">
+						<td class="itineraryReportTD">
+							${actionItem.site.name}
+							<br> 
+							<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
+								<font color="red">${actionItem.date.format('kk:mm')} </font>
+							</g:if>
+							<g:else>
+								<font color="green">${actionItem.date.format('kk:mm')} </font>
+							</g:else>
+							<g:if test="${hasNext}"> - 
+								<g:if test="${nextActionItem.nature.equals(ItineraryNature.ARRIVEE)}">
+									<font color="red">${nextActionItem.date.format('kk:mm')} </font>
+								</g:if>
+								<g:else>
+									<font color="green">${nextActionItem.date.format('kk:mm')} </font>
+								</g:else>		
+							</g:if>
+						</td>
+					</g:if>
+					<g:else>
+					</g:else>
+					<g:if test="${(j + 2) < theoriticalActionsList.size() }">
+						<% nextActionItem = theoriticalActionsList.get(j+2);%>	
+						${nextActionItem.site.name}
+					</g:if>
+					<g:else>
+						<% hasNext = false;%>	
+					</g:else>
+				</g:each>
+			</tr>
+		
+		
 			<tr>
 				<g:each in="${theoriticalActionsList}" var='actionItem' status="j">
 					<g:if test="${outActionItem != null && outActionItem.site.equals(actionItem.site)}">
 						<td class="itineraryReportTD" >${actionItem.site.name}<br>	
-							<a href="#itinerary_out_action_form_${j}" id="itinerary_out_action_pop_${j}">	
 							<g:if test="${outActionItem.nature.equals(ItineraryNature.ARRIVEE)}">
 								<font color="red">
 							</g:if>
 							<g:else>
 								<font color="green">
 							</g:else>
-							${outActionItem.date.format('kk:mm')}</font></a>
-							<a href="#x" class="overlay" id="itinerary_out_action_form_${j}" style="background: transparent;"></a>
-							<div id="itinerary_out_action_popup_${j}" class="popup">
-								<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
-								<p>${message(code: 'action.create.info', default: 'Report')}</p>
-								<g:form action="create">
-									<input type="text" name="date_out_action_picker_${j}" id="date_out_action_picker_${j}" value="${outActionItem.date.format('kk:mm')}"/> 
-									<script type="text/javascript">
-										timePickerLaunch ("date_out_action_picker_${j}","time");
-									</script>	
-									<g:submitToRemote class="listButton"
-				                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
-										update="itineraryReportTemplate"
-										onSuccess="closePopup()"
-										url="[controller:'action', action:'modifyAction']" value="${message(code: 'action.modification.validation', default: 'Report')}">
-									</g:submitToRemote>
-									<g:hiddenField name="viewType" value="${viewType}" />
-									<g:if test="${itineraryInstance != null}"><g:hiddenField name="itineraryId_${j}" value="${itineraryInstance.id}" /></g:if>
-									<g:if test="${outActionItem != null}"><g:hiddenField name="outActionItemId_${j}" value="${outActionItem.id}" /></g:if>
-								</g:form>
-								<a class="close" id="closeId" href="#close"></a>
-							</div>
-							 -  <br>					 
-							<a href="#itinerary_in_action_form_${j}" id="itinerary_in_action_pop_${j}">
-							
+							${outActionItem.date.format('kk:mm')}</font>
+							 -  <br>					 							
 							<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
 								<font color="red">
 							</g:if>
 							<g:else>
 								<font color="green">
 							</g:else>
-							
-							${actionItem.date.format('kk:mm')}</font></a>
-							<a href="#x" class="overlay" id="itinerary_in_action_form_${j}" style="background: transparent;"></a>
-							<div id="itinerary_in_action_popup_${j}" class="popup">
-								<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
-								<p>${message(code: 'action.create.info', default: 'Report')}</p>
-								<g:form action="create">
-									<input type="text" name="date_in_action_picker_${j}" id="date_in_action_picker_${j}" value="${actionItem.date.format('kk:mm')}"/> 
-									<script type="text/javascript">
-										timePickerLaunch ("date_in_action_picker_${j}","time");
-									</script>	
-									<g:submitToRemote class="listButton"
-				                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
-										update="itineraryReportTemplate"
-										onSuccess="closePopup()"
-										url="[controller:'action', action:'modifyAction']" value="${message(code: 'action.modification.validation', default: 'Report')}">
-									</g:submitToRemote>
-									<g:hiddenField name="viewType" value="${viewType}" />
-									<g:if test="${itineraryInstance != null}"><g:hiddenField name="itineraryId_${j}" value="${itineraryInstance.id}" /></g:if>
-									<g:if test="${actionItem != null}"><g:hiddenField name="inActionItemId_${j}" value="${actionItem.id}" /></g:if>
-								</g:form>
-								<a class="close" id="closeId" href="#close"></a>
-							</div>
+							${actionItem.date.format('kk:mm')}</font>
 						</td>
 					</g:if>
 					<g:else>
 						<g:if test="${outActionItem == null}">
 							<td class="itineraryReportTD">${actionItem.site.name}<br>
-								<a href="#itinerary_action_form_${j}" id="itinerary_action_pop_${j}">
 								<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
 									<font color="red">
 								</g:if>
 								<g:else>
 									<font color="green">
 								</g:else>
-
-								${actionItem.date.format('kk:mm')}</font></a> 
-								<a href="#x" class="overlay" id="itinerary_action_form_${j}" style="background: transparent;"></a>
-								<div id="itinerary_action_popup_${j}" class="popup">
-									<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
-									<p>${message(code: 'action.create.info', default: 'Report')}</p>
-									<g:form action="create">
-										<input type="text" name="date_action_picker_${j}" id="date_action_picker_${j}" value="${actionItem.date.format('kk:mm')}"/> 
-										<script type="text/javascript">
-											timePickerLaunch ("date_action_picker_${j}","time");
-										</script>	
-										<g:submitToRemote class="listButton"
-					                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-					                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
-											update="itineraryReportTemplate"
-											onSuccess="closePopup()"
-											url="[controller:'action', action:'modifyAction']" value="${message(code: 'action.modification.validation', default: 'Report')}">
-										</g:submitToRemote>
-										<g:hiddenField name="viewType" value="${viewType}" />
-										<g:if test="${itineraryInstance != null}"><g:hiddenField name="itineraryId_${j}" value="${itineraryInstance.id}" /></g:if>
-										<g:if test="${actionItem != null}"><g:hiddenField name="inActionItemId_${j}" value="${actionItem.id}" /></g:if>
-									</g:form>
-									<a class="close" id="closeId" href="#close"></a>
-								</div>
+								${actionItem.date.format('kk:mm')}</font>
 							</td>					
 						</g:if>
 						<% outActionItem = actionItem;%>			
@@ -127,39 +113,14 @@
 				<g:each in="${theoriticalSaturdayActionsList}" var='actionItem' status="j">
 					<g:if test="${outActionItem != null && outActionItem.site.equals(actionItem.site)}">
 						<td class="itineraryReportTD" >${actionItem.site.name}<br>	
-							<a href="#itinerary_out_action_form_${j}" id="itinerary_out_action_pop_${j}">	
 							<g:if test="${outActionItem.nature.equals(ItineraryNature.ARRIVEE)}">
 								<font color="red">
 							</g:if>
 							<g:else>
 								<font color="green">
 							</g:else>
-							${outActionItem.date.format('kk:mm')}</font></a>
-							<a href="#x" class="overlay" id="itinerary_out_action_form_${j}" style="background: transparent;"></a>
-							<div id="itinerary_out_action_popup_${j}" class="popup">
-								<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
-								<p>${message(code: 'action.create.info', default: 'Report')}</p>
-								<g:form action="create">
-									<input type="text" name="date_out_action_picker_${j}" id="date_out_action_picker_${j}" value="${outActionItem.date.format('kk:mm')}"/> 
-									<script type="text/javascript">
-										timePickerLaunch ("date_out_action_picker_${j}","time");
-									</script>	
-									<g:submitToRemote class="listButton"
-				                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
-										update="itineraryReportTemplate"
-										onSuccess="closePopup()"
-										url="[controller:'action', action:'modifyAction']" value="${message(code: 'action.modification.validation', default: 'Report')}">
-									</g:submitToRemote>
-									<g:hiddenField name="viewType" value="${viewType}" />
-									<g:if test="${itineraryInstance != null}"><g:hiddenField name="itineraryId_${j}" value="${itineraryInstance.id}" /></g:if>
-									<g:if test="${outActionItem != null}"><g:hiddenField name="outActionItemId_${j}" value="${outActionItem.id}" /></g:if>
-								</g:form>
-								<a class="close" id="closeId" href="#close"></a>
-							</div>
-							 - 	<br>				 
-							<a href="#itinerary_in_action_form_${j}" id="itinerary_in_action_pop_${j}">
-							
+							${outActionItem.date.format('kk:mm')}</font>
+							 - 	<br>				 							
 							<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
 								<font color="red">
 							</g:if>
@@ -168,34 +129,11 @@
 							</g:else>
 							
 							${actionItem.date.format('kk:mm')}</font></a>
-							<a href="#x" class="overlay" id="itinerary_in_action_form_${j}" style="background: transparent;"></a>
-							<div id="itinerary_in_action_popup_${j}" class="popup">
-								<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
-								<p>${message(code: 'action.create.info', default: 'Report')}</p>
-								<g:form action="create">
-									<input type="text" name="date_in_action_picker_${j}" id="date_in_action_picker_${j}" value="${actionItem.date.format('kk:mm')}"/> 
-									<script type="text/javascript">
-										timePickerLaunch ("date_in_action_picker_${j}","time");
-									</script>	
-									<g:submitToRemote class="listButton"
-				                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-				                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
-										update="itineraryReportTemplate"
-										onSuccess="closePopup()"
-										url="[controller:'action', action:'modifyAction']" value="${message(code: 'action.modification.validation', default: 'Report')}">
-									</g:submitToRemote>
-									<g:hiddenField name="viewType" value="${viewType}" />
-									<g:if test="${itineraryInstance != null}"><g:hiddenField name="itineraryId_${j}" value="${itineraryInstance.id}" /></g:if>
-									<g:if test="${actionItem != null}"><g:hiddenField name="inActionItemId_${j}" value="${actionItem.id}" /></g:if>
-								</g:form>
-								<a class="close" id="closeId" href="#close"></a>
-							</div>
 						</td>
 					</g:if>
 					<g:else>
 						<g:if test="${outActionItem == null}">
 							<td class="itineraryReportTD">${actionItem.site.name}<br>
-								<a href="#itinerary_action_form_${j}" id="itinerary_action_pop_${j}">
 								<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
 									<font color="red">
 								</g:if>
@@ -203,29 +141,7 @@
 									<font color="green">
 								</g:else>
 	
-								${actionItem.date.format('kk:mm')}</font></a>
-								<a href="#x" class="overlay" id="itinerary_action_form_${j}" style="background: transparent;"></a>
-								<div id="itinerary_action_popup_${j}" class="popup">
-									<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
-									<p>${message(code: 'action.create.info', default: 'Report')}</p>
-									<g:form action="create">
-										<input type="text" name="date_action_picker_${j}" id="date_action_picker_${j}" value="${actionItem.date.format('kk:mm')}"/> 
-										<script type="text/javascript">
-											timePickerLaunch ("date_action_picker_${j}","time");
-										</script>	
-										<g:submitToRemote class="listButton"
-					                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-					                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
-											update="itineraryReportTemplate"
-											onSuccess="closePopup()"
-											url="[controller:'action', action:'modifyAction']" value="${message(code: 'action.modification.validation', default: 'Report')}">
-										</g:submitToRemote>
-										<g:hiddenField name="viewType" value="${viewType}" />
-										<g:if test="${itineraryInstance != null}"><g:hiddenField name="itineraryId_${j}" value="${itineraryInstance.id}" /></g:if>
-										<g:if test="${actionItem != null}"><g:hiddenField name="inActionItemId_${j}" value="${actionItem.id}" /></g:if>
-									</g:form>
-									<a class="close" id="closeId" href="#close"></a>
-								</div>
+								${actionItem.date.format('kk:mm')}</font>
 							</td>					
 						</g:if>
 						<% outActionItem = actionItem;%>			
@@ -245,38 +161,14 @@
 				<g:each in="${theoriticalActionsList}" var='actionItem' status="j">
 					<td class="itineraryReportTD">
 						${actionItem.itinerary.name}<br>
-						<a href="#itinerary_action_form_${j}" id="itinerary_action_pop_${j}">
 						<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
 							<font color="red">
 						</g:if>
 						<g:else>
 							<font color="green">
 						</g:else>		
-						${actionItem.date.format('kk:mm')}</font></a>
-						<a href="#x" class="overlay" id="itinerary_action_form_${j}" style="background: transparent;"></a>
-						<div id="itinerary_action_popup_${j}" class="popup">
-							<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
-							<p>${message(code: 'action.create.info', default: 'Report')}</p>
-							<g:form action="create">
-								<input type="text" name="date_action_picker_${j}" id="date_action_picker_${j}" value="${actionItem.date.format('kk:mm')}"/> 
-								<script type="text/javascript">
-									timePickerLaunch ('date_action_picker_${j}','time');
-								</script>	
-								<g:submitToRemote class="listButton"
-			                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-			                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
-									update="itineraryReportTemplate"
-									onSuccess="closePopup()"
-									url="[controller:'action', action:'modifyAction']" value="${message(code: 'action.modification.validation', default: 'Report')}">
-								</g:submitToRemote>
-								<g:hiddenField name="viewType" value="${viewType}" />
-								<g:if test="${itineraryInstance != null}"><g:hiddenField name="itineraryId_${j}" value="${itineraryInstance.id}" /></g:if>
-								<g:if test="${actionItem != null}"><g:hiddenField name="inActionItemId_${j}" value="${actionItem.id}" /></g:if>
-							</g:form>
-							<a class="close" id="closeId" href="#close"></a>
-						</div>
+						${actionItem.date.format('kk:mm')}</font>
 					</td>					
-
 				</g:each>
 			</tr>
 		</tbody>
@@ -289,37 +181,13 @@
 				<g:each in="${theoriticalSaturdayActionsList}" var='actionItem' status="k">
 					<td class="itineraryReportTD">
 						${actionItem.itinerary.name}<br>
-						<a href="#itinerary_action_form_${k}" id="itinerary_action_pop_${k}">
 						<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
 							<font color="red">
 						</g:if>
 						<g:else>
 							<font color="green">
 						</g:else>
-						
-						${actionItem.date.format('kk:mm')}</font></a>
-						<a href="#x" class="overlay" id="itinerary_action_form_${k}" style="background: transparent;"></a>
-						<div id="itinerary_action_popup_${k}" class="popup">
-							<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
-							<p>${message(code: 'action.create.info', default: 'Report')}</p>
-							<g:form action="create">
-								<input type="text" name="date_action_picker_${k}" id="date_action_picker_${k}" value="${actionItem.date.format('kk:mm')}"/> 
-								<script type="text/javascript">
-									timePickerLaunch ("date_action_picker_${k}","time");
-								</script>	
-								<g:submitToRemote class="listButton"
-			                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-			                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
-									update="itineraryReportTemplate"
-									onSuccess="closePopup()"
-									url="[controller:'action', action:'modifyAction']" value="${message(code: 'action.modification.validation', default: 'Report')}">
-								</g:submitToRemote>
-								<g:hiddenField name="viewType" value="${viewType}" />
-								<g:if test="${itineraryInstance != null}"><g:hiddenField name="itineraryId_${k}" value="${itineraryInstance.id}" /></g:if>
-								<g:if test="${actionItem != null}"><g:hiddenField name="inActionItemId_${k}" value="${actionItem.id}" /></g:if>
-							</g:form>
-							<a class="close" id="closeId" href="#close"></a>
-						</div>
+						${actionItem.date.format('kk:mm')}</font>
 					</td>
 				</g:each>
 			</tr>
