@@ -70,73 +70,54 @@
 	<body>
 		<h1 style="text-align:center;font-size:130%">${message(code: 'itinerary.monthly.report.label')} ${itinerary.name} <g:formatDate format="MMMM yyyy" date="${currentDate}"/></h1>
 		<g:if test="${theoriticalActionsList != null }">
-		   <div id="theoriticalActionsList">
+		   <!--div id="theoriticalActionsList">
 				<h3>${message(code: 'itinerary.weekday', default: 'Report')}</h3>
 				<table style="table-layout:fixed;">
 					<tbody>
 						<tr>
 							<g:each in="${theoriticalActionsList}" var='actionItem' status="j">
-								<g:if test="${outActionItem != null && outActionItem.site.equals(actionItem.site)}">
-									<td>${actionItem.site.name}<br/>	
-										<g:if test="${outActionItem.nature.equals(ItineraryNature.ARRIVEE)}">
-											<font color="red">${outActionItem.date.format('kk:mm')}</font>
-										</g:if>
-										<g:else>
-											<font color="green">${outActionItem.date.format('kk:mm')}</font>
-										</g:else>
-										<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
-											<font color="red">${actionItem.date.format('kk:mm')}</font>
-										</g:if>
-										<g:else>
-											<font color="green">${actionItem.date.format('kk:mm')}</font>
-										</g:else>
-									</td>
+								<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
+									<td style="width:80px;">
+										${actionItem.site.name}<br/>
+										<div style="color: red;">${actionItem.date.format('kk:mm')}</div>
+									</td>							
 								</g:if>
+								
 								<g:else>
-									<g:if test="${outActionItem == null}">
-										<td>${actionItem.site.name}<br/>
-											<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
-												<font color="red">${actionItem.date.format('kk:mm')}</font>
-											</g:if>
-											<g:else>
-												<font color="green">${actionItem.date.format('kk:mm')}</font>
-											</g:else>
-										</td>					
-									</g:if>
-									<% outActionItem = actionItem;%>			
+									<td style="width:80px;">
+										${actionItem.site.name}<br/>
+										<div style="color: green;">${actionItem.date.format('kk:mm')}</div>
+									</td>							
+
 								</g:else>
-							</g:each>
+							</g:each>	
 						</tr>
 					</tbody>
 				</table>			
-			</div>
+			</div-->
 		</g:if>
 		<BR/>
 		<g:if test="${theoriticalSaturdayActionsMap != null }">
-		   <div id="theoriticalSaturdayActionsMap">
+		   <!--div id="theoriticalSaturdayActionsMap">
 				<h3>${message(code: 'itinerary.saturday', default: 'Report')}</h3>
 				<table>
 					<tbody style="border:1px;">
 						<g:each in="${theoriticalSaturdayActionsMap}" var='thSatActionListItem' status="m">
-							<tr class="eventTD">	
+							<tr>	
 								<td>${thSatActionListItem.key.name}</td>
 								<g:each in="${thSatActionListItem.value}" var='thSatActionItem' status="n">
 									<g:if test="${thSatActionItem.nature.equals(ItineraryNature.ARRIVEE)}">
-										<td style="width:30px;background-color:red;color:white;">
-											${thSatActionItem.date.format('kk:mm')}
-										</td>
+										<td style="color: red;">${thSatActionItem.date.format('kk:mm')}</td>
 									</g:if>
 									<g:else>
-										<td style="width:30px;background-color:green;color:white;">
-											${thSatActionItem.date.format('kk:mm')}
-										</td>
+										<td style="color: green;">${thSatActionItem.date.format('kk:mm')}</td>
 									</g:else>
 								</g:each>
 							</tr>
 						</g:each>
 					</tbody>
 				</table>
-			</div>
+			</div-->
 		</g:if>
 		<div id="actionMap">
 			<g:if test="${actionsList == null || actionsList.size() == 0}">${message(code: 'action.list.empty', default: 'Report')}</g:if>
@@ -149,10 +130,16 @@
 								<td>${(actionListItem.key).format('EEE dd/MM/yyyy')}</td>
 								<g:each in="${actionListItem.value}" var='actionItem' status="n">
 									<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
-										<td style="color: red;">${actionItem.site.name}<br/>${actionItem.date.format('kk:mm')}</td>
+										<td style="width:80px;">
+											${actionItem.site.name}<br/>
+											<div style="color: red;">${actionItem.date.format('kk:mm')}</div>
+										</td>
 									</g:if>
 									<g:else>
-										<td style="color: green;">${actionItem.site.name}<br/>${actionItem.date.format('kk:mm')}</td>
+										<td style="width:80px;">
+											${actionItem.site.name}<br/>
+											<div style="color: green;">${actionItem.date.format('kk:mm')}</div>
+										</td>
 									</g:else>								
 								</g:each>
 							</tr>

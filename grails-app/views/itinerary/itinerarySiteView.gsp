@@ -10,6 +10,7 @@
 		<g:set var="entityName" value="${message(code: 'itinerary.label', default: 'Itinerary')}" />
 		<title><g:message code="default.show.label" args="[entityName]" /></title>
 		<g:javascript library="application"/> 		
+		<resource:tooltip />
  		<r:require module="report"/>		
 		<r:layoutResources/>	
 		<g:set var="calendar" value="${Calendar.instance}"/>
@@ -89,6 +90,41 @@
 				}
 			}
 		</script>
+		
+		
+		
+	<style type="text/css">
+	            div#tooltip a span {
+	            	display: none;
+	            }
+	            div#tooltip a:hover span {
+	            	display: block;
+	               	position: relative; width: 125px;
+	               	padding: 5px; margin: 10px; z-index: 100;
+	               	color: black; background-color:#FFFFCC; border: 1px solid #ccc;
+	              	font: 10px Verdana, sans-serif; text-align: center;
+	             }
+	            div#tooltip a {
+	              	position:relative;
+	            }
+	            div#tooltip a span {
+		            display:none;
+		            border: 0px;
+	            }
+	            div#tooltip a:hover span {
+		            display:block;
+		            position:absolute; width: 100px;
+		            color: black; background-color:#FFFFCC; border: 0px solid #ccc;
+		            font: 10px Verdana, sans-serif; text-align: center;
+	            }
+	            div#tooltip a:hover {
+	            	text-indent:0;
+	            }
+	            #tooltip button {
+	            	border:0em;
+	            	background-color:#FFFFFF;
+	            }
+	</style>
 	</head>
 	<body>
 		<a href="#show-itinerary" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
@@ -97,6 +133,14 @@
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
 				<li><g:link class="list" action="index"><g:message code="default.list.label" args="[entityName]" /></g:link></li>
 				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
+				<li>
+					<a  class='itinereraryLegendTable' id="legend" title="
+					<table  id='itinereraryLegendTable'>
+						<tr><td style='color : #FFD700;font-weight: bold;'><g:message code='itinerary.sup.15' default='Régul' /></td></tr>
+						<tr><td style='color : #FF8C00;font-weight: bold;'><g:message code='itinerary.sup.30' default='Régul' /></td></tr>
+						<tr><td style='color : #FF4500;font-weight: bold;'><g:message code='itinerary.sup.60' default='Régul' /></td></tr>						
+						</table>"><g:message code='legend.label' default='Régul' /></a> <richui:tooltip id="legend" />
+				</li>
 			</ul>
 		</div>
 		<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>

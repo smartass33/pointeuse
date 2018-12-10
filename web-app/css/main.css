@@ -1092,8 +1092,26 @@ a.skip {
 	opacity: 0.6;
  }
  
+ #itinereraryLegendTable {
+	border: 0px;
+	line-height:0.9em;
+	background-color:#FFFFFF;
+	opacity: 0.6;
+ }
  
  
+ .yui-tt {
+    visibility:hidden;
+    position:absolute;
+    color:#333;
+    background-color:#c0c0c0;
+    font-family:arial,helvetica,verdana,sans-serif;
+    padding:2px;
+    border:1px solid #FCC90D;
+    font:100% sans-serif;
+    width:auto;
+}
+
 #mainTable td {
  	padding: 20px;/*Pads each table cell in modern browsers*/
  	border: 1px solid #000000;
@@ -2532,7 +2550,6 @@ a.modalbox {
     text-shadow:1px 1px 1px #fff;
     border: 1px solid #c0c0c0;
     width:68px;
-
 }
 
 .itineraryReportDateTD {
@@ -2547,8 +2564,4 @@ a.modalbox {
     text-shadow:1px 1px 1px #fff;
     border: 1px solid #c0c0c0;
     width:63px;
-   // overflow: hidden;
-   // display: inline-block;
-   // white-space: nowrap;
-
 }

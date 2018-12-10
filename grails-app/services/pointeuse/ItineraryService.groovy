@@ -30,7 +30,6 @@ class ItineraryService {
 			site = input
 		}
 		
-		
 		if (site != null){			
 			for (def itineraryIter: itineraryList){
 				criteria = Action.createCriteria()

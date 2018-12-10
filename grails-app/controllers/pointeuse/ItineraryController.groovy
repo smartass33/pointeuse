@@ -233,6 +233,8 @@ class ItineraryController {
 		if (siteTemplate){
 			theoriticalActionsMap         = itineraryService.getTheoriticalActionMap(site,false)
 			theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true) 
+			theoriticalActionsList         = itineraryService.getTheoriticalActionList(site,false)
+			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(site,true)
 		}else{
 			theoriticalActionsList         = itineraryService.getTheoriticalActionList(itinerary,false)
 			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)

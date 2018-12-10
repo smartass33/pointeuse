@@ -20,7 +20,7 @@ class PDFService {
 	
 	
 	def generateItineraryMonthlyReportByItinerary(def viewType, def itinerary, def currentCalendar, def folder){
-		log.error('generateItineraryMonthlyReport called for itinerary: '+itinerary.name+' and date: '+currentCalendar.time)
+		log.error('generateItineraryMonthlyReportByItinerary called for itinerary: '+itinerary.name+' and date: '+currentCalendar.time)
 		def model
 		def filename
 		OutputStream outputStream
@@ -53,7 +53,7 @@ class PDFService {
 	}
 	
 	def generateItineraryMonthlyReportBySite(def viewType, def itinerary, def currentCalendar, def site, def folder){
-		log.error('generateItineraryMonthlyReport called for site: '+site.name+' and date: '+currentCalendar.time)
+		log.error('generateItineraryMonthlyReportBySite called for site: '+site.name+' and date: '+currentCalendar.time)
 		def model
 		def filename
 		OutputStream outputStream
@@ -61,19 +61,10 @@ class PDFService {
 		def theoriticalActionsMap = [:]
 		def theoriticalSaturdayActionsMap = [:]
 		
-		
-		//siteTemplate = true as it is bySite
-		
 		model = itineraryService.getActionMap(viewType, itinerary, currentCalendar, site)
 		
 		theoriticalActionsMap         = itineraryService.getTheoriticalActionMap(site,false)
 		theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true)
-		
-		/*
-		actionsList:serviceResponse.get('actionsList'),
-		actionListMap:serviceResponse.get('actionListMap'),
-		dailyActionMap:serviceResponse.get('dailyActionMap'),
-		*/
 
 		model << [
 			currentDate : currentCalendar.time,
@@ -81,8 +72,6 @@ class PDFService {
 			theoriticalActionsMap:theoriticalActionsMap,
 			theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap
 		]
-
-
 
 		// Get the bytes
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeItineraryReportBySiteTemplate', model: model)

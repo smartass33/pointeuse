@@ -11,7 +11,6 @@
 		<title><g:message code="default.show.label" args="[entityName]" /></title>
 		<g:javascript library="application"/> 
 		<resource:tooltip />
-				
  		<r:require module="report"/>		
 		<r:layoutResources/>	
 		<g:set var="calendar" value="${Calendar.instance}"/>
@@ -106,7 +105,7 @@
 						<tr><td style='color : red;font-weight: bold;'><g:message code='itinerary.name.ARR' default='Régul' /></td></tr>
 						<tr><td style='color : green;font-weight: bold;'><g:message code='itinerary.name.DEP' default='Régul' /></td></tr>
 						</table>"><g:message code='legend.label' default='Régul' /></a> <richui:tooltip id="legend" />
-			</li>
+				</li>
 				
 			</ul>
 		</div>

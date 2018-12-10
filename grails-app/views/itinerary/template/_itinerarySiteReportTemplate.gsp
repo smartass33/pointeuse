@@ -1,11 +1,20 @@
 <%@ page import="pointeuse.Itinerary" %>
 <%@ page import="pointeuse.Site" %>
 <%@ page import="pointeuse.ItineraryNature" %>
+<%@ page import="groovy.time.TimeCategory" %>
 
-<g:set var="realCal" 		value="${Calendar.instance}"/>
-<g:set var="theoriticalCal" value="${Calendar.instance}"/>
+
+
+
+<g:set var="realCal" 			value="${Calendar.instance}"/>
+<g:set var="theoriticalCal" 	value="${Calendar.instance}"/>
+<g:set var="tdColor" 			value=""/>
+<g:set var="timeDiff" 			value=""/>
+<g:set var="actionItemColor" 	value=""/>
 
 <div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
+
+
 
 <div id="theoriticalTableDiv">
 	<g:if test="${theoriticalActionsMap != null }">
@@ -76,6 +85,8 @@
 			</tbody>
 		</table>
 	</g:if>
+	
+
 	
 	<g:if test="${theoriticalSaturdayActionsMap != null }">
 		<BR>
@@ -206,23 +217,114 @@
 			</g:form>
 			<a class="close" id="closeId" href="#close"></a>
 		</div>
+		
+
+		
+		
 		<g:if test="${actionListMap == null || actionListMap.size() == 0}">${message(code: 'action.list.empty', default: 'Report')}</g:if>
 		<g:else>
 			<table style="table-layout:fixed;">
 				<tbody>
+					<g:if test="${theoriticalActionsList != null}">
+						<tr>
+							<td class="itineraryReportDateTD" style="font:12px;">${message(code: 'itinerary.WEEK', default: 'Report')}</td>
+							<g:each in="${theoriticalActionsList}" var='actionItem' status="a">
+								<%
+									if (actionItem.nature.equals(ItineraryNature.ARRIVEE)){
+										actionItemColor='red'
+									}else{
+										actionItemColor='green'
+									}
+								 %>
+								<td class="itineraryReportTD"><font color="${actionItemColor}">${actionItem.date.format('kk:mm')}</font></td>
+							</g:each>
+						</tr>
+					</g:if>
+					<g:if test="${theoriticalSaturdayActionsList != null}">
+						<tr>
+							<td class="itineraryReportDateTD" style="font:12px;">${message(code: 'itinerary.SATURDAY', default: 'Report')}</td>
+							<g:each in="${theoriticalSaturdayActionsList}" var='actionItem' status="b">
+								<%
+									if (actionItem.nature.equals(ItineraryNature.ARRIVEE)){
+										actionItemColor='red'
+									}else{
+										actionItemColor='green'
+									}
+								 %>
+								<td class="itineraryReportTD"><font color="${actionItemColor}">${actionItem.date.format('kk:mm')}</font></td>
+							</g:each>
+						</tr>
+					</g:if>
+				
 					<g:each in="${actionListMap}" var='actionListItem' status="m">
 						<tr>
-							<td class="itineraryReportDateTD">${(actionListItem.key).format('dd/MM/yyyy')}</td>
+							<td class="itineraryReportDateTD">${(actionListItem.key).format('EEE dd')}</td>
 							<g:each in="${actionListItem.value}" var='actionItem' status="n">
-								<td class="itineraryReportTD" >
-									<a href="#itinerary_action_monthly_form_${m}_${n}" id="itinerary_action_monthly_pop_${m}_${n}"> 							
-									<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
-										<font color="red">
-									</g:if>
-									<g:else>
-										<font color="green">
-									</g:else>				
-									${actionItem.date.format('kk:mm')}</font></a>
+							
+								<g:if test="${actionItem.date.getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY}">
+									<g:if test="${theoriticalActionsList.size() >= n}">										
+										<% 
+											theoriticalCal.time = actionItem.date
+											realCal.time = actionItem.date
+											theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalActionsList[n].date.getAt(Calendar.HOUR_OF_DAY))
+											theoriticalCal.set(Calendar.MINUTE,theoriticalActionsList[n].date.getAt(Calendar.MINUTE))
+											use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
+											if (timeDiff.minutes <= 15){
+												tdColor = '#FFFFFF'
+											}
+											if (timeDiff.minutes > 15){
+												tdColor = '#FFD700'
+											}
+											if (timeDiff.minutes > 30){
+												tdColor = '#FF8C00'
+											} 
+											if (timeDiff.minutes > 60){
+												tdColor = '#FF4500'
+											}
+											%>
+									</g:if>			
+								</g:if>
+								<g:else>
+									<g:if test="${theoriticalSaturdayActionsList.size() >= n}">
+										<% 
+											theoriticalCal.time = actionItem.date
+											realCal.time = actionItem.date
+											theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalSaturdayActionsList[n].date.getAt(Calendar.HOUR_OF_DAY))
+											theoriticalCal.set(Calendar.MINUTE,theoriticalSaturdayActionsList[n].date.getAt(Calendar.MINUTE))
+											use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
+											if (timeDiff.minutes <= 15){
+												tdColor = '#FFFFFF'
+											}
+											if (timeDiff.minutes > 15){
+												tdColor = '#FFD700'
+											}
+											if (timeDiff.minutes > 30){
+												tdColor = '#FF8C00'
+											} 
+											if (timeDiff.minutes > 60){
+												tdColor = '#FF4500'
+											}
+											%>								
+									</g:if>			
+								</g:else>
+									<%
+									if (actionItem.nature.equals(ItineraryNature.ARRIVEE)){
+										actionItemColor='red'
+									}else{
+										actionItemColor='green'
+									}
+								 %>
+	
+									<td class="itineraryReportTD" style="background-color:${tdColor};">
+									
+									<div id="tooltip">
+										<a href="#itinerary_action_monthly_form_${m}_${n}" id="itinerary_action_monthly_pop_${m}_${n}"> 
+											<button id="button" style="background-color:${tdColor};"><font color="${actionItemColor}">${actionItem.date.format('kk:mm')}</font></button>
+	                							<span>${timeDiff}</span>	            							
+            							</a>
+									</div>
+									
+									
 									<a href="#x" class="overlay" id="itinerary_action_monthly_form_${m}_${n}" style="background: transparent;"></a>
 									<div id="itinerary_action_monthly_popup_${m}_${n}" class="popup">
 										<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
@@ -258,6 +360,7 @@
 										</g:form>
 										<a class="close" id="closeId" href="#close"></a>
 									</div>
+
 							</g:each>
 						</tr>
 					</g:each>
