@@ -126,19 +126,23 @@
 	            }
 	</style>
 	</head>
+	
+	<g:set var="myYellow" 			value="#fefb00"/>
+	<g:set var="myOrange" 			value="#74F3FE"/>
+	<g:set var="myRed" 				value="#FF4500"/>
 	<body>
 		<a href="#show-itinerary" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div class="nav" role="navigation">
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
 				<li><g:link class="list" action="index"><g:message code="default.list.label" args="[entityName]" /></g:link></li>
-				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
+				<li><g:link class="create" action="create"><g:message code="default.new.feminine.label" args="[entityName]" /></g:link></li>
 				<li>
 					<a  class='itinereraryLegendTable' id="legend" title="
 					<table  id='itinereraryLegendTable'>
-						<tr><td style='color : #FFD700;font-weight: bold;'><g:message code='itinerary.sup.15' default='Régul' /></td></tr>
-						<tr><td style='color : #FF8C00;font-weight: bold;'><g:message code='itinerary.sup.30' default='Régul' /></td></tr>
-						<tr><td style='color : #FF4500;font-weight: bold;'><g:message code='itinerary.sup.60' default='Régul' /></td></tr>						
+						<tr><td style='color : ${myYellow};font-weight: bold;'><g:message code='itinerary.sup.15' default='Régul' /></td></tr>
+						<tr><td style='color : ${myOrange};font-weight: bold;'><g:message code='itinerary.sup.30' default='Régul' /></td></tr>
+						<tr><td style='color : ${myRed}   ;font-weight: bold;'><g:message code='itinerary.sup.60' default='Régul' /></td></tr>						
 						</table>"><g:message code='legend.label' default='Régul' /></a> <richui:tooltip id="legend" />
 				</li>
 			</ul>

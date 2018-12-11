@@ -1104,10 +1104,10 @@ a.skip {
     visibility:hidden;
     position:absolute;
     color:#333;
-    background-color:#c0c0c0;
+    background-color:#dbdbdb;
     font-family:arial,helvetica,verdana,sans-serif;
     padding:2px;
-    border:1px solid #FCC90D;
+    border:1px solid #FFFFFF;
     font:100% sans-serif;
     width:auto;
 }
@@ -2551,6 +2551,7 @@ a.modalbox {
     border: 1px solid #c0c0c0;
     width:68px;
 }
+
 
 .itineraryReportDateTD {
     font:11px Georgia, serif;

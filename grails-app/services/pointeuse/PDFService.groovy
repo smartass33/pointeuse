@@ -60,17 +60,23 @@ class PDFService {
 		File file
 		def theoriticalActionsMap = [:]
 		def theoriticalSaturdayActionsMap = [:]
+		def theoriticalActionsList
+		def theoriticalSaturdayActionsList
 		
 		model = itineraryService.getActionMap(viewType, itinerary, currentCalendar, site)
 		
 		theoriticalActionsMap         = itineraryService.getTheoriticalActionMap(site,false)
 		theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true)
+		theoriticalActionsList         = itineraryService.getTheoriticalActionList(site,false)
+		theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(site,true)
 
 		model << [
 			currentDate : currentCalendar.time,
 			site:site,
 			theoriticalActionsMap:theoriticalActionsMap,
-			theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap
+			theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
+			theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+			theoriticalActionsList:theoriticalActionsList
 		]
 
 		// Get the bytes
