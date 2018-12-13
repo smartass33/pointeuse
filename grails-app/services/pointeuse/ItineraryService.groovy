@@ -41,7 +41,7 @@ class ItineraryService {
 						eq('isSaturday',isSaturday)
 						order('date','asc')
 					}
-				}
+				}				
 				if (theoriticalActionsList != null && theoriticalActionsList.size() > 0)
 					theoriticalActionsMap.put(itineraryIter,theoriticalActionsList)
 			}
@@ -64,7 +64,7 @@ class ItineraryService {
 		def theoriticalActionsMap = [:]
 		def criteria = Action.createCriteria()
 		def theoriticalActionsList = []
-		def itineraryList = Itinerary.findAll("from Itinerary")	
+		//def itineraryList = Itinerary.findAll("from Itinerary")	
 		
 		if (input instanceof Itinerary){
 			itinerary = input
@@ -95,8 +95,7 @@ class ItineraryService {
 		return theoriticalActionsList
 	}
 	
-	def getActionList(def viewType, def itinerary,def currentCalendar,def site){
-		
+	def getActionList(def viewType, def itinerary,def currentCalendar,def site){	
 		def actionsList = []
 		def monthCalendar = Calendar.instance
 		def criteria = Action.createCriteria()
@@ -185,7 +184,6 @@ class ItineraryService {
 				}
 				break
 			}
-		
 		return [actionsList:actionsList,actionListMap:actionListMap]
 		}
 	
@@ -195,6 +193,10 @@ class ItineraryService {
 		def criteria = Action.createCriteria()
 		def actionListMap = [:]
 		def dailyActionMap = [:]
+		def actionsThOrderedMap = [:]
+		def actionsThOrderedBySiteMap = [:]
+		def actionsThOrderedList = []
+		def actionsThOrderedListIter = []
 		def itineraryList = Itinerary.findAll("from Itinerary")
 
 		switch (viewType) {
@@ -257,6 +259,9 @@ class ItineraryService {
 				def lastDay = currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 				
 				for (int j = 1;j < lastDay + 1;j++){
+					log.debug('monthCalendar: '+monthCalendar.time)
+					actionsThOrderedList = []
+					actionsThOrderedBySiteMap = [:]
 					criteria = Action.createCriteria()
 					actionsList = criteria.list {
 						and {
@@ -268,6 +273,26 @@ class ItineraryService {
 							order('date','asc')
 						}
 					}
+					
+					for (def itineraryIter: itineraryList){
+						criteria = Action.createCriteria()
+						actionsThOrderedListIter = criteria.list {
+							and {
+								eq('itinerary',itineraryIter)
+								eq('day',monthCalendar.get(Calendar.DAY_OF_MONTH))
+								eq('month',monthCalendar.get(Calendar.MONTH) + 1)
+								eq('year',monthCalendar.get(Calendar.YEAR))
+								eq('isTheoritical',false)
+								eq('site',site)
+								order('date','asc')
+							}
+						}
+						log.debug('actionsThOrderedListIter: '+actionsThOrderedListIter)
+						actionsThOrderedBySiteMap.put(itineraryIter,actionsThOrderedListIter)
+						//actionsThOrderedList.addAll(actionsThOrderedListIter)
+					}				
+					actionsThOrderedMap.put(monthCalendar.time,actionsThOrderedBySiteMap)
+					log.debug('actionsThOrderedList '+monthCalendar.time+' '+actionsThOrderedList)		
 					actionListMap.put(monthCalendar.time,actionsList)
 					monthCalendar.roll(Calendar.DAY_OF_MONTH,1)
 				}
@@ -289,9 +314,9 @@ class ItineraryService {
 		
 		return [
 			actionsList:actionsList,
+			actionsThOrderedMap:actionsThOrderedMap,
 			actionListMap:actionListMap,
 			dailyActionMap:dailyActionMap
 		]
-		}
-	
+	}
 }
