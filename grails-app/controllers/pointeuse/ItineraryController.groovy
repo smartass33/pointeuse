@@ -201,7 +201,6 @@ class ItineraryController {
 		def timeDiffMap = [:]
 		def actionListMap = [:]
 		def calendar = Calendar.instance
-		def monthCalendar = Calendar.instance
 		def i = 0
 		def hasDiscrepancy = false
 		def serviceResponse 
@@ -242,19 +241,34 @@ class ItineraryController {
 			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
 		}
 		
+		currentCalendar.set(Calendar.DAY_OF_MONTH,1)
+		def actionIterList 
+		def orderedActionList = []
+		def theoriticalListRef = []
 		
-		actionsList = serviceResponse.get('actionsList')
-		actionListMap = serviceResponse.get('actionListMap')
-		def dailyActionMap = serviceResponse.get('dailyActionMap')
-		def actionsThOrderedMap = serviceResponse.get('actionsThOrderedMap')
-
+		for (int j = 1;j < currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
+			log.debug("date: "+currentCalendar.time)
+			
+			theoriticalListRef = (currentCalendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
+			actionIterList = serviceResponse.get('actionListMap').get(currentCalendar.time)
+			
+			// compare to theoriticalActionsList
+			if (theoriticalListRef != null && actionIterList != null && theoriticalListRef.size() == actionIterList.size()){
+				orderedActionList = itineraryService.orderList(theoriticalListRef, actionIterList, [])
+			}else{
+				orderedActionList = actionIterList
+			}
+			actionListMap.put(currentCalendar.time,orderedActionList)
+			orderedActionList = []
+			currentCalendar.roll(Calendar.DAY_OF_MONTH,1)
+		}
+	
 		if (siteTemplate){
 			render template: "/itinerary/template/itinerarySiteReportTemplate", model: [
 				itineraryInstance:itinerary,
 				actionsList:serviceResponse.get('actionsList'),
-				actionListMap:serviceResponse.get('actionListMap'),
+				actionListMap:actionListMap,
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
-				actionsThOrderedMap:serviceResponse.get('actionsThOrderedMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
 				theoriticalActionsMap:theoriticalActionsMap,
@@ -271,7 +285,7 @@ class ItineraryController {
 			render template: "/itinerary/template/itineraryReportTemplate", model: [
 				itineraryInstance:itinerary,
 				actionsList:serviceResponse.get('actionsList'),
-				actionListMap:serviceResponse.get('actionListMap'),
+				actionListMap:actionListMap,
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,

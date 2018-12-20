@@ -79,7 +79,7 @@
 	<g:set var="actionItemColor" 	value=""/>
 	<g:set var="myYellow" 			value="#fefb00"/>
 	<g:set var="myOrange" 			value="#74F3FE"/>
-	<g:set var="myRed" 				value="#FF4500"/>
+	<g:set var="myRed" 				value="#FF8E79"/>
 	<body>
 		<h1 style="text-align:center;font-size:130%">${message(code: 'itinerary.site.monthly.report.label')} ${site.name} <g:formatDate format="MMMM yyyy" date="${currentDate}"/></h1>
 		<div id="actionMap">
@@ -116,7 +116,7 @@
 									<g:each in="${actionListItem.value}" var='actionItem' status="n">
 										<% actionItemColor = (actionItem.nature.equals(ItineraryNature.ARRIVEE)) ? 'red' : 'green' %> 
 										<g:if test="${actionItem.date.getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY}">
-											<g:if test="${theoriticalActionsList.size() >= n}">										
+											<g:if test="${theoriticalActionsList.size() >= n && theoriticalActionsList[n] != null}">										
 												<% 
 													theoriticalCal.time = actionItem.date
 													realCal.time = actionItem.date
@@ -139,7 +139,7 @@
 											</g:if>			
 										</g:if>
 										<g:else>
-											<g:if test="${theoriticalSaturdayActionsList.size() >= n}">
+											<g:if test="${theoriticalSaturdayActionsList.size() >= n && theoriticalSaturdayActionsList[n] != null}">
 												<% 
 													theoriticalCal.time = actionItem.date
 													realCal.time = actionItem.date

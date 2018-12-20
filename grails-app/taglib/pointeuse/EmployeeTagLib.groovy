@@ -109,5 +109,13 @@ class EmployeeTagLib {
 	def annualSiteTime = {attrs,body->
 		out<<render(template:"/employee/template/listAnnualSiteTimeTemplate")
 	}
+	
+	def itineraryForm = {attrs,body->
+		out<<render(template:"/itinerary/template/itineraryForm",model:[actionPicker:attrs.actionPicker,hrefName:attrs.hrefName,row:attrs.row,column:attrs.column,actionItem:attrs.actionItem,viewType:attrs.viewType,itinerary:attrs.itinerary])
+	}
+	
+	def itineraryTheoriticalForm = {attrs,body->
+		out<<render(template:"/itinerary/template/itineraryTheoriticalForm",model:[actionPicker:attrs.actionPicker,hrefName:attrs.hrefName,row:attrs.row,column:attrs.column,actionItem:attrs.actionItem,viewType:attrs.viewType,itinerary:attrs.itinerary])
+	}
 
 }

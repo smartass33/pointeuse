@@ -140,47 +140,53 @@ class ActionController {
 			}
 		}		
 		
-		serviceResponse = itineraryService.getActionMap(viewType, itinerary,calendar,site)
-
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, calendar, site)
+		
 		if (siteTemplate){
-			theoriticalActionsMap = itineraryService.getTheoriticalActionMap(site,false)
-			theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true)
+			theoriticalActionsMap        	= itineraryService.getTheoriticalActionMap(site,false) 
+			theoriticalSaturdayActionsMap  	= itineraryService.getTheoriticalActionMap(site,true) 
+			theoriticalActionsList         	= itineraryService.getTheoriticalActionList(site,false)
+			theoriticalSaturdayActionsList 	= itineraryService.getTheoriticalActionList(site,true)			
 		}else{
-			theoriticalActionsList = itineraryService.getTheoriticalActionList(itinerary,false)
+			theoriticalActionsList         = itineraryService.getTheoriticalActionList(itinerary,false)
 			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
 		}
 		
-/*
-		hasDiscrepancy = (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() != theoriticalActionsList.size()) ? true : false
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		def actionIterList 
+		def orderedActionList = []
+		def theoriticalListRef = []
 		
-		actionsList = serviceResponse.get('actionsList')
-		if (actionsList != null && actionsList.size() > 0){
-			for (Action actionIter in theoriticalActionsList){
-				calendar.setTime(actionIter.date)
-				if (actionsList.size() > i && actionsList.get(i) != null){
-					use (TimeCategory){timeDiff = calendar.time - actionsList.get(i).date}
-					timeDiffMap.put(i, timeDiff)
-				}else{
-					timeDiffMap.put(i, 0)
-				}
-				i++
+		for (int j = 1;j < calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
+			
+			theoriticalListRef = (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
+			actionIterList = serviceResponse.get('actionListMap').get(calendar.time)
+			
+			// compare to theoriticalActionsList
+			if (theoriticalListRef != null && actionIterList != null && theoriticalListRef.size() == actionIterList.size()){
+				orderedActionList = itineraryService.orderList(theoriticalListRef, actionIterList, [])
+			}else{
+				orderedActionList = actionIterList
 			}
+			actionListMap.put(calendar.time,orderedActionList)
+			orderedActionList = []
+			calendar.roll(Calendar.DAY_OF_MONTH,1)
 		}
-		
-		*/
+	
 		if (siteTemplate){
 			render template: "/itinerary/template/itinerarySiteReportTemplate", model: [
 				itineraryInstance:itinerary,
-				actionsList:actionsList,
-				actionListMap:serviceResponse.get('actionListMap'),
+				actionsList:serviceResponse.get('actionsList'),
+				actionListMap:actionListMap,
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
-				theoriticalActionsMap:theoriticalActionsMap,
-				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+				theoriticalActionsMap:theoriticalActionsMap,
+				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
 				hasDiscrepancy:hasDiscrepancy,
-				siteTemplate:siteTemplate,
+				timeDiffMap:timeDiffMap,
 				viewType:viewType,
+				siteTemplate:siteTemplate,
 				site:site,
 				timeDiffMap:timeDiffMap
 				]
@@ -188,15 +194,15 @@ class ActionController {
 		}else{
 			render template: "/itinerary/template/itineraryReportTemplate", model: [
 				itineraryInstance:itinerary,
-				actionsList:actionsList,
+				actionsList:serviceResponse.get('actionsList'),
 				actionListMap:serviceResponse.get('actionListMap'),
+				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
-				theoriticalActionsMap:theoriticalActionsMap,
-				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
 				hasDiscrepancy:hasDiscrepancy,
-				siteTemplate:siteTemplate,
+				timeDiffMap:timeDiffMap,
 				viewType:viewType,
+				siteTemplate:siteTemplate,
 				timeDiffMap:timeDiffMap
 				]
 			return
@@ -246,8 +252,8 @@ class ActionController {
 			if (name.contains('employeeId')){
 				employee = Employee.get(params.int(name))
 			}
-			if (name.contains('action.type')){
-				actionType = (params[name]).equals('ARR') ? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
+			if (name.contains('action.type') && value.size() > 0){
+				actionType = (value.equals('ARR') )? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
 			}
 			if (name.contains('viewType')){
 				viewType = params[name]
@@ -262,48 +268,53 @@ class ActionController {
 		def action = new Action(itinerary, calendar.time, site, employee, actionType)
 		action.save flush:true
 	
-		serviceResponse = itineraryService.getActionMap(viewType, itinerary, calendar,site)
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, calendar, site)
 		
 		if (siteTemplate){
-			theoriticalActionsMap = itineraryService.getTheoriticalActionMap(site,false)
-			theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true) 
+			theoriticalActionsMap        	= itineraryService.getTheoriticalActionMap(site,false) 
+			theoriticalSaturdayActionsMap  	= itineraryService.getTheoriticalActionMap(site,true) 
+			theoriticalActionsList         	= itineraryService.getTheoriticalActionList(site,false)
+			theoriticalSaturdayActionsList 	= itineraryService.getTheoriticalActionList(site,true)			
 		}else{
-			theoriticalActionsList = itineraryService.getTheoriticalActionList(itinerary,false)
+			theoriticalActionsList         = itineraryService.getTheoriticalActionList(itinerary,false)
 			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
 		}
 		
-	/*
-		hasDiscrepancy = (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() != theoriticalActionsList.size()) ? true : false
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		def actionIterList 
+		def orderedActionList = []
+		def theoriticalListRef = []
 		
-		
-		actionsList = serviceResponse.get('actionsList')
-		if (actionsList != null && actionsList.size() > 0){
-			for (Action actionIter in theoriticalActionsList){
-				calendar.setTime(actionIter.date)
-				if (actionsList.size() > i && actionsList.get(i) != null){
-					use (TimeCategory){timeDiff = calendar.time - actionsList.get(i).date}
-					timeDiffMap.put(i, timeDiff)
-				}else{
-					timeDiffMap.put(i, 0)
-				}
-				i++
+		for (int j = 1;j < calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
+			
+			theoriticalListRef = (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
+			actionIterList = serviceResponse.get('actionListMap').get(calendar.time)
+			
+			// compare to theoriticalActionsList
+			if (theoriticalListRef != null && actionIterList != null && theoriticalListRef.size() == actionIterList.size()){
+				orderedActionList = itineraryService.orderList(theoriticalListRef, actionIterList, [])
+			}else{
+				orderedActionList = actionIterList
 			}
+			actionListMap.put(calendar.time,orderedActionList)
+			orderedActionList = []
+			calendar.roll(Calendar.DAY_OF_MONTH,1)
 		}
-		*/
-		
+	
 		if (siteTemplate){
 			render template: "/itinerary/template/itinerarySiteReportTemplate", model: [
 				itineraryInstance:itinerary,
-				actionsList:actionsList,
-				actionListMap:serviceResponse.get('actionListMap'),
+				actionsList:serviceResponse.get('actionsList'),
+				actionListMap:actionListMap,
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
 				theoriticalActionsMap:theoriticalActionsMap,
 				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
 				hasDiscrepancy:hasDiscrepancy,
-				siteTemplate:siteTemplate,
+				timeDiffMap:timeDiffMap,
 				viewType:viewType,
+				siteTemplate:siteTemplate,
 				site:site,
 				timeDiffMap:timeDiffMap
 				]
@@ -311,16 +322,15 @@ class ActionController {
 		}else{
 			render template: "/itinerary/template/itineraryReportTemplate", model: [
 				itineraryInstance:itinerary,
-				actionsList:actionsList,
+				actionsList:serviceResponse.get('actionsList'),
 				actionListMap:serviceResponse.get('actionListMap'),
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
-				theoriticalActionsMap:theoriticalActionsMap,
-				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
 				hasDiscrepancy:hasDiscrepancy,
-				siteTemplate:siteTemplate,
+				timeDiffMap:timeDiffMap,
 				viewType:viewType,
+				siteTemplate:siteTemplate,
 				timeDiffMap:timeDiffMap
 				]
 			return
@@ -356,6 +366,7 @@ class ActionController {
 		def site
 		def siteTemplate
 		def currentDate
+		def commentary
 			
 		params.each { name, value ->
 			if (name.contains('ActionItemId')){
@@ -364,11 +375,12 @@ class ActionController {
 				calendar.time = action.date
 				log.error('calendar.time: '+calendar.time)
 			}
-			if (name.contains('actionType')){
-				if (params[name].size() > 0)
-					action.nature = (params['name'].equals('ARR') )? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
+			if (name.contains('actionType') && value.size() > 0){
+				action.nature = (value.equals('ARR') )? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
 			}
-
+			if (name.contains('commentary') && value.size() > 0){
+				commentary = value
+			}
 			
 			if (name.contains('action_picker')){
 				date_action_picker = params[name] 
@@ -376,8 +388,7 @@ class ActionController {
 					currentDate =  new Date().parse("dd/MM/yyyy HH:mm", params[name])
 				} catch (ParseException e) {
 					currentDate =  new Date().parse("HH:mm", params[name])
-				}
-				
+				}		
 			}
 			if (name.contains('itineraryId')){
 				itinerary = Itinerary.get(params.int(name))			
@@ -390,54 +401,62 @@ class ActionController {
 		
 		calendar.set(Calendar.HOUR_OF_DAY,currentDate.getAt(Calendar.HOUR_OF_DAY))
 		calendar.set(Calendar.MINUTE,currentDate.getAt(Calendar.MINUTE))
-		log.error('calendar.time: '+calendar.time)
 		action.date = calendar.time
+		action.commentary = commentary
 		action.save flush:true
 		
 		if (siteTemplate){
 			site = action.site
 		}
-		serviceResponse = itineraryService.getActionMap(viewType, itinerary, calendar, site)	
+		
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, calendar, site)
 		
 		if (siteTemplate){
-			theoriticalActionsMap = itineraryService.getTheoriticalActionMap(site,false)
-			theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true) 
+			theoriticalActionsMap        	= itineraryService.getTheoriticalActionMap(site,false) 
+			theoriticalSaturdayActionsMap  	= itineraryService.getTheoriticalActionMap(site,true) 
+			theoriticalActionsList         	= itineraryService.getTheoriticalActionList(site,false)
+			theoriticalSaturdayActionsList 	= itineraryService.getTheoriticalActionList(site,true)			
 		}else{
-			theoriticalActionsList = itineraryService.getTheoriticalActionList(itinerary,false)
+			theoriticalActionsList         = itineraryService.getTheoriticalActionList(itinerary,false)
 			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
 		}
 		
-/*
-		hasDiscrepancy = (serviceResponse.get('actionsList') != null && serviceResponse.get('actionsList').size() != theoriticalActionsList.size()) ? true : false
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		def actionIterList 
+		def orderedActionList = []
+		def theoriticalListRef = []
 		
-		actionsList = serviceResponse.get('actionsList')
-		if (actionsList != null && actionsList.size() > 0){
-			for (Action actionIter in theoriticalActionsList){
-				calendar.setTime(actionIter.date)				
-				if (actionsList.size() > i && actionsList.get(i) != null){
-					use (TimeCategory){timeDiff = calendar.time - actionsList.get(i).date}
-					timeDiffMap.put(i, timeDiff)
-				}else{
-					timeDiffMap.put(i, 0)
-				}
-				i++
+		for (int j = 1;j < calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
+			log.debug("date: "+calendar.time)
+			
+			theoriticalListRef = (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
+			actionIterList = serviceResponse.get('actionListMap').get(calendar.time)
+			
+			// compare to theoriticalActionsList
+			if (theoriticalListRef != null && actionIterList != null && theoriticalListRef.size() == actionIterList.size()){
+				orderedActionList = itineraryService.orderList(theoriticalListRef, actionIterList, [])
+			}else{
+				orderedActionList = actionIterList
 			}
+			actionListMap.put(calendar.time,orderedActionList)
+			orderedActionList = []
+			calendar.roll(Calendar.DAY_OF_MONTH,1)
 		}
-		*/
-		
+	
 		if (siteTemplate){
 			render template: "/itinerary/template/itinerarySiteReportTemplate", model: [
 				itineraryInstance:itinerary,
-				actionsList:actionsList,
-				actionListMap:serviceResponse.get('actionListMap'),
+				actionsList:serviceResponse.get('actionsList'),
+				actionListMap:actionListMap,
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
 				theoriticalActionsMap:theoriticalActionsMap,
 				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
 				hasDiscrepancy:hasDiscrepancy,
-				siteTemplate:siteTemplate,
+				timeDiffMap:timeDiffMap,
 				viewType:viewType,
+				siteTemplate:siteTemplate,
 				site:site,
 				timeDiffMap:timeDiffMap
 				]
@@ -445,15 +464,15 @@ class ActionController {
 		}else{
 			render template: "/itinerary/template/itineraryReportTemplate", model: [
 				itineraryInstance:itinerary,
-				actionsList:actionsList,
+				actionsList:serviceResponse.get('actionsList'),
 				actionListMap:serviceResponse.get('actionListMap'),
+				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
-				theoriticalActionsMap:theoriticalActionsMap,
-				theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
 				hasDiscrepancy:hasDiscrepancy,
-				siteTemplate:siteTemplate,
+				timeDiffMap:timeDiffMap,
 				viewType:viewType,
+				siteTemplate:siteTemplate,
 				timeDiffMap:timeDiffMap
 				]
 			return

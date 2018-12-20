@@ -1069,6 +1069,11 @@ a.skip {
 	left: -9999px;
 }
 
+#trash{
+	background: url(../images/skin/trash.png) no-repeat scroll 1px 1px;
+	background-size: 15px 15px;
+	padding-left:30px;
+}
 
 #data_row { 
 	border: 3px solid blue 
@@ -1277,8 +1282,7 @@ a.skip {
 }
 
 .datePicker:focus {
-		background-image: url(../images/skin/calendar.png);
-	
+	background-image: url(../images/skin/calendar.png);
 	background-color: #666;
 	background-color: #999999;
 	color: #ffffff;

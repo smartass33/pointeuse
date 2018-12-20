@@ -15,7 +15,7 @@
 		<r:layoutResources/>	
 		<g:set var="calendar" value="${Calendar.instance}"/>
 
-		<script>
+		<script>		
 			jQuery(function($){
 			   $.datepicker.regional['fr'] = {
 			      closeText: 'Fermer',
@@ -94,36 +94,41 @@
 		
 		
 	<style type="text/css">
-	            div#tooltip a span {
-	            	display: none;
-	            }
-	            div#tooltip a:hover span {
-	            	display: block;
-	               	position: relative; width: 125px;
-	               	padding: 5px; margin: 10px; z-index: 100;
-	               	color: black; background-color:#FFFFCC; border: 1px solid #ccc;
-	              	font: 10px Verdana, sans-serif; text-align: center;
-	             }
-	            div#tooltip a {
-	              	position:relative;
-	            }
-	            div#tooltip a span {
-		            display:none;
-		            border: 0px;
-	            }
-	            div#tooltip a:hover span {
-		            display:block;
-		            position:absolute; width: 100px;
-		            color: black; background-color:#FFFFCC; border: 0px solid #ccc;
-		            font: 10px Verdana, sans-serif; text-align: center;
-	            }
-	            div#tooltip a:hover {
-	            	text-indent:0;
-	            }
-	            #tooltip button {
-	            	border:0em;
-	            	background-color:#FFFFFF;
-	            }
+         div#tooltip a span {
+         	display: none;
+         }
+         div#tooltip a:hover span {
+         	display: block;
+            	position: relative; width: 125px;
+            	padding: 5px; margin: 10px; z-index: 100;
+            	color: black; background-color:#FFFFCC; border: 1px solid #ccc;
+           	font: 10px Verdana, sans-serif; text-align: center;
+          }
+         div#tooltip a {
+           	position:relative;
+         }
+         div#tooltip a span {
+          display:none;
+          border: 0px;
+         }
+         div#tooltip a:hover span {
+          display:block;
+          position:absolute; width: 100px;
+          color: black; background-color:#FFFFCC; border: 0px solid #ccc;
+          font: 10px Verdana, sans-serif; text-align: center;
+         }
+         div#tooltip a:hover {
+         	text-indent:0;
+         }
+         #tooltip button {
+         	border:0em;
+         	background-color:#FFFFFF;
+         }
+}
+
+	            
+	            
+	            
 	</style>
 	</head>
 	

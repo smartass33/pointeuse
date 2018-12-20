@@ -127,8 +127,8 @@
 									style="vertical-align: middle;" />						
 							</g:else>				
 						</li>
-						<li>
-							<input type="text" id="date_picker" name="date_picker" />
+						<li style="width: 100px;">
+							<input style="width: 100px;" type="text" id="date_picker" name="date_picker" />
 						</li>
 						<li>	
 							<g:submitToRemote class="displayButton"

@@ -3280,6 +3280,7 @@ class EmployeeController {
 		def clientIP = request.getHeader("X-Forwarded-For")
 		def authorizedIPList = grailsApplication.config.ip.authorized
 		def isIPAuthorizationOn = grailsApplication.config.ip.authorization.on
+		 
 		
 		if (isIPAuthorizationOn && !authorizedIPList.contains(clientIP) && !authorizedIPList.contains(request.remoteAddr)){
 			log.error('found no matching IP, exiting...')

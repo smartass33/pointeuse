@@ -273,31 +273,10 @@ class ItineraryService {
 							order('date','asc')
 						}
 					}
-					
-					for (def itineraryIter: itineraryList){
-						criteria = Action.createCriteria()
-						actionsThOrderedListIter = criteria.list {
-							and {
-								eq('itinerary',itineraryIter)
-								eq('day',monthCalendar.get(Calendar.DAY_OF_MONTH))
-								eq('month',monthCalendar.get(Calendar.MONTH) + 1)
-								eq('year',monthCalendar.get(Calendar.YEAR))
-								eq('isTheoritical',false)
-								eq('site',site)
-								order('date','asc')
-							}
-						}
-						log.debug('actionsThOrderedListIter: '+actionsThOrderedListIter)
-						actionsThOrderedBySiteMap.put(itineraryIter,actionsThOrderedListIter)
-						//actionsThOrderedList.addAll(actionsThOrderedListIter)
-					}				
-					actionsThOrderedMap.put(monthCalendar.time,actionsThOrderedBySiteMap)
-					log.debug('actionsThOrderedList '+monthCalendar.time+' '+actionsThOrderedList)		
 					actionListMap.put(monthCalendar.time,actionsList)
 					monthCalendar.roll(Calendar.DAY_OF_MONTH,1)
 				}
-				break
-				
+				break				
 			default:
 				actionsList = criteria.list {
 					and {
@@ -314,9 +293,51 @@ class ItineraryService {
 		
 		return [
 			actionsList:actionsList,
-			actionsThOrderedMap:actionsThOrderedMap,
 			actionListMap:actionListMap,
 			dailyActionMap:dailyActionMap
 		]
+	}
+	
+	def orderList(def theoriticalList, def actualList, def orderedList){
+		try {
+			for (Action theoriticalAction : theoriticalList){
+				for (Action actualAction : actualList){
+					// theoritcal and actual belongs to same itinerary: we keep
+					if (actualAction.itinerary == theoriticalAction.itinerary){
+						log.debug('actualList size: '+actualList.size())
+						log.debug('theoriticalList size: '+theoriticalList.size())
+						log.debug('actualAction content: '+actualAction.itinerary.name)
+						log.debug('theoriticalAction content: '+theoriticalAction.itinerary.name)
+						
+						orderedList.add(actualAction)
+						actualList.remove(actualAction)
+						theoriticalList.remove(theoriticalAction)
+
+						orderList(theoriticalList, actualList, orderedList)
+						break
+					}
+	
+				}
+				if (theoriticalList.size() == 1){
+					orderedList.add(actualList[0])
+					break	
+				}
+			}
+		}catch(ConcurrentModificationException e){
+			//log.error(e.toString())
+		}finally{
+			return orderedList
+		}
+		//return orderedList
+	}
+	
+	def printItineraryList(def listToDisplay){
+		log.error('displayin list: ')
+		def appender = ''
+		for (Action action : listToDisplay){
+			appender += ' '+action.itinerary.name+' '+action.date.format('kk:mm')	
+		}
+		appender += ' --end'
+		log.error(appender)
 	}
 }

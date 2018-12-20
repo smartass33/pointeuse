@@ -54,7 +54,7 @@ class PDFService {
 	
 	def generateItineraryMonthlyReportBySite(def viewType, def itinerary, def currentCalendar, def site, def folder){
 		log.error('generateItineraryMonthlyReportBySite called for site: '+site.name+' and date: '+currentCalendar.time)
-		def model
+		def model = [:]
 		def filename
 		OutputStream outputStream
 		File file
@@ -62,15 +62,42 @@ class PDFService {
 		def theoriticalSaturdayActionsMap = [:]
 		def theoriticalActionsList
 		def theoriticalSaturdayActionsList
+		def serviceResponse
+		def actionIterList
+		def orderedActionList = []
+		def theoriticalListRef = []
+		def actionListMap = [:]
 		
-		model = itineraryService.getActionMap(viewType, itinerary, currentCalendar, site)
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, currentCalendar, site)
 		
 		theoriticalActionsMap         = itineraryService.getTheoriticalActionMap(site,false)
 		theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true)
 		theoriticalActionsList         = itineraryService.getTheoriticalActionList(site,false)
 		theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(site,true)
+		
+		currentCalendar.set(Calendar.DAY_OF_MONTH,1)
+
+		
+		for (int j = 1;j < currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
+			log.debug("date: "+currentCalendar.time)
+			
+			theoriticalListRef = (currentCalendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
+			actionIterList = serviceResponse.get('actionListMap').get(currentCalendar.time)
+			
+			// compare to theoriticalActionsList
+			if (theoriticalListRef != null && actionIterList != null && theoriticalListRef.size() == actionIterList.size()){
+				orderedActionList = itineraryService.orderList(theoriticalListRef, actionIterList, [])
+			}else{
+				orderedActionList = actionIterList
+			}
+			actionListMap.put(currentCalendar.time,orderedActionList)
+			orderedActionList = []
+			currentCalendar.roll(Calendar.DAY_OF_MONTH,1)
+		}
+		
 
 		model << [
+			actionListMap:actionListMap,
 			currentDate : currentCalendar.time,
 			site:site,
 			theoriticalActionsMap:theoriticalActionsMap,
