@@ -110,8 +110,7 @@
 			</ul>
 		</div>
 		<div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
-		<div id="actions" class="standardNav">
-			
+		<div id="actions" class="standardNav">	
 				<ul>
 					<g:form method="POST">
 						<li><g:message code="itinerary.label" default="Search" style="vertical-align: middle;" /></li>

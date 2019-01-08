@@ -186,9 +186,47 @@ class ItineraryController {
 		
 	}
 
+	def showAnomalies(){
+		log.error('showAnomalies called')
+		params.each{i->log.error('parameter of list: '+i)}
+		
+		def itinerary
+		def site
+		def date_picker
+		def criteria
+		def actionsList = []
+		def currentCalendar = Calendar.instance
+		
+		params.each { name, value ->
+			if (name.contains('itineraryId'))
+				itinerary = Itinerary.get(params.int(name))
+			if (name.contains('siteId'))
+				site = Site.get(params.int(name))
+			if (name.contains('date_picker')){
+				date_picker = params[name]
+				if (date_picker != null && date_picker.size() > 0){
+					currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+					log.debug('currentCalendar.time: '+currentCalendar.time)
+				}
+			}
+		}
+		
+		criteria = Action.createCriteria()
+		actionsList = criteria.list {
+			and {
+				eq('month',currentCalendar.get(Calendar.MONTH) + 1)
+				eq('year',currentCalendar.get(Calendar.YEAR))
+				eq('isTheoritical',false)
+				eq('site',site)
+				order('date','asc')
+			}
+		}
+		
+	}
+	
 	def showItineraryActions(){
 		log.error('showItineraryActions called')
-		params.each{i->log.debug('parameter of list: '+i)}
+		params.each{i->log.error('parameter of list: '+i)}
 		def itinerary
 		def currentCalendar = Calendar.instance
 		def criteria 

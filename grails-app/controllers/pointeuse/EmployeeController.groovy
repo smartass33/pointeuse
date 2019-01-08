@@ -408,6 +408,7 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def weeklyReportExcelExport(){
+		params.each{i->log.debug('parameter of list: '+i)}	
 		def folder = grailsApplication.config.pdf.directory
 		log.error('entering weeklyReportExcelExport')
 		def siteValue = params.boolean('siteValue')
@@ -418,7 +419,7 @@ class EmployeeController {
 		def siteId = params['siteId']
 		def site = Site.get(siteId)
 		def funtionCheckBoxesMap = [:]
-		def period = Period.get(params.int('periodId'))
+		def period = Period.get(params['periodId'])
 		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
 		if (period == null && year != null){
 			period = Period.findByYear(year)

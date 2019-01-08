@@ -367,6 +367,8 @@ class ActionController {
 		def siteTemplate
 		def currentDate
 		def commentary
+		def fnc
+		def other
 			
 		params.each { name, value ->
 			if (name.contains('ActionItemId')){
@@ -380,6 +382,12 @@ class ActionController {
 			}
 			if (name.contains('commentary') && value.size() > 0){
 				commentary = value
+			}
+			if (name.contains('fnc') && value.size() > 0){
+				fnc = value
+			}
+			if (name.contains('other') && value.size() > 0){
+				other = value
 			}
 			
 			if (name.contains('action_picker')){
@@ -403,6 +411,8 @@ class ActionController {
 		calendar.set(Calendar.MINUTE,currentDate.getAt(Calendar.MINUTE))
 		action.date = calendar.time
 		action.commentary = commentary
+		action.fnc = fnc
+		action.other = other
 		action.save flush:true
 		
 		if (siteTemplate){

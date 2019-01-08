@@ -189,10 +189,17 @@
 							url="[controller:'itinerary', action:'showItineraryActions',id:'monthlyViewBySite']"/>	
 					</li> 	
 					<li>
+						<g:submitToRemote class="displayButton"
+							value="${message(code:'action.anomaly.report')}"
+							update="itinerarySiteReportTemplate" 
+							onLoading="document.getElementById('spinner').style.display = 'inline';"
+			                onComplete="document.getElementById('spinner').style.display = 'none';"
+							url="[controller:'itinerary', action:'showItineraryActions',id:'anomalyViewBySite']"/>	
+					</li>
+					<li>
 						<g:actionSubmit value="PDF" action="itineraryPDF" class="pdfButton" />
 						<g:hiddenField name="id" value="monthlyViewBySite"/>
-
-					</li>
+					</li>					
 				</g:form>
 			</ul>
 		</div>

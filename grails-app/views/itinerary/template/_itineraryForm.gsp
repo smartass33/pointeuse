@@ -1,50 +1,3 @@
-
-<script>
-//Make the DIV element draggagle:
-	dragElement(document.getElementById("${hrefName}_popup_${row}_${column}"));
-	
-	function dragElement(elmnt) {
-	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-	if (document.getElementById(elmnt.id + "header")) {
-	  /* if present, the header is where you move the DIV from:*/
-	  document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
-	} else {
-	  /* otherwise, move the DIV from anywhere inside the DIV:*/
-	  elmnt.onmousedown = dragMouseDown;
-	}
-	
-	function dragMouseDown(e) {
-	  e = e || window.event;
-	  e.preventDefault();
-	  // get the mouse cursor position at startup:
-	  pos3 = e.clientX;
-	  pos4 = e.clientY;
-	  document.onmouseup = closeDragElement;
-	  // call a function whenever the cursor moves:
-	  document.onmousemove = elementDrag;
-	}
-	
-	function elementDrag(e) {
-	  e = e || window.event;
-	  e.preventDefault();
-	  // calculate the new cursor position:
-	  pos1 = pos3 - e.clientX;
-	  pos2 = pos4 - e.clientY;
-	  pos3 = e.clientX;
-	  pos4 = e.clientY;
-	  // set the element's new position:
-	  elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-	  elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-	}
-	
-	function closeDragElement() {
-	  /* stop moving when mouse button is released:*/
-	  document.onmouseup = null;
-	  document.onmousemove = null;
-	}
-	}
-</script>
-
 <a href="#x" class="overlay" id="${hrefName}_form_${row}_${column}" style="background: transparent;" ></a>
 <div id="${hrefName}_popup_${row}_${column}" class="popup" >
 	<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
@@ -72,12 +25,24 @@
 							noSelection="['':'-Choisissez votre élément-']" />
 					</td>
 				</tr>
-				<!--tr class="prop">
+				<tr class="prop">
 					<td>${message(code: 'itinerary.comment', default: 'Report')}:</td>
 					<td>
 						<textarea name="commentary" id="commentary" >${actionItem != null ? actionItem.commentary :'' }</textarea>
 					</td>
-				</tr-->
+				</tr>
+				<tr class="prop">
+					<td>${message(code: 'action.fnc')}:</td>
+					<td>
+						<input type="text" id="fnc" value="${actionItem != null ? actionItem.fnc :'' }" name="fnc" />
+					</td>
+				</tr>				
+				<tr class="prop">
+					<td>${message(code: 'action.other')}:</td>
+					<td>
+						<input type="text" id="other" value="${actionItem != null ? actionItem.other :'' }" name="other" />
+					</td>
+				</tr>				
 				<tr class="prop">
 					<td>											
 						<g:submitToRemote class="listButton"

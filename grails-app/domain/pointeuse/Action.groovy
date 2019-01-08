@@ -16,6 +16,8 @@ class Action {
 	Itinerary itinerary
 	boolean isSaturday
 	String commentary
+	String fnc
+	String other
 	static belongsTo = [itinerary:Itinerary]
 	
 	public Action(){
@@ -24,6 +26,8 @@ class Action {
 	static constraints = {
 		employeeLogger (blank: true,nullable:true)
 		commentary (blank: true,nullable:true)
+		other (blank: true,nullable:true)
+		fnc (blank: true,nullable:true)
 	}
 	
 	public Action(Itinerary itinerary, Date date, Site site, Employee employeeLogger, ItineraryNature nature) {

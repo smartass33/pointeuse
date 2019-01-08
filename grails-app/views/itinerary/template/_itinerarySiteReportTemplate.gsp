@@ -12,7 +12,9 @@
 <g:set var="myYellow" 			value="#fefb00"/>
 <g:set var="myOrange" 			value="#74F3FE"/>
 <g:set var="myRed" 				value="#FF8E79"/>
-
+<g:set var="anomalyList" 		value="${[]}"/>
+<g:set var="anomalyThList" 		value="${[]}"/>
+<g:set var="anomalyEcartList" 		value="${[]}"/>
 
 <div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
 
@@ -72,17 +74,87 @@
 									   		</a>
 										</div>	
 										<g:itineraryTheoriticalForm hrefName="itinerary_theoritical_saturday" actionPicker="sat_date_action_picker" row="${x}" column="${y}" viewType="${viewType}" actionItem="${actionItem}" itinerary="${itineraryInstance}"/>									
-							</g:each>
-						</tr>
-					</g:if>
-				</g:each>
-			</tr>	
-		</tbody>
-	</table>
-</g:if>
+								</g:each>
+							</tr>
+						</g:if>
+					</g:each>
+				</tr>	
+			</tbody>
+		</table>
+	</g:if>
 </div>
-
-
+<g:if test="${viewType.equals('anomalyViewBySite')}">
+	<BR>
+	<div id="anomalyViewBySite">
+		<g:if test="${actionListMap == null || actionListMap.size() == 0}">${message(code: 'action.list.empty', default: 'Report')}</g:if>
+		<g:else>
+			<g:each in="${actionListMap}" var='actionListItem' status="m">
+					<g:each in="${actionListItem.value}" var='actionItem' status="n">
+						<g:if test="${actionItem.date.getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY}">
+							<g:if test="${theoriticalActionsList.size() >= n && theoriticalActionsList[n] != null}">										
+								<% 
+									theoriticalCal.time = actionItem.date
+									realCal.time = actionItem.date
+									theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalActionsList[n].date.getAt(Calendar.HOUR_OF_DAY))
+									theoriticalCal.set(Calendar.MINUTE,theoriticalActionsList[n].date.getAt(Calendar.MINUTE))
+									use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
+									if ((timeDiff.minutes + timeDiff.hours*60) > 30){
+										anomalyList.add(actionItem)
+										anomalyThList.add(theoriticalActionsList[n])
+										anomalyEcartList.add(timeDiff)
+									} 
+								%>
+							</g:if>			
+						</g:if>
+						<g:else>
+							<g:if test="${theoriticalSaturdayActionsList.size() >= n && theoriticalSaturdayActionsList[n] != null}">
+								<% 
+									theoriticalCal.time = actionItem.date
+									realCal.time = actionItem.date
+									theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalSaturdayActionsList[n].date.getAt(Calendar.HOUR_OF_DAY))
+									theoriticalCal.set(Calendar.MINUTE,theoriticalSaturdayActionsList[n].date.getAt(Calendar.MINUTE))
+									use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
+									if ((timeDiff.minutes + timeDiff.hours*60) > 30){
+										anomalyList.add(actionItem)
+										anomalyThList.add(theoriticalSaturdayActionsList[n])	
+										anomalyEcartList.add(timeDiff)
+									}
+								%>								
+							</g:if>			
+						</g:else>							
+					</g:each>
+			</g:each>
+			<g:if test="${anomalyList != null}">
+				<table style="table-layout:fixed;">
+					<thead>
+						<tr>
+							<th>${message(code: 'report.table.date.label')}</th>						
+							<th>${message(code: 'action.time.real')}</th>
+							<th>${message(code: 'action.time.theoritical')}</th>
+							<th style="width:90px;">${message(code: 'action.ecart.label')}</th>
+							<th>${message(code: 'itinerary.comment')}</th>
+							<th>${message(code: 'action.fnc')}</th>
+							<th>${message(code: 'action.other')}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<g:each in="${anomalyList}" var="anomaly" status="s">
+							<tr>
+								<td class="itineraryReportDateTD">${anomaly.date.format('EEE dd MMM') }</td>								
+								<td class="itineraryReportDateTD">${anomaly.date.format('kk:mm') }</td>
+								<td class="itineraryReportDateTD">${anomalyThList[s].date.format('kk:mm') }</td>
+								<td class="itineraryReportDateTD">${anomalyEcartList[s]}</td>								
+								<td class="itineraryReportDateTD">${anomaly.commentary}</td>
+								<td class="itineraryReportDateTD">${anomaly.fnc}</td>
+								<td class="itineraryReportDateTD">${anomaly.other}</td>
+							</tr>
+						</g:each>
+					</tbody>
+				</table>
+			</g:if>
+		</g:else>
+	</div>
+</g:if>
 
 <g:if test="${viewType.equals('monthlyViewBySite')}">
 	<div id="monthlyViewBySite">
@@ -304,12 +376,10 @@
 									<g:each in="${actionListItem.value}" var='actionItem' status="n">
 										<% actionItemColor = (actionItem.nature.equals(ItineraryNature.ARRIVEE)) ? 'red' : 'green' %>
 										<g:if test="${actionItem.date.getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY}">
-											<g:if test="${theoriticalActionsMap.get(actionListItem.key).size() >= n && theoriticalActionsMap.get(actionListItem.key)[n] != null}">										
+											<g:if test="${theoriticalActionsMap == null && theoriticalActionsMap.get(actionListItem.key).size() >= n && theoriticalActionsMap.get(actionListItem.key)[n] != null}">										
 												<% 
 													theoriticalCal.time = actionItem.date
 													realCal.time = actionItem.date
-													
-													
 													theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalActionsMap.get(actionListItem.key)[n].date.getAt(Calendar.HOUR_OF_DAY))
 													theoriticalCal.set(Calendar.MINUTE,theoriticalActionsMap.get(actionListItem.key)[n].date.getAt(Calendar.MINUTE))
 													use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
@@ -329,12 +399,12 @@
 											</g:if>			
 										</g:if>
 										<g:else>
-											<g:if test="${theoriticalSaturdayActionsMap.get(actionListItem.key).size() >= n && theoriticalSaturdayActionsMap.get(actionListItem.key)[n] != null}">
-												<% 
+											<g:if test="${theoriticalSaturdayActionsMap == null && theoriticalSaturdayActionsMap.get(actionListItem.key).size() >= n && theoriticalSaturdayActionsMap.get(actionListItem.key)[n] != null}">
+												<% 													
 													theoriticalCal.time = actionItem.date
 													realCal.time = actionItem.date
-													theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalSaturdayActionsMap.get(actionListItem.key).date.getAt(Calendar.HOUR_OF_DAY))
-													theoriticalCal.set(Calendar.MINUTE,theoriticalSaturdayActionsMap.get(actionListItem.key).date.getAt(Calendar.MINUTE))
+													theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalSaturdayActionsMap.get(actionListItem.key)[n].date.getAt(Calendar.HOUR_OF_DAY))
+													theoriticalCal.set(Calendar.MINUTE,theoriticalSaturdayActionsMap.get(actionListItem.key)[n].date.getAt(Calendar.MINUTE))
 													use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
 													if (timeDiff.minutes <= 15){
 														tdColor = '#FFFFFF'

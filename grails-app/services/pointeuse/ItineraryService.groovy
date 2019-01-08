@@ -64,7 +64,6 @@ class ItineraryService {
 		def theoriticalActionsMap = [:]
 		def criteria = Action.createCriteria()
 		def theoriticalActionsList = []
-		//def itineraryList = Itinerary.findAll("from Itinerary")	
 		
 		if (input instanceof Itinerary){
 			itinerary = input
@@ -276,7 +275,31 @@ class ItineraryService {
 					actionListMap.put(monthCalendar.time,actionsList)
 					monthCalendar.roll(Calendar.DAY_OF_MONTH,1)
 				}
-				break				
+				break
+			case 'anomalyViewBySite':
+				monthCalendar = currentCalendar
+				monthCalendar.set(Calendar.DAY_OF_MONTH,1)
+				def lastDay = currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+				
+				for (int j = 1;j < lastDay + 1;j++){
+					log.debug('monthCalendar: '+monthCalendar.time)
+					actionsThOrderedList = []
+					actionsThOrderedBySiteMap = [:]
+					criteria = Action.createCriteria()
+					actionsList = criteria.list {
+						and {
+							eq('day',monthCalendar.get(Calendar.DAY_OF_MONTH))
+							eq('month',monthCalendar.get(Calendar.MONTH) + 1)
+							eq('year',monthCalendar.get(Calendar.YEAR))
+							eq('isTheoritical',false)
+							eq('site',site)
+							order('date','asc')
+						}
+					}
+					actionListMap.put(monthCalendar.time,actionsList)
+					monthCalendar.roll(Calendar.DAY_OF_MONTH,1)
+				}
+				break
 			default:
 				actionsList = criteria.list {
 					and {
