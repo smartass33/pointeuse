@@ -79,10 +79,10 @@
 					calendarMonday.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY)
 					calendarSaturday.set(Calendar.WEEK_OF_YEAR,weekNumber as int)
 					calendarSaturday.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY)
-							
+
 					if (weekNumber == 1){
-						calendarMonday.set(Calendar.YEAR,lastYear)	
-						calendarSaturday.set(Calendar.YEAR,lastYear)				
+						calendarMonday.roll(Calendar.YEAR,1)
+						calendarSaturday.roll(Calendar.YEAR,1)
 					}
 				%>	
 				<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">

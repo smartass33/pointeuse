@@ -9,24 +9,24 @@
 	</div>
 </g:if>  
 <div id="details">
-	<table  style="width:70%; float: right;"class="table  site-table-header-rotated" >
+	<table  style="width:65%; float: right;"class="table  site-table-header-rotated" >
 		<thead>
-			<th class='rotate-45' style="width:80px;text-align:center;"><div><span><g:message code="annual.report.theoritical.label"/></span></div></th>
-			<th class='rotate-45' style="width:80px;text-align:center;"><div><span><g:message code="annual.report.elapsed.label"/></span></div></th>
-			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.holidays.label"/></span></div></th>
-			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>
-			<th class='rotate-45' style="width:45px;text-align:center;"><div ><span><g:message code="annual.report.RTT.label"/></span></div></th>
-			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
-			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
-			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.DIF.label"/></span></div></th>
-			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.DON.label"/></span></div></th>
-			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>		
-			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
-			<th class='rotate-45' style="width:45px;text-align:center;"><div><span><g:message code="employee.paternite.count"/></span></div></th>
-			<th class='rotate-45' style="width:60px;text-align:center;"><div><span><g:message code="annual.HS.above.quota.short"/></span></div></th>
-			<th class='rotate-45' style="width:85px;text-align:center;"><div><span><g:message code="annual.computed.quota.short"/></span></div></th>
-			<th class='rotate-45' style="width:60px;text-align:center;"><div><span><g:message code="annual.other.HS.quota.short"/></span></div></th>
-			<th class='rotate-45' style="width:60px;text-align:center;"><div><span><g:message code="annual.total.HS.to.pay"/></span></div></th>
+			<th class='rotate-45' style="width:76px;text-align:center;"><div><span><g:message code="annual.report.theoritical.label"/></span></div></th>
+			<th class='rotate-45' style="width:76px;text-align:center;"><div><span><g:message code="annual.report.elapsed.label"/></span></div></th>
+			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="annual.report.holidays.label"/></span></div></th>
+			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>
+			<th class='rotate-45' style="width:43px;text-align:center;"><div ><span><g:message code="annual.report.RTT.label"/></span></div></th>
+			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
+			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
+			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="annual.report.DIF.label"/></span></div></th>
+			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="annual.report.DON.label"/></span></div></th>
+			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>		
+			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
+			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="employee.paternite.count"/></span></div></th>
+			<th class='rotate-45' style="width:55px;text-align:center;"><div><span><g:message code="annual.HS.above.quota.short"/></span></div></th>
+			<th class='rotate-45' style="width:79px;text-align:center;"><div><span><g:message code="annual.computed.quota.short"/></span></div></th>
+			<th class='rotate-45' style="width:57px;text-align:center;"><div><span><g:message code="annual.other.HS.quota.short"/></span></div></th>
+			<th class='rotate-45' style="width:57px;text-align:center;"><div><span><g:message code="annual.total.HS.to.pay"/></span></div></th>
 		</thead>
 		<tbody>
 			<g:if test='${employeeList != null }'>
@@ -34,16 +34,16 @@
 					<tr>
 						<td style="text-align:right;" class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}"><my:humanTimeTD id="annualTheoritical"  name="annualTheoritical" value="${(annualReportMap.get(employee)).get('annualTheoritical')}"/></g:if></td>
 						<td style="text-align:right;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}"><my:humanTimeTD id="annualTotal"  name="annualTotal" value="${(annualReportMap.get(employee)).get('annualTotal')}"/></g:if></td>
-						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualHoliday')}</g:if></td>
-						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('remainingCA')}</g:if></td>
-						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualRTT')}</g:if></td>
-						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualCSS')}</g:if></td>
-						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualINJUSTIFIE')}</g:if></td>
-						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualDIF')}</g:if></td>
-						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualDON')}</g:if></td>
-						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualSickness')}</g:if></td>
-						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualExceptionnel')}</g:if></td>
-						<td style="width:45px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualPaternite')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualHoliday')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('remainingCA')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualRTT')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualCSS')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualINJUSTIFIE')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualDIF')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualDON')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualSickness')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualExceptionnel')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualPaternite')}</g:if></td>
 						<td style="text-align:right;width:50px;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}"><my:humanTimeTD id="annualPayableSupTime"  name="annualPayableSupTime" value="${(annualReportMap.get(employee)).get('annualPayableSupTime')}"/></g:if></td>
 						<td style="text-align:right;width:50px;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}"><my:humanTimeTD id="annualTheoriticalIncludingExtra"  name="annualTheoriticalIncludingExtra" value="${(annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra')}"/></g:if></td>
 						<td style="text-align:right;width:50px;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}"><my:humanTimeTD id="annualSupTimeAboveTheoritical"  name="annualSupTimeAboveTheoritical" value="${(annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical')}"/></g:if></td>
