@@ -1116,7 +1116,16 @@ class TimeManagerService {
 				lt('date',maxDate)
 				eq('type',AbsenceType.PATERNITE)
 			}
-		}		
+		}	
+		criteria = Absence.createCriteria()
+		def yearlyParental = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',minDate)
+				lt('date',maxDate)
+				eq('type',AbsenceType.PARENTAL)
+			}
+		}
 		criteria = Absence.createCriteria()
 		def yearlyDif = criteria.list {
 			and {
@@ -1322,6 +1331,7 @@ class TimeManagerService {
 			yearlyHolidays:yearlyHolidays.size(),
 			yearlyExceptionnel:yearlyExceptionnel.size(),
 			yearlyPaternite:yearlyPaternite.size(),		
+			yearlyParental:yearlyParental.size(),
 			yearlyDif:yearlyDif.size(),	
 			yearlyDon:yearlyDon.size(),
 			yearlyRtt:yearlyRtt.size(),
@@ -1488,6 +1498,16 @@ class TimeManagerService {
 		}
 		
 		criteria = Absence.createCriteria()
+		def parental = criteria.list {
+			and {
+				eq('employee',employeeInstance)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.PARENTAL)
+			}
+		}
+		
+		criteria = Absence.createCriteria()
 		def dif = criteria.list {
 			and {
 				eq('employee',employeeInstance)
@@ -1562,6 +1582,7 @@ class TimeManagerService {
 			exceptionnel:exceptionnel.size(),
 			formation:formation.size(),
 			paternite:paternite.size(),			
+			parental:parental.size(),			
 			dif:dif.size(),
 			don:don.size(),
 			rtt:rtt.size(),
@@ -1613,6 +1634,7 @@ class TimeManagerService {
 		def exceptionnel = cartoucheTable.get('exceptionnel')
 		def formation = cartoucheTable.get('formation')
 		def paternite = cartoucheTable.get('paternite')		
+		def parental = cartoucheTable.get('parental')		
 		def rtt = cartoucheTable.get('rtt')
 		def isCurrentMonth = cartoucheTable.get('isCurrentMonth')	
 		def sickness = cartoucheTable.get('sickness')
@@ -1626,6 +1648,7 @@ class TimeManagerService {
 		def yearlyDon = cartoucheTable.get('yearlyDon')
 		def yearlyExceptionnel = cartoucheTable.get('yearlyExceptionnel')	
 		def yearlyPaternite = cartoucheTable.get('yearlyPaternite')
+		def yearlyParental = cartoucheTable.get('yearlyParental')
 		def yearlyFormation = cartoucheTable.get('yearlyFormation')	
 		def yearlyRtt = cartoucheTable.get('yearlyRtt')
 		def yearlySickness = cartoucheTable.get('yearlySickness')
@@ -1748,6 +1771,8 @@ class TimeManagerService {
 			yearlyDif:yearlyDif,	
 			yearlyDon:yearlyDon,
 			exceptionnel:exceptionnel,
+			parental:parental,
+			yearlyParental:yearlyParental,
 			yearlyExceptionnel:yearlyExceptionnel,
 			paternite:paternite,
 			yearlyPaternite:yearlyPaternite,
@@ -2123,6 +2148,7 @@ class TimeManagerService {
 		def annualMaternite = 0
 		def annualExceptionnel = 0	
 		def annualPaternite = 0	
+		def annualParental = 0
 		def annualFormation = 0
 		def annualPayableSupTime = 0
 		def annualPayableCompTime = 0
@@ -2304,6 +2330,7 @@ class TimeManagerService {
 			annualMaternite += cartoucheTable.getAt('maternite')		
 			annualExceptionnel += cartoucheTable.getAt('exceptionnel')
 			annualPaternite += cartoucheTable.getAt('paternite')	
+			annualParental += cartoucheTable.getAt('parental')		
 			annualFormation += cartoucheTable.getAt('formation')	
 			annualWorkingDays += cartoucheTable.getAt('workingDays')
 			if (monthlySupTotalTime != null)
@@ -2352,6 +2379,7 @@ class TimeManagerService {
 			annualSickness:annualSickness,
 			annualMaternite:annualMaternite,			
 			annualExceptionnel:annualExceptionnel,
+			annualParental:annualParental,
 			annualFormation:annualFormation,
 			annualPaternite:annualPaternite,
 			annualWorkingDays:annualWorkingDays,
@@ -2405,6 +2433,7 @@ class TimeManagerService {
 		def annualExceptionnel = 0
 		def annualFormation = 0
 		def annualPaternite = 0
+		def annualParental = 0
 		def annualPayableSupTime = 0
 		def annualPayableCompTime = 0
 		def annualWorkingDays = 0
@@ -2543,6 +2572,7 @@ class TimeManagerService {
 			annualMaternite += cartoucheTable.getAt('yearlyMaternite')		
 			annualExceptionnel += cartoucheTable.getAt('yearlyExceptionnel')
 			annualPaternite += cartoucheTable.getAt('yearlyPaternite')
+			annualParental += cartoucheTable.getAt('yearlyParental')
 			annualFormation += cartoucheTable.getAt('yearlyFormation')
 			annualWorkingDays += cartoucheTable.getAt('yearOpenDays')
 			annualTotal += monthlyTotalTime
@@ -2583,6 +2613,7 @@ class TimeManagerService {
 			annualMaternite:annualMaternite,
 			annualExceptionnel:annualExceptionnel,
 			annualPaternite:annualPaternite,
+			annualParental:annualParental,
 			annualFormation:annualFormation,
 			annualWorkingDays:annualWorkingDays,
 			annualPayableSupTime:Math.round(annualPayableSupTime) as long,
@@ -2688,6 +2719,17 @@ class TimeManagerService {
 			}
 		}
 		absenceMap.put(AbsenceType.EXCEPTIONNEL, exceptionnel.size())	
+		
+		criteria = Absence.createCriteria()
+		def parental = criteria.list {
+			and {
+				eq('employee',employee)
+				ge('date',startDate)
+				le('date',endDate)
+				eq('type',AbsenceType.PARENTAL)
+			}
+		}
+		absenceMap.put(AbsenceType.PARENTAL, parental.size())
 		
 		criteria = Absence.createCriteria()
 		def formation = criteria.list {
@@ -2817,7 +2859,6 @@ class TimeManagerService {
 		}
 		absenceMap.put(AbsenceType.VACANCE, holidays.size())
 		
-		
 		criteria = Absence.createCriteria()
 		def exceptionnel = criteria.list {
 			and {
@@ -2828,6 +2869,17 @@ class TimeManagerService {
 			}
 		}
 		absenceMap.put(AbsenceType.EXCEPTIONNEL, exceptionnel.size())
+		
+		criteria = Absence.createCriteria()
+		def parental = criteria.list {
+			and {
+				eq('employee',employee)
+				eq('year',year)
+				eq('month',month)
+				eq('type',AbsenceType.PARENTAL)
+			}
+		}
+		absenceMap.put(AbsenceType.PARENTAL, parental.size())
 		
 		criteria = Absence.createCriteria()
 		def formation = criteria.list {
@@ -3053,7 +3105,7 @@ class TimeManagerService {
 					
 					def A = realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
 					def B = tem
-					def C = -(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.MATERNITE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.INJUSTIFIE)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)+absenceMap.get(AbsenceType.DON))
+					def C = -(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.MATERNITE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.INJUSTIFIE)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.PARENTAL)+absenceMap.get(AbsenceType.DIF)+absenceMap.get(AbsenceType.DON))
 					def D = - (35/7)*absenceMap.get(AbsenceType.PATERNITE)		
 					def E = (weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday	
 					
@@ -3062,7 +3114,7 @@ class TimeManagerService {
 						3600*(
 								realOpenDays*weeklyContractTime/Employee.WeekOpenedDays
 								+ tem
-								-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.MATERNITE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.INJUSTIFIE)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.DIF)+absenceMap.get(AbsenceType.DON))
+								-(weeklyContractTime/Employee.WeekOpenedDays)*(absenceMap.get(AbsenceType.MALADIE)+absenceMap.get(AbsenceType.MATERNITE)+absenceMap.get(AbsenceType.VACANCE)+absenceMap.get(AbsenceType.CSS)+absenceMap.get(AbsenceType.INJUSTIFIE)+absenceMap.get(AbsenceType.EXCEPTIONNEL)+absenceMap.get(AbsenceType.PARENTAL)+absenceMap.get(AbsenceType.DIF)+absenceMap.get(AbsenceType.DON))
 								- (35/7)*absenceMap.get(AbsenceType.PATERNITE)
 								+ (weeklyContractTime/Employee.WeekOpenedDays)*paterniteSunday			
 							)
@@ -3426,6 +3478,7 @@ class TimeManagerService {
 		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0	
+		def siteAnnualParental = 0	
 		def siteAnnualDIF = 0
 		def siteAnnualDON = 0
 		def siteAnnualPayableSupTime = 0
@@ -3451,6 +3504,7 @@ class TimeManagerService {
 			siteAnnualDON += ((annualReportMap.get(employee)).get('annualDON'))
 			siteAnnualExceptionnel += ((annualReportMap.get(employee)).get('annualExceptionnel'))
 			siteAnnualPaternite += ((annualReportMap.get(employee)).get('annualPaternite'))
+			siteAnnualParental += ((annualReportMap.get(employee)).get('annualParental'))
 			siteAnnualPayableSupTime += getTimeFromText((annualReportMap.get(employee)).get('annualPayableSupTime'),false)
 			siteAnnualTheoriticalIncludingExtra += getTimeFromText((annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra'),false)
 			siteAnnualSupTimeAboveTheoritical += (annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical')
@@ -3473,6 +3527,7 @@ class TimeManagerService {
 			siteAnnualDON:siteAnnualDON,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,	
+			siteAnnualParental:siteAnnualParental,
 			siteAnnualPayableSupTime:getTimeAsText(computeHumanTime(siteAnnualPayableSupTime),false),
 			siteAnnualTheoriticalIncludingExtra:getTimeAsText(computeHumanTime(siteAnnualTheoriticalIncludingExtra),false),
 			siteAnnualSupTimeAboveTheoritical:getTimeAsText(computeHumanTime(siteAnnualSupTimeAboveTheoritical),false),
@@ -4290,6 +4345,7 @@ class TimeManagerService {
 		def holidays = []
 		def exceptionnel = []
 		def paternite = []
+		def parental = []
 		def formation = []
 		def dif = []
 		def don = []
@@ -4393,6 +4449,9 @@ class TimeManagerService {
 		}
 		
 		Absence.withTransaction{
+			parental = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.PARENTAL])
+		}
+		Absence.withTransaction{
 			formation = Absence.findAll("from Absence as a where a.employee = :employee and a.year = :year and month = :month  and type = :type",[employee:employeeInstance,year:year,month:month,type:AbsenceType.FORMATION])
 		}
 		
@@ -4446,6 +4505,7 @@ class TimeManagerService {
 			holidays:holidays.size(),
 			exceptionnel:exceptionnel.size(),
 			paternite:paternite.size(),
+			parental:parental.size(),
 			formation:formation.size(),
 			dif:dif.size(),
 			don:don.size(),
@@ -4503,6 +4563,7 @@ class TimeManagerService {
 		def minDate = calendar.time
 		def yearlyHolidays = []
 		def yearlyExceptionnel = []
+		def yearlyParental = []
 		def yearlyPaternite = []
 		def yearlyMaternite = []
 		def yearlyFormation = []
@@ -4540,6 +4601,9 @@ class TimeManagerService {
 			yearlyPaternite = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.PATERNITE])
 		}
 		
+		Absence.withTransaction{
+			yearlyParental = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.PARENTAL])
+		}
 		Absence.withTransaction{
 			yearlyFormation = Absence.findAll("from Absence as a where a.employee = :employee and date >= :minDate and date < :maxDate  and type = :type",[employee:employee,minDate:minDate,maxDate:maxDate,type:AbsenceType.FORMATION])
 		}
@@ -4665,6 +4729,7 @@ class TimeManagerService {
 			yearlyHolidays:yearlyHolidays.size(),
 			yearlyExceptionnel:yearlyExceptionnel.size(),
 			yearlyPaternite:yearlyPaternite.size(),
+			yearlyParental:yearlyParental.size(),
 			yearlyFormation:yearlyFormation.size(),
 			yearlyDif:yearlyDif.size(),
 			yearlyDon:yearlyDon.size(),
@@ -4822,6 +4887,9 @@ class TimeManagerService {
 						if ( absenceMap.get(AbsenceType.EXCEPTIONNEL) != null )
 							multiplier += absenceMap.get(AbsenceType.EXCEPTIONNEL) as long
 							
+						if ( absenceMap.get(AbsenceType.PARENTAL) != null )
+							multiplier += absenceMap.get(AbsenceType.PARENTAL) as long
+							
 						if ( absenceMap.get(AbsenceType.DIF) != null )
 							multiplier += absenceMap.get(AbsenceType.DIF)
 							
@@ -4857,6 +4925,7 @@ class TimeManagerService {
 		def holidays = []
 		def exceptionnel = []
 		def paternite = []
+		def parental = []
 		def dif = []
 		def don = []
 		def formation = []
@@ -4884,6 +4953,10 @@ class TimeManagerService {
 		Absence.withTransaction{
 			exceptionnel = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.EXCEPTIONNEL])
 			absenceMap.put(AbsenceType.EXCEPTIONNEL, exceptionnel.size())
+		}
+		Absence.withTransaction{
+			parental = Absence.findAll("from Absence as a where a.employee = :employee and date >= :startDate and date <= :endDate  and type = :type",[employee:employee,startDate:startDate,endDate:endDate,type:AbsenceType.PARENTAL])
+			absenceMap.put(AbsenceType.PARENTAL, parental.size())
 		}
 		
 		Absence.withTransaction{
@@ -5063,6 +5136,7 @@ class TimeManagerService {
 		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
+		def siteAnnualParental = 0
 		def siteAnnualDIF = 0
 		def siteAnnualDON = 0
 		def siteAnnualPayableSupTime = 0
@@ -5091,6 +5165,7 @@ class TimeManagerService {
 				 siteAnnualDIF += data.get('annualDIF')
 				 siteAnnualDON += data.get('annualDON')
 				 siteAnnualExceptionnel += data.get('annualExceptionnel')
+				 siteAnnualParental += data.get('annualParental')
 				 siteAnnualPaternite += data.get('annualPaternite')
 				 siteAnnualPayableSupTime += data.get('annualPayableSupTime') as long
 				 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
@@ -5122,6 +5197,7 @@ class TimeManagerService {
 			siteAnnualDON:siteAnnualDON,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,
+			siteAnnualParental:siteAnnualParental,
 			siteAnnualPayableSupTime:siteAnnualPayableSupTime,
 			siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
 			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,

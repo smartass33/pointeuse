@@ -13,6 +13,7 @@ public enum AbsenceType {
 	FERIE('F'),
 	EXCEPTIONNEL('CE'),
 	PATERNITE('CP'),
+	PARENTAL('PAR'),
 	DIF('DIF'),
 	DON('DON'),
 	FORMATION('FO'),

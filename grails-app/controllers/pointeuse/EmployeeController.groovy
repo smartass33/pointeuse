@@ -85,6 +85,25 @@ class EmployeeController {
 		}
 
 	@Secured(['ROLE_ADMIN'])
+	def weeklyScheduleReport(){
+		params.each{i->log.error('parameter of list: '+i)}
+		def siteId=params["site.id"]
+		def currentDate
+		def calendar = Calendar.instance
+		def date_picker =params["date_picker"]
+		if (date_picker != null && date_picker.size()>0){
+			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
+			calendar.time=currentDate
+		}else{
+			currentDate = calendar.time
+		}
+		def model = timeManagerService.getDailyInAndOutsData(siteId, currentDate)
+		render template: "/employee/template/weekScheduleTemplate", model:model
+		return
+	}
+	
+	
+	@Secured(['ROLE_ADMIN'])
 	def dailyReport(){
 		def siteId=params["site.id"]
 		def currentDate
@@ -112,7 +131,7 @@ class EmployeeController {
 		
 		model << [startDate:"'"+startDate.format('yyyy-MM-dd HH:mm:SS')+"'"]
 		if (model.get('site') != null){
-			render template: "/employee/template/listDailyTimeTemplate", model:model
+			render template: "/employee/template/weekScheduleTemplate", model:model
 			return	
 		}
 		model
@@ -993,6 +1012,7 @@ class EmployeeController {
 		headers.add(AbsenceType.AUTRE)
 		headers.add(AbsenceType.EXCEPTIONNEL)
 		headers.add(AbsenceType.PATERNITE)
+		headers.add(AbsenceType.PARENTAL)
 		headers.add(AbsenceType.CSS)
 		headers.add(AbsenceType.DIF)
 		headers.add(AbsenceType.DON)
@@ -1044,6 +1064,12 @@ class EmployeeController {
 				}else{
 					dailyList.add(0)
 				}
+				if (absenceMap.get(AbsenceType.PARENTAL) != null){
+					dailyList.add(absenceMap.get(AbsenceType.PARENTAL))
+				}else{
+					dailyList.add(0)
+				}
+				
 				if (absenceMap.get(AbsenceType.CSS) != null){
 					dailyList.add(absenceMap.get(AbsenceType.CSS))
 				}else{
@@ -1507,6 +1533,7 @@ class EmployeeController {
 		def takenAutreMap = [:]
 		def takenExceptionnelMap = [:]		
 		def takenPaterniteMap = [:]
+		def takenParentalMap = [:]
 		def takenDifMap = [:]
 		def takenDonMap = [:]
 		def formationMap = [:]
@@ -1517,6 +1544,7 @@ class EmployeeController {
 		def takenAutre
 		def takenExceptionnel
 		def takenPaternite
+		def takenParental
 		def takenMaternite
 		def takenDIF	
 		def takenDON
@@ -1742,7 +1770,7 @@ class EmployeeController {
 			
 			//PATERNITE
 			criteria = Absence.createCriteria()
-			takenExceptionnel = criteria.list {
+			takenPaternite = criteria.list {
 				and {
 					eq('employee',employee)
 					ge('date',startCalendar.time)
@@ -1755,7 +1783,23 @@ class EmployeeController {
 			}else{
 				takenPaterniteMap.put(employee, 0)
 			}
-			
+
+			//PARENTAL
+			criteria = Absence.createCriteria()
+			takenParental = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.PARENTAL)
+				}
+			}
+			if (takenParental!=null){
+				takenParentalMap.put(employee, takenParental.size())
+			}else{
+				takenParentalMap.put(employee, 0)
+			}
+						
 			//DIF
 			criteria = Absence.createCriteria()
 			takenDIF = criteria.list {
@@ -2272,7 +2316,8 @@ class EmployeeController {
 			updatedSelection = AbsenceType.FORMATION
 		if (updatedSelection.equals('CE'))
 			updatedSelection = AbsenceType.EXCEPTIONNEL
-		
+		if (updatedSelection.equals('PAR'))
+			updatedSelection = AbsenceType.PARENTAL
 		if (updatedSelection.equals('RTT'))
 			updatedSelection = AbsenceType.RTT
 		
@@ -3653,6 +3698,12 @@ class EmployeeController {
 		 def period
 		 def monthList=[]
 		 
+		 //calendar.set(Calendar.DAY_OF_MONTH,30)
+		 //calendar.set(Calendar.MONTH,7)
+		 //calendar.set(Calendar.YEAR,2018)
+		 
+		 
+		 
 		 if (year!=null && !year.equals("")){
 			 if (year instanceof String[]){
 				 year=(year[0]!="")?year[0].toInteger():year[1].toInteger()
@@ -3667,9 +3718,9 @@ class EmployeeController {
 		 refCalendar.set(Calendar.MONTH,5)
 		 refCalendar.set(Calendar.YEAR,period.year)
 		 
-		 if (refCalendar.get(Calendar.YEAR)==calendar.get(Calendar.YEAR)){
-			 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
-				 log.debug('refCalendar: '+refCalendar.time)
+		 if (refCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)){
+			 while(refCalendar.get(Calendar.MONTH) < calendar.get(Calendar.MONTH)){
+				 log.error('refCalendar: '+refCalendar.time)
 				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
 				 refCalendar.roll(Calendar.MONTH, 1)
 				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
@@ -3678,17 +3729,18 @@ class EmployeeController {
 			 }
 	 	}else{
 			 while(refCalendar.get(Calendar.MONTH) <= 11){
-				 log.debug('refCalendar: '+refCalendar.time)
+				 log.error('refCalendar: '+refCalendar.time)
 				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
-				 if (refCalendar.get(Calendar.MONTH)==11){
+				 if (refCalendar.get(Calendar.MONTH) == 11){
+					 refCalendar.set(Calendar.MONTH,0)
+					 refCalendar.set(Calendar.YEAR,calendar.get(Calendar.YEAR))
 					 break
 				 }
 				 refCalendar.roll(Calendar.MONTH, 1)
 			 }
-			 refCalendar.set(Calendar.MONTH,0)
-			 refCalendar.set(Calendar.YEAR,calendar.get(Calendar.YEAR))
-			 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
-				 log.debug('refCalendar: '+refCalendar.time)
+
+			 while(refCalendar.get(Calendar.MONTH) < calendar.get(Calendar.MONTH)){
+				 log.error('refCalendar: '+refCalendar.time)
 				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
 				 refCalendar.roll(Calendar.MONTH, 1)
 				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
@@ -4977,4 +5029,6 @@ class EmployeeController {
 		}
 		
 	}
+	
+	
 }

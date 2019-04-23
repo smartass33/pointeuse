@@ -357,6 +357,7 @@ class PDFService {
 		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
+		def siteAnnualParental = 0
 		def siteAnnualDIF = 0
 		def siteAnnualDON = 0
 		def siteAnnualPayableSupTime = 0
@@ -388,6 +389,7 @@ class PDFService {
 						 siteAnnualDON += data.get('annualDON')
 						 siteAnnualExceptionnel += data.get('annualExceptionnel')
 						 siteAnnualPaternite += data.get('annualPaternite')
+						 siteAnnualParental += data.get('annualParental')
 						 siteAnnualPayableSupTime += data.get('annualPayableSupTime')
 						 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
 						 siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
@@ -421,6 +423,7 @@ class PDFService {
 			siteAnnualDON:siteAnnualDON,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,
+			siteAnnualParental:siteAnnualParental,
 			siteAnnualPayableSupTime:siteAnnualPayableSupTime,
 			siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
 			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,

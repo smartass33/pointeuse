@@ -94,5 +94,6 @@ grails.project.dependency.resolution = {
 		compile "org.grails.plugins:remote-pagination:0.4.8"
 		compile "org.grails.plugins:multi-select:0.2"	
 		compile ':jquery-date-time-picker:0.2.0'
+		//compile 'org.grails.plugins:jasper:1.11.0'
     }
 }

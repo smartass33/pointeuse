@@ -23,6 +23,7 @@
 			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>		
 			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
 			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="employee.paternite.count"/></span></div></th>
+			<th class='rotate-45' style="width:43px;text-align:center;"><div><span><g:message code="employee.parental.count"/></span></div></th>
 			<th class='rotate-45' style="width:55px;text-align:center;"><div><span><g:message code="annual.HS.above.quota.short"/></span></div></th>
 			<th class='rotate-45' style="width:79px;text-align:center;"><div><span><g:message code="annual.computed.quota.short"/></span></div></th>
 			<th class='rotate-45' style="width:57px;text-align:center;"><div><span><g:message code="annual.other.HS.quota.short"/></span></div></th>
@@ -44,6 +45,7 @@
 						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualSickness')}</g:if></td>
 						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualExceptionnel')}</g:if></td>
 						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualPaternite')}</g:if></td>
+						<td style="width:43px;text-align:center;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}">${(annualReportMap.get(employee)).get('annualParental')}</g:if></td>
 						<td style="text-align:right;width:50px;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}"><my:humanTimeTD id="annualPayableSupTime"  name="annualPayableSupTime" value="${(annualReportMap.get(employee)).get('annualPayableSupTime')}"/></g:if></td>
 						<td style="text-align:right;width:50px;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}"><my:humanTimeTD id="annualTheoriticalIncludingExtra"  name="annualTheoriticalIncludingExtra" value="${(annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra')}"/></g:if></td>
 						<td style="text-align:right;width:50px;"class="cartoucheRightTitleTD"><g:if test="${annualReportMap != null}"><my:humanTimeTD id="annualSupTimeAboveTheoritical"  name="annualSupTimeAboveTheoritical" value="${(annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical')}"/></g:if></td>
@@ -64,6 +66,7 @@
 						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualSickness}</td>
 						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualExceptionnel}</td>
 						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualPaternite}</td>
+						<td style="width:50px;text-align:center;"class="cartoucheRightTitleTD">${siteAnnualParental}</td>
 						<td style="text-align:right;width:50px;"class="cartoucheRightTitleTD"><my:humanTimeTD id="siteAnnualPayableSupTime"  name="siteAnnualPayableSupTime" value="${siteAnnualPayableSupTime}"/></td>
 						<td style="text-align:right;width:50px;"class="cartoucheRightTitleTD"><my:humanTimeTD id="siteAnnualTheoriticalIncludingExtra"  name="siteAnnualTheoriticalIncludingExtra" value="${siteAnnualTheoriticalIncludingExtra}"/></td>
 						<td style="text-align:right;width:50px;"class="cartoucheRightTitleTD"><my:humanTimeTD id="siteAnnualSupTimeAboveTheoritical"  name="siteAnnualSupTimeAboveTheoritical" value="${siteAnnualSupTimeAboveTheoritical}"/></td>

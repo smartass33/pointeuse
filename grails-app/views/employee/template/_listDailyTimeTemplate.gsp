@@ -27,11 +27,8 @@
 							<script>
 					        var current_time = (new Date()).getTime() + ((new Date()).getTimezoneOffset() * 60 * 1000 * -1);
 								$(document).ready(function () {
-								
-									
 									(function () {
-						 				var container = document.getElementById('timeline-${entry.key.id}');
-																					
+						 				var container = document.getElementById('timeline-${entry.key.id}');																					
 										var inAndOutsForEmployeeTable_${entry.key.id} = ${inAndOutsForEmployeeMap.get(entry.key)};
 										var init_cells_${entry.key.id} = [];
 										var item;
@@ -63,7 +60,6 @@
 												   		}
 									   				init_cells_${entry.key.id}.push(item);		
 										   		}		  
-
 										   }
 										} 
 						
@@ -77,8 +73,6 @@
 											graduation_step:20,
 											init_cells: init_cells_${entry.key.id}
 										});
-						
-						
 								    })();
 								});
 							</script>

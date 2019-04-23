@@ -103,6 +103,19 @@
 		                onComplete="document.getElementById('spinner').style.display = 'none';"
 						url="[controller:'employee', action:'dailyReport']"
 					/>	
+				</li>
+				
+				<li>
+					<g:submitToRemote class="displayButton"
+						value="schedule"
+						update="scheduleTable" 
+						onLoading="document.getElementById('spinner').style.display = 'inline';"
+		                onComplete="document.getElementById('spinner').style.display = 'none';"
+						url="[controller:'employee', action:'weeklyScheduleReport']"
+					/>	
+				</li>
+				<li>	
+					<g:actionSubmit value="HTML REPORT" action="htmlReport" controller="employee"  class="displayButton"/>	
 				</li>						
 				<li>	
 					<g:actionSubmit value="PDF" action="dailyTotalPDF" controller="employee"  class="pdfButton"/>	
@@ -120,6 +133,10 @@
 	</div>	
 	<div id="dailyTable">
 		<g:listDailyTime/>
+	</div>
+	
+	<div id="scheduleTable">
+		<g:weekScheduleView/>
 	</div>
 </body>
 </html>

@@ -217,6 +217,7 @@ class SiteController {
 		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
+		def siteAnnualParental= 0
 		def siteAnnualDIF = 0
 		def siteAnnualDON = 0
 		def siteAnnualPayableSupTime = 0
@@ -295,6 +296,7 @@ class SiteController {
 					employeeModel << ['annualMaternite':(annualEmployeeData.valueMap.get('annualMaternite') != null ? annualEmployeeData.valueMap.get('annualMaternite').toLong() : 0)]
 					employeeModel << ['annualExceptionnel':(annualEmployeeData.valueMap.get('annualExceptionnel') != null ? annualEmployeeData.valueMap.get('annualExceptionnel').toLong() : 0)]	
 					employeeModel << ['annualPaternite':(annualEmployeeData.valueMap.get('annualPaternite') != null ? annualEmployeeData.valueMap.get('annualPaternite').toLong() : 0)]
+					employeeModel << ['annualParental':(annualEmployeeData.valueMap.get('annualParental') != null ? annualEmployeeData.valueMap.get('annualParental').toLong() : 0)]
 					employeeModel << ['annualPayableSupTime':(annualEmployeeData.valueMap.get('annualPayableSupTime') != null ? annualEmployeeData.valueMap.get('annualPayableSupTime').toLong() : 0)]
 					employeeModel << ['annualTheoriticalIncludingExtra':(annualEmployeeData.valueMap.get('annualTheoriticalIncludingExtra') != null ? annualEmployeeData.valueMap.get('annualTheoriticalIncludingExtra').toLong() : 0)]
 					employeeModel << ['annualSupTimeAboveTheoritical':(annualEmployeeData.valueMap.get('annualSupTimeAboveTheoritical') != null ? annualEmployeeData.valueMap.get('annualSupTimeAboveTheoritical').toLong() : 0)]
@@ -314,6 +316,7 @@ class SiteController {
 					siteAnnualDIF += (annualEmployeeData.valueMap.get('annualDIF') != null ? annualEmployeeData.valueMap.get('annualDIF').toLong() : 0)
 					siteAnnualDON += (annualEmployeeData.valueMap.get('annualDON') != null ? annualEmployeeData.valueMap.get('annualDON').toLong() : 0)
 					siteAnnualExceptionnel += (annualEmployeeData.valueMap.get('annualExceptionnel') != null ? annualEmployeeData.valueMap.get('annualExceptionnel').toLong() : 0)
+					siteAnnualParental += (annualEmployeeData.valueMap.get('annualParental') != null ? annualEmployeeData.valueMap.get('annualParental').toLong() : 0)
 					siteAnnualPaternite += (annualEmployeeData.valueMap.get('annualPaternite') != null ? annualEmployeeData.valueMap.get('annualPaternite').toLong() : 0)
 					siteAnnualPayableSupTime += (annualEmployeeData.valueMap.get('annualPayableSupTime') != null ? annualEmployeeData.valueMap.get('annualPayableSupTime').toLong() : 0)
 					siteAnnualTheoriticalIncludingExtra += (annualEmployeeData.valueMap.get('annualTheoriticalIncludingExtra') != null ? annualEmployeeData.valueMap.get('annualTheoriticalIncludingExtra').toLong() : 0)
@@ -337,6 +340,7 @@ class SiteController {
 				siteAnnualDON:siteAnnualDON,
 				siteAnnualExceptionnel:siteAnnualExceptionnel,
 				siteAnnualPaternite:siteAnnualPaternite,
+				siteAnnualParental:siteAnnualParental,
 				siteAnnualPayableSupTime:siteAnnualPayableSupTime,
 				siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
 				siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
@@ -414,6 +418,7 @@ class SiteController {
 					valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
 					valueMap << ['annualMaternite':String.valueOf(annualReportMap.get(employee).get('annualMaternite'))]
 					valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
+					valueMap << ['annualParental':String.valueOf(annualReportMap.get(employee).get('annualParental'))]
 					valueMap << ['annualPaternite':String.valueOf(annualReportMap.get(employee).get('annualPaternite'))]
 					valueMap << ['annualPayableSupTime':String.valueOf(annualReportMap.get(employee).get('annualPayableSupTime'))]
 					valueMap << ['annualTheoriticalIncludingExtra':String.valueOf(annualReportMap.get(employee).get('annualTheoriticalIncludingExtra'))]
@@ -460,6 +465,7 @@ class SiteController {
 		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
+		def siteAnnualParental = 0
 		def siteAnnualDIF = 0
 		def siteAnnualDON = 0
 		def siteAnnualPayableSupTime = 0
@@ -491,6 +497,7 @@ class SiteController {
 				siteAnnualDON += data.get('annualDON')
 				siteAnnualExceptionnel += data.get('annualExceptionnel')
 				siteAnnualPaternite += data.get('annualPaternite')
+				siteAnnualParental += data.get('annualParental')
 				siteAnnualPayableSupTime += data.get('annualPayableSupTime') as long
 				siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
 				siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
@@ -525,6 +532,7 @@ class SiteController {
 			siteAnnualDON:siteAnnualDON,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,
+			siteAnnualParental:siteAnnualParental,
 			siteAnnualPayableSupTime:siteAnnualPayableSupTime,
 			siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
 			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
@@ -562,6 +570,7 @@ class SiteController {
 				valueMap << ['annualMaternite':String.valueOf(annualReportMap.get(employee).get('annualMaternite'))]
 				valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
 				valueMap << ['annualPaternite':String.valueOf(annualReportMap.get(employee).get('annualPaternite'))]
+				valueMap << ['annualParental':String.valueOf(annualReportMap.get(employee).get('annualParental'))]
 				valueMap << ['annualPayableSupTime':String.valueOf(annualReportMap.get(employee).get('annualPayableSupTime'))]
 				valueMap << ['annualTheoriticalIncludingExtra':String.valueOf(annualReportMap.get(employee).get('annualTheoriticalIncludingExtra'))]
 				valueMap << ['annualSupTimeAboveTheoritical':String.valueOf(annualReportMap.get(employee).get('annualSupTimeAboveTheoritical'))]

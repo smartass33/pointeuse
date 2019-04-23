@@ -96,6 +96,7 @@
  					<th class="rotate-45"><div><span>${AbsenceType.AUTRE}</span></div></th>
 					<th class="rotate-45"><div><span>${AbsenceType.EXCEPTIONNEL}</span></div></th>
 					<th class="rotate-45"><div><span>${AbsenceType.PATERNITE}</span></div></th>
+ 					<th class="rotate-45"><div><span>${AbsenceType.PARENTAL}</span></div></th>
   					<th class="rotate-45"><div><span>${AbsenceType.CSS}</span></div></th>
   					<th class="rotate-45"><div><span>${AbsenceType.INJUSTIFIE}</span></div></th>
   					<th class="rotate-45"><div><span>${AbsenceType.DIF}</span></div></th>  					
@@ -150,6 +151,10 @@
   							<g:if test="${employeeAbsenceMap.get(employee.key).get(AbsenceType.PATERNITE) == null }">0</g:if> 							
   							<g:else>${employeeAbsenceMap.get(employee.key).get(AbsenceType.PATERNITE)}</g:else>  							
   						</td> 						
+    					<td class="vacationTD">
+  							<g:if test="${employeeAbsenceMap.get(employee.key).get(AbsenceType.PARENTAL) == null }">0</g:if> 							
+  							<g:else>${employeeAbsenceMap.get(employee.key).get(AbsenceType.PARENTAL)}</g:else>  							
+  						</td> 
   					    <td class="vacationTD">
   							<g:if test="${employeeAbsenceMap.get(employee.key).get(AbsenceType.CSS) == null }">0</g:if> 							
   							<g:else>${employeeAbsenceMap.get(employee.key).get(AbsenceType.CSS)}</g:else>  							

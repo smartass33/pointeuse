@@ -15,6 +15,7 @@
 			<th class='rotate-45'><div><span><font size="1"><g:message code="other.vacation.label"/></font></span></div></th>
 			<th class='rotate-45'><div><span><font size="1"><g:message code="exceptionnal.vacation.label"/></font></span></div></th>
 			<th class='rotate-45'><div><span><font size="1"><g:message code="paternite.vacation.label"/></font></span></div></th>
+			<th class='rotate-45'><div><span><font size="1"><g:message code="parental.vacation.label"/></font></span></div></th>
 	</thead>
 	<tbody>
 	<g:if test="${employeeInstanceList!=null}">
@@ -33,6 +34,7 @@
 					<td>${takenAutreMap.get(employee)}</td>			
 					<td>${takenExceptionnelMap.get(employee)}</td>	
 					<td>${takenPaterniteMap.get(employee)}</td>	
+					<td>${takenParentalMap.get(employee)}</td>	
 				</g:if>
 			</tr>
 		</g:each>

@@ -72,6 +72,7 @@
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.maternite.abreviation.label"/></th>
 			<th style="vertical-align: middle;text-align:center;width:"><g:message code="annual.report.exceptionnel.abreviation.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.paternite.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.parental.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.supplementary.abreviation.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.sunday.time.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.bank.holiday.time.label"/></th>
@@ -106,6 +107,7 @@
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('maternite')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('exceptionnel')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('paternite')}</td>
+					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('parental')}</td>
 					<!--  td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('formation')}</td-->
 
 					<td style="vertical-align: middle;text-align:right;">
@@ -132,6 +134,7 @@
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualMaternite}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualExceptionnel}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualPaternite}</td>
+				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualParental}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">
 					<g:if test="${annualPayableSupTime !=null}"><my:humanTimeTD id="annualPayableSupTime"  name="annualPayableSupTime" value="${annualPayableSupTime}"/></g:if>
 				</td>

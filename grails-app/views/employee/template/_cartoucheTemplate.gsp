@@ -124,6 +124,12 @@
 		     			<td class="cartoucheRightFiguresTD">
 					</tr>
 					<tr>		
+						<td class="cartoucheRightTitleTD" >${message(code: 'employee.parental.count', default: 'report')} :</td>	
+						<td class="cartoucheRightFiguresTD">${parental as java.lang.Float}</td>        					
+		     			<td class="cartoucheRightFiguresTD">${yearlyParental as java.lang.Float}</td>
+		     			<td class="cartoucheRightFiguresTD">
+					</tr>
+					<tr>		
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.dif.count', default: 'report')} :</td>	
 						<td class="cartoucheRightFiguresTD">${dif as java.lang.Float}</td>        					
 		     			<td class="cartoucheRightFiguresTD">${yearlyDif as java.lang.Float}</td>

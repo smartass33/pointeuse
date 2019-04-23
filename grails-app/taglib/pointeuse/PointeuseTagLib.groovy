@@ -53,4 +53,7 @@ class PointeuseTagLib {
 	def itinerarySiteMonthlyView ={attrs,body->
 		out<<render(template:"/itinerary/template/itinerarySiteMonthlyView")
 	}
+	def weekScheduleView ={attrs,body->
+		out<<render(template:"/employee/template/weekScheduleTemplate")
+	}
 }
