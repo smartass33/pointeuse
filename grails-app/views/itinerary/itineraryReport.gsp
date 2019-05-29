@@ -90,6 +90,41 @@
 				}
 			}
 		</script>
+		
+		
+			<style type="text/css">
+         div#tooltip a span {
+         	display: none;
+         }
+         div#tooltip a:hover span {
+         	display: block;
+            	position: relative; width: 125px;
+            	padding: 5px; margin: 10px; z-index: 100;
+            	color: black; background-color:#FFFFCC; border: 1px solid #ccc;
+           	font: 10px Verdana, sans-serif; text-align: center;
+          }
+         div#tooltip a {
+           	position:relative;
+         }
+         div#tooltip a span {
+          display:none;
+          border: 0px;
+         }
+         div#tooltip a:hover span {
+          display:block;
+          position:absolute; width: 100px;
+          color: black; background-color:#FFFFCC; border: 0px solid #ccc;
+          font: 10px Verdana, sans-serif; text-align: center;
+         }
+         div#tooltip a:hover {
+         	text-indent:0;
+         }
+         #tooltip button {
+         	border:0em;
+         	background-color:#FFFFFF;
+         }
+	}
+	</style>
 	</head>
 	<body>
 		<a href="#show-itinerary" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
@@ -147,6 +182,9 @@
 								url="[controller:'itinerary', action:'showItineraryActions',id:'monthlyView']"
 							/>	
 						</li> 	
+						<li>
+							<g:actionSubmit class='excelButton' value=" " action="itinerarySiteExcel"/>
+						</li>
 						<li>
 							<g:actionSubmit value="PDF" action="itineraryPDF" class="pdfButton" />
 							<g:hiddenField name="id" value="monthlyView"/>

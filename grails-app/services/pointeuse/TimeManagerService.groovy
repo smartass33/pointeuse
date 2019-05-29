@@ -2057,26 +2057,7 @@ class TimeManagerService {
 			presentEmployeeByMonth:presentEmployeeByMonth		
 		]
 	}
-		/*
-	def getAllSitesEcartData(def monthList,Period period){
-		def sites = Site.findAll("from Site")
-		def siteData = []
-		def employeeCount = 0
-		def periodTheoritical = 0
-		for (Site site in sites){
-			siteData = getEcartData(site, monthList, period)
-			//Somme HR - HT
-			// nombre de salariés
-			// HT
-			siteData['monthlyTheoriticalByEmployee'].each(){
-				employeeCount ++
-				periodTheoritical += it.value
-				}
-			}
-		}
-		
-	}
-	*/
+
 	def getMonthlySupTime(Employee employee,int month, int year){
 		log.error('getMonthlySupTime called with month: '+month+' year: '+year)
 		int daysToWithdraw
@@ -3189,7 +3170,7 @@ class TimeManagerService {
 	   }
 	   
 	   return [
-		   sickEmployeeMap: sickEmployeeMap,
+		   sickEmployeeMap:sickEmployeeMap,
 		   site:site,
 		   currentDate:currentDate
 		   ]
@@ -5585,7 +5566,188 @@ class TimeManagerService {
 			weeklySubTotalsByWeek:weeklySubTotalsByWeek,
 			weeklyFunctionTotalMap:weeklyFunctionTotalMap
 		]
-
-		
 	}
+	
+	def isEmployeeIn(Employee employee,Date eventDate){
+		def criteria
+		def isIn = false
+		def upperBound
+		def lowerBound
+		def entriesByDay
+		
+		criteria = InAndOut.createCriteria()
+		entriesByDay = criteria{
+			and {
+				eq('employee',employee)
+				eq('day',eventDate.getAt(Calendar.DAY_OF_MONTH))
+				eq('month',eventDate.getAt(Calendar.MONTH) + 1)
+				eq('year',eventDate.getAt(Calendar.YEAR))
+				order('time')
+				}
+		}
+		
+		// find upperbound
+		entriesByDay.each{
+			println " entriesByDay Item: $it"
+			if (it > eventDate){
+				upperBound = it
+				return
+			}
+		}
+		
+		//find lowerbound		
+		entriesByDay = entriesByDay.reverse()
+		entriesByDay.each{
+			println " entriesByDayReverse Item: $it"
+			if (eventDate > it){
+				lowerBound = it
+				return
+			}
+		}
+	
+		isIn = (lowerBound.type.equals('S') && upperBound.type.equals('E')) ? true : false		
+		return isIn
+	}
+	
+	def isEmployeeIn2(Employee employee,Date eventDate,Date lowerBound,Date upperBound){
+		def criteria
+		def isIn = false
+		def entriesByDay
+		
+		criteria = InAndOut.createCriteria()
+		entriesByDay = criteria{
+			and {
+				eq('employee',employee)
+				eq('day',eventDate.getAt(Calendar.DAY_OF_MONTH))
+				eq('month',eventDate.getAt(Calendar.MONTH) + 1)
+				eq('year',eventDate.getAt(Calendar.YEAR))
+				order('time')
+				}
+		}	
+	}
+	
+	def getDailyTotalWithIntervals(Date currentDate, siteId){
+		def pas = 10 as long
+		def minuteStart = 30
+		def hourStart = 6
+		def minuteEnd = 22
+		def hourEnd = 30
+		def initialMinute
+		def calendar = Calendar.instance
+		def startDate = calendar.time
+		def startCalendar = Calendar.instance
+		def endDate = calendar.time
+		def endCalendar = Calendar.instance
+		def rollingDate = calendar.time
+		def rollingCalendar = Calendar.instance
+		def dateList = []
+		def dateList2 = []
+		def employeeSiteList = []
+		def criteria
+		def statusMapByEmployee = [:]
+		def statusMapByTime = [:]
+		def mapByTime = [:]
+		def listByEmployee = []
+		def entriesByDay
+		def eventIndexList
+		def eventMinute
+		def eventIndex
+		def status
+		def i
+		def statusMap
+		def model
+		def site
+
+		if (siteId != null && !siteId.equals("")){
+			site = Site.get(siteId)
+		}
+		
+		employeeSiteList = Employee.findAllBySite(site)
+		currentDate.clearTime()
+		startDate.putAt(Calendar.HOUR_OF_DAY,hourStart)
+		startDate.putAt(Calendar.MINUTE,minuteStart)
+		startCalendar.time = startDate
+		startCalendar.time.clearTime()
+		initialMinute = hourStart*60+minuteStart
+		
+		endDate.putAt(Calendar.HOUR_OF_DAY,19)
+		endDate.putAt(Calendar.MINUTE,30)
+		endCalendar.time = endDate
+		endCalendar.time.clearTime()
+		
+		rollingDate.putAt(Calendar.HOUR_OF_DAY,hourStart)
+		rollingDate.putAt(Calendar.MINUTE,minuteStart)
+		rollingCalendar.time = rollingDate
+		rollingCalendar.time.clearTime()
+		
+		while (rollingCalendar.time < endCalendar.time){
+			log.debug('rollingDate: '+rollingCalendar.time.format('HH:mm'))
+			dateList.add(rollingCalendar.time.format('HH:mm'))
+			dateList2.add(rollingCalendar.time)
+			if (rollingCalendar.time == endCalendar.time){
+				//last occurence
+				rollingCalendar.setTimeInMillis(rollingCalendar.getTimeInMillis() + pas*60*1000)
+				dateList.add(rollingCalendar.time.format('HH:mm'))
+				dateList2.add(rollingCalendar.time)
+				break
+			}
+			rollingCalendar.setTimeInMillis(rollingCalendar.getTimeInMillis() + pas*60*1000)
+		}
+					
+		for (Employee employee:employeeSiteList){
+			criteria = InAndOut.createCriteria()
+				entriesByDay = criteria{
+				and {
+					eq('employee',employee)
+					eq('day',currentDate.getAt(Calendar.DAY_OF_MONTH))
+					eq('month',currentDate.getAt(Calendar.MONTH) + 1)
+					eq('year',currentDate.getAt(Calendar.YEAR))
+					order('time')
+					}
+			}
+			eventIndexList = []
+			for (InAndOut eventIter in entriesByDay){
+				Date eventDate = eventIter.time
+				eventMinute = eventDate.getAt(Calendar.HOUR_OF_DAY)*60 + eventDate.getAt(Calendar.MINUTE) - initialMinute
+				log.debug('eventDate: '+eventDate.format('HH:mm'))
+				eventIndex = (int)(eventMinute / pas)
+				log.debug("eventIndex: "+eventIndex)
+				if (eventIndexList != null && eventIndexList.size() > 0 && eventIndexList.last() == eventIndex){
+					eventIndexList.remove(eventIndexList.size() - 1)
+				}else{
+					eventIndexList.add(eventIndex)
+				}
+			}			
+			status = false
+			i = 0
+			statusMap = [:]
+			for (Date date in dateList2){
+				if (eventIndexList.contains(i)){
+					status = (status == false) ? true : false
+				}
+				statusMap.put(date,status)
+				i++
+				if (statusMapByTime != null && statusMapByTime.get(date) != null){
+					def tmpList = statusMapByTime.get(date)
+					tmpList.add(status)
+					statusMapByTime.put(date,tmpList)
+				}else{
+					statusMapByTime.put(date,[status])
+				}	
+			}
+			statusMapByEmployee.put(employee,statusMap)
+		}
+		
+		model = getDailyInAndOutsData(site.id, currentDate)		
+		model << [
+			isWeekScheduleView:true,
+			dateList:dateList,
+			employeeSiteList:employeeSiteList,
+			statusMapByEmployee:statusMapByEmployee,
+			statusMapByTime:statusMapByTime,
+			dateList2:dateList2
+		]
+		return model
+	}
+	
 }

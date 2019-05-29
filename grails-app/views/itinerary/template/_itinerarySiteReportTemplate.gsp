@@ -14,7 +14,7 @@
 <g:set var="myRed" 				value="#FF8E79"/>
 <g:set var="anomalyList" 		value="${[]}"/>
 <g:set var="anomalyThList" 		value="${[]}"/>
-<g:set var="anomalyEcartList" 		value="${[]}"/>
+<g:set var="anomalyEcartList" 	value="${[]}"/>
 
 <div id="spinner" class="spinner" style="display: none;"><img src="${createLinkTo(dir:'images',file:'spinner.gif')}"  width="16" height="16" /><g:message code="spinner.loading.label"/></div>
 

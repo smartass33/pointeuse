@@ -1,6 +1,7 @@
 package pointeuse
 
 import grails.plugin.springsecurity.annotation.Secured
+
 import org.springframework.core.io.Resource
 import org.springframework.dao.DataIntegrityViolationException
 import org.apache.commons.io.IOUtils
@@ -13,6 +14,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.Callable
 
+import org.apache.commons.lang.time.DateUtils
+
 import groovy.json.JsonSlurper
 import groovy.time.TimeDuration
 import groovy.time.TimeCategory
@@ -20,7 +23,14 @@ import grails.converters.JSON
 
 import org.apache.commons.logging.LogFactory
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFColor
 import org.codehaus.groovy.grails.core.io.ResourceLocator
+import org.apache.poi.hssf.util.CellRangeAddress
+import org.apache.poi.ss.usermodel.IndexedColors
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.hssf.usermodel.*;
 
 import pl.touk.excel.export.WebXlsxExporter
 
@@ -29,6 +39,7 @@ import java.util.concurrent.*
 import groovyx.gpars.GParsConfig
 import groovyx.gpars.GParsPool
 
+import java.awt.Color
 
 
 class EmployeeController {	
@@ -80,24 +91,57 @@ class EmployeeController {
 		}
 			log.error('isExpanded:'+isExpanded)
 			render template: "/itinerary/form", model:[employeeList : employeeList,checked:isExpanded]
-
 			return		
 		}
-
+	
 	@Secured(['ROLE_ADMIN'])
-	def weeklyScheduleReport(){
-		params.each{i->log.error('parameter of list: '+i)}
-		def siteId=params["site.id"]
+	def dailyTotalWitIntervalsPDF(){
+		params.each{i->log.debug('parameter of list: '+i)}
+		def folder = grailsApplication.config.pdf.directory
+		def siteId = params["site.id"]
 		def currentDate
 		def calendar = Calendar.instance
 		def date_picker =params["date_picker"]
+		def model
+		def site
+		
 		if (date_picker != null && date_picker.size()>0){
 			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
-			calendar.time=currentDate
+			calendar.time = currentDate
 		}else{
 			currentDate = calendar.time
 		}
-		def model = timeManagerService.getDailyInAndOutsData(siteId, currentDate)
+		
+		if (siteId != null && !siteId.equals("")){
+			site = Site.get(siteId)
+		}
+		
+		//model = timeManagerService.getDailyTotalWithIntervals(currentDate, siteId)
+		
+		def retour = PDFService.generateWeeklySheetWithIntervals(site, folder, currentDate)
+		response.setContentType("application/octet-stream")
+		response.setHeader("Content-disposition", "filename=${retour[1]}")
+		response.outputStream << retour[0]
+	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def weeklyScheduleReport(){
+		log.error('entering weeklyScheduleReport with params = siteId: '+params["site.id"]+', date_picker: '+params["date_picker"])
+		params.each{i->log.debug('parameter of list: '+i)}
+		def siteId = params["site.id"]
+		def currentDate
+		def calendar = Calendar.instance
+		def date_picker =params["date_picker"]
+		def model
+		
+		if (date_picker != null && date_picker.size()>0){
+			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
+			calendar.time = currentDate
+		}else{
+			currentDate = calendar.time
+		}		
+		
+		model = timeManagerService.getDailyInAndOutsData(siteId, currentDate)
 		render template: "/employee/template/weekScheduleTemplate", model:model
 		return
 	}
@@ -105,10 +149,25 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def dailyReport(){
+		log.error('entering dailyReport')
+		def dailyMap = [:]
+		def dailySupMap = [:]
+		def dailyInAndOutMap = [:]
 		def siteId=params["site.id"]
+		def dailyTotal
+		def inAndOutList
+		def criteria
+		def site
+		def elapsedSeconds = 0
+		def employeeInstanceList
 		def currentDate
 		def calendar = Calendar.instance
 		def fromIndex=params.boolean('fromIndex')
+		def inAndOutsForEmployee = []
+		def inAndOutsForEmployeeMap = [:]
+		def employeeSubList
+		def localisationMap = [:]
+		
 		
 		if (!fromIndex && (siteId == null || siteId.size() == 0)){
 			flash.message = message(code: 'ecart.site.selection.error')
@@ -116,30 +175,212 @@ class EmployeeController {
 			redirect(action: "dailyReport",params:params)
 			return
 		}
-		
+		def maxSize = 0
 		def date_picker =params["date_picker"]
+		if (date_picker != null && date_picker.size()>0){
+			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
+			calendar.time=currentDate
+		}
+		
+		def functionList = Function.list([sort: "ranking", order: "asc"])
+		def serviceList = Service.list([sort: "name", order: "asc"])
+		
+		if (siteId != null && !siteId.equals("")){
+			 site = Site.get(params.int('site.id'))
+			 employeeInstanceList = []
+			 
+			 def foreignEmployees = []
+			 def foreignEmployeesIds = []
+			 criteria = DailyTotal.createCriteria()
+			 
+			 def dailyTotals = criteria.list{
+				 and {
+					 eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+					 eq('month',calendar.get(Calendar.MONTH)+1)
+					 eq('year',calendar.get(Calendar.YEAR))
+					 eq('site',site)
+				 }
+			 }
+			 for (DailyTotal dailyTotalIter : dailyTotals){
+				 if (dailyTotalIter.site != null && dailyTotalIter.site != dailyTotalIter.employee.site){
+					 foreignEmployees.add(dailyTotalIter.employee)
+					 foreignEmployeesIds.add(dailyTotalIter.employee.id)
+					 localisationMap.put(dailyTotalIter.employee,site)
+				 }
+			 }
+			 
+			 for (Function function:functionList){
+				 for (Service service:serviceList){
+					  criteria = Employee.createCriteria()
+					  
+					  if (foreignEmployeesIds != null && foreignEmployeesIds.size() > 0){
+						  employeeSubList = criteria.list{
+							  or{
+								  
+								  and {
+									  eq('function',function)
+									  eq('service',service)
+									  eq('site',site)
+								  }
+								  
+								  and {
+									  eq('function',function)
+									  eq('service',service)
+									  'in'("id",foreignEmployeesIds)
+								  }
+								  order('lastName','asc')
+							  }
+						  }
+					  }
+					  else{
+						  employeeSubList = criteria.list{
+							  or{
+								  and {
+									  eq('function',function)
+									  eq('service',service)
+									  eq('site',site)
+								  }
+								  order('lastName','asc')
+							  }
+						  }
+						  
+					  }
+					  employeeInstanceList.addAll(employeeSubList)
+				 }
+			 }
+		}else{
+			employeeInstanceList = []
+			for (Service service:serviceList){
+				for (Function function:functionList){
+					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
+				}
+			}
+		}
+		for (Employee employee:employeeInstanceList){
+			inAndOutsForEmployee = []
+			criteria = DailyTotal.createCriteria()
+			dailyTotal = criteria.get{
+				and {
+					eq('employee',employee)
+					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
+					eq('year',calendar.get(Calendar.YEAR))
+					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+				}
+			}
+			
+			if (dailyTotal != null && dailyTotal.site != null && dailyTotal.site != site){
+				def tmpSite = Site.findByName(dailyTotal.site.name)
+				localisationMap.put(employee,tmpSite)
+			}else{
+				localisationMap.put(employee,site)
+			}
+			
+			
+			criteria = InAndOut.createCriteria()
+			inAndOutList = criteria.list{
+				and {
+						eq('employee',employee)
+						eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
+						eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+						eq('month',calendar.get(Calendar.MONTH)+1)
+						eq('year',calendar.get(Calendar.YEAR))
+						order('time')
+					}
+			}
+			
+			maxSize = (inAndOutList != null && inAndOutList.size() > maxSize) ? inAndOutList.size() : maxSize
+			
+			for (InAndOut inOrOut : inAndOutList){
+				inAndOutsForEmployee.add("'"+inOrOut.time.format('yyyy-MM-dd HH:mm:SS')+"'")
+			}
+		
+			if (inAndOutList.size() < maxSize){
+				def difference = maxSize - inAndOutList.size()
+				for (int j = 0 ;j < difference ; j++){
+					inAndOutsForEmployee.add(null)
+				}
+			}
+			
+			if (fromIndex){
+				return [site:site,fromIndex:fromIndex,currentDate:calendar.time]
+			}
+			
+			dailyInAndOutMap.put(employee, inAndOutList)
+			elapsedSeconds = dailyTotal != null ? (timeManagerService.getDailyTotal(dailyTotal)).get('elapsedSeconds') : 0
+	
+			if (elapsedSeconds > DailyTotal.maxWorkingTime){
+				dailySupMap.put(employee,elapsedSeconds-DailyTotal.maxWorkingTime)
+			}else{
+				dailySupMap.put(employee,0)
+			}
+			if (dailyTotal != null && (dailyTotal.site == site || dailyTotal.site == null)){
+				dailyMap.put(employee,elapsedSeconds)
+			}
+			
+			inAndOutsForEmployeeMap.put(employee,inAndOutsForEmployee)
+		}
+		
+		def startDate=calendar.time
+		startDate.putAt(Calendar.HOUR_OF_DAY,6)
+		startDate.putAt(Calendar.MINUTE,0)
+		
+		if (site!=null){
+			render template: "/employee/template/listDailyTimeTemplate", model:[
+				inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,
+				startDate:"'"+startDate.format('yyyy-MM-dd HH:mm:SS')+"'",
+				inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,
+				dailyMap: dailyMap,
+				site:site,
+				dailySupMap:dailySupMap,
+				dailyInAndOutMap:dailyInAndOutMap,
+				localisationMap:localisationMap,
+				maxSize:maxSize]
+			return
+		}
+		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:calendar.time,maxSize:maxSize]
+	}
+	/*
+	@Secured(['ROLE_ADMIN'])
+	def dailyReport(){
+		def siteId = params["site.id"]
+		def currentDate
+		def calendar = Calendar.instance
+		def fromIndex = params.boolean('fromIndex')
+		def date_picker = params["date_picker"]
+		def model
+		def startDate
+		
+		startDate = calendar.time
+		startDate.putAt(Calendar.HOUR_OF_DAY,6)
+		startDate.putAt(Calendar.MINUTE,0)
+		
+		if (!fromIndex && (siteId == null || siteId.size() == 0)){
+			flash.message = message(code: 'ecart.site.selection.error')
+			params["fromIndex"]=true
+			redirect(action: "dailyReport",params:params)
+			return
+		}
+	
 		if (date_picker != null && date_picker.size()>0){
 			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
 			calendar.time=currentDate
 		}else{
 			currentDate = calendar.time
 		}
-		def model = timeManagerService.getDailyInAndOutsData(siteId, currentDate)
-		def startDate=calendar.time
-		startDate.putAt(Calendar.HOUR_OF_DAY,6)
-		startDate.putAt(Calendar.MINUTE,0)
-		
+		model = timeManagerService.getDailyInAndOutsData(siteId, currentDate)
 		model << [startDate:"'"+startDate.format('yyyy-MM-dd HH:mm:SS')+"'"]
+		model << [isWeekScheduleView:false]
 		if (model.get('site') != null){
-			render template: "/employee/template/weekScheduleTemplate", model:model
+			render template: "/employee/template/listDailyTimeTemplate", model:model
 			return	
 		}
 		model
 	}
+	*/
 	
 	@Secured(['ROLE_ADMIN'])
 	def sickLeaveDailyReport(){
-		def siteId=params["site.id"]
+		def siteId = params["site.id"]
 		def currentDate
 		def calendar = Calendar.instance
 		def fromIndex=params.boolean('fromIndex')
@@ -175,8 +416,8 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def annualSitesReportExcelExport(){
-		def folder = grailsApplication.config.pdf.directory
 		log.error('entering annualSitesReportExcelExport')
+		def folder = grailsApplication.config.pdf.directory
 		def siteValue = params.boolean('siteValue')
 		def siteFunction = params['siteFunction']
 		def currentDate
@@ -424,6 +665,145 @@ class EmployeeController {
 		}
 		
 	}
+	
+	//HENRI
+	@Secured(['ROLE_ADMIN'])
+	def weeklyEXCEL(){
+		log.error('entering weeklyEXCEL')
+		params.each{i->log.debug('parameter of list: '+i)}
+		
+		def folder = grailsApplication.config.pdf.directory
+		def siteId = params["site.id"]
+		def currentDate
+		def calendar = Calendar.instance
+		def date_picker = params["date_picker"]
+		def model = [:]
+		def site
+		def dayList = []
+		def dayModel = [:]
+		def dayModelList = []
+		def timeList
+		def employeeList = []
+		def items
+		int rowIndex = 2
+		def colIndex = 1
+		byte[] rgb
+		def cell
+		def colour
+		def cellsWithColor = 0
+		def totalColumn = 1
+		CellRangeAddress cra
+		def dayIndex = 0
+		
+		
+		if (date_picker != null && date_picker.size()>0){
+			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
+			calendar.time = currentDate
+		}else{
+			currentDate = calendar.time
+		}
+		
+		if (siteId != null && !siteId.equals("")){
+			site = Site.get(siteId)
+		}
+		int day = calendar.get(Calendar.DAY_OF_YEAR);
+		
+		//model = timeManagerService.getDailyTotalWithIntervals(currentDate, siteId)
+		
+		log.debug('day is: '+calendar.time.format('EEE dd/MM/yyyy'))
+		while(calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY){
+			log.debug('day is: '+calendar.time.format('EEE dd/MM/yyyy'))
+			calendar.set(Calendar.DAY_OF_YEAR, --day);
+		}
+		
+		while(calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+			log.debug('day is: '+calendar.time.format('EEE dd/MM/yyyy'))
+			dayList.add(calendar.time)			
+			dayModel = timeManagerService.getDailyTotalWithIntervals(calendar.time, site.id)
+			if (timeList == null)
+				timeList = dayModel.get('dateList') //les horaires de la journée
+			dayModelList.add(dayModel)	
+			calendar.set(Calendar.DAY_OF_YEAR, ++day);
+			
+		}
+		model << [dayList : dayList,currentDate:currentDate,dayModelList:dayModelList,dateList:timeList]
+		
+		if (dayModelList != null && dayModelList[0] != null && dayModelList[0].get('employeeSiteList')){
+			
+			for (Employee employee : dayModelList[0].get('employeeSiteList')){
+				employeeList.add(employee.lastName.take(2))
+			}
+			//totalColumn = employeeList.size()
+			
+			new WebXlsxExporter(folder+'/daily_report.xlsx').with { xlsxExporter ->
+				setResponseHeaders(response)
+				
+				def timingRowIndex = 3
+				for (def timing : timeList){
+					putCellValue(timingRowIndex, 0, timing)
+					timingRowIndex++
+				}
+				
+				putCellValue(0, 1, site.name+" - semaine du "+ dayList[0].format('EEEE d MM yyyy')+' au '+dayList[dayList.size() - 1].format('EEEE d MM yyyy'))
+				cra = new CellRangeAddress(0, 0,1, employeeList.size() * dayList.size() );
+				sheet.addMergedRegion(cra)
+				for (Date currentdDay : dayList){						
+					log.debug('doing day: '+currentdDay.format('EEE dd/MM/yyyy'))					
+					rowIndex = 3
+					
+					def employeeIndex = totalColumn
+					if (employeeIndex > 1){
+						putCellValue(1, employeeIndex, currentdDay)
+						cra = new CellRangeAddress(1, 1,employeeIndex, employeeIndex + employeeList.size() -1);
+						sheet.addMergedRegion(cra)
+					}else{
+						putCellValue(1, 1, currentdDay)
+						cra = new CellRangeAddress(1, 1,1, employeeList.size());					
+						sheet.addMergedRegion(cra)
+					}
+					for (def name : employeeList){
+						log.debug('writing name to file: '+1+', '+employeeIndex)
+						putCellValue(2, employeeIndex, name)
+						employeeIndex++
+					}
+					if (dayModelList[dayIndex] != null && dayModelList[dayIndex].get('statusMapByTime')){
+						
+						// for a given day get the status by time
+						dayModelList[dayIndex].get('statusMapByTime').each{ k, v ->		
+							
+							def employeePosition = 0
+							// for a given time, check if employees in or out
+							v.each{
+								
+								def currentEmployee = dayModelList[0].get('employeeSiteList')[employeePosition]
+								def employeeFunction = currentEmployee.function.name
+								
+								log.debug('writing to cell: '+rowIndex+', '+colIndex)
+								
+								colIndex
+								if (it){
+									putCellValue(rowIndex, colIndex, 'I@'+employeeFunction.take(2))
+								}else{
+									putCellValue(rowIndex, colIndex, 'O@'+employeeFunction.take(2))
+								}
+								colIndex++
+								employeePosition ++
+							}
+							rowIndex++	
+							colIndex = totalColumn
+							
+						}		
+					}
+					totalColumn += employeeList.size()
+					colIndex = totalColumn
+					dayIndex++
+				}
+				save(response.outputStream)
+			}
+		}
+		response.setContentType("application/octet-stream")
+	}
+	
 	
 	@Secured(['ROLE_ADMIN'])
 	def weeklyReportExcelExport(){
@@ -1794,7 +2174,7 @@ class EmployeeController {
 					eq('type',AbsenceType.PARENTAL)
 				}
 			}
-			if (takenParental!=null){
+			if (takenParental != null){
 				takenParentalMap.put(employee, takenParental.size())
 			}else{
 				takenParentalMap.put(employee, 0)
@@ -1846,6 +2226,7 @@ class EmployeeController {
 			takenRTTMap:takenRTTMap,
 			takenExceptionnelMap:takenExceptionnelMap,
 			takenPaterniteMap:takenPaterniteMap,
+			takenParentalMap:takenParentalMap,
 			takenDifMap:takenDifMap,
 			takenCAMap:takenCAMap,
 			initialCAMap:initialCAMap,
@@ -3696,13 +4077,7 @@ class EmployeeController {
 		 def refCalendar = Calendar.instance 
 		 def site
 		 def period
-		 def monthList=[]
-		 
-		 //calendar.set(Calendar.DAY_OF_MONTH,30)
-		 //calendar.set(Calendar.MONTH,7)
-		 //calendar.set(Calendar.YEAR,2018)
-		 
-		 
+		 def monthList = []
 		 
 		 if (year!=null && !year.equals("")){
 			 if (year instanceof String[]){
@@ -3792,7 +4167,7 @@ class EmployeeController {
 	 
 	 @Secured(['ROLE_ADMIN'])
 	 def addSickLeave (){
-		 params.each{i->log.error(i)}
+		 params.each{i->log.debug(i)}
 		 Employee employee = Employee.get(params['employeeId'])
 		 def period = Period.get(params['periodId'])
 		 def site = Site.get(params['siteId'])
@@ -3842,10 +4217,7 @@ class EmployeeController {
 			}
 			startCalendar.add(Calendar.DATE,1)
 		}
-
-		 
-		 redirect(action: "sickLeaveReport", params: [id:employee.id,isAdmin:false,employeeId:employee.id,periodId:params['periodId'],siteId:params['siteId']])
-		 
+		 redirect(action: "sickLeaveReport", params: [id:employee.id,isAdmin:false,employeeId:employee.id,periodId:params['periodId'],siteId:params['siteId']])		 
 	 }
 	 
 	@Secured(['ROLE_ADMIN'])

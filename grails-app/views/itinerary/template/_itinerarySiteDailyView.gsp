@@ -5,6 +5,7 @@
 <g:set var="realCal" 		value="${Calendar.instance}"/>
 <g:set var="theoriticalCal" value="${Calendar.instance}"/>
 
+
 <div>
 	<h1>${message(code: 'itinerary.real.label', default: 'Report')} <g:if test="${site != null}"> du site: ${site.name}</g:if></h1>
 	<BR>

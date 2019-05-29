@@ -17,8 +17,7 @@ class PDFService {
 	def mileageService
 	def pdfRenderingService
 	def grailsApplication
-	
-	
+		
 	def generateItineraryMonthlyReportByItinerary(def viewType, def itinerary, def currentCalendar, def folder){
 		log.error('generateItineraryMonthlyReportByItinerary called for itinerary: '+itinerary.name+' and date: '+currentCalendar.time)
 		def model
@@ -283,7 +282,7 @@ class PDFService {
 		def filename
 		OutputStream outputStream
 		File file
-		def modelEcart=timeManagerService.getEcartData(site, monthList, period)
+		def modelEcart = timeManagerService.getEcartData(site, monthList, period)
 		modelEcart << [site:site]
 		def siteName = (site.name).replaceAll("\\s","").trim()
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeEcartPDFTemplate', model: modelEcart)
@@ -298,6 +297,75 @@ class PDFService {
 		return [file.bytes,file.name]
 	}
 
+	def generateDailySheetWithIntervals(Site site,String folder,Date currentDate){
+		log.error('generateDailySheetWithIntervals called '+'with date: '+currentDate.format('dd/MM/yyyy'))
+		def filename
+		OutputStream outputStream
+		File file
+		def model
+		def siteName
+	
+		model = timeManagerService.getDailyTotalWithIntervals(currentDate, site.id)
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeWeeklyTimePDFTemplate', model: model)
+		siteName = (site.name).replaceAll("\\s","").trim()
+		filename = (currentDate.format('yyyy-mm-dd')).toString()+'-'+siteName +'-dailyWithIntervalReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]	
+	}
+	
+	def generateWeeklySheetWithIntervals(Site site,String folder,Date currentDate){
+		log.error('generateWeeklySheetWithIntervals called '+'with date: '+currentDate.format('dd/MM/yyyy'))
+		def filename
+		OutputStream outputStream
+		File file
+		def model = [:]
+		def siteName
+		def dayModel = [:]
+		def dayList = []
+		def dayModelList = []
+		def dateList
+		def calendar = Calendar.instance
+		calendar.time = currentDate
+		int day = calendar.get(Calendar.DAY_OF_YEAR);
+		// need to find first day of week
+		log.debug('day is: '+calendar.time.format('EEE dd/MM/yyyy'))
+		while(calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY){
+			log.debug('day is: '+calendar.time.format('EEE dd/MM/yyyy'))
+			calendar.set(Calendar.DAY_OF_YEAR, --day);
+		}
+		
+		while(calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+			log.debug('day is: '+calendar.time.format('EEE dd/MM/yyyy'))
+			dayList.add(calendar.time)			
+			dayModel = timeManagerService.getDailyTotalWithIntervals(calendar.time, site.id)
+			if (dateList == null)
+				dateList = dayModel.get('dateList')
+			dayModelList.add(dayModel)	
+			calendar.set(Calendar.DAY_OF_YEAR, ++day);
+			
+		}
+		model << [dayList : dayList,currentDate:currentDate,dayModelList:dayModelList,dateList:dateList]
+		// request getDailyTotalWithIntervals day by day over the course of the week
+		//model << timeManagerService.getDailyTotalWithIntervals(currentDate, site.id)
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeWeeklyTimePDFTemplate', model: model)
+		siteName = (site.name).replaceAll("\\s","").trim()
+		filename = (currentDate.format('yyyy-mm-dd')).toString()+'-'+siteName +'-dailyWithIntervalReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
 	def generateDailySheet(Site site,String folder,Date currentDate){
 		def filename
 		OutputStream outputStream

@@ -47,8 +47,8 @@
 									<li class="controller"><g:link controller="bankHoliday" style="text-decoration: none;"><g:message code="bank.holiday.list" default="Last Name" /></g:link></li>	
 									<li class="controller"><g:link controller="site" style="text-decoration: none;"><g:message code="site.list" default="Last Name" /></g:link></li>	
 									<li class="controller"><g:link controller="site" action='siteTotalTime' style="text-decoration: none;"><g:message code="sites.followup" default="Last Name" /></g:link></li>	
-									<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="daily.followup" default="Last Name" /></g:link></li>	
-									<li class="controller"><g:link controller="employee" action='weeklyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="weekly.followup" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="daily.followup.week" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="employee" action='weeklyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="weekly.recap" default="Last Name" /></g:link></li>	
 									<li class="controller"><g:link controller="employee" action='absenceFollowup' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="absence.report.followup" default="Last Name" /></g:link></li>	
 									<li class="controller"><g:link controller="employee" action='vacationFollowup' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="absence.followup" default="Last Name" /></g:link></li>	
 									<li class="controller"><g:link controller="employee" action='ecartFollowup' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="ecart.followup" default="Last Name" /></g:link></li>	
