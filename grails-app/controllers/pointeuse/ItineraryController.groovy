@@ -378,13 +378,8 @@ class ItineraryController {
         }
     }
 	
-	
-
-	
 	def itinerarySiteExcel(){
-		log.error('itinerarySiteExcel called')
-		params.debug{i->log.error('parameter of list: '+i)}
-		
+		log.error('itinerarySiteExcel called')		
 		def folder = grailsApplication.config.pdf.directory
 		def itinerary
 		def currentCalendar = Calendar.instance
