@@ -5,6 +5,9 @@
 		<%@ page import="pointeuse.Itinerary" %>
 		<%@ page import="pointeuse.Site" %>
 		<%@ page import="pointeuse.ItineraryNature" %>
+		<%@ page import="java.util.Calendar"%>
+		<%@ page import="groovy.time.TimeCategory" %>
+		
 		<style  type="text/css">
 			@page {
 			   size: 297mm 210mm ;
@@ -67,80 +70,82 @@
 
 		</style>
 	</head>
+		
+	<g:set var="realCal" 		value="${Calendar.instance}"/>
+	<g:set var="theoriticalCal" value="${Calendar.instance}"/>
+	<g:set var="outActionItem"/>
+	<g:set var="tdColor" 			value=""/>
+	<g:set var="timeDiff" 			value=""/>
+	<g:set var="actionItemColor" 	value=""/>
+	<g:set var="myYellow" 			value="#fefb00"/>
+	<g:set var="myOrange" 			value="#74F3FE"/>
+	<g:set var="myRed" 				value="#FF8E79"/>
+	<g:set var="anomalyList" 		value="${[]}"/>
+	<g:set var="anomalyThList" 		value="${[]}"/>
+	<g:set var="anomalyEcartList" 	value="${[]}"/>
+	
 	<body>
 		<h1 style="text-align:center;font-size:130%">${message(code: 'itinerary.monthly.report.label')} ${itinerary.name} <g:formatDate format="MMMM yyyy" date="${currentDate}"/></h1>
-		<g:if test="${theoriticalActionsList != null }">
-		   <!--div id="theoriticalActionsList">
-				<h3>${message(code: 'itinerary.weekday', default: 'Report')}</h3>
-				<table style="table-layout:fixed;">
-					<tbody>
-						<tr>
-							<g:each in="${theoriticalActionsList}" var='actionItem' status="j">
-								<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
-									<td style="width:80px;">
-										${actionItem.site.name}<br/>
-										<div style="color: red;">${actionItem.date.format('kk:mm')}</div>
-									</td>							
-								</g:if>
-								
-								<g:else>
-									<td style="width:80px;">
-										${actionItem.site.name}<br/>
-										<div style="color: green;">${actionItem.date.format('kk:mm')}</div>
-									</td>							
-
-								</g:else>
-							</g:each>	
-						</tr>
-					</tbody>
-				</table>			
-			</div-->
-		</g:if>
-		<BR/>
-		<g:if test="${theoriticalSaturdayActionsMap != null }">
-		   <!--div id="theoriticalSaturdayActionsMap">
-				<h3>${message(code: 'itinerary.saturday', default: 'Report')}</h3>
-				<table>
-					<tbody style="border:1px;">
-						<g:each in="${theoriticalSaturdayActionsMap}" var='thSatActionListItem' status="m">
-							<tr>	
-								<td>${thSatActionListItem.key.name}</td>
-								<g:each in="${thSatActionListItem.value}" var='thSatActionItem' status="n">
-									<g:if test="${thSatActionItem.nature.equals(ItineraryNature.ARRIVEE)}">
-										<td style="color: red;">${thSatActionItem.date.format('kk:mm')}</td>
-									</g:if>
-									<g:else>
-										<td style="color: green;">${thSatActionItem.date.format('kk:mm')}</td>
-									</g:else>
-								</g:each>
-							</tr>
-						</g:each>
-					</tbody>
-				</table>
-			</div-->
-		</g:if>
 		<div id="actionMap">
-			<g:if test="${actionsList == null || actionsList.size() == 0}">${message(code: 'action.list.empty', default: 'Report')}</g:if>
+			<g:if test="${actionListMap == null || actionListMap.size() == 0}">${message(code: 'action.list.empty', default: 'Report')}</g:if>
 			<g:else>
-				<h3>${message(code: 'itinerary.real.label', default: 'Report')}</h3>
 				<table style="border-width:1px;">
 					<tbody>
 						<g:each in="${actionListMap}" var='actionListItem' status="m">
-							<tr>
-								<td>${(actionListItem.key).format('EEE dd/MM/yyyy')}</td>
+							<tr style="border:1px;border-style:solid;border-color:black;">
+								<td style="border:1px;border-style:solid;border-color:black;">${(actionListItem.key).format('dd/MM/yyyy')}</td>
 								<g:each in="${actionListItem.value}" var='actionItem' status="n">
-									<g:if test="${actionItem.nature.equals(ItineraryNature.ARRIVEE)}">
-										<td style="width:80px;">
-											${actionItem.site.name}<br/>
-											<div style="color: red;">${actionItem.date.format('kk:mm')}</div>
-										</td>
+									<% actionItemColor = (actionItem.nature.equals(ItineraryNature.ARRIVEE)) ? 'red' : 'green' %>
+									<g:if test="${actionItem.date.getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY}">
+										<g:if test="${theoriticalActionsList != null && theoriticalActionsList.size() >= n && theoriticalActionsList[n] != null}">										
+											<% 
+												theoriticalCal.time = actionItem.date
+												realCal.time = actionItem.date
+												theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalActionsList[n].date.getAt(Calendar.HOUR_OF_DAY))
+												theoriticalCal.set(Calendar.MINUTE,theoriticalActionsList[n].date.getAt(Calendar.MINUTE))
+												use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
+												if ((timeDiff.minutes + timeDiff.hours) <= 15){
+													tdColor = '#FFFFFF'
+												}
+												if ((timeDiff.minutes + timeDiff.hours*60) > 15){
+													tdColor = myYellow
+												}
+												if ((timeDiff.minutes + timeDiff.hours*60) > 30){
+													tdColor = myOrange
+												} 
+												if ((timeDiff.minutes + timeDiff.hours*60) > 60){
+													tdColor = myRed
+												}
+											%>
+										</g:if>			
 									</g:if>
 									<g:else>
-										<td style="width:80px;">
-											${actionItem.site.name}<br/>
-											<div style="color: green;">${actionItem.date.format('kk:mm')}</div>
-										</td>
-									</g:else>								
+										<g:if test="${theoriticalSaturdayActionsList != null && theoriticalSaturdayActionsList.size() >= n && theoriticalSaturdayActionsList[n] != null}">
+											<% 
+												theoriticalCal.time = actionItem.date
+												realCal.time = actionItem.date
+												theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalSaturdayActionsList[n].date.getAt(Calendar.HOUR_OF_DAY))
+												theoriticalCal.set(Calendar.MINUTE,theoriticalSaturdayActionsList[n].date.getAt(Calendar.MINUTE))
+												use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
+												if (timeDiff.minutes <= 15){
+													tdColor = '#FFFFFF'
+												}
+												if ((timeDiff.minutes + timeDiff.hours*60) > 15){
+													tdColor = myYellow
+												}
+												if ((timeDiff.minutes + timeDiff.hours*60) > 30){
+													tdColor = myOrange
+												} 
+												if ((timeDiff.minutes + timeDiff.hours*60) > 60){
+													tdColor = myRed
+												}
+												%>								
+										</g:if>			
+									</g:else>
+									<td class="itineraryReportTD" style="border:1px;border-style:solid;border-color:black;background-color:${tdColor};">										
+										${actionItem.itinerary.name}<BR/>
+										<div style="color:${actionItemColor};">${actionItem.date.format('kk:mm')}</div>
+									</td>		
 								</g:each>
 							</tr>
 						</g:each>

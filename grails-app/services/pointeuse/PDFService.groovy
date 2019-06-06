@@ -20,22 +20,48 @@ class PDFService {
 		
 	def generateItineraryMonthlyReportByItinerary(def viewType, def itinerary, def currentCalendar, def folder){
 		log.error('generateItineraryMonthlyReportByItinerary called for itinerary: '+itinerary.name+' and date: '+currentCalendar.time)
-		def model
+		def model = [:]
 		def filename
 		OutputStream outputStream
 		File file
+		def serviceResponse
 		def theoriticalActionsList = []
 		def theoriticalSaturdayActionsList = []
-		
-		model = itineraryService.getActionMap(viewType, itinerary, currentCalendar, null)
+		def theoriticalListRef = []
+		def actionIterList = []
+		def orderedActionList = []
+		def actionListMap = [:]
+				
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, currentCalendar, null)
 		theoriticalActionsList         = itineraryService.getTheoriticalActionList(itinerary,false)
 		theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
+		
+		currentCalendar.set(Calendar.DAY_OF_MONTH,1)
+		
+		for (int j = 1;j < currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
+			log.debug("date: "+currentCalendar.time)
+			
+			theoriticalListRef = (currentCalendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
+			actionIterList = serviceResponse.get('actionListMap').get(currentCalendar.time)
+			
+			// compare to theoriticalActionsList
+			if (theoriticalListRef != null && actionIterList != null && theoriticalListRef.size() == actionIterList.size()){
+				orderedActionList = itineraryService.orderList(theoriticalListRef, actionIterList, [])
+			}else{
+				orderedActionList = actionIterList
+			}
+			actionListMap.put(currentCalendar.time,orderedActionList)
+			orderedActionList = []
+			currentCalendar.roll(Calendar.DAY_OF_MONTH,1)
+		}
+
 	
 		model << [
+			actionListMap:actionListMap,
 			itinerary : itinerary,
 			currentDate : currentCalendar.time,
 			theoriticalActionsList:theoriticalActionsList,
-			theoriticalSaturdayActionsList:theoriticalSaturdayActionsList
+			theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
 		]
 
 		// Get the bytes
@@ -75,7 +101,6 @@ class PDFService {
 		theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(site,true)
 		
 		currentCalendar.set(Calendar.DAY_OF_MONTH,1)
-
 		
 		for (int j = 1;j < currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
 			log.debug("date: "+currentCalendar.time)

@@ -235,7 +235,6 @@ class ItineraryController {
 	
 	def showItineraryActions(){
 		log.error('showItineraryActions called')
-		params.each{i->log.error('parameter of list: '+i)}
 		def itinerary
 		def currentCalendar = Calendar.instance
 		def criteria 
@@ -416,6 +415,7 @@ class ItineraryController {
 		def realCal = Calendar.instance
 		def fontDEPART
 		def fontARRIVEE
+		def computeTimeDiff = false
 		
 		params.each { name, value ->
 			if (name.contains('itineraryId'))
@@ -492,10 +492,15 @@ class ItineraryController {
 				cell = excelRow.createCell(0)
 				if (siteTemplate)
 					cell.setCellValue(message(code: 'itinerary.SATURDAY'))
-				cell = excelRow.createCell(iter)
-				if (actionItem != null && siteTemplate){
-					cell.setCellValue(actionItem.itinerary.name+'\n'+actionItem.date.format('HH:mm'))
+				cell = excelRow.createCell(iter)				
+				if (actionItem != null){
+					if (siteTemplate){
+						cell.setCellValue(actionItem.itinerary.name+'\n'+actionItem.date.format('HH:mm'))
+					}else{
+						cell.setCellValue(actionItem.site.name+'\n'+actionItem.date.format('HH:mm'))
+					}
 				}
+				
 				myStyle.setVerticalAlignment(CellStyle.VERTICAL_JUSTIFY)
 				cell.setCellStyle(myStyle)
 				iter ++
@@ -529,27 +534,41 @@ class ItineraryController {
 						myStyle.setFont(fontARRIVEE)
 					}	
 					theoriticalCal.time = actionItem.date
-					realCal.time = actionItem.date				
-					if (actionItem.date.getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY){
-						theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalActionsList[col - 1].date.getAt(Calendar.HOUR_OF_DAY))
-						theoriticalCal.set(Calendar.MINUTE,theoriticalActionsList[col - 1].date.getAt(Calendar.MINUTE))
-					}else{
-						theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalSaturdayActionsList[col - 1].date.getAt(Calendar.HOUR_OF_DAY))
-						theoriticalCal.set(Calendar.MINUTE,theoriticalSaturdayActionsList[col - 1].date.getAt(Calendar.MINUTE))
-					}
-					use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
+					realCal.time = actionItem.date	
 					
-					if ((timeDiff.minutes + timeDiff.hours*60) > 15){
-						myStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(254, 251, 0)));
-						myStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+					
+					if (actionItem.date.getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY){
+						if (theoriticalActionsList.size >= orderedActionList.size()){
+							theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalActionsList[col - 1].date.getAt(Calendar.HOUR_OF_DAY))
+							theoriticalCal.set(Calendar.MINUTE,theoriticalActionsList[col - 1].date.getAt(Calendar.MINUTE))
+							computeTimeDiff = true
+						}else{
+							computeTimeDiff = false
+						}
+					}else{
+						if (theoriticalSaturdayActionsList.size >= orderedActionList.size()){
+							theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalSaturdayActionsList[col - 1].date.getAt(Calendar.HOUR_OF_DAY))
+							theoriticalCal.set(Calendar.MINUTE,theoriticalSaturdayActionsList[col - 1].date.getAt(Calendar.MINUTE))
+							computeTimeDiff = true
+							}else{
+								computeTimeDiff = false
+							}
 					}
-					if ((timeDiff.minutes + timeDiff.hours*60) > 30){
-						myStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(116,243,254)));						
-						myStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-					}
-					if ((timeDiff.minutes + timeDiff.hours*60) > 60){
-						myStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(255,142,121)));							
-						myStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+					if (computeTimeDiff){
+						use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
+						
+						if ((timeDiff.minutes + timeDiff.hours*60) > 15){
+							myStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(254, 251, 0)));
+							myStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+						}
+						if ((timeDiff.minutes + timeDiff.hours*60) > 30){
+							myStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(116,243,254)));						
+							myStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+						}
+						if ((timeDiff.minutes + timeDiff.hours*60) > 60){
+							myStyle.setFillForegroundColor(new XSSFColor(new java.awt.Color(255,142,121)));							
+							myStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+						}
 					}
 					cell.setCellValue(actionItem.date.format('HH:mm').toString());
 					cell.setCellStyle(myStyle);

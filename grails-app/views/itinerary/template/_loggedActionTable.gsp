@@ -86,17 +86,14 @@
 			<tbody>
 				<tr><td class="itineraryReportTD">${actionsList.get(0).date.format('dd/MM/yyyy')}</td>
 					<g:each in="${actionsList}" var='actionItem' status="j">
-					
-					
-					
 							<% actionItemColor = (actionItem.nature.equals(ItineraryNature.ARRIVEE)) ? 'red' : 'green' %>
-							<g:if test="${actionItem.date.getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY}">
+							<g:if test="${(actionItem.date).getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY}">
 								<g:if test="${theoriticalActionsList.size() >= j && theoriticalActionsList[j] != null}">										
 									<% 
 										theoriticalCal.time = actionItem.date
 										realCal.time = actionItem.date
-										theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalActionsList[j].date.getAt(Calendar.HOUR_OF_DAY))
-										theoriticalCal.set(Calendar.MINUTE,theoriticalActionsList[j].date.getAt(Calendar.MINUTE))
+										theoriticalCal.set(Calendar.HOUR_OF_DAY,(theoriticalActionsList[j].date).getAt(Calendar.HOUR_OF_DAY))
+										theoriticalCal.set(Calendar.MINUTE,(theoriticalActionsList[j].date).getAt(Calendar.MINUTE))
 										use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
 										if ((timeDiff.minutes + timeDiff.hours) <= 15){
 											tdColor = '#FFFFFF'
@@ -114,12 +111,12 @@
 								</g:if>			
 							</g:if>
 							<g:else>
-								<g:if test="${theoriticalSaturdayActionsList.size() >= n && theoriticalSaturdayActionsList[n] != null}">
+								<g:if test="${theoriticalSaturdayActionsList.size() >= j && theoriticalSaturdayActionsList[j] != null}">
 									<% 
 										theoriticalCal.time = actionItem.date
 										realCal.time = actionItem.date
-										theoriticalCal.set(Calendar.HOUR_OF_DAY,theoriticalSaturdayActionsList[n].date.getAt(Calendar.HOUR_OF_DAY))
-										theoriticalCal.set(Calendar.MINUTE,theoriticalSaturdayActionsList[n].date.getAt(Calendar.MINUTE))
+										theoriticalCal.set(Calendar.HOUR_OF_DAY,(theoriticalSaturdayActionsList[j].date).getAt(Calendar.HOUR_OF_DAY))
+										theoriticalCal.set(Calendar.MINUTE,(theoriticalSaturdayActionsList[j].date).getAt(Calendar.MINUTE))
 										use (TimeCategory){timeDiff = realCal.time - theoriticalCal.time}
 										if (timeDiff.minutes <= 15){
 											tdColor = '#FFFFFF'

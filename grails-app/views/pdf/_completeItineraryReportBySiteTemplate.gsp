@@ -80,6 +80,9 @@
 	<g:set var="myYellow" 			value="#fefb00"/>
 	<g:set var="myOrange" 			value="#74F3FE"/>
 	<g:set var="myRed" 				value="#FF8E79"/>
+	
+	
+	
 	<body>
 		<h1 style="text-align:center;font-size:130%">${message(code: 'itinerary.site.monthly.report.label')} ${site.name} <g:formatDate format="MMMM yyyy" date="${currentDate}"/></h1>
 		<div id="actionMap">
@@ -161,10 +164,11 @@
 													%>								
 											</g:if>			
 										</g:else>
-										<td bgcolor='${tdColor}' style="width:60px;border:1px;border-style:solid;border-color:black;">
+										
+										<td bgcolor='${tdColor}' style="width:60px;border:1px;border-style:solid;border-color:black;">										
 											${actionItem.itinerary.name}<BR/>
 											<div style="color:${actionItemColor};">${actionItem.date.format('kk:mm')}</div>
-										</td>
+										</td>									
 									</g:each>
 								</tr>
 							</g:else>
