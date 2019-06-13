@@ -1,3 +1,5 @@
+<%@ page import="pointeuse.Itinerary" %>
+
 <a href="#x" class="overlay" id="${hrefName}_form_${row}_${column}" style="background: transparent;" ></a>
 <div id="${hrefName}_popup_${row}_${column}" class="popup" >
 	<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
@@ -25,6 +27,32 @@
 							noSelection="['':'-Choisissez votre élément-']" />
 					</td>
 				</tr>
+				<tr>
+					<td>
+						${message(code: 'itinerary.label', default: 'Report')}:
+					</td>
+					<td>
+						<g:if test="${itineraryInstance != null}">
+							<g:select
+								name="itineraryId" from="${Itinerary.list([sort:'name'])}"				
+								optionValue="name"
+								optionKey="id"
+								noSelection="${['': itineraryInstance.name ]}" />
+						</g:if>
+						<g:else>
+								<g:select
+								name="itineraryId" from="${Itinerary.list([sort:'name'])}"				
+								optionValue="name"
+								optionKey="id"
+								noSelection="['':'-Choisissez votre élément-']" />
+						</g:else>
+
+					</td>
+				</tr>
+				
+				
+														
+				
 				<tr class="prop">
 					<td>${message(code: 'itinerary.comment', default: 'Report')}:</td>
 					<td>

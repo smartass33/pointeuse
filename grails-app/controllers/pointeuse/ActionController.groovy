@@ -341,11 +341,11 @@ class ActionController {
 	def modifyAction(){
 		log.error('modifyAction called')
 		params.each{i->log.error('parameter of list: '+i)}
-		
 		def viewType
 		def itinerary
 		def action
 		def calendar = Calendar.instance
+		def currentCalendar = Calendar.instance
 		def date_action_picker
 		SimpleDateFormat dateFormat
 		def criteria
@@ -369,6 +369,7 @@ class ActionController {
 		def commentary
 		def fnc
 		def other
+		def itineraryNew
 			
 		params.each { name, value ->
 			if (name.contains('ActionItemId')){
@@ -389,7 +390,13 @@ class ActionController {
 			if (name.contains('other') && value.size() > 0){
 				other = value
 			}
-			
+			if (name.contains('itineraryId') && !name.contains('null')){
+				itinerary = Itinerary.get(params.int(name))
+			}
+			if (name.contains('viewType')){
+				viewType = params['viewType']
+				siteTemplate = viewType.contains('BySite') ? true : false
+			}		
 			if (name.contains('action_picker')){
 				date_action_picker = params[name] 
 				try {
@@ -398,28 +405,32 @@ class ActionController {
 					currentDate =  new Date().parse("HH:mm", params[name])
 				}		
 			}
-			if (name.contains('itineraryId')){
-				itinerary = Itinerary.get(params.int(name))			
-			}
-			if (name.contains('viewType')){
-				viewType = params['viewType']
-				siteTemplate = viewType.contains('BySite') ? true : false
-			}
 		}
+		
+		
+		def itineraryID = params['itineraryId']
 		
 		calendar.set(Calendar.HOUR_OF_DAY,currentDate.getAt(Calendar.HOUR_OF_DAY))
 		calendar.set(Calendar.MINUTE,currentDate.getAt(Calendar.MINUTE))
 		action.date = calendar.time
-		action.commentary = commentary
-		action.fnc = fnc
-		action.other = other
+		if (commentary != null)
+			action.commentary = commentary
+		if (itineraryID != null){
+			itineraryNew = Itinerary.get(itineraryID)
+			action.itinerary = itineraryNew
+		}
+		if (fnc != null)
+			action.fnc = fnc
+		if (other != null)
+			action.other = other
+
 		action.save flush:true
 		
 		if (siteTemplate){
 			site = action.site
 		}
 		
-		serviceResponse = itineraryService.getActionMap(viewType, itinerary, calendar, site)
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, currentCalendar, site)
 		
 		if (siteTemplate){
 			theoriticalActionsMap        	= itineraryService.getTheoriticalActionMap(site,false) 
@@ -431,16 +442,15 @@ class ActionController {
 			theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
 		}
 		
-		calendar.set(Calendar.DAY_OF_MONTH,1)
+		currentCalendar.set(Calendar.DAY_OF_MONTH,1)
 		def actionIterList 
 		def orderedActionList = []
 		def theoriticalListRef = []
 		
-		for (int j = 1;j < calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
-			log.debug("date: "+calendar.time)
-			
-			theoriticalListRef = (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
-			actionIterList = serviceResponse.get('actionListMap').get(calendar.time)
+		for (int j = 1;j < currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
+			log.debug("date: "+currentCalendar.time)
+			theoriticalListRef = (currentCalendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
+			actionIterList = serviceResponse.get('actionListMap').get(currentCalendar.time)
 			
 			// compare to theoriticalActionsList
 			if (theoriticalListRef != null && actionIterList != null && theoriticalListRef.size() == actionIterList.size()){
@@ -448,13 +458,13 @@ class ActionController {
 			}else{
 				orderedActionList = actionIterList
 			}
-			actionListMap.put(calendar.time,orderedActionList)
+			actionListMap.put(currentCalendar.time,orderedActionList)
 			orderedActionList = []
-			calendar.roll(Calendar.DAY_OF_MONTH,1)
+			currentCalendar.roll(Calendar.DAY_OF_MONTH,1)
 		}
-	
 		if (siteTemplate){
-			render template: "/itinerary/template/itinerarySiteReportTemplate", model: [
+			render template: "/itinerary/template/itinerarySiteReportTemplate",
+				model: [
 				itineraryInstance:itinerary,
 				actionsList:serviceResponse.get('actionsList'),
 				actionListMap:actionListMap,
@@ -472,10 +482,11 @@ class ActionController {
 				]
 			return
 		}else{
-			render template: "/itinerary/template/itineraryReportTemplate", model: [
+			render template: "/itinerary/template/itineraryReportTemplate",
+				model: [
 				itineraryInstance:itinerary,
 				actionsList:serviceResponse.get('actionsList'),
-				actionListMap:serviceResponse.get('actionListMap'),
+				actionListMap:actionListMap,
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,

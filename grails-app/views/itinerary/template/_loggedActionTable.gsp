@@ -140,9 +140,6 @@
 								    <span>${actionItem.itinerary.name}<BR>${timeDiff}</span>	            							
 							   	</a>
 							</div>	
-					
-					
-		
 								<a href="#x" class="overlay" id="itinerary_action_form_${j}" style="background: transparent;"></a>
 								<div id="itinerary_action_popup_${j}" class="popup">
 									<h2>${message(code: 'action.modification.button', default: 'Report')}</h2>
@@ -152,12 +149,18 @@
 										<script type="text/javascript">
 											timePickerLaunch ("date_action_picker_${j}","date");						
 										</script>	
-											<BR>	
-										${message(code: 'inAndOut.create.event', default: 'Report')}:				
-										<g:select
+											<BR>												
+										${message(code: 'inAndOut.create.event', default: 'Report')}:	<g:select
 											name="actionType" from="${['DEP','ARR']}"
 											valueMessagePrefix="itinerary.name"
 											noSelection="['':'-Choisissez votre élément-']" />
+										<BR>
+										${message(code: 'itinerary.label', default: 'Report')}:	<g:select
+											name="itinerary.name" from="${Itinerary.list([sort:'name'])}"
+											
+											valueMessagePrefix="itinerary.name"
+											noSelection="['':'-Choisissez votre tournée-']" />																	
+										<BR>
 										<g:submitToRemote class="listButton"
 					                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
 					                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
