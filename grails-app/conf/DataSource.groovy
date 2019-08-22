@@ -84,14 +84,14 @@ environments {
 		}
 	}
 	
-	alrikiki {
+	aws_isengard {
 		dataSource {
 			pooled = true
 			dbCreate = "update"
-			url = "jdbc:mariadb://localhost:3306/pointeuse"
+			url = "jdbc:mariadb://database-cluster-pointeuse.cluster-cr6vxicqs2rk.us-east-1.rds.amazonaws.com:3306/pointeuse"
 			driverClassName = "org.mariadb.jdbc.Driver"
-			username = "root"
-			password = "root"
+			username = "admin"
+			password = "Smartass33*"
 			properties {
 				maxActive = 50
 				maxIdle = 25
@@ -106,54 +106,6 @@ environments {
 				validationQuery="SELECT 1"
 			}
 		}
-	
-	}
-	
-	
-	dell {
-		dataSource {
-			pooled = true
-			dbCreate = "update"
-			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
-			driverClassName = "com.mysql.jdbc.Driver"
-			username = "root"
-			password = "root"
-			properties {
-				maxActive = 100
-				maxIdle = 25
-				minIdle = 20
-				initialSize = 20
-				maxWait = 10000
-				validationQuery = "select 1"
-				testOnBorrow = true
-				testWhileIdle = true
-				testOnReturn = true
-			}
-		}
-	
-	}
-	
-	dell_test {
-		dataSource {
-			pooled = true
-			dbCreate = "update"
-			url = "jdbc:mysql://localhost:3306/pointeuse?autoReconnect=true"
-			driverClassName = "com.mysql.jdbc.Driver"
-			username = "root"
-			password = "root"
-			properties {
-				maxActive = 100
-				maxIdle = 25
-				minIdle = 20
-				initialSize = 20
-				maxWait = 10000
-				validationQuery = "select 1"
-				testOnBorrow = true
-				testWhileIdle = true
-				testOnReturn = true
-			}
-		}
-	
 	}
 	
 

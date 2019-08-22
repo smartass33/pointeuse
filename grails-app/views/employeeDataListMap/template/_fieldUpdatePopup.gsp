@@ -1,5 +1,3 @@
-<%@ page import="pointeuse.EmployeeDataType"%>
-
 <a href="#join_form_${fieldName}" id="join_pop_${fieldName}" style="text-decoration: none;">${fieldName}</a>
 <a href="#x_${fieldName}" class="overlay" id="join_form_${fieldName}" style="background: transparent;"></a>
 <div id="popup_${fieldName}" class="popup">

@@ -1,5 +1,5 @@
-<%@ page import="pointeuse.Reason" %>
-
+<%@ page import="pointeuse.Reason"%>
+<%@ page import="pointeuse.Site"%>
 
 <div id="last5days" >
 	<h1><g:message code="daily.last.3.events" default="Last Name" /></h1>
@@ -49,7 +49,7 @@
 			${flash.message}
 		</div>
 	</g:if>
-<g:if test="${inAndOuts==null || inAndOuts.size()}">
+<g:if test="${inAndOuts ==null || inAndOuts.size()}">
 	<table border="1">
 		<thead>
 			<g:each in="${inAndOuts}" var="inAndOut">
@@ -73,8 +73,6 @@
 						</g:else>
 					</th>			
 				</g:else>
-			
-
 			</g:each>
 		</thead>
 		<tbody>
@@ -96,10 +94,9 @@
 		</tbody>
 	</table>
 </g:if>
-<g:else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pas d'évenement pour le jour en cours <BR>
+<g:else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<g:message code="inAndOut.no.element"/><BR>
 	<BR>
 </g:else>
-	
 	<g:hiddenField name="userId" value="${employee?.id}" />
 	<g:if test="${entranceStatus}">
 			<g:hiddenField name="type" value="S" />
@@ -124,35 +121,48 @@
 	<BR>
 	<div class="standardNav">
 		<ul>
+			<li>
+				<g:select name="site.id"
+					from="${Site.list([sort:'name'])}"
+					noSelection="['':'-Ajouter un site-']" optionKey="id"
+					optionValue="name" 
+					onchange="${remoteFunction(action: 'addingEventToEmployee',
+                       update: 'last5days',
+						params:"\'siteId=\'+ this.value + \'&userId=\' + \'${employee.id} + \' + \'&entranceStatus=\' + \'${entranceStatus} +          \'"								
+					   )}"
+					/>
+
+			</li>
 			<li>				
-				<g:if test="${entranceStatus}">
+				<g:if test="${entranceStatus}">					
 					<g:remoteLink action="addingEventToEmployee" update="last5days"
 						onLoading="document.getElementById('spinner').style.display = 'inline';"
 	                    onComplete="document.getElementById('spinner').style.display = 'none';"	
-						class="exitbutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
+						class="exitbutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>			
 				</g:if> 
 				<g:else>
 					<g:remoteLink action="addingEventToEmployee" update="last5days"
 						onLoading="document.getElementById('spinner').style.display = 'inline';"
 	                    onComplete="document.getElementById('spinner').style.display = 'none';"	
-						class="entrybutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
+						class="entrybutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>				
 				</g:else>
 			</li>
+
 			<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
 			<li >
 				<g:link class="displayButton" controller="employee" action="reportLight" params="[userId:employee.id]">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link>
 			</li>
 			<li >
-				<a href="#join_form" id="join_pop" class="addElementButton">Ajouter un élement</a>
+				<a href="#join_form" id="join_pop" class="addElementButton"><g:message code="inAndOut.element.add"/></a>
 				<a href="#x" class="overlay" id="join_form" style="background: transparent;"></a>
 				<div id="popup" class="popup">
-					<h2>Creer Entrée/Sortie</h2>
-					<p>Renseignez les informations pour créer un nouvel évènement</p>
+					<h2><g:message code="inAndOut.element.add"/></h2>
+					<p><g:message code="inAndOut.element.add.info"/></p>
 					<g:form action="create">
 						<table>
 							<tbody>
 								<tr class="prop">
-									<td class="eventTD" valign="top">choisissez la date:</td>
+									<td class="eventTD" valign="top"><g:message code="inAndOut.element.choose.date"/></td>
 									<td class="eventTD" valign="top"><input type="text" name="date_picker" id="date_picker" /> 
 										<script type="text/javascript">
 											datePickerLaunch();
@@ -160,7 +170,7 @@
 									</td>
 								</tr>
 								<tr class="prop">
-									<td class="eventTD" valign="top">Evènement:</td>
+									<td class="eventTD" valign="top"><g:message code="event.label"/></td>
 									<td class="eventTD" valign="top">
 										<g:select
 											name="event.type" from="${['E','S']}"

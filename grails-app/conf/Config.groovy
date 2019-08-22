@@ -129,20 +129,19 @@ environments {
 		}
 	}
 	
-	alrikiki {
+	aws_isengard {
 		pdf.directory='/opt/tomcat/pdf'
-		mysqldump.directory='/usr/local/mysql/bin'
+		mysqldump.directory='/usr/bin'
 		grails.app.context=''
 		grails.logging.jul.usebridge = false
-		//serverURL = "http://192.168.1.17"
-		serverURL = "http://192.168.1.31"
+		grails.resources.processing.enabled=false
+		serverURL = "http://http://pointeuseisengard-env.4gnpxcipp9.us-east-1.elasticbeanstalk.com/"
 		context=''
 		log4j = {
 				'null' name:'stacktrace'
 				appenders {
-					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					rollingFile name:'myAppender',file:"/tmp/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
-			
 				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
 				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
 					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
@@ -152,67 +151,14 @@ environments {
 					   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
 					   'org.springframework',
 					   'org.hibernate',
-					   'net.sf.ehcache.hibernate'			
+					   'net.sf.ehcache.hibernate'
+				warn 'org.springframework.security'
 				root {
 					warn 'myAppender'//,'rollingFile'
-				}
-		}
-	}
-	
-	dell {
-		pdf.directory='/opt/tomcat/pdf'
-		mysqldump.directory='/usr/local/mysql/bin'
-		grails.app.context=''
-		grails.logging.jul.usebridge = false
-		serverURL = "http://10.33.6.10"
-		context=''
-		log4j = {
-			'null' name:'stacktrace'
-			appenders {
-				rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
-			}			
-			warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
-			warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
-				   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
-				   'org.codehaus.groovy.grails.commons',            // core / classloading
-				   'org.codehaus.groovy.grails.plugins',            // plugins
-				   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
-				   'org.springframework',
-				   'org.hibernate',
-				   'net.sf.ehcache.hibernate'
-			root {
-				warn 'rollingFile'//,'stdout'
 			}
 		}
 	}
-	
-	dell_test {
-		pdf.directory='/opt/tomcat/pdf'
-		grails.app.context=''
-		grails.logging.jul.usebridge = false
-		serverURL = "http://10.33.6.112"
-		context=''
-		log4j = {
-			'null' name:'stacktrace'
-			appenders {
-				rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,layout:pattern(conversionPattern: '%d %c{2} %m%n')
-			}		
-			warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
-			warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
-				   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
-				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
-				   'org.codehaus.groovy.grails.commons',            // core / classloading
-				   'org.codehaus.groovy.grails.plugins',            // plugins
-				   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
-				   'org.springframework',
-				   'org.hibernate',
-				   'net.sf.ehcache.hibernate'			
-			root {
-				warn 'rollingFile'//,'stdout'
-			}
-		}
-	}
+
 }
 
 grails {

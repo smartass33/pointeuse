@@ -1729,13 +1729,16 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ANONYMOUS'])
 	def addingEventToEmployee(){
+		params.each{i->log.error(i)}
 		def cal = Calendar.instance	
+		
 		def type = params["type"].equals("Entrer") ? "E" : "S" 
-		def isOutSideSite=params["isOutSideSite"].equals("true") ? true : false
-		Employee employeeInstance = Employee.get(params.int('userId'))		
+		def isOutSideSite = params["isOutSideSite"].equals("true") ? true : false
+		Employee employeeInstance = Employee.get(params['userId'])		
 		def currentDate = cal.time
 		def criteria
-		def entranceStatus=false
+		def entranceStatus = params.boolean("entranceStatus")//false
+		type = entranceStatus ? "E" : "S"
 		def timeDiff		
 		def flashMessage=true
 		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).time
@@ -1815,7 +1818,7 @@ class EmployeeController {
 				flash.message = message(code: 'inAndOut.create.label', args: [message(code: 'inAndOut.exit.label', default: 'exit'), cal.time])
 		}
 		
-		def model = timeManagerService.getPointageData( employeeInstance)
+		def model = timeManagerService.getPointageData(employeeInstance)
 		model << [userId: employeeInstance.id,employee: employeeInstance]
 		render template: "/employee/template/last5DaysTemplate", model:model
 	}

@@ -1,4 +1,3 @@
-<%@ page import="pointeuse.EmployeeDataType" %>
 
 <!DOCTYPE html>
 <html>

@@ -1,7 +1,5 @@
 <%@ page import="pointeuse.EmployeeDataListMap" %>
 
-
-
 <div class="fieldcontain ${hasErrors(bean: employeeDataListMapInstance, field: 'creationDate', 'error')} required">
 	<label for="creationDate">
 		<g:message code="employeeDataListMap.creationDate.label" default="Creation Date" />

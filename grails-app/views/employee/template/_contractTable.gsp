@@ -27,11 +27,11 @@
 
 	<table class="form-table" id="customFields">
 		<thead>
-			<th>Date de début</th>
-			<th>Date de fin</th>
-			<th><g:message code="employee.weeklyContractTime.label"/></th>
-			<th>Statut</th>	
-			<th>Effacer</th>								
+			<th>${message(code: 'contract.start.date', default: 'Report')}</th>
+			<th>${message(code: 'contract.end.date', default: 'Report')}</th>
+			<th>${message(code: 'employee.weeklyContractTime.label', default: 'Report')}</th>
+			<th>${message(code: 'employee.status.label', default: 'Report')}</th>	
+			<th>${message(code: 'default.button.delete.label', default: 'Report')}</th>								
 		</thead>
 		<tbody>
 			<g:if test='${previousContracts != null}'>
@@ -75,7 +75,7 @@
 					    	<td style='background-color:green;'><input type="text" class="code" id="startDate_${i}" name="startDate_${i}" format="dd/MM/yyyy" value="${previousContract.startDate.format('dd/MM/yyyy')}" /></td>    
 		   			    	<td style='background-color:green;'><input type="text" class="code" id="endDate_${i}" name="endDate_${i}" format="dd/MM/yyyy"  /></td>		    
 					    	<td style='background-color:green;'><input type="number" class="code" id="previousContractLength_${i}" name="previousContractLength_${i}" value="${previousContract ? previousContract.weeklyLength : 35}" /> &nbsp;</td>			    
-					    	<td style='background-color:green;'>en cours...</td>			    	
+					    	<td style='background-color:green;'>${message(code: 'contract.ongoing', default: 'Create')}</td>			    	
 					 		<td style='background-color:green;'>
 						    	<g:remoteLink action="trashContract" controller="employee" id="${previousContract}" params="[contractId:previousContract.id]"
 				                    	update="contractTable"
@@ -89,8 +89,8 @@
 					    <g:else>
 					    	<td style='background-color:grey;'><input type="text" class="code" id="startDate_${i}" name="startDate_${i}" format="dd/MM/yyyy" value="${previousContract.startDate.format('dd/MM/yyyy')}" /></td>    
 					       	<td style='background-color:grey;'><input type="text" class="code" id="endDate_${i}" name="endDate_${i}" format="dd/MM/yyyy" value="${previousContract.endDate.format('dd/MM/yyyy')}" /></td>			    
-					   		<td style='background-color:grey;'><input type="number" class="code" id="previousContractLength_${i}" name="previousContractLength_${i}" value="${previousContract ? previousContract.weeklyLength : 35}" /> &nbsp;</td>
-					    	<td style='background-color:grey;'>terminé</td>
+					   		<td style='background-color:grey;'><input type="number" step="any" class="code" id="previousContractLength_${i}" name="previousContractLength_${i}" value="${previousContract ? previousContract.weeklyLength : 35}" /> &nbsp;</td>
+					    	<td style='background-color:grey;'>${message(code: 'contract.terminated', default: 'Report')}</td>
 					 		<td style='background-color:grey;'>
 						    	<g:remoteLink action="trashContract" controller="employee" id="${previousContract}" params="[contractId:previousContract.id]"
 				                    	update="contractTable"
@@ -105,15 +105,15 @@
 					</tr>
 				</g:each>
 			</g:if>
-			<tr>
-				<td><div id="newContractButton"><a href="#">Ajouter un contrat</a></div></td>
+			<tr>		
+				<td><div id="newContractButton"><a href="#">${message(code: 'contract.add.label', default: 'Report')}</a></div></td>
 			</tr>	
 	
 	    	<tr id="newContractForm">
 	    		<td><input type="text" class="code" id="newStartDate"  value="" name="newStartDate" /></td>
 	    		<td><input type="text" class="code" id="newEndDate" name="newEndDate"  value="" /></td> 
 	    		<td><input type="number" class="code" name="newContractValue" value="" placeholder="valeur hebdo" /></td> 
-	    		<td ><a href="#" id="cancelContract">Annuler</a></td>
+	    		<td ><a href="#" id="cancelContract">${message(code: 'default.button.cancel.label', default: 'Report')}</a></td>
 	    		<td><input type="submit" class="listButton" value="Ajouter" name="_action_addNewContract"></td>
 	    	</tr>
 		</tbody>		

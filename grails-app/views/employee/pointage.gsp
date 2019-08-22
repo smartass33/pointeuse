@@ -1,4 +1,4 @@
- <%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8"%>
 <%@ page import="pointeuse.InAndOut"%>
 <%@ page import="pointeuse.Employee"%>
 <%@ page import="pointeuse.Reason"%>

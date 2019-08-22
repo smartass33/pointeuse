@@ -168,8 +168,7 @@ class TimeManagerService {
 			dailyTotal = new DailyTotal(employee,currentDate)
 			dailyTotal.weeklyTotal=weeklyTotal
 			weeklyTotal.dailyTotals.add(dailyTotal)
-			dailyTotal.save(flush:true)
-			
+			dailyTotal.save(flush:true)	
 		}
 		 
 		if (event==null){
@@ -178,8 +177,7 @@ class TimeManagerService {
 			dailyTotal.inAndOuts.add(inOrOut)
 			employee.inAndOuts.add(inOrOut)
 			dailyTotal.exitCount=dailyTotal.exitCount+1
-			return inOrOut
-			
+			return inOrOut		
 		}else{
 			event.dailyTotal=dailyTotal
 			return event

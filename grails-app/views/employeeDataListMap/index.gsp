@@ -1,5 +1,4 @@
 <%@ page import="pointeuse.EmployeeDataListMap" %>
-<%@ page import="pointeuse.EmployeeDataType" %>
 <!DOCTYPE html>
 <html>
 	<head>

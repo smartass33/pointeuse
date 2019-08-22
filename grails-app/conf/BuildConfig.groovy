@@ -89,11 +89,5 @@ grails.project.dependency.resolution = {
 		compile ":csv:0.3.1"
 		compile ":ajax-uploader:1.1"
 		compile "org.grails.plugins:remote-pagination:0.4.8"
-		
-		/*
-		compile ("org.grails.plugins:email-confirmation:2.0.8"){
-			excludes "quartz:1.0-RC2"
-        }	
-        */
     }
 }
