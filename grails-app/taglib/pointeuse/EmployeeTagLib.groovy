@@ -23,6 +23,10 @@ class EmployeeTagLib {
 		
 	}
 	
+	def listDailySickLeave ={attrs,body->
+		out<<render(template:"/employee/template/listSickLeaveDailyTemplate")
+		
+	}
 	
 	def annualReportTable ={attrs,body->
 		out<<render(template:"/employee/template/annualReportTemplate")
@@ -35,6 +39,11 @@ class EmployeeTagLib {
 		
 	}
 	
+	def sickLeave ={attrs,body->
+		out<<render(template:"/employee/template/sickLeaveTemplate")
+		
+	}
+	
 	def paidHSEditTable ={attrs,body->
 		out<<render(template:"/employee/template/paidHSEditTemplate")
 		
@@ -43,6 +52,11 @@ class EmployeeTagLib {
 	
 	def listVacationEmployee ={attrs,body->
 		out<<render(template:"/employee/template/listVacationEmployeeTemplate")
+		
+	}
+	
+	def listAbsences ={attrs,body->
+		out<<render(template:"/employee/template/listAbsenceEmployeeTemplate")
 		
 	}
 	
@@ -92,5 +106,16 @@ class EmployeeTagLib {
 		out<<render(template:"/employee/template/listWeeklyTimeTemplate")
 	}
 	
+	def annualSiteTime = {attrs,body->
+		out<<render(template:"/employee/template/listAnnualSiteTimeTemplate")
+	}
+	
+	def itineraryForm = {attrs,body->
+		out<<render(template:"/itinerary/template/itineraryForm",model:[actionPicker:attrs.actionPicker,hrefName:attrs.hrefName,row:attrs.row,column:attrs.column,actionItem:attrs.actionItem,viewType:attrs.viewType,itinerary:attrs.itinerary])
+	}
+	
+	def itineraryTheoriticalForm = {attrs,body->
+		out<<render(template:"/itinerary/template/itineraryTheoriticalForm",model:[actionPicker:attrs.actionPicker,hrefName:attrs.hrefName,row:attrs.row,column:attrs.column,actionItem:attrs.actionItem,viewType:attrs.viewType,itinerary:attrs.itinerary])
+	}
 
 }

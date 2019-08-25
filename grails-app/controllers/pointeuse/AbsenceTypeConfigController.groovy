@@ -9,31 +9,6 @@ import grails.transaction.Transactional
 class AbsenceTypeConfigController {
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
-
-	
-	def test(){
-		def criteria 
-		def types = AbsenceTypeConfig.findAll()
-		
-		for (def type:types){
-			log.error('type.name: '+type.shortName)
-			log.error('AbsenceType.VACANCE: '+AbsenceType.VACANCE)
-			def toCompare = type.name as AbsenceType 
-			if (toCompare == AbsenceType.VACANCE){
-				log.error("string are identical")
-			}
-			
-			criteria = Absence.createCriteria()
-			def yearlyHolidays = criteria.list {
-				and {				
-					eq('type',toCompare)
-				}
-			}
-			log.error('yearlyHolidays: '+yearlyHolidays)
-			
-		}
-		
-	}
 	
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)

@@ -10,24 +10,29 @@
 <table id="table-header-rotated" style="width:100%;"class="table table-striped table-header-rotated" >
 	<BR>
 	<thead>
-		<th class='rotate-45' style="width:100px"><div><span><g:message code="annual.report.month.label"/></span></div></th>	
-		<th class='rotate-45'  style="width:60px"><div><span><g:message code="annual.report.opened.days"/></span></div></th>	
-		<th class='rotate-45'  style="width:60px"><div><span><g:message code="annual.report.working.days"/></span></div></th>			
-		<th class='rotate-45'><div><span><g:message code="annual.report.theoritical.label"/></span></div></th>
-		<th class='rotate-45'><div><span><g:message code="annual.report.elapsed.label"/></span></div></th>
-		<th class='rotate-45' style="width:45px"><div><span><g:message code="annual.report.holidays.label"/></span></div></th>
-		<th class='rotate-45'  style="width:54px"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>	
-		<th class='rotate-45'  style="width:45px"><div><span><g:message code="annual.report.RTT.label"/></span></div></th>
-		<th class='rotate-45'  style="width:45px"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
-		<th class='rotate-45'  style="width:50px"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
-		<th class='rotate-45'  style="width:50px"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>
-		<th class='rotate-45'  style="width:75px"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
-		<th class='rotate-45'  style="width:65x"><div><span><g:message code="employee.paternite.count"/></span></div></th>		
-		<th class='rotate-45'  style="width:50px"><div><span><g:message code="employee.formation.count"/></span></div></th>		
-		<th class='rotate-45'><div><span><g:message code="annual.report.supplementary.label"/></span></div></th>
-		<th class='rotate-45'  style="width:65px"><div><span><g:message code="annual.report.sunday.time.label"/></span></div></th>
-		<th class='rotate-45'><div><span><g:message code="annual.report.bank.holiday.time.label"/></span></div></th>
+		<th class='rotate-45'  style="width:100px"><div><span><font size="1"><g:message code="annual.report.month.label"/></font></span></div></th>	
+		<th class='rotate-45'  style="width:60px"><div><span><font size="1"><g:message code="annual.report.opened.days"/></font></span></div></th>	
+		<th class='rotate-45'  style="width:60px"><div><span><font size="1"><g:message code="annual.report.working.days"/></font></span></div></th>			
+		<th class='rotate-45'  style="width:60px"><div><span><font size="1"><g:message code="annual.report.theoritical.abreviation.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:60px"><div><span><font size="1"><g:message code="annual.report.elapsed.label.abr"/></font></span></div></th>
+		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.holidays.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:55px"><div><span><font size="1"><g:message code="annual.report.remaining.holidays.label"/></font></span></div></th>	
+		<th class='rotate-45'  style="width:43px"><div><span><font size="1"><g:message code="annual.report.RTT.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.CSS.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.DIF.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.DON.label"/></font></span></div></th>		
+		<th class='rotate-45'  style="width:50px"><div><span><font size="1"><g:message code="annual.report.INJUSTIFIE.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:50px"><div><span><font size="1"><g:message code="annual.report.sickness.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.maternite.abreviation.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:50px"><div><span><font size="1"><g:message code="annual.report.exceptionnel.abreviation.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:55px"><div><span><font size="1"><g:message code="annual.report.paternite.abreviation.label"/></font></span></div></th>		
+		<th class='rotate-45'  style="width:55px"><div><span><font size="1"><g:message code="annual.report.parental.abreviation.label"/></font></span></div></th>		
+		<th class='rotate-45'  style="width:50px"><div><span><font size="1"><g:message code="annual.report.formation.label"/></font></span></div></th>		
+		<th class='rotate-45'  style="width:55px"><div><span><font size="1"><g:message code="annual.report.supplementary.abreviation.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:55px"><div><span><font size="1"><g:message code="annual.report.sunday.time.label.abr"/></font></span></div></th>
+		<th class='rotate-45'  style="width:55px"><div><span><font size="1"><g:message code="annual.report.bank.holiday.time.label.abr"/></font></span></div></th>
 	</thead>
+	
 	<tbody id='body_update' style="border:1px;">
 		<g:each in="${yearMonthMap}"  status="i" var="cartouche">
 			<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
@@ -55,10 +60,14 @@
 				<td style="vertical-align: middle;text-align:center;">${monthlyTakenHolidays.get(cartouche.key)}</td>				
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('rtt')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sansSolde')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('dif')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('don')}</td>		
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('injustifie')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sickness')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('maternite')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('exceptionnel')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('paternite')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('parental')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('formation')}</td>			
 				<td style="vertical-align: middle;text-align:right;">
 					<g:if test="${yearMonthlySupTime.get(cartouche.key) !=null}"><my:humanTimeTD id="yearMonthlySupTime"  name="yearMonthlySupTime" value="${yearMonthlySupTime.get(cartouche.key)} "/></g:if>
@@ -86,12 +95,15 @@
 		<td style="vertical-align: middle;text-align:center;">${remainingCA}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualRTT}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualCSS}</td>
+		<td style="vertical-align: middle;text-align:center;">${annualDIF}</td>
+		<td style="vertical-align: middle;text-align:center;">${annualDON}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualINJUSTIFIE}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualSickness}</td>
+		<td style="vertical-align: middle;text-align:center;">${annualMaternite}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualExceptionnel}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualPaternite}</td>
+		<td style="vertical-align: middle;text-align:center;">${annualParental}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualFormation}</td>
-		
 		<td style="vertical-align: middle;text-align:right;">
 		<g:if test="${annualMonthlySupTime !=null}">
 			<my:humanTimeTD id="annualMonthlySupTime"  name="annualMonthlySupTime" value="${annualMonthlySupTime}"/>

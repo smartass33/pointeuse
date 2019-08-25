@@ -14,9 +14,10 @@ import pointeuse.EventLogAppender
 //grails.config.locations = ["file:${userHome}/.grails/${appName}-config.groovy","file:/opt/tomcat/${appName}-config.groovy"]
 
 
- if (System.properties["${appName}.config.location"]) {
-   grails.config.locations << "file:" + System.properties["${appName}.config.location"]
- }
+
+// grails.config.locations = [ "classpath:${appName}-config.properties"]
+
+
 
 grails.views.javascript.library = "jquery"
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
@@ -75,8 +76,12 @@ grails.plugins.remotepagination.enableBootstrap=false
 
 environments {
     development {
-		pdf.directory='C:/Users/dbzm1855/pointeuse'
-		mysqldump.directory='/usr/local/mysql/bin'
+		ip.authorized = ['90.80.193.12','0:0:0:0:0:0:0:1']
+		ip.authorization.on=false
+		laboratory.logo='LABM.png'
+		laboratory.name='LABM'
+		pdf.directory='/Users/henri/pointeuse'
+		mysqldump.directory='/usr/local/bin/'
 		grails.app.context=pointeuse
         grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
@@ -86,33 +91,39 @@ environments {
 			appenders {
 				rollingFile name:'rollingFileAppender',file:"C:/Users/dbzm1855/Documents/workspace/pointeuse/logs/pointeuse.log", maxFileSize:1024,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 			}
-			warn 'org.codehaus.groovy.grails.orm.hibernate','org.hibernate','org.springframework', 'net.sf.ehcache.hibernate'			
+			warn 'org.codehaus.groovy.grails.orm.hibernate','org.hibernate','org.springframework', 'net.sf.ehcache.hibernate'
 			warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
 				   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
 				   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
 				   'org.codehaus.groovy.grails.commons',            // core / classloading
 				   'org.codehaus.groovy.grails.plugins'            // plugins
-			debug 'org.springframework.security'
+			warn 'org.springframework.security'
 			root {
 				warn 'rollingFileAppender','stdout'//,'eventLogAppender'
 			}
 		}
     }
 
-	aws {
+	demo_aws {
+		ip.authorized = ['90.80.193.12','90.120.222.39','0:0:0:0:0:0:0:1']
+		ip.authorization.on=false
 		pdf.directory='/opt/tomcat/pdf'
+		laboratory.logo='LABM.png'
+		laboratory.name='LABM'
 		mysqldump.directory='/usr/bin'
 		grails.app.context=''
-		grails.logging.jul.usebridge = false
+		grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
-		serverURL = "http://ec2-54-154-203-127.eu-west-1.compute.amazonaws.com"
+		serverURL = "http://pointeuse.ddns.net"
+		//serverURL = "http://pointeuse.biolab33.com"
+
 		context=''
 		log4j = {
 				'null' name:'stacktrace'
 				appenders {
-					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuseDEMO.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
-				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
+			//	warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
 				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
 					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
 					   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
@@ -128,14 +139,20 @@ environments {
 			}
 		}
 	}
-	
-	aws_isengard {
+
+	aws {
+		ip.authorized = ['90.80.193.12','90.120.222.39','0:0:0:0:0:0:0:1']
+		ip.authorization.on=true
 		pdf.directory='/opt/tomcat/pdf'
 		mysqldump.directory='/usr/bin'
+		laboratory.logo='biolab3.png'
+		laboratory.name='biolab'
 		grails.app.context=''
-		grails.logging.jul.usebridge = false
+		grails.logging.jul.usebridge = true
 		grails.resources.processing.enabled=false
-		serverURL = "http://http://pointeuseisengard-env.4gnpxcipp9.us-east-1.elasticbeanstalk.com/"
+		//serverURL = "http://ec2-34-255-11-191.eu-west-1.compute.amazonaws.com"
+		serverURL = "http://pointeuse.biolab33.com"
+
 		context=''
 		log4j = {
 				'null' name:'stacktrace'
@@ -167,8 +184,8 @@ grails {
 	   port = 587
 	   username = "pointeuse@biolab32.fr.fto"
 	   password = "pasteur33"
-	   grails.mail.default.from="pointeuse@biolab33.com"	   
-	   props = ["mail.smtp.starttls.enable":"true", 
+	   grails.mail.default.from="pointeuse@biolab33.com"
+	   props = ["mail.smtp.starttls.enable":"true",
 		   		"mail.smtp.auth":"true",
                 "mail.smtp.port":"587"]
 	 }
@@ -200,6 +217,8 @@ grails.plugin.springsecurity.userLookup.userDomainClassName = 'pointeuse.User'
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/':                			['permitAll'],
 	'/index':           			['permitAll'],
+	'/redirection':           		['permitAll'],
+	'/redirection.html':           	['permitAll'],
 	'/employee/main.css':			['permitAll'],
 	'/user/**':						['ROLE_SUPER_ADMIN'],
 	'/role/**':						['ROLE_SUPER_ADMIN'],
@@ -215,33 +234,36 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/**/images/**':    			['permitAll'],
 	'/register/**':    				['permitAll'],
 	'/**/favicon.ico':  			['permitAll'],
-	'/plugins/**':					['permitAll']
-	
+	'/plugins/**':					['permitAll'],
+	'/jasper/**':					['permitAll'],
+	'/range.html': ['permitAll']
+
 	// special URL to be accessed via cron
-	
+
 ]
 
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ['ROLE_ADMIN']
 grails.plugin.springsecurity.ui.encodePassword = true
 grails.plugin.springsecurity.ui.forgotPassword.emailFrom = 'pointeuse@biolab33.com'
-grails.plugin.springsecurity.ui.password.validationRegex='^.*(?!^.*[A-Z]{2,}.*$)^[A-Za-z]*$'
+
+//grails.plugin.springsecurity.ui.password.validationRegex='^.*(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}*$'
+grails.plugin.springsecurity.ui.password.validationRegex='^.*[A-Za-z0-9].*$'
+//grails.plugin.springsecurity.ui.password.validationRegex='^.*(?!^.*[A-Z]{2,}.*$)^[A-Za-z]*$'
+//grails.plugin.springsecurity.ui.password.validationRegex='^.*(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&]).*$'
 grails.plugin.springsecurity.ui.password.minLength = 6
 grails.plugin.springsecurity.ui.password.maxLength = 64
 grails.plugin.springsecurity.ui.register.postRegisterUrl = '/index.gsp'
 grails.plugin.springsecurity.ui.register.emailFrom = 'pointeuse@biolab33.com'
+grails.plugin.springsecurity.ui.forgotPassword.emailSubject = 'Réinitialisation du mot de passe de la pointeuse'
+//grails.plugin.springsecurity.ui.register.emailBody = '...'
+//grails.plugin.springsecurity.ui.register.emailSubject = '...'
+grails.plugin.springsecurity.ui.register.postRegisterUrl = '/'
 grails.plugin.springsecurity.ui.forgotPassword.emailBody = '''\
 Bonjour $user.username,<br/>
 <br/>
 Vous (ou quelqu'un prétendant être vous) a demandé la réinitialisation de votre mot de passe.<br/>
 <br/>
-Si vous n'êtes pas à l'origine de cette demande, veuillez igoner ce message.<br/>
+Si vous n'êtes pas à l'origine de cette demande, veuillez ignorer ce message.<br/>
 <br/>
 Si en revanche vous souhaitez réinitialiser votre mot passe, merci de cliquer <a href="$url">ici</a>.
 '''
-
-	
-grails.plugin.springsecurity.ui.forgotPassword.emailSubject = 'Réinitialisation du mot de passe pointeuse.biolab33'
-//grails.plugin.springsecurity.ui.register.emailBody = '...'
-//grails.plugin.springsecurity.ui.register.emailSubject = '...'
-grails.plugin.springsecurity.ui.register.postRegisterUrl = '/'
-grails.plugin.springsecurity.ui.register.postResetUrl = '/'

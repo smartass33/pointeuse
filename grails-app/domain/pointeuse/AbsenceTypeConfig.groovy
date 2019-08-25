@@ -1,15 +1,14 @@
 package pointeuse
 
-
 class AbsenceTypeConfig {
 
-	Date creationDate
 	String name
 	String shortName
-	User userId
 	double weight
-	boolean isPorpotional
-	
-	static constraints = {
-	}
+	Boolean isPorportional
+	User user
+	Date creationDate
+
+    static constraints = {
+    }
 }

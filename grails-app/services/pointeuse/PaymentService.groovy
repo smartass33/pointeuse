@@ -28,17 +28,7 @@ class PaymentService {
 			for (Employee employee:employeeInstanceList){
 				paymentMap =[:]
 				paymentIDMap= [:]
-				/*
-				criteria = Payment.createCriteria()
-				paymentList = criteria.list{
-					and {
-						eq('employee',employee)
-						eq('period',period)
-					}
-					order('month','asc')
-					
-				}
-				*/
+
 				for (int month in monthList ){				
 					Payment existingPayment = Payment.find('from Payment where employee = :employee and period = :period and month = :month',[employee:employee,period:period,month:month])
 					if (existingPayment != null){
@@ -51,26 +41,6 @@ class PaymentService {
 						paymentMap.put(month,0)
 					}
 				}	
-					/*
-					payment = Payment.find()
-					if (paymentList!=null && paymentList.size()>0){
-						for (Payment payment:paymentList){
-							if (payment.month == month){
-								log.debug('payment is created for period: '+period+' and month: '+month)
-								paymentIDMap.put(month,payment.id)
-								paymentMap.put(month,payment.amountPaid)
-								}else{
-									log.debug('payment does not exist. will generate an =0 cell')
-									paymentIDMap.put(month,0)
-									paymentMap.put(month,0)
-							}
-						}
-					}else{
-						paymentIDMap.put(month,0)
-						paymentMap.put(month,0)
-					}
-				}
-				*/
 				paymentMapByEmployee.put(employee,paymentMap)
 				paymentIDMapByEmployee.put(employee,paymentIDMap)
 			}

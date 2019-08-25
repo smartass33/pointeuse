@@ -4,7 +4,6 @@
 <script>
 	jQuery(function($){		    			
   			$("#suspensionDate").datepicker();
-  			$("#suspensionDate").change = "alert('ffff');"		
   			$( "#suspensionDate" ).change(function() {				
 				${remoteFunction(
 									action:"changeContractStatus",

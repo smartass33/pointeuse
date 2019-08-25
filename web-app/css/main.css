@@ -267,27 +267,112 @@ img {
 	}
 
 
-
-#detailSelector {
-		background-image: url(../images/skin/information_green.png);
-	
-		background-position: 0.7em center;
+#domicileSelector {
+	background-image: url(../images/skin/minus.png);
+	background-position: 0.7em center;
 	background-repeat: no-repeat;
-	text-indent: 20px;
-	
-		color: #666666;
+	text-indent: 25px;
+	color: #666666;
 	display: block;
 	padding: 0.25em 0.7em;
 	text-decoration: none;
-	   -moz-border-radius: 0.3em;
+	-moz-border-radius: 0.3em;
 	-webkit-border-radius: 0.3em;
-	        border-radius: 0.3em;
-		background-position: 0.7em center;
+	border-radius: 0.3em;
+	background-position: 0.7em center;
 	background-repeat: no-repeat;
-		background-color: transparent;
-		outline: none;
-			border: none;
-		font-family: Verdana,Arial,sans-serif;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+    font-size: 1em;
+}
+
+#domicileSelector:active {
+	color: #666666;
+}
+
+#domicileSelector:visited {
+	color: #666666;
+}
+#domicileSelector:focus {
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
+	
+#domicileSelector:hover {
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	}
+
+#employeeSelector {
+	background-image: url(../images/skin/plus.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 25px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+	border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+    font-size: 1em;
+}
+
+#employeeSelector:active {
+	color: #666666;
+}
+
+#employeeSelector:visited {
+	color: #666666;
+}
+#employeeSelector:focus {
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+
+	}
+	
+#employeeSelector:hover {
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	}
+
+
+
+#detailSelector {
+	background-image: url(../images/skin/information_green.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 20px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+	border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
     font-size: 1em;
 }
 
@@ -314,24 +399,23 @@ img {
 	}
 
 #principalSelector {
-		background-image: url(../images/skin/information_green.png);
-			background-position: 0.7em center;
+	background-image: url(../images/skin/information_green.png);
+	background-position: 0.7em center;
 	background-repeat: no-repeat;
 	text-indent: 20px;
-	
-		color: #666666;
+	color: #666666;
 	display: block;
 	padding: 0.25em 0.7em;
 	text-decoration: none;
-	   -moz-border-radius: 0.3em;
+	-moz-border-radius: 0.3em;
 	-webkit-border-radius: 0.3em;
-	        border-radius: 0.3em;
-		background-position: 0.7em center;
+	border-radius: 0.3em;
+	background-position: 0.7em center;
 	background-repeat: no-repeat;
-		background-color: transparent;
-		outline: none;
-			border: none;
-		font-family: Verdana,Arial,sans-serif;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
     font-size: 1em;
 }
 
@@ -985,6 +1069,11 @@ a.skip {
 	left: -9999px;
 }
 
+#trash{
+	background: url(../images/skin/trash.png) no-repeat scroll 1px 1px;
+	background-size: 15px 15px;
+	padding-left:30px;
+}
 
 #data_row { 
 	border: 3px solid blue 
@@ -1008,8 +1097,26 @@ a.skip {
 	opacity: 0.6;
  }
  
+ #itinereraryLegendTable {
+	border: 0px;
+	line-height:0.9em;
+	background-color:#FFFFFF;
+	opacity: 0.6;
+ }
  
  
+ .yui-tt {
+    visibility:hidden;
+    position:absolute;
+    color:#333;
+    background-color:#dbdbdb;
+    font-family:arial,helvetica,verdana,sans-serif;
+    padding:2px;
+    border:1px solid #FFFFFF;
+    font:100% sans-serif;
+    width:auto;
+}
+
 #mainTable td {
  	padding: 20px;/*Pads each table cell in modern browsers*/
  	border: 1px solid #000000;
@@ -1175,8 +1282,7 @@ a.skip {
 }
 
 .datePicker:focus {
-		background-image: url(../images/skin/calendar.png);
-	
+	background-image: url(../images/skin/calendar.png);
 	background-color: #666;
 	background-color: #999999;
 	color: #ffffff;
@@ -1459,6 +1565,27 @@ a.skip {
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
 }
 
+.domicileSelector {
+	background-image: url(../images/skin/search_report.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 20px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+   	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+    border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+   	font-size: 1em;
+}
+
 .displayButton {
 	background-image: url(../images/skin/search_report.png);
 	background-position: 0.7em center;
@@ -1534,7 +1661,44 @@ a.skip {
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
 }
 	
+.addMileageButton {
+	background-image: url(../images/skin/car.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 20px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+   	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+    border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+   	font-size: 1em;
+}
 
+
+.addMileageButton:hover {
+	background-image: url(../images/skin/car.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.addMileageButton:focus {
+	background-image: url(../images/skin/car.png);
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	}
 
 .addElementButton {
 	background-image: url(../images/skin/add_element.png);
@@ -1567,6 +1731,45 @@ a.skip {
 }
 
 .addElementButton:focus {
+	background-image: url(../images/skin/add_element.png);
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	}
+
+.addElementButton2 {
+	background-image: url(../images/skin/add_element.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 20px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+   	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+    border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+   	font-size: 1em;
+}
+
+
+.addElementButton2:hover {
+	background-image: url(../images/skin/add_element.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.addElementButton2:focus {
 	background-image: url(../images/skin/add_element.png);
 	background-color: #666;
 	background-color: #999999;
@@ -1928,7 +2131,7 @@ a.modalbox {
 	
 
 	
-	.panel a#login_pop,.panel a#join_pop {
+	.panel a#login_pop,.panel a#join_pop a#mileage_pop{
 		border: 2px solid #aaa;
 		color: #fff;
 		display: block;
@@ -1944,7 +2147,7 @@ a.modalbox {
 		border-radius: 10px;
 	}
 	
-	a#login_pop:hover,a#join_pop:hover {
+	a#login_pop:hover,a#join_pop:hover, a#mileage_pop:hover {
 		border-color: #eee;
 	}
 	
@@ -2314,7 +2517,7 @@ a.modalbox {
 		height: 13px;
 	}
 	
-	
+	theoriticalTableDiv
 	.annualReportTitleTD {
     font:14px Georgia, serif;
     padding:2px 2px;
@@ -2338,4 +2541,32 @@ a.modalbox {
     color:#666;
     text-shadow:1px 1px 1px #fff;
   //  width:150px;
+}
+
+.itineraryReportTD {
+    font:11px Georgia, serif;
+    padding:0px 0px;
+    text-align:center;
+    border: 1px solid #c0c0c0;
+    -moz-border-radius:1px;
+    -webkit-border-radius:1px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    border: 1px solid #c0c0c0;
+    width:68px;
+}
+
+
+.itineraryReportDateTD {
+    font:11px Georgia, serif;
+    padding:0px 0px;
+    text-align:center;
+    valign:middle;
+    border: 1px solid #c0c0c0;
+    -moz-border-radius:1px;
+    -webkit-border-radius:1px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    border: 1px solid #c0c0c0;
+    width:63px;
 }

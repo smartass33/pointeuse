@@ -34,6 +34,7 @@ class InAndOutController {
         [inAndOutInstance: inAndOutInstance,complete:complete,reportRedirect:reportRedirect]
     }
 	
+	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
     def save() {
 		def user = springSecurityService.currentUser
 		def type=params["event.type"]

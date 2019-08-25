@@ -5,6 +5,7 @@ public enum AbsenceType {
 	VACANCE('V'),
 	MALADIE('M'),
 	GROSSESSE('G'),
+	MATERNITE('CM'),
 	RTT('RTT'),
 	AUTRE('R'),
 	ANNULATION('-'),
@@ -12,7 +13,9 @@ public enum AbsenceType {
 	FERIE('F'),
 	EXCEPTIONNEL('CE'),
 	PATERNITE('CP'),
+	PARENTAL('PAR'),
 	DIF('DIF'),
+	DON('DON'),
 	FORMATION('FO'),
 	INJUSTIFIE('AI')
 	

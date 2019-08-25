@@ -41,9 +41,11 @@
 				<th  style="width:80px;"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.DIF.label"/></span></div></th>	
+				<th  style="width:80px;"><div><span><g:message code="annual.report.DON.label"/></span></div></th>	
 				<th  style="width:80px;"><div><span><g:message code="annual.report.sickness.label"/></span></div></th>		
 				<th  style="width:80px;"><div><span><g:message code="employee.exceptionnel.count"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="employee.paternite.count"/></span></div></th>
+				<th  style="width:80px;"><div><span><g:message code="employee.parental.count"/></span></div></th>
 				<th  style="width:120px;"><div><span><g:message code="annual.HS.above.quota.short"/></span></div></th>
 				<th  style="width:120px;"><div><span><g:message code="annual.computed.quota.short"/></span></div></th>
 				<th  style="width:120px;"><div><span><g:message code="annual.other.HS.quota.short"/></span></div></th>
@@ -71,9 +73,11 @@
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualCSS')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualINJUSTIFIE')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualDIF')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualDON')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualSickness')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualExceptionnel')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualPaternite')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualParental')}</td>
 								<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualPayableSupTime"  name="annualPayableSupTime" value="${(annualReportMap.get(employee)).get('annualPayableSupTime')}"/></td>
 								<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualTheoriticalIncludingExtra"  name="annualTheoriticalIncludingExtra" value="${(annualReportMap.get(employee)).get('annualTheoriticalIncludingExtra')}"/></td>
 								<td style="text-align:right;width:50px;"><my:humanTimeTD id="annualSupTimeAboveTheoritical"  name="annualSupTimeAboveTheoritical" value="${(annualReportMap.get(employee)).get('annualSupTimeAboveTheoritical')}"/></td>
@@ -95,9 +99,11 @@
 								<td style="width:50px;text-align:center;">${siteAnnualCSS}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualINJUSTIFIE}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualDIF}</td>
+								<td style="width:50px;text-align:center;">${siteAnnualDON}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualSickness}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualExceptionnel}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualPaternite}</td>
+								<td style="width:50px;text-align:center;">${siteAnnualParental}</td>
 								<td style="text-align:right;width:50px;"><my:humanTimeTD id="siteAnnualPayableSupTime"  name="siteAnnualPayableSupTime" value="${siteAnnualPayableSupTime}"/></td>
 								<td style="text-align:right;width:50px;"><my:humanTimeTD id="siteAnnualTheoriticalIncludingExtra"  name="siteAnnualTheoriticalIncludingExtra" value="${siteAnnualTheoriticalIncludingExtra}"/></td>
 								<td style="text-align:right;width:50px;"><my:humanTimeTD id="siteAnnualSupTimeAboveTheoritical"  name="siteAnnualSupTimeAboveTheoritical" value="${siteAnnualSupTimeAboveTheoritical}"/></td>

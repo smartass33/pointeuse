@@ -13,7 +13,7 @@ class WeeklyTotal {
 	MonthlyTotal monthlyTotal
 	Employee employee
 	static hasMany = [dailyTotals:DailyTotal]
-	static belongsTo = [MonthlyTotal]
+	static belongsTo = [monthlyTotal:MonthlyTotal]
 	
 	WeeklyTotal(Employee employee,Date currentDate){
 		this.employee=employee
@@ -23,7 +23,9 @@ class WeeklyTotal {
 		this.elapsedSeconds=0
 		this.dailyTotals=[]
 	}
-
+	String toString(){
+		return 'weeklyTotal: '+ this.employee.lastName+', year: '+this.year+', month'+this.month+', week'+this.week+', elapsedSeconds'+this.elapsedSeconds
+	}
 	
   
 }

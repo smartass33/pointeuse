@@ -1,7 +1,6 @@
 package pointeuse
 
 class Employee{
-
 	static final float Pentecote=7/12
 	static final float legalWeekTime=35
 	static final float WeekOpenedDays=6
@@ -21,18 +20,33 @@ class Employee{
 	Map extraData 
 	Title title
 	
+	static belongsTo = [site:Site]
 	
-	static hasMany = [annualEmployeeData:AnnualEmployeeData,payments:Payment,supplementary_time:SupplementaryTime,contracts:Contract,vacations:Vacation,vacationsCounters:Vacation,absenceCounters:AbsenceCounter,inAndOuts: InAndOut,dailyTotals:DailyTotal,weeklyTotals:WeeklyTotal,monthlyTotals:MonthlyTotal,absences:Absence]	
+	static hasMany = [
+		annualEmployeeData:AnnualEmployeeData,
+		payments:Payment,
+		supplementary_time:SupplementaryTime,
+		contracts:Contract,
+		vacations:Vacation,
+		vacationsCounters:Vacation,
+		absenceCounters:AbsenceCounter,
+		inAndOuts: InAndOut,
+		dailyTotals:DailyTotal,
+		weeklyTotals:WeeklyTotal,
+		monthlyTotals:MonthlyTotal,
+		absences:Absence,
+		milages:Mileage
+	]	
 	static searchable = true	
 	static constraints = {
 		matricule (blank: true,nullable:true)
+		service (blank: true,nullable:true)
 		firstName blank: false
 		lastName blank: false 
 		userName (unique: true,blank: false)
 		birthName (blank: true,nullable:true)
 	}
 
-	
 	static mapping = {
 		site lazy: false
 	}
@@ -40,5 +54,4 @@ class Employee{
 	String toString(){
 		return 'employee: lastname:'+ this.lastName+' firstname:'+this.firstName + ' username:'+ this.userName+' id:'+ this.id + ' site:'+this.site.name
 	}
-	
 }

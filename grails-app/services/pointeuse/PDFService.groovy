@@ -13,9 +13,135 @@ import org.hibernate.StaleObjectStateException
 class PDFService {
 	def timeManagerService
 	def paymentService
+	def itineraryService
+	def mileageService
 	def pdfRenderingService
 	def grailsApplication
+		
+	def generateItineraryMonthlyReportByItinerary(def viewType, def itinerary, def currentCalendar, def folder){
+		log.error('generateItineraryMonthlyReportByItinerary called for itinerary: '+itinerary.name+' and date: '+currentCalendar.time)
+		def model = [:]
+		def filename
+		OutputStream outputStream
+		File file
+		def serviceResponse
+		def theoriticalActionsList = []
+		def theoriticalSaturdayActionsList = []
+		def theoriticalListRef = []
+		def actionIterList = []
+		def orderedActionList = []
+		def actionListMap = [:]
+				
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, currentCalendar, null)
+		theoriticalActionsList         = itineraryService.getTheoriticalActionList(itinerary,false)
+		theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(itinerary,true)
+		
+		currentCalendar.set(Calendar.DAY_OF_MONTH,1)
+		
+		for (int j = 1;j < currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
+			log.debug("date: "+currentCalendar.time)
+			
+			theoriticalListRef = (currentCalendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
+			actionIterList = serviceResponse.get('actionListMap').get(currentCalendar.time)
+			
+			// compare to theoriticalActionsList
+			if (theoriticalListRef != null && actionIterList != null && theoriticalListRef.size() == actionIterList.size()){
+				orderedActionList = itineraryService.orderList(theoriticalListRef, actionIterList, [])
+			}else{
+				orderedActionList = actionIterList
+			}
+			actionListMap.put(currentCalendar.time,orderedActionList)
+			orderedActionList = []
+			currentCalendar.roll(Calendar.DAY_OF_MONTH,1)
+		}
+
 	
+		model << [
+			actionListMap:actionListMap,
+			itinerary : itinerary,
+			currentDate : currentCalendar.time,
+			theoriticalActionsList:theoriticalActionsList,
+			theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+		]
+
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeItineraryReportTemplate', model: model)
+		filename = currentCalendar.get(Calendar.YEAR).toString()+ '-' + (currentCalendar.get(Calendar.MONTH)+1).toString()+'-'+itinerary.name+'-itineraire.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
+	def generateItineraryMonthlyReportBySite(def viewType, def itinerary, def currentCalendar, def site, def folder){
+		log.error('generateItineraryMonthlyReportBySite called for site: '+site.name+' and date: '+currentCalendar.time)
+		def model = [:]
+		def filename
+		OutputStream outputStream
+		File file
+		def theoriticalActionsMap = [:]
+		def theoriticalSaturdayActionsMap = [:]
+		def theoriticalActionsList
+		def theoriticalSaturdayActionsList
+		def serviceResponse
+		def actionIterList
+		def orderedActionList = []
+		def theoriticalListRef = []
+		def actionListMap = [:]
+		
+		serviceResponse = itineraryService.getActionMap(viewType, itinerary, currentCalendar, site)
+		
+		theoriticalActionsMap         = itineraryService.getTheoriticalActionMap(site,false)
+		theoriticalSaturdayActionsMap = itineraryService.getTheoriticalActionMap(site,true)
+		theoriticalActionsList         = itineraryService.getTheoriticalActionList(site,false)
+		theoriticalSaturdayActionsList = itineraryService.getTheoriticalActionList(site,true)
+		
+		currentCalendar.set(Calendar.DAY_OF_MONTH,1)
+		
+		for (int j = 1;j < currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
+			log.debug("date: "+currentCalendar.time)
+			
+			theoriticalListRef = (currentCalendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
+			actionIterList = serviceResponse.get('actionListMap').get(currentCalendar.time)
+			
+			// compare to theoriticalActionsList
+			if (theoriticalListRef != null && actionIterList != null && theoriticalListRef.size() == actionIterList.size()){
+				orderedActionList = itineraryService.orderList(theoriticalListRef, actionIterList, [])
+			}else{
+				orderedActionList = actionIterList
+			}
+			actionListMap.put(currentCalendar.time,orderedActionList)
+			orderedActionList = []
+			currentCalendar.roll(Calendar.DAY_OF_MONTH,1)
+		}
+		
+
+		model << [
+			actionListMap:actionListMap,
+			currentDate : currentCalendar.time,
+			site:site,
+			theoriticalActionsMap:theoriticalActionsMap,
+			theoriticalSaturdayActionsMap:theoriticalSaturdayActionsMap,
+			theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
+			theoriticalActionsList:theoriticalActionsList
+		]
+
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeItineraryReportBySiteTemplate', model: model)
+		filename = currentCalendar.get(Calendar.YEAR).toString()+ '-' + (currentCalendar.get(Calendar.MONTH)+1).toString()+'-'+site.name+'-itineraire.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
 	
 	def generateSiteMonthlyTimeSheet(Date myDate,Site site,String folder){
 		log.error('generateSiteMonthlyTimeSheet called for site: '+site.name+' and date: '+myDate)		
@@ -51,7 +177,10 @@ class PDFService {
 				PdfReader pdfReader = new PdfReader(folder+'/'+tmpFile)
 				finalCopy.addDocument(pdfReader)	
 			}
+
 			finalCopy.close();		
+			site.lastReportDate=calendar.time
+			site.save(flush:true)
 		} catch( java.io.IOException ioe){
 			log.error(ioe)
 		}finally{
@@ -108,6 +237,51 @@ class PDFService {
 		file = new File(folder+'/'+filename)
 		return [file.bytes,file.name]
 	}
+	
+	def generateUserMonthlyMileageSheet(Date minDate, Date maxDate,Employee employee,String folder){
+		log.error('generateUserMonthlyMileageSheet called for employee: '+employee.firstName+' '+employee.lastName)
+		def filename
+		Calendar calendar = Calendar.instance
+		OutputStream outputStream
+		File file
+		boolean entityUpdate = true
+		def modelReport = timeManagerService.getMileage(minDate, maxDate, employee)
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeUserMileageTemplate', model: modelReport)
+		filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString()+'-Kilometres-'+employee.lastName+'-'+employee.firstName+'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
+	
+	def generateYearSiteMileageSheet(def infYear, def supYear, def siteList , folder){
+		log.error('generateYearSiteMileageSheet called between year: '+infYear+' and year '+supYear)
+		def filename
+		Calendar calendar = Calendar.instance
+		OutputStream outputStream
+		File file
+		boolean entityUpdate = true
+		def modelReport = mileageService.getAllSitesOverPeriod(siteList,infYear,supYear)
+		modelReport << [infYear:infYear,supYear:supYear]
+		// Get the bytes
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeYearSiteMileageTemplate', model: modelReport)
+		filename = calendar.get(Calendar.YEAR).toString()+ '-' + (calendar.get(Calendar.MONTH)+1).toString()+'-Kilometres-'+infYear+'-'+supYear+'-Sites'+'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
 
 	def generateUserAnnualTimeSheet(int year,int month,Employee employee,String folder){
 		def filename
@@ -115,7 +289,7 @@ class PDFService {
 		File file
 		log.error('method pdf generateUserAnnualTimeSheet with parameters: Last Name='+employee.lastName+', Year= '+year+', Month= '+month)
 		def modelReport = timeManagerService.getAnnualReportData(year, employee)		
-		modelReport << timeManagerService.getOffHoursTime(employee,year)
+		modelReport << timeManagerService.getOffHoursTimeNoUpdate(employee,year)
 		// Get the bytes
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeAnnualReportTemplate', model: modelReport)
 		filename = year.toString()+'-'+employee.lastName +'-'+employee.firstName +'-annualReport' +'.pdf'
@@ -133,7 +307,7 @@ class PDFService {
 		def filename
 		OutputStream outputStream
 		File file
-		def modelEcart=timeManagerService.getEcartData(site, monthList, period)
+		def modelEcart = timeManagerService.getEcartData(site, monthList, period)
 		modelEcart << [site:site]
 		def siteName = (site.name).replaceAll("\\s","").trim()
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeEcartPDFTemplate', model: modelEcart)
@@ -148,11 +322,80 @@ class PDFService {
 		return [file.bytes,file.name]
 	}
 
+	def generateDailySheetWithIntervals(Site site,String folder,Date currentDate){
+		log.error('generateDailySheetWithIntervals called '+'with date: '+currentDate.format('dd/MM/yyyy'))
+		def filename
+		OutputStream outputStream
+		File file
+		def model
+		def siteName
+	
+		model = timeManagerService.getDailyTotalWithIntervals(currentDate, site.id)
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeWeeklyTimePDFTemplate', model: model)
+		siteName = (site.name).replaceAll("\\s","").trim()
+		filename = (currentDate.format('yyyy-mm-dd')).toString()+'-'+siteName +'-dailyWithIntervalReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]	
+	}
+	
+	def generateWeeklySheetWithIntervals(Site site,String folder,Date currentDate){
+		log.error('generateWeeklySheetWithIntervals called '+'with date: '+currentDate.format('dd/MM/yyyy'))
+		def filename
+		OutputStream outputStream
+		File file
+		def model = [:]
+		def siteName
+		def dayModel = [:]
+		def dayList = []
+		def dayModelList = []
+		def dateList
+		def calendar = Calendar.instance
+		calendar.time = currentDate
+		int day = calendar.get(Calendar.DAY_OF_YEAR);
+		// need to find first day of week
+		log.debug('day is: '+calendar.time.format('EEE dd/MM/yyyy'))
+		while(calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY){
+			log.debug('day is: '+calendar.time.format('EEE dd/MM/yyyy'))
+			calendar.set(Calendar.DAY_OF_YEAR, --day);
+		}
+		
+		while(calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+			log.debug('day is: '+calendar.time.format('EEE dd/MM/yyyy'))
+			dayList.add(calendar.time)			
+			dayModel = timeManagerService.getDailyTotalWithIntervals(calendar.time, site.id)
+			if (dateList == null)
+				dateList = dayModel.get('dateList')
+			dayModelList.add(dayModel)	
+			calendar.set(Calendar.DAY_OF_YEAR, ++day);
+			
+		}
+		model << [dayList : dayList,currentDate:currentDate,dayModelList:dayModelList,dateList:dateList]
+		// request getDailyTotalWithIntervals day by day over the course of the week
+		//model << timeManagerService.getDailyTotalWithIntervals(currentDate, site.id)
+		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/completeWeeklyTimePDFTemplate', model: model)
+		siteName = (site.name).replaceAll("\\s","").trim()
+		filename = (currentDate.format('yyyy-mm-dd')).toString()+'-'+siteName +'-dailyWithIntervalReport' +'.pdf'
+		outputStream = new FileOutputStream (folder+'/'+filename);
+		bytes.writeTo(outputStream)
+		if(bytes)
+			bytes.close()
+		if(outputStream)
+			outputStream.close()
+		file = new File(folder+'/'+filename)
+		return [file.bytes,file.name]
+	}
+	
 	def generateDailySheet(Site site,String folder,Date currentDate){
 		def filename
 		OutputStream outputStream
 		File file
-		def modelDaily=timeManagerService.getDailyInAndOutsData(site,currentDate)
+		def modelDaily=timeManagerService.getDailyInAndOutsData(site.id,currentDate)
 		modelDaily << [site:site]
 		ByteArrayOutputStream bytes = pdfRenderingService.render(template: '/pdf/listDailyTimePDFTemplate', model: modelDaily)
 		def siteName = (site.name).replaceAll("\\s","").trim()
@@ -204,9 +447,12 @@ class PDFService {
 		def siteAnnualCSS = 0
 		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
+		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
+		def siteAnnualParental = 0
 		def siteAnnualDIF = 0
+		def siteAnnualDON = 0
 		def siteAnnualPayableSupTime = 0
 		def siteAnnualTheoriticalIncludingExtra = 0
 		def siteAnnualSupTimeAboveTheoritical = 0
@@ -231,9 +477,12 @@ class PDFService {
 						 siteAnnualCSS += data.get('annualCSS')
 						 siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
 						 siteAnnualSickness += data.get('annualSickness')
+						 siteAnnualMaternite += data.get('annualMaternite')					 
 						 siteAnnualDIF += data.get('annualDIF')
+						 siteAnnualDON += data.get('annualDON')
 						 siteAnnualExceptionnel += data.get('annualExceptionnel')
 						 siteAnnualPaternite += data.get('annualPaternite')
+						 siteAnnualParental += data.get('annualParental')
 						 siteAnnualPayableSupTime += data.get('annualPayableSupTime')
 						 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
 						 siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
@@ -262,9 +511,12 @@ class PDFService {
 			siteAnnualCSS:siteAnnualCSS,
 			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualMaternite:siteAnnualMaternite,		
 			siteAnnualDIF:siteAnnualDIF,
+			siteAnnualDON:siteAnnualDON,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,
+			siteAnnualParental:siteAnnualParental,
 			siteAnnualPayableSupTime:siteAnnualPayableSupTime,
 			siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
 			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,

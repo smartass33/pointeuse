@@ -66,10 +66,6 @@
 					<li><g:actionSubmit class='displayButton' value="vue mensuelle"  action="monthlyVacationFollowup"/></li>		
 
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
-					<g:if test="${site!=null}">	
-						<g:hiddenField name="site.id" value="${site.id}" />		
-					</g:if>
-					<g:hiddenField name="siteId" value="${siteId}" />
 					<g:if test="${period!=null}">	
 						<g:hiddenField name="year" value="${period.id}" />	
 					</g:if>

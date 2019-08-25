@@ -10,6 +10,5 @@ class Reason {
 		creatingDate  nullable: true
 		creatingUser  nullable: true
 		name nullable: false
-		
     }
 }

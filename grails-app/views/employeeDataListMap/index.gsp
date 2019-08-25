@@ -1,4 +1,5 @@
 <%@ page import="pointeuse.EmployeeDataListMap" %>
+<%@ page import="pointeuse.EmployeeDataType" %>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -36,8 +37,8 @@
 
 				<g:employeeDataListTable/>
 			</div>
-			<g:form method="post" >			
-				<script>		
+			<g:form method="post">
+				<script>
 					$(document).ready(
 					    function() {
 					        $("#newEmployeeDataButton").click(function() {
@@ -45,23 +46,23 @@
 					        });
 					       	$("#cancelEmployeeDataCreation").click(function() {
 					            $("#newEmployeeDataForm").toggle();
-					        });   
-					   });		  	   
+					        });
+					   });
 				</script>
 				<table>
-					<tbody>	
+					<tbody>
 						<tr>
 							<td><div id="newEmployeeDataButton"><a href="#"><g:message code="employeeDataListMap.add.label" default="Field name" /></a></div></td>
-						</tr>					
+						</tr>
 				    	<tr id="newEmployeeDataForm">
 				    		<td><input type="text" class="code" id="fieldName"  value="" name="fieldname" /></td>
-				    		<td><g:select name="type" from="${EmployeeDataType.values()}"  /></td> 
+				    		<td><g:select name="type" from="${EmployeeDataType.values()}"  /></td>
 				    		<td ><a href="#" id="cancelEmployeeDataCreation">${message(code: 'default.button.cancel.label', default: 'cancel')}</a></td>
 				    		<td><input type="submit" class="listButton" value="${message(code: 'default.button.add.label', default: 'cancel')}" name="_action_addNewEmployeeData"></td>
 				    	</tr>
-					</tbody>		
+					</tbody>
 				</table>
-			</g:form>			
+			</g:form>
 		</div>
 	</body>
 </html>

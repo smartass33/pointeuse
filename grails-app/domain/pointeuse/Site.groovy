@@ -9,9 +9,12 @@ class Site {
 	String address
 	String town
 	int postCode
-	CardTerminal cardTerminal
+	//CardTerminal cardTerminal
+	Date lastReportDate
+	
+	static hasMany = [employees: Employee,users:User,weeklyCases:WeeklyCase,dailyTotals:DailyTotal]
 
-	static hasMany = [employees: Employee,users:User]
+	static hasOne = [cardTerminal: CardTerminal]
 
     static constraints = {
 		cardTerminal nullable:true	
@@ -19,6 +22,7 @@ class Site {
 		name unique:true
 		address blank:true
 		town blank:true	
+		lastReportDate nullable:true
     }
 	
 	String toString(){

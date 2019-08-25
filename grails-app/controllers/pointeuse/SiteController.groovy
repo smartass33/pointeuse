@@ -214,9 +214,12 @@ class SiteController {
 		def siteAnnualCSS = 0
 		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
+		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
+		def siteAnnualParental= 0
 		def siteAnnualDIF = 0
+		def siteAnnualDON = 0
 		def siteAnnualPayableSupTime = 0
 		def siteAnnualTheoriticalIncludingExtra = 0
 		def siteAnnualSupTimeAboveTheoritical = 0
@@ -258,7 +261,6 @@ class SiteController {
 		def startDate = new Date()
 		def employeeList = Employee.findAllBySite(site)
 		criteria = AnnualEmployeeData.createCriteria()
-		
 		def annualEmployeeDataList = criteria.list  {
 			and{
 				eq('period',period)
@@ -280,42 +282,46 @@ class SiteController {
 				}
 				def employeeModel = [:]			
 				if (annualEmployeeData != null && annualEmployeeData.valueMap != null)	{
-					employeeModel << ['yearOpenDays':annualEmployeeData.valueMap.get('yearOpenDays').toLong()]		
-					employeeModel << ['annualEmployeeWorkingDays':annualEmployeeData.valueMap.get('annualEmployeeWorkingDays').toLong()]
-					employeeModel << ['annualTotal':annualEmployeeData.valueMap.get('annualTotal').toLong()]
-					employeeModel << ['annualTheoritical':annualEmployeeData.valueMap.get('annualTheoritical').toLong()]
-					employeeModel << ['annualTotal':annualEmployeeData.valueMap.get('annualTotal').toLong()]
-					employeeModel << ['annualHoliday':annualEmployeeData.valueMap.get('annualHoliday').toLong()]
-					employeeModel << ['remainingCA':annualEmployeeData.valueMap.get('remainingCA').toLong()]
-					employeeModel << ['annualRTT':annualEmployeeData.valueMap.get('annualRTT').toLong()]
-					employeeModel << ['annualCSS':annualEmployeeData.valueMap.get('annualCSS').toLong()]
-					employeeModel << ['annualINJUSTIFIE':annualEmployeeData.valueMap.get('annualINJUSTIFIE').toLong()]
-					employeeModel << ['annualDIF':annualEmployeeData.valueMap.get('annualDIF').toLong()]
-					employeeModel << ['annualSickness':annualEmployeeData.valueMap.get('annualSickness').toLong()]
-					employeeModel << ['annualExceptionnel':annualEmployeeData.valueMap.get('annualExceptionnel').toLong()]
-					employeeModel << ['annualPaternite':annualEmployeeData.valueMap.get('annualPaternite').toLong()]
-					employeeModel << ['annualPayableSupTime':annualEmployeeData.valueMap.get('annualPayableSupTime').toLong()]
-					employeeModel << ['annualTheoriticalIncludingExtra':annualEmployeeData.valueMap.get('annualTheoriticalIncludingExtra').toLong()]
-					employeeModel << ['annualSupTimeAboveTheoritical':annualEmployeeData.valueMap.get('annualSupTimeAboveTheoritical').toLong()]
-					employeeModel << ['annualGlobalSupTimeToPay':annualEmployeeData.valueMap.get('annualGlobalSupTimeToPay').toLong()]				
+					employeeModel << ['yearOpenDays': (annualEmployeeData.valueMap.get('yearOpenDays') != null ? annualEmployeeData.valueMap.get('yearOpenDays').toLong() : 0)]		
+					employeeModel << ['annualEmployeeWorkingDays':(annualEmployeeData.valueMap.get('annualEmployeeWorkingDays') != null ? annualEmployeeData.valueMap.get('annualEmployeeWorkingDays').toLong() : 0)]  
+					employeeModel << ['annualTotal':(annualEmployeeData.valueMap.get('annualTotal') != null ? annualEmployeeData.valueMap.get('annualTotal').toLong() : 0 )]	
+					employeeModel << ['annualTheoritical':(annualEmployeeData.valueMap.get('annualTheoritical') != null ? annualEmployeeData.valueMap.get('annualTheoritical').toLong() : 0)]
+					employeeModel << ['annualHoliday':(annualEmployeeData.valueMap.get('annualHoliday') != null ? annualEmployeeData.valueMap.get('annualHoliday').toLong() : 0)]
+					employeeModel << ['remainingCA':(annualEmployeeData.valueMap.get('remainingCA') != null ? annualEmployeeData.valueMap.get('remainingCA').toLong() : 0)]
+					employeeModel << ['annualRTT':(annualEmployeeData.valueMap.get('annualRTT') != null ? annualEmployeeData.valueMap.get('annualRTT').toLong() : 0)]
+					employeeModel << ['annualCSS':(annualEmployeeData.valueMap.get('annualCSS') != null ? annualEmployeeData.valueMap.get('annualCSS').toLong() : 0)]
+					employeeModel << ['annualINJUSTIFIE':(annualEmployeeData.valueMap.get('annualINJUSTIFIE') != null && annualEmployeeData.valueMap.get('annualINJUSTIFIE') != 'null' ? annualEmployeeData.valueMap.get('annualINJUSTIFIE').toLong() : 0)]
+					employeeModel << ['annualDIF':(annualEmployeeData.valueMap.get('annualDIF') != null ? annualEmployeeData.valueMap.get('annualDIF').toLong() : 0 )  ]
+					employeeModel << ['annualSickness':(annualEmployeeData.valueMap.get('annualSickness') != null ? annualEmployeeData.valueMap.get('annualSickness').toLong() : 0)]	
+					employeeModel << ['annualMaternite':(annualEmployeeData.valueMap.get('annualMaternite') != null ? annualEmployeeData.valueMap.get('annualMaternite').toLong() : 0)]
+					employeeModel << ['annualExceptionnel':(annualEmployeeData.valueMap.get('annualExceptionnel') != null ? annualEmployeeData.valueMap.get('annualExceptionnel').toLong() : 0)]	
+					employeeModel << ['annualPaternite':(annualEmployeeData.valueMap.get('annualPaternite') != null ? annualEmployeeData.valueMap.get('annualPaternite').toLong() : 0)]
+					employeeModel << ['annualParental':(annualEmployeeData.valueMap.get('annualParental') != null ? annualEmployeeData.valueMap.get('annualParental').toLong() : 0)]
+					employeeModel << ['annualPayableSupTime':(annualEmployeeData.valueMap.get('annualPayableSupTime') != null ? annualEmployeeData.valueMap.get('annualPayableSupTime').toLong() : 0)]
+					employeeModel << ['annualTheoriticalIncludingExtra':(annualEmployeeData.valueMap.get('annualTheoriticalIncludingExtra') != null ? annualEmployeeData.valueMap.get('annualTheoriticalIncludingExtra').toLong() : 0)]
+					employeeModel << ['annualSupTimeAboveTheoritical':(annualEmployeeData.valueMap.get('annualSupTimeAboveTheoritical') != null ? annualEmployeeData.valueMap.get('annualSupTimeAboveTheoritical').toLong() : 0)]
+					employeeModel << ['annualGlobalSupTimeToPay':(annualEmployeeData.valueMap.get('annualGlobalSupTimeToPay') != null ? annualEmployeeData.valueMap.get('annualGlobalSupTimeToPay').toLong() : 0)]
 				
 					annualReportMap.put(employee,employeeModel)						
-					siteAnnualEmployeeWorkingDays += annualEmployeeData.valueMap.get('annualEmployeeWorkingDays').toLong()
-					siteAnnualTheoritical += annualEmployeeData.valueMap.get('annualTheoritical').toLong()
-					siteAnnualTotal += annualEmployeeData.valueMap.get('annualTotal').toLong()
-					siteAnnualHoliday += annualEmployeeData.valueMap.get('annualHoliday').toLong()
-					siteRemainingCA += annualEmployeeData.valueMap.get('remainingCA').toLong()
-					siteAnnualRTT += annualEmployeeData.valueMap.get('annualRTT').toLong()
-					siteAnnualCSS += annualEmployeeData.valueMap.get('annualCSS').toLong()
-					siteAnnualINJUSTIFIE += annualEmployeeData.valueMap.get('annualINJUSTIFIE').toLong()
-					siteAnnualSickness += annualEmployeeData.valueMap.get('annualSickness').toLong()
-					siteAnnualDIF += annualEmployeeData.valueMap.get('annualDIF').toLong()
-					siteAnnualExceptionnel += annualEmployeeData.valueMap.get('annualExceptionnel').toLong()
-					siteAnnualPaternite += annualEmployeeData.valueMap.get('annualPaternite').toLong()
-					siteAnnualPayableSupTime += annualEmployeeData.valueMap.get('annualPayableSupTime').toLong()
-					siteAnnualTheoriticalIncludingExtra += annualEmployeeData.valueMap.get('annualTheoriticalIncludingExtra').toLong()
-					siteAnnualSupTimeAboveTheoritical += annualEmployeeData.valueMap.get('annualSupTimeAboveTheoritical').toLong()
-					siteAnnualGlobalSupTimeToPay += annualEmployeeData.valueMap.get('annualGlobalSupTimeToPay').toLong()				
+					siteAnnualEmployeeWorkingDays +=  (annualEmployeeData.valueMap.get('annualEmployeeWorkingDays') != null ? annualEmployeeData.valueMap.get('annualEmployeeWorkingDays').toLong() : 0)
+					siteAnnualTheoritical += (annualEmployeeData.valueMap.get('annualTheoritical') != null ? annualEmployeeData.valueMap.get('annualTheoritical').toLong() : 0)
+					siteAnnualTotal += (annualEmployeeData.valueMap.get('annualTotal') != null ? annualEmployeeData.valueMap.get('annualTotal').toLong() : 0)
+					siteAnnualHoliday += (annualEmployeeData.valueMap.get('annualHoliday') != null ? annualEmployeeData.valueMap.get('annualHoliday').toLong() : 0)
+					siteRemainingCA += (annualEmployeeData.valueMap.get('remainingCA') != null ? annualEmployeeData.valueMap.get('remainingCA').toLong() : 0)
+					siteAnnualRTT += (annualEmployeeData.valueMap.get('annualRTT') != null ? annualEmployeeData.valueMap.get('annualRTT').toLong() : 0)
+					siteAnnualCSS += (annualEmployeeData.valueMap.get('annualCSS') != null ? annualEmployeeData.valueMap.get('annualCSS').toLong() : 0)
+					siteAnnualINJUSTIFIE += (annualEmployeeData.valueMap.get('annualINJUSTIFIE') != null && annualEmployeeData.valueMap.get('annualINJUSTIFIE') != 'null' ? annualEmployeeData.valueMap.get('annualINJUSTIFIE').toLong() : 0)
+					siteAnnualSickness += (annualEmployeeData.valueMap.get('annualSickness') != null ? annualEmployeeData.valueMap.get('annualSickness').toLong() : 0)
+					siteAnnualMaternite += (annualEmployeeData.valueMap.get('annualMaternite') != null ? annualEmployeeData.valueMap.get('annualMaternite').toLong() : 0)				
+					siteAnnualDIF += (annualEmployeeData.valueMap.get('annualDIF') != null ? annualEmployeeData.valueMap.get('annualDIF').toLong() : 0)
+					siteAnnualDON += (annualEmployeeData.valueMap.get('annualDON') != null ? annualEmployeeData.valueMap.get('annualDON').toLong() : 0)
+					siteAnnualExceptionnel += (annualEmployeeData.valueMap.get('annualExceptionnel') != null ? annualEmployeeData.valueMap.get('annualExceptionnel').toLong() : 0)
+					siteAnnualParental += (annualEmployeeData.valueMap.get('annualParental') != null ? annualEmployeeData.valueMap.get('annualParental').toLong() : 0)
+					siteAnnualPaternite += (annualEmployeeData.valueMap.get('annualPaternite') != null ? annualEmployeeData.valueMap.get('annualPaternite').toLong() : 0)
+					siteAnnualPayableSupTime += (annualEmployeeData.valueMap.get('annualPayableSupTime') != null ? annualEmployeeData.valueMap.get('annualPayableSupTime').toLong() : 0)
+					siteAnnualTheoriticalIncludingExtra += (annualEmployeeData.valueMap.get('annualTheoriticalIncludingExtra') != null ? annualEmployeeData.valueMap.get('annualTheoriticalIncludingExtra').toLong() : 0)
+					siteAnnualSupTimeAboveTheoritical += (annualEmployeeData.valueMap.get('annualSupTimeAboveTheoritical') != null ? annualEmployeeData.valueMap.get('annualSupTimeAboveTheoritical').toLong() : 0) 
+					siteAnnualGlobalSupTimeToPay += (annualEmployeeData.valueMap.get('annualGlobalSupTimeToPay') != null ? annualEmployeeData.valueMap.get('annualGlobalSupTimeToPay').toLong() : 0) 			
 					model << [annualReportMap:annualReportMap]
 				}
 			}			
@@ -329,72 +335,25 @@ class SiteController {
 				siteAnnualCSS:siteAnnualCSS,
 				siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 				siteAnnualSickness:siteAnnualSickness,
+				siteAnnualMaternite:siteAnnualMaternite,
 				siteAnnualDIF:siteAnnualDIF,
+				siteAnnualDON:siteAnnualDON,
 				siteAnnualExceptionnel:siteAnnualExceptionnel,
 				siteAnnualPaternite:siteAnnualPaternite,
+				siteAnnualParental:siteAnnualParental,
 				siteAnnualPayableSupTime:siteAnnualPayableSupTime,
 				siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
 				siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
 				siteAnnualGlobalSupTimeToPay:siteAnnualGlobalSupTimeToPay
 			]
-			model << [flash:flash]
-			model << [
-				period2:period,
-				site:site,
-				siteId:siteId,
-				employeeList:employeeList
-				]
-			render template: "/site/template/siteMonthlyTemplate", model:model
-			return
 		}
-		
-		GParsExecutorsPool.withPool {		 
-			 employeeList.iterator().eachParallel {
-				 data = timeManagerService.getAnnualReportDataNOHS(period.year, it)
-				 annualReportMap.put(it,data)			 
-				 siteAnnualEmployeeWorkingDays += data.get('yearOpenDays')
-				 siteAnnualTheoritical += data.get('annualTheoritical')
-				 siteAnnualTotal += data.get('annualTotal')
-				 siteAnnualHoliday += data.get('annualHoliday')
-				 siteRemainingCA += data.get('remainingCA')
-				 siteAnnualRTT += data.get('annualRTT')
-				 siteAnnualCSS += data.get('annualCSS')
-				 siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
-				 siteAnnualSickness += data.get('annualSickness')
-				 siteAnnualDIF += data.get('annualDIF')
-				 siteAnnualExceptionnel += data.get('annualExceptionnel')
-				 siteAnnualPaternite += data.get('annualPaternite')
-				 siteAnnualPayableSupTime += data.get('annualPayableSupTime') as long
-				 siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
-				 siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
-				 siteAnnualGlobalSupTimeToPay += data.get('annualGlobalSupTimeToPay')
-			 }
-		 }	
-		use (TimeCategory){executionTime=new Date()-startDate}
-		log.error('execution time: '+executionTime)
-		model << [flash:flash]
-		model << [period2:period,
+		model << [
+			flash:flash,
+			period2:period,
 			site:site,
 			siteId:siteId,
-			employeeList:employeeList,
-			annualReportMap:annualReportMap,
-			siteAnnualEmployeeWorkingDays:siteAnnualEmployeeWorkingDays,
-			siteAnnualTheoritical:siteAnnualTheoritical,
-			siteAnnualTotal:siteAnnualTotal,
-			siteAnnualHoliday:siteAnnualHoliday,
-			siteRemainingCA:siteRemainingCA,
-			siteAnnualRTT:siteAnnualRTT,
-			siteAnnualCSS:siteAnnualCSS,
-			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
-			siteAnnualSickness:siteAnnualSickness,
-			siteAnnualDIF:siteAnnualDIF,
-			siteAnnualExceptionnel:siteAnnualExceptionnel,
-			siteAnnualPaternite:siteAnnualPaternite,
-			siteAnnualPayableSupTime:siteAnnualPayableSupTime,
-			siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
-			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
-			siteAnnualGlobalSupTimeToPay:siteAnnualGlobalSupTimeToPay
-		]	
+			employeeList:employeeList
+			]
 		render template: "/site/template/siteMonthlyTemplate", model:model
 		return
 	}
@@ -457,7 +416,9 @@ class SiteController {
 					valueMap << ['annualINJUSTIFIE':String.valueOf(annualReportMap.get(employee).get('annualINJUSTIFIE'))]
 					valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
 					valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
+					valueMap << ['annualMaternite':String.valueOf(annualReportMap.get(employee).get('annualMaternite'))]
 					valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
+					valueMap << ['annualParental':String.valueOf(annualReportMap.get(employee).get('annualParental'))]
 					valueMap << ['annualPaternite':String.valueOf(annualReportMap.get(employee).get('annualPaternite'))]
 					valueMap << ['annualPayableSupTime':String.valueOf(annualReportMap.get(employee).get('annualPayableSupTime'))]
 					valueMap << ['annualTheoriticalIncludingExtra':String.valueOf(annualReportMap.get(employee).get('annualTheoriticalIncludingExtra'))]
@@ -501,9 +462,12 @@ class SiteController {
 		def siteAnnualCSS = 0
 		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
+		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
 		def siteAnnualPaternite = 0
+		def siteAnnualParental = 0
 		def siteAnnualDIF = 0
+		def siteAnnualDON = 0
 		def siteAnnualPayableSupTime = 0
 		def siteAnnualTheoriticalIncludingExtra = 0
 		def siteAnnualSupTimeAboveTheoritical = 0
@@ -528,9 +492,12 @@ class SiteController {
 				siteAnnualCSS += data.get('annualCSS')
 				siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
 				siteAnnualSickness += data.get('annualSickness')
+				siteAnnualMaternite += data.get('annualMaternite')			
 				siteAnnualDIF += data.get('annualDIF')
+				siteAnnualDON += data.get('annualDON')
 				siteAnnualExceptionnel += data.get('annualExceptionnel')
 				siteAnnualPaternite += data.get('annualPaternite')
+				siteAnnualParental += data.get('annualParental')
 				siteAnnualPayableSupTime += data.get('annualPayableSupTime') as long
 				siteAnnualTheoriticalIncludingExtra += data.get('annualTheoriticalIncludingExtra') as long
 				siteAnnualSupTimeAboveTheoritical += data.get('annualSupTimeAboveTheoritical') as long
@@ -541,9 +508,9 @@ class SiteController {
 		threads.each { it.start() }
 		threads.each { it.join() }
 
-		log.debug('employee loop finished')
+		log.error('employee loop finished')
 		use (TimeCategory){executionTime=new Date()-startDate}
-		log.debug('execution time: '+executionTime)		
+		log.error('execution time: '+executionTime)		
 		 
 		model << [
 			period2:period,
@@ -560,9 +527,12 @@ class SiteController {
 			siteAnnualCSS:siteAnnualCSS,
 			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
+			siteAnnualMaternite:siteAnnualMaternite,		
 			siteAnnualDIF:siteAnnualDIF,
+			siteAnnualDON:siteAnnualDON,
 			siteAnnualExceptionnel:siteAnnualExceptionnel,
 			siteAnnualPaternite:siteAnnualPaternite,
+			siteAnnualParental:siteAnnualParental,
 			siteAnnualPayableSupTime:siteAnnualPayableSupTime,
 			siteAnnualTheoriticalIncludingExtra:siteAnnualTheoriticalIncludingExtra,
 			siteAnnualSupTimeAboveTheoritical:siteAnnualSupTimeAboveTheoritical,
@@ -585,8 +555,8 @@ class SiteController {
 			}
 			def valueMap = [:]	
 			if (annualReportMap != null && annualReportMap.get(employee) != null){
-				valueMap << ['yearOpenDays':String.valueOf(annualReportMap.get(employee).get('yearOpenDays'))]			
-				valueMap << ['annualEmployeeWorkingDays':String.valueOf(annualReportMap.get(employee).get('annualEmployeeWorkingDays'))]
+				//valueMap << ['yearOpenDays':String.valueOf(annualReportMap.get(employee).get('yearOpenDays'))]			
+				//valueMap << ['annualEmployeeWorkingDays':String.valueOf(annualReportMap.get(employee).get('annualEmployeeWorkingDays'))]
 				valueMap << ['annualTotal':String.valueOf(annualReportMap.get(employee).get('annualTotal'))]
 				valueMap << ['annualTheoritical':String.valueOf(annualReportMap.get(employee).get('annualTheoritical'))]
 				valueMap << ['annualTotal':String.valueOf(annualReportMap.get(employee).get('annualTotal'))]
@@ -597,8 +567,10 @@ class SiteController {
 				valueMap << ['annualINJUSTIFIE':String.valueOf(annualReportMap.get(employee).get('annualINJUSITIFIE'))]
 				valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
 				valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
+				valueMap << ['annualMaternite':String.valueOf(annualReportMap.get(employee).get('annualMaternite'))]
 				valueMap << ['annualExceptionnel':String.valueOf(annualReportMap.get(employee).get('annualExceptionnel'))]
 				valueMap << ['annualPaternite':String.valueOf(annualReportMap.get(employee).get('annualPaternite'))]
+				valueMap << ['annualParental':String.valueOf(annualReportMap.get(employee).get('annualParental'))]
 				valueMap << ['annualPayableSupTime':String.valueOf(annualReportMap.get(employee).get('annualPayableSupTime'))]
 				valueMap << ['annualTheoriticalIncludingExtra':String.valueOf(annualReportMap.get(employee).get('annualTheoriticalIncludingExtra'))]
 				valueMap << ['annualSupTimeAboveTheoritical':String.valueOf(annualReportMap.get(employee).get('annualSupTimeAboveTheoritical'))]

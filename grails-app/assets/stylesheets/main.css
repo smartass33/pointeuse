@@ -1534,7 +1534,44 @@ a.skip {
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
 }
 	
+.addMileageButton {
+	background-image: url(../images/skin/car.png);
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	text-indent: 20px;
+	color: #666666;
+	display: block;
+	padding: 0.25em 0.7em;
+	text-decoration: none;
+   	-moz-border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
+    border-radius: 0.3em;
+	background-position: 0.7em center;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	font-family: Verdana,Arial,sans-serif;
+   	font-size: 1em;
+}
 
+
+.addMileageButton:hover {
+	background-image: url(../images/skin/car.png);
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+}
+
+.addMileageButton:focus {
+	background-image: url(../images/skin/car.png);
+	background-color: #666;
+	background-color: #999999;
+	color: #ffffff;
+	outline: none;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+	}
 
 .addElementButton {
 	background-image: url(../images/skin/add_element.png);
@@ -1792,7 +1829,69 @@ a.modalbox {
     text-shadow:1px 1px 1px #fff;
     width:80px;
 }
-		.eventTDEntry {
+
+	.mileageTD {
+	  @extend .eventTD;
+	}
+
+	.mileageTD {
+    font:14px Georgia, serif;
+    padding:1px 1px;
+    text-align:center;
+    border: 0px solid #E7EFE0;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    width:60px;
+	}
+
+		
+	.mileageTextField {
+	  @extend .mileageTD;
+	}
+
+	.mileageTextField {
+    font:14px Georgia, serif;
+    padding:1px 1px;
+    text-align:center;
+    border: 0px solid #E7EFE0;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
+    color:#666;
+    text-shadow:1px 1px 1px #fff;
+    width:60px;
+	}
+	
+	.weeklyTextField {
+	    font:12px Helvetica;
+	    padding:1px 1px;
+	    text-align:center;
+	    border: 0px solid #E7EFE0;
+	    -moz-border-radius:2px;
+	    -webkit-border-radius:2px;
+	    border-radius:2px;
+	    color:#333333;
+	    text-shadow:1px 1px 1px #fff;
+	    width:90px;
+	}
+	
+		.weeklyTextField.element {
+	    font:12px Helvetica;
+	    padding:1px 1px;
+	    text-align:center;
+	    border: 0px solid #E7EFE0;
+	    -moz-border-radius:2px;
+	    -webkit-border-radius:2px;
+	    border-radius:2px;
+	    color:#333333;
+	    text-shadow:1px 1px 1px #fff;
+	    width:90px;
+	}
+		
+	.eventTDEntry {
     font:14px Georgia, serif;
     padding:2px 2px;
     padding-right: 2px;     
@@ -1928,7 +2027,7 @@ a.modalbox {
 	
 
 	
-	.panel a#login_pop,.panel a#join_pop {
+	.panel a#login_pop,.panel a#join_pop a#mileage_pop{
 		border: 2px solid #aaa;
 		color: #fff;
 		display: block;
@@ -1944,7 +2043,7 @@ a.modalbox {
 		border-radius: 10px;
 	}
 	
-	a#login_pop:hover,a#join_pop:hover {
+	a#login_pop:hover,a#join_pop:hover,a#mileage_pop:hover {
 		border-color: #eee;
 	}
 	

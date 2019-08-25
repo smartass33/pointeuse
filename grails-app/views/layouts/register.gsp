@@ -9,7 +9,7 @@
 <g:layoutHead/>
 	</head>
 	<body>
-		<div id="grailsLogo" role="banner"><a href="${grailsApplication.config.serverURL}/${grailsApplication.config.context}"><asset:image src="biolab3.png"/></a></div>		
+		<div id="grailsLogo" role="banner"><a href="${grailsApplication.config.serverURL}/${grailsApplication.config.context}"><asset:image src="${grailsApplication.config.laboratory.logo}"/></a></div>		
 		<p/>
 		<g:layoutBody/>
 		<asset:javascript src='spring-security-ui-register.js'/>

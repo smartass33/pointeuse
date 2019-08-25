@@ -174,6 +174,21 @@
 	        					</td>
 							</tr>
 							<tr>
+								<td style="text-align:left;">${message(code: 'employee.maternite.count', default: 'report')} :</td>
+	 							<td>
+	 								<table border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${maternite as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td>${yearlyMaternite as float}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>
+							<tr>
 								<td style="text-align:left;">${message(code: 'employee.sanssolde.count', default: 'report')} :</td>
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
@@ -222,6 +237,22 @@
 	        					</td>
 							</tr>	
 							<tr>
+								<td width="35%" style="text-align:left;" >${message(code: 'employee.parental.count', default: 'report')} :</td>	
+	 							<td>
+	 								<table border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${parental as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					
+	        					<td>
+	        						<table border="1" class="cartoucheValues">
+	        							<thead></thead>	        							
+	        							<tr><td>${yearlyParental as float}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>	
+							<tr>
 								<td width="35%" style="text-align:left;" >${message(code: 'employee.dif.count', default: 'report')} :</td>	
 	 							<td>
 	 								<table border="1" class="cartoucheValues" >
@@ -236,8 +267,7 @@
 	        							<tr><td>${yearlyDif as float}</td></tr>
 	        						</table>
 	        					</td>
-							</tr>								
-											
+							</tr>																			
 							<tr>
 								<td style="text-align:left;">${message(code: 'employee.yearly.theorical.time', default: 'report')} :</td>							
 								<td>

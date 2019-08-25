@@ -1,7 +1,6 @@
 package pointeuse
 
 class AbsenceCounter {
-
 	Date logging_time
 	Employee employee
 	User user
@@ -9,6 +8,7 @@ class AbsenceCounter {
 	float counter
 	static belongsTo = [employee:Employee]
 	
-    static constraints = {
-    }
+	String toString(){
+		return 'employee: lastname:'+ this.employee.lastName+' firstname:'+this.employee.firstName + ' counter:'+ this.counter + ' year:'+this.year
+	}
 }

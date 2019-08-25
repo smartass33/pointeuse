@@ -23,7 +23,7 @@ class InAndOut {
 	static final int MODIFIEE_ADMIN=3
 	static final int MODIFIEE_SALARIE=4
 	Boolean isOutsideSite
-	static belongsTo = [dailyTotal:DailyTotal,employee:Employee]
+	static belongsTo = [dailyTotal:DailyTotal,employee:Employee,modifyingUser:User]
 		
 	
 	InAndOut(Employee employee,Date currentDate,String type,Boolean isOutside){

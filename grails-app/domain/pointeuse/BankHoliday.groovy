@@ -14,5 +14,6 @@ class BankHoliday {
 	
     static constraints = {
 		calendar(unique:['day','month','year','week'])
+		user nullable: true
     }
 }

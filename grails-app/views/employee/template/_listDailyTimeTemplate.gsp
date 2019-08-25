@@ -27,11 +27,8 @@
 							<script>
 					        var current_time = (new Date()).getTime() + ((new Date()).getTimezoneOffset() * 60 * 1000 * -1);
 								$(document).ready(function () {
-								
-									
 									(function () {
-						 				var container = document.getElementById('timeline-${entry.key.id}');
-																					
+						 				var container = document.getElementById('timeline-${entry.key.id}');																					
 										var inAndOutsForEmployeeTable_${entry.key.id} = ${inAndOutsForEmployeeMap.get(entry.key)};
 										var init_cells_${entry.key.id} = [];
 										var item;
@@ -63,7 +60,6 @@
 												   		}
 									   				init_cells_${entry.key.id}.push(item);		
 										   		}		  
-
 										   }
 										} 
 						
@@ -77,15 +73,22 @@
 											graduation_step:20,
 											init_cells: init_cells_${entry.key.id}
 										});
-						
-						
 								    })();
 								});
 							</script>
 						</g:if>
 					</td>
 				</g:if>
-
+			</tr>
+		</g:each>
+		<g:each in="${sickEmployeeList}" status="i" var="sickEmployee">
+			<tr>
+				<td style="width:90px;text-align:center;valign:middle;">${sickEmployee.lastName}<BR>${sickEmployee.firstName}</td>
+				<td style="width:120px;text-align:center;valign:middle;">-</td>
+				<td style="width:120px;text-align:center;valign:middle;">${sickEmployee.function.name}</td>
+				<td style="width:120px;text-align:center;valign:middle;">${sickEmployee.service.name}</td>
+				<td>ARRET MALADIE</td>
+				<td>n/a</td>
 			</tr>
 		</g:each>
 	</tbody>

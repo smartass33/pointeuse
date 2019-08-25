@@ -5,7 +5,7 @@
 	<head>
 		<meta name="layout" content="main" />
 		<resource:tabView />		
-		<title>${message(code: 'pointeuse.entreprise.label', default: 'Create')}</title>
+		<title>${grailsApplication.config.laboratory.name}</title>
 		<script type="text/javascript">	
 			function closePopup ( ){
 				window.location = $('#closeId').attr('href');
@@ -42,17 +42,25 @@
 	        		<richui:tabContent>
 						<sec:ifLoggedIn>
 							<ul>
-								<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="employee.list" default="Last Name" /></g:link></li>
-								<li class="controller"><g:link controller="bankHoliday" style="text-decoration: none;"><g:message code="bank.holiday.list" default="Last Name" /></g:link></li>	
-								<li class="controller"><g:link controller="site" style="text-decoration: none;"><g:message code="site.list" default="Last Name" /></g:link></li>	
-								<li class="controller"><g:link controller="site" action='siteTotalTime' style="text-decoration: none;"><g:message code="sites.followup" default="Last Name" /></g:link></li>	
-								<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="daily.followup" default="Last Name" /></g:link></li>	
-								<li class="controller"><g:link controller="employee" action='weeklyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="weekly.followup" default="Last Name" /></g:link></li>	
-								<li class="controller"><g:link controller="employee" action='vacationFollowup' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="absence.followup" default="Last Name" /></g:link></li>	
-								<li class="controller"><g:link controller="employee" action='ecartFollowup' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="ecart.followup" default="Last Name" /></g:link></li>	
-								<li class="controller"><g:link controller="payment" action='paymentReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="payment.management" default="Last Name" /></g:link></li>	
+								<sec:ifAnyGranted roles="ROLE_ADMIN">	
+									<li class="controller"><g:link controller="employee" action='list' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="employee.list" default="Last Name" /></g:link></li>
+									<li class="controller"><g:link controller="bankHoliday" style="text-decoration: none;"><g:message code="bank.holiday.list" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="site" style="text-decoration: none;"><g:message code="site.list" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="site" action='siteTotalTime' style="text-decoration: none;"><g:message code="sites.followup" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="employee" action='dailyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="daily.followup.week" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="employee" action='weeklyReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="weekly.recap" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="employee" action='absenceFollowup' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="absence.report.followup" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="employee" action='vacationFollowup' params="[isAdmin:false,max:20]" style="text-decoration: none;"><g:message code="absence.followup" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="employee" action='ecartFollowup' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="ecart.followup" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="mileage" action='index' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="mileage.followup" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="payment" action='paymentReport' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="payment.management" default="Last Name" /></g:link></li>	
+									<li class="controller"><g:link controller="itinerary" action='index' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="itinerary.followup" default="Last Name" /></g:link></li>	
+								</sec:ifAnyGranted>
 								<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">								
 									<li class="controller"><g:link controller="authorization" action='index' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="authorization.management" default="Last Name" /></g:link></li>	
+								</sec:ifAnyGranted>
+								<sec:ifAnyGranted roles="ROLE_TOURNEE">
+									<li class="controller"><g:link controller="itinerary" action='index' params="[isAdmin:false,max:20,fromIndex:true]" style="text-decoration: none;"><g:message code="itinerary.followup" default="Last Name" /></g:link></li>	
 								</sec:ifAnyGranted>
 								<li><BR></li>
 								<li class="controller"><g:link controller="logout" class="adminLogout"><g:message code="admin.logout.label" default="Last Name" /></g:link></li>							
@@ -65,11 +73,12 @@
 					<richui:tabContent>
 						<sec:ifLoggedIn>
 							<ul>
-								<li class="controller"><g:link controller="user" style="text-decoration: none;"><g:message code="admin.list" default="Last Name" /></g:link></li>						
-								<li class="controller"><g:link controller="reason" style="text-decoration: none;"><g:message code="regularization.reasons" default="Last Name" /></g:link></li>			
-								<li class="controller"><g:link controller="service" style="text-decoration: none;"><g:message code="service.list" default="Last Name" /></g:link></li>
-								<li class="controller"><g:link controller="function" style="text-decoration: none;"><g:message code="function.list" default="Last Name" /></g:link></li>
-
+								<sec:ifAnyGranted roles="ROLE_ADMIN">	
+									<li class="controller"><g:link controller="user" style="text-decoration: none;"><g:message code="admin.list" default="Last Name" /></g:link></li>						
+									<li class="controller"><g:link controller="reason" style="text-decoration: none;"><g:message code="regularization.reasons" default="Last Name" /></g:link></li>			
+									<li class="controller"><g:link controller="service" style="text-decoration: none;"><g:message code="service.list" default="Last Name" /></g:link></li>
+									<li class="controller"><g:link controller="function" style="text-decoration: none;"><g:message code="function.list" default="Last Name" /></g:link></li>
+								</sec:ifAnyGranted>
 								<sec:ifAnyGranted roles="ROLE_SUPER_ADMIN">		
 									<li class="controller"><g:link controller="employeeDataListMap" style="text-decoration: none;"><g:message code="employeeDataListMap.management" default="Last Name" /></g:link></li>																							
 									<li class="controller"><g:link controller="category" style="text-decoration: none;"><g:message code="authorizationType.management.label" default="Last Name" /></g:link></li>			
@@ -87,11 +96,10 @@
 			</richui:tabView>
 		</div>
 		<div class="standardNav" role="main">
-			<h1><font size="5"><g:message code="welcome.label" default="Welcome"/>, il est: <span id='clock'><g:formatDate format="HH:mm:ss" date="${new Date()}"/></span>
+			<h1><font size="5"><g:message code="welcome.label" default="Welcome"/> ${grailsApplication.config.laboratory.name}, il est: <span id='clock'><g:formatDate format="HH:mm:ss" date="${new Date()}"/></span>
 			</font></h1>
 			<BR>
-			<p><g:message code="explanation.label" default="Welcome"/></p>
-						
+			<p><g:message code="explanation.label" default="Welcome"/></p>					
 			<BR>
 			<g:if test="${flash.message}">
 	        	<div class="message">${flash.message}</div>

@@ -5,7 +5,7 @@
 		<g:javascript library="jquery" plugin="jquery" />
 	
 		<meta name="layout" content="main">
-		<g:set var="entityName" value="${message(code: 'period.label', default: 'Year')}" />
+		<g:set var="entityName" value="${message(code: 'period.label')}" />
 		<title><g:message code="default.create.label" args="[entityName]" /></title>
 	</head>
 	<body>

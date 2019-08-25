@@ -9,7 +9,7 @@ import grails.plugin.springsecurity.annotation.Secured
 class PeriodController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
-	def utilServic
+	def utilService
 	private static final log = LogFactory.getLog(this)
 	
     def index() {
@@ -27,6 +27,12 @@ class PeriodController {
         [periodInstance: new Period(params)]
     }
 
+	def initializeVacation(){
+		def period = Period.findByYear(params.int('year'))	
+		utilService.initiateVacations(period)
+		return	
+	}
+	
     def save() {
         def periodInstance = new Period(params)
         if (!periodInstance.save(flush: true)) {
@@ -91,6 +97,7 @@ class PeriodController {
     }
 
     def delete(Long id) {
+
         def periodInstance = Period.get(id)
         if (!periodInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'period.label', default: 'Year'), id])
@@ -111,10 +118,6 @@ class PeriodController {
 	
 	def changeValue(){
 		log.error("entering changeValue")
-		/*
-		params.each{i->
-			log.error(i);
-		}*/
 		def year = params["yearAsString"] as long
 		def yearAsString = year.toString()+'/'+(year+1).toString()
 		render template: "/common/periodBoxTemplate", model:[yearAsString:yearAsString]

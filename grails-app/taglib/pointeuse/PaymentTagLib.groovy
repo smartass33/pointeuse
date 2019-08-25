@@ -12,6 +12,14 @@ class PaymentTagLib {
 	}
 
 	
+	def mileageManagementTable ={attrs,body->
+		out << render(template:"/mileage/template/mileageTemplate")
+	}
+	
+	def mileageSiteTable ={attrs,body->
+		out << render(template:"/mileage/template/mileageFollowup")
+	}
+	
 	def humanTimeTD ={attr ->
 		attr.value = (attr.value == null) ? attr.value = 0 : attr.value
 		out << writeHumanTime(attr.value as long)		

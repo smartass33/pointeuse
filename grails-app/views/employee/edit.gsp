@@ -30,7 +30,6 @@
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'employee.label', default: 'Employee')}" />
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>		
-  		<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 		<script>
 			function closePopup (){
 				window.location = $('#closeId').attr('href');
@@ -76,6 +75,7 @@
 	   			});
 			});
 		</script>
+	
 	</head>
 	<body style="">
 		<a href="#edit-employee" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
@@ -137,8 +137,9 @@
 						<g:employeeContractTable/>
 					</div>
 				</g:if>
+				<g:contractStatus/>
+				<g:sickLeave/>	
 			</g:form>
-			<g:contractStatus/>
 			<g:vacationEditTable/>	
 			<script type="text/javascript">
 				$(function(){
@@ -146,5 +147,6 @@
 			     });
 			</script>
 		</div>
+
 	</body>
 </html>

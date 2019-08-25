@@ -16,7 +16,7 @@ class DailyTotal {
 	Site site
 	WeeklyTotal weeklyTotal
 	static hasMany = [inAndOuts:InAndOut]
-	static belongsTo = [weeklyTotal:WeeklyTotal]
+	static belongsTo = [weeklyTotal:WeeklyTotal,site:Site]
 	
 	DailyTotal(Employee employee,Date currentDate){
 		this.employee=employee

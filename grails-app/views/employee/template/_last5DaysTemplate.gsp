@@ -1,5 +1,6 @@
-<%@ page import="pointeuse.Reason"%>
-<%@ page import="pointeuse.Site"%>
+<%@ page import="pointeuse.Reason" %>
+<%@ page import="pointeuse.Site" %>
+<%@ page import="pointeuse.Itinerary" %>
 
 <div id="last5days" >
 	<h1><g:message code="daily.last.3.events" default="Last Name" /></h1>
@@ -94,7 +95,7 @@
 		</tbody>
 	</table>
 </g:if>
-<g:else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<g:message code="inAndOut.no.element"/><BR>
+<g:else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${message(code: 'inAndOut.no.element')}<BR>
 	<BR>
 </g:else>
 	<g:hiddenField name="userId" value="${employee?.id}" />
@@ -121,6 +122,7 @@
 	<BR>
 	<div class="standardNav">
 		<ul>
+<<<<<<< .merge_file_34enGn
 			<li>
 				<g:select name="site.id"
 					from="${Site.list([sort:'name'])}"
@@ -158,54 +160,181 @@
 				<div id="popup" class="popup">
 					<h2><g:message code="inAndOut.element.add"/></h2>
 					<p><g:message code="inAndOut.element.add.info"/></p>
+			<g:if test="${employee != null && !employee.lastName.equals('cort')}">
+				<li>				
+					<g:if test="${entranceStatus}">
+						<g:remoteLink action="addingEventToEmployee" update="last5days"
+							onLoading="document.getElementById('spinner').style.display = 'inline';"
+		                    onComplete="document.getElementById('spinner').style.display = 'none';"	
+							class="exitbutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
+					</g:if> 
+					<g:else>
+						<g:remoteLink action="addingEventToEmployee" update="last5days"
+							onLoading="document.getElementById('spinner').style.display = 'inline';"
+		                    onComplete="document.getElementById('spinner').style.display = 'none';"	
+							class="entrybutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
+					</g:else>
+				</li>
+				<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+				<li>	
+					<g:link class="displayButton" controller="employee" action="reportLight" params="[userId:employee.id]">${message(code: 'employee.monthly.light.report.label', default: 'Report')}</g:link>
+				</li>
+				<li>
+					<a href="#join_form" id="join_pop" class="addElementButton">${message(code: 'inAndOut.create.add.label.short', default: 'Report')}</a>
+					<a href="#x" class="overlay" id="join_form" style="background: transparent;"></a>
+					<div id="popup" class="popup">
+						<h2>${message(code: 'inAndOut.create.button', default: 'Report')}</h2>
+						<p>${message(code: 'inAndOut.create.info', default: 'Report')}</p>
+						<g:form controller="inAndOut" action="create">
+							<table>
+								<tbody>
+									<tr class="prop">
+										<td class="eventTD" valign="top">${message(code: 'inAndOut.create.date.choice', default: 'Report')}:</td>
+										<td class="eventTD" valign="top"><input type="text" name="date_picker" id="date_picker" /> 
+											<script type="text/javascript">
+												timePickerLaunch("date_picker","date");
+											</script>
+										</td>
+									</tr>
+									<tr class="prop">
+										<td class="eventTD" valign="top">${message(code: 'inAndOut.create.event', default: 'Report')}:</td>
+										<td class="eventTD" valign="top">
+											<g:select
+												name="event.type" from="${['E','S']}"
+												valueMessagePrefix="entry.name"
+												noSelection="['':'-Choisissez votre élément-']" />
+										</td>
+									</tr>
+									<tr class="prop">
+										<td class="eventTD" valign="top">${message(code: 'inAndOut.create.reason', default: 'Report')}:</td>
+										<td class="eventTD" valign="top">
+											<g:select name="reason.id"
+												from="${Reason.list([sort:'name'])}"
+												noSelection="['':'-Ajouter une raison-']" optionKey="id"
+												optionValue="name" />
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<g:hiddenField name="userId" value="${userId}" />
+							<g:hiddenField name="fromReport" value="${fromReport}" />
+							<g:submitToRemote class="listButton"
+				                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
+				                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
+										update="last5days"
+										onSuccess="closePopup()"
+										url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
+						</g:form>
+						<a class="close" id="closeId" href="#close"></a>
+					</div>
+			</li>
+			<li >
+				<a href="#mileage_form" id="mileage_pop" class="addMileageButton">${message(code: 'mileage.create.add.label.short', default: 'Report')}</a>
+				<a href="#x" class="overlay" id="mileage_form" style="background: transparent;"></a>
+				<div id="mileage_popup" class="popup">
+					<h2>${message(code: 'mileage.create.button', default: 'Report')}</h2>
+					<p>${message(code: 'mileage.create.info', default: 'Report')}</p>
 					<g:form action="create">
 						<table>
 							<tbody>
 								<tr class="prop">
 									<td class="eventTD" valign="top"><g:message code="inAndOut.element.choose.date"/></td>
 									<td class="eventTD" valign="top"><input type="text" name="date_picker" id="date_picker" /> 
+									<td class="eventTD" valign="top">${message(code: 'mileage.create.date.choice', default: 'Report')}:</td>
+									<td class="eventTD" valign="top"><input type="text" name="date_mileage_picker" id="date_mileage_picker" /> 
 										<script type="text/javascript">
-											datePickerLaunch();
+											timePickerLaunch("date_mileage_picker","date");
 										</script>
 									</td>
 								</tr>
 								<tr class="prop">
 									<td class="eventTD" valign="top"><g:message code="event.label"/></td>
+									<td class="eventTD" valign="top">${message(code: 'mileage.create.value', default: 'Report')}:</td>
 									<td class="eventTD" valign="top">
-										<g:select
-											name="event.type" from="${['E','S']}"
-											valueMessagePrefix="entry.name"
-											noSelection="['':'-Choisissez votre élément-']" />
-									</td>
-								</tr>
-								<tr class="prop">
-									<td class="eventTD" valign="top">Raison:</td>
-									<td class="eventTD" valign="top">
-										<g:select name="reason.id"
-											from="${Reason.list([sort:'name'])}"
-											noSelection="['':'-Ajouter une raison-']" optionKey="id"
-											optionValue="name" />
+										<g:textField name="mileageValue" value="${mileageValue}" />
 									</td>
 								</tr>
 							</tbody>
 						</table>
-						<g:hiddenField name="userId" value="${userId}" />
+						<g:hiddenField name="employeeId" value="${employee.id}" />
 						<g:hiddenField name="fromReport" value="${fromReport}" />
 						<g:submitToRemote class="listButton"
 	                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
-	                    	onComplete="document.getElementById('spinner').style.display = 'none';"				
+	                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
 							update="last5days"
 							onSuccess="closePopup()"
-							url="[controller:'inAndOut', action:'save']" value="Creer"></g:submitToRemote>
+							url="[controller:'mileage', action:'addMileage']" value="${message(code: 'mileage.create.validation', default: 'Report')}">
+						</g:submitToRemote>
 					</g:form>
 					<a class="close" id="closeId" href="#close"></a>
 				</div>
-
 			</li>
+			</g:if>
+			<li >
+				<a href="#itinerary_action_form" id="itinerary_action_pop" class="addElementButton">${message(code: 'action.create.add.label', default: 'Report')}</a>
+				<a href="#x" class="overlay" id="itinerary_action_form" style="background: transparent;"></a>
+				<div id="itinerary_action_popup" class="popup">
+					<h2>${message(code: 'action.create.button', default: 'Report')}</h2>
+					<p>${message(code: 'action.create.info', default: 'Report')}</p>
+					<g:form action="create">
+						<table>
+							<tbody>
+								<tr class="prop">
+									<td class="eventTD" valign="top">${message(code: 'itinerary.label', default: 'Report')}:</td>
+									<td>
+										<g:select name="itineraryId"
+								          from="${Itinerary.list([sort:'name'])}"
+								          noSelection="${['':'-']}"          
+								          optionKey="id" optionValue="${{it.description != null ? it.name+' '+it.description : it.name}}"
+								          />
+									</td>	
+								</tr>
+								<tr class="prop">
+									<td class="eventTD" valign="top">${message(code: 'employee.site.label', default: 'Report')}:</td>
+									<td>
+										<g:select name="siteId"
+								          from="${Site.list([sort:'name'])}"
+								          noSelection="${['':'-']}"          
+								          optionKey="id" optionValue="name"
+								          />
+									</td>	
+								</tr>
+								<tr class="prop">
+									<td class="eventTD" valign="top">${message(code: 'action.time', default: 'Report')}:</td>
+									<td>	
+										<input type="text" name="time_picker" id="time_picker" value="${(new Date()).format('dd/MM/yyyy HH:mm') }" /> 
+										<script type="text/javascript">
+											timePickerLaunch("time_picker","date");
+										</script>
+									</td>
+								</tr>						
+								<tr class="prop">
+									<td class="eventTD" valign="top">${message(code: 'action.nature.label', default: 'Report')}:</td>
+									<td>
+										<g:select
+											name="action.type" from="${['ARR','DEP']}"
+											valueMessagePrefix="action.name"
+											noSelection="['':'-Choisissez votre élément-']" />																	
+									</td>	
+								</tr>
+							</tbody>
+						</table>
+						<g:hiddenField name="employeeId" value="${employee.id}" />
+						<g:hiddenField name="fromReport" value="${fromReport}" />
+						<g:submitToRemote class="listButton"
+	                    	onLoading="document.getElementById('spinner').style.display = 'inline';"
+	                    	onComplete="document.getElementById('spinner').style.display = 'none';closePopup();"				
+							update="last5days"
+							onSuccess="closePopup()"
+							url="[controller:'action', action:'addAction']" value="${message(code: 'mileage.create.validation', default: 'Report')}">				
+						</g:submitToRemote>
+					</g:form>
+					<a class="close" id="closeId" href="#close"></a>
+				</div>
+			</li>			
 			<li>
 				<g:link class="logoutButton"  url="${grailsApplication.config.serverURL}/${grailsApplication.config.context}">${message(code: 'employee.disconnect.label', default: 'Sortie')}</g:link>
 			</li>			
 		</ul>
 	</div>
-	
 </div>

@@ -13,7 +13,7 @@ hibernate {
 
 environments {
     development {
-		
+
 		/*
         dataSource {
 		    pooled = true
@@ -34,7 +34,7 @@ environments {
 				maxWait = 10000			}
 		}
 		*/
-		
+
 		dataSource {
 			pooled = true
 			dbCreate = "update"
@@ -42,7 +42,7 @@ environments {
 			driverClassName = "org.mariadb.jdbc.Driver"
 			username = "root"
 			password = "root"
-			
+
 			properties {
 				maxActive = 50
 				maxIdle = 25
@@ -58,8 +58,8 @@ environments {
 			}
 		}
     }
-	
-	
+
+
 	aws {
 		dataSource {
 			pooled = true
@@ -83,7 +83,7 @@ environments {
 			}
 		}
 	}
-	
+
 	aws_isengard {
 		dataSource {
 			pooled = true
@@ -107,7 +107,4 @@ environments {
 			}
 		}
 	}
-	
-
 }
-

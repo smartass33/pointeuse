@@ -26,16 +26,16 @@ import groovyx.gpars.GParsConfig
 import groovyx.gpars.GParsPool
 
 
-class EmployeeController {	
+class EmployeeController {
 	def PDFService
 	def utilService
 	def mailService
 	def searchableService
 	def authenticateService
 	def springSecurityService
-	def timeManagerService 
+	def timeManagerService
 	def supplementaryTimeService
-	def employeeService	
+	def employeeService
 	def dataSource
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 	long secondInMillis = 1000;
@@ -44,8 +44,8 @@ class EmployeeController {
 	long dayInMillis = hourInMillis * 24;
 	long yearInMillis = dayInMillis * 365;
 	private static final log = LogFactory.getLog(this)
-	
-	
+
+
 	@Secured(['ROLE_ADMIN'])
     def index() {
         redirect(action: "list", params: params)
@@ -59,7 +59,7 @@ class EmployeeController {
 		AbsenceCounter absenceCount = AbsenceCounter.findByEmployeeAndYear(employee,year)
 		[absenceCount:absenceCount]
 	}
-	
+
 
 	@Secured(['ROLE_ADMIN'])
 	def dailyReport(){
@@ -78,10 +78,10 @@ class EmployeeController {
 		def fromIndex=params.boolean('fromIndex')
 		def inAndOutsForEmployee = []
 		def inAndOutsForEmployeeMap = [:]
-		def employeeSubList 
+		def employeeSubList
 		def localisationMap = [:]
-		
-		
+
+
 		if (!fromIndex && (siteId == null || siteId.size() == 0)){
 			flash.message = message(code: 'ecart.site.selection.error')
 			params["fromIndex"]=true
@@ -94,18 +94,18 @@ class EmployeeController {
 			currentDate =  new Date().parse("dd/MM/yyyy", date_picker)
 			calendar.time=currentDate
 		}
-		
+
 		def functionList = Function.list([sort: "ranking", order: "asc"])
 		def serviceList = Service.list([sort: "name", order: "asc"])
-		
+
 		if (siteId != null && !siteId.equals("")){
 			 site = Site.get(params.int('site.id'))
 			 employeeInstanceList = []
-			 
+
 			 def foreignEmployees = []
 			 def foreignEmployeesIds = []
 			 criteria = DailyTotal.createCriteria()
-			 
+
 			 def dailyTotals = criteria.list{
 				 and {
 					 eq('day',calendar.get(Calendar.DAY_OF_MONTH))
@@ -121,21 +121,21 @@ class EmployeeController {
 					 localisationMap.put(dailyTotalIter.employee,site)
 				 }
 			 }
-			 
+
 			 for (Function function:functionList){
 				 for (Service service:serviceList){
 					  criteria = Employee.createCriteria()
-					  
+
 					  if (foreignEmployeesIds != null && foreignEmployeesIds.size() > 0){
 						  employeeSubList = criteria.list{
 							  or{
-								  
+
 								  and {
 									  eq('function',function)
 									  eq('service',service)
 									  eq('site',site)
 								  }
-								  
+
 								  and {
 									  eq('function',function)
 									  eq('service',service)
@@ -156,10 +156,10 @@ class EmployeeController {
 								  order('lastName','asc')
 							  }
 						  }
-						  
+
 					  }
 					  employeeInstanceList.addAll(employeeSubList)
-				 }							  
+				 }
 			 }
 		}else{
 			employeeInstanceList = []
@@ -169,7 +169,7 @@ class EmployeeController {
 				}
 			}
 		}
-		for (Employee employee:employeeInstanceList){	
+		for (Employee employee:employeeInstanceList){
 			inAndOutsForEmployee = []
 			criteria = DailyTotal.createCriteria()
 			dailyTotal = criteria.get{
@@ -178,49 +178,49 @@ class EmployeeController {
 					eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
 					eq('year',calendar.get(Calendar.YEAR))
 					eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-				}				
+				}
 			}
-			
+
 			if (dailyTotal != null && dailyTotal.site != null && dailyTotal.site != site){
 				def tmpSite = Site.findByName(dailyTotal.site.name)
 				localisationMap.put(employee,tmpSite)
 			}else{
 				localisationMap.put(employee,site)
 			}
-			
-			
-			criteria = InAndOut.createCriteria()			
+
+
+			criteria = InAndOut.createCriteria()
 			inAndOutList = criteria.list{
 				and {
 						eq('employee',employee)
 						eq('week',calendar.get(Calendar.WEEK_OF_YEAR))
 						eq('day',calendar.get(Calendar.DAY_OF_MONTH))
-						eq('month',calendar.get(Calendar.MONTH)+1)			
+						eq('month',calendar.get(Calendar.MONTH)+1)
 						eq('year',calendar.get(Calendar.YEAR))
-						order('time')				
+						order('time')
 					}
 			}
-			
+
 			maxSize = (inAndOutList != null && inAndOutList.size() > maxSize) ? inAndOutList.size() : maxSize
-			
+
 			for (InAndOut inOrOut : inAndOutList){
 				inAndOutsForEmployee.add("'"+inOrOut.time.format('yyyy-MM-dd HH:mm:SS')+"'")
 			}
-		
+
 			if (inAndOutList.size() < maxSize){
 				def difference = maxSize - inAndOutList.size()
 				for (int j = 0 ;j < difference ; j++){
 					inAndOutsForEmployee.add(null)
 				}
 			}
-			
+
 			if (fromIndex){
 				return [site:site,fromIndex:fromIndex,currentDate:calendar.time]
 			}
-			
-			dailyInAndOutMap.put(employee, inAndOutList)	
+
+			dailyInAndOutMap.put(employee, inAndOutList)
 			elapsedSeconds = dailyTotal != null ? (timeManagerService.getDailyTotal(dailyTotal)).get('elapsedSeconds') : 0
-	
+
 			if (elapsedSeconds > DailyTotal.maxWorkingTime){
 				dailySupMap.put(employee,elapsedSeconds-DailyTotal.maxWorkingTime)
 			}else{
@@ -229,14 +229,14 @@ class EmployeeController {
 			if (dailyTotal != null && (dailyTotal.site == site || dailyTotal.site == null)){
 				dailyMap.put(employee,elapsedSeconds)
 			}
-			
+
 			inAndOutsForEmployeeMap.put(employee,inAndOutsForEmployee)
-		}		
-		
+		}
+
 		def startDate=calendar.time
 		startDate.putAt(Calendar.HOUR_OF_DAY,6)
 		startDate.putAt(Calendar.MINUTE,0)
-		
+
 		if (site!=null){
 			render template: "/employee/template/listDailyTimeTemplate", model:[
 				inAndOutsForEmployeeMap:inAndOutsForEmployeeMap,
@@ -248,12 +248,12 @@ class EmployeeController {
 				dailyInAndOutMap:dailyInAndOutMap,
 				localisationMap:localisationMap,
 				maxSize:maxSize]
-			return	
+			return
 		}
 		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:calendar.time,maxSize:maxSize]
 	}
-	
-	
+
+
 	@Secured(['ROLE_ADMIN'])
 	def weeklyReport(){
 		log.error('weeklyReport called')
@@ -282,13 +282,13 @@ class EmployeeController {
 		 if (year == null){
 		 	year = calendar.get(Calendar.YEAR)
 		 }
-		 
+
 		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
 		def currentYear = year
 		def currentWeek = 0
 		def functionList = Function.list([sort: "ranking", order: "asc"])
 		def serviceList = Service.list([sort: "name", order: "asc"])
-		
+
 		if (site != null){
 			employeeInstanceList = []
 			for (Function function:functionList){
@@ -304,21 +304,21 @@ class EmployeeController {
 					 }
 					 employeeInstanceList.addAll(employeeSubList)
 				 }
-			 }			 
+			 }
 		}else{
 			employeeInstanceList = []
 			for (Service service:serviceList){
 				for (Function function:functionList){
 					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
 				}
-			}				
+			}
 		}
 		def rollingCal = Calendar.instance
 		rollingCal.set(Calendar.MONTH,5)
 		rollingCal.set(Calendar.DAY_OF_MONTH,1)
 		rollingCal.set(Calendar.YEAR,currentYear)
 		rollingCal.clearTime()
-		
+
 		def lastWeekOfYear = rollingCal.getActualMaximum(Calendar.WEEK_OF_YEAR)
 		def firstWeek = rollingCal.get(Calendar.WEEK_OF_YEAR)
 		def weekNumber = []
@@ -330,11 +330,11 @@ class EmployeeController {
 		endOfPeriodCal.set(Calendar.DAY_OF_MONTH,endOfPeriodCal.getActualMaximum(Calendar.DAY_OF_MONTH))
 		endOfPeriodCal.set(Calendar.YEAR,currentYear + 1)
 		endOfPeriodCal.clearTime()
-		
+
 		for (int j = 1; j <= endOfPeriodCal.get(Calendar.WEEK_OF_YEAR);j++){
 			weekNumber.add(j)
 		}
-				
+
 		def iteratorYear = currentYear
 		for (week in weekNumber){
 			if (week < firstWeek){
@@ -345,15 +345,15 @@ class EmployeeController {
 					and {
 						eq('year',iteratorYear)
 						eq('week',week)
-						
+
 						'in'('employee',employeeInstanceList)
-					}			
+					}
 				order('employee', 'asc')
 			}
 
 			weeklyTotalByWeek.put(week,weeklyTotals)
-			weekList.add(week)		
-			
+			weekList.add(week)
+
 			if (iteratorYear == currentYear && week == lastWeekOfYear){
 				log.error('we got the rest of the last week of year that is in the year + 1')
 				criteria = WeeklyTotal.createCriteria()
@@ -361,40 +361,40 @@ class EmployeeController {
 						and {
 							eq('year',currentYear + 1)
 							eq('week',week)
-							
+
 							'in'('employee',employeeInstanceList)
-						}				
+						}
 					order('employee', 'asc')
-				}						
+				}
 			}
 		}
 
 		for (WeeklyTotal weeklyTotal in lastWeekOfYearWeeklyTotals){
 			lastWeekOfYearByEmployee.put(weeklyTotal.employee,weeklyTotal)
 		}
-		
-			
+
+
 		def weeklyTotalsByWeek = [:]
 		for (int weekIter in weekList){
 			def weeklyTotalsByEmployee = [:]
-			for (Employee currentEmployee in employeeInstanceList){				
+			for (Employee currentEmployee in employeeInstanceList){
 				for (WeeklyTotal weeklyTotal in weeklyTotalByWeek.get(weekIter)){
 					if (weeklyTotal.employee == currentEmployee){
 						if (weeklyTotalsByEmployee.get(currentEmployee) == null){
 							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotal.elapsedSeconds as long)
 						}else{
-							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + weeklyTotal.elapsedSeconds as long)											
+							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + weeklyTotal.elapsedSeconds as long)
 						}
-						if (weekIter == lastWeekOfYear && lastWeekOfYearWeeklyTotals!= null && lastWeekOfYearByEmployee.get(currentEmployee) != null){							
-							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + lastWeekOfYearByEmployee.get(currentEmployee).elapsedSeconds as long)							
+						if (weekIter == lastWeekOfYear && lastWeekOfYearWeeklyTotals!= null && lastWeekOfYearByEmployee.get(currentEmployee) != null){
+							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + lastWeekOfYearByEmployee.get(currentEmployee).elapsedSeconds as long)
 						}
 						weeklyTotalsByWeek.put(weekIter,weeklyTotalsByEmployee)
 					}
-				}	
-							
-			}			
+				}
+
+			}
 		}
-		
+
 		if (!fromIndex && site == null){
 			flash.message = message(code: 'weeklyTime.site.selection.error')
 			params["fromIndex"]=true
@@ -402,7 +402,7 @@ class EmployeeController {
 			return
 		}
 		if (site!=null){
-			render template: "/employee/template/listWeeklyTimeTemplate", 
+			render template: "/employee/template/listWeeklyTimeTemplate",
 			model:[
 				site:site,
 				period:period,
@@ -416,7 +416,7 @@ class EmployeeController {
 		}
 		[currentDate:calendar.time]
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
 		log.debug('entering list for employee')
@@ -429,39 +429,39 @@ class EmployeeController {
 		def employeeInstanceTotal
 		def site
 		def siteId=params["site"]
-		boolean back = (params["back"] != null && params["back"].equals("true")) ? true : false		
-		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false	
-		
+		boolean back = (params["back"] != null && params["back"].equals("true")) ? true : false
+		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
+
 		def user = springSecurityService.currentUser
 		def username = user?.getUsername()
 		def criteria = Employee.createCriteria()
 
-					
+
 		if (params["site"]!=null && !params["site"].equals('') && !params["site"].equals('[id:]')){
 			site = Site.get(params.int('site'))
 			if (site != null)
-				siteId=site.id			
-		}	
+				siteId=site.id
+		}
 		if (params["siteId"]!=null && !params["siteId"].equals("")){
 			site = Site.get(params.int('siteId'))
 			if (site != null)
 				siteId=site.id
-		}		
-		
+		}
+
 		if (back){
 			if (site!=null){
 				employeeInstanceList = Employee.findAllBySite(site,['sort':'lastName','offset':offset])
-				employeeInstanceTotal = employeeInstanceList.size()		
-				[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]	
-			}else {	
+				employeeInstanceTotal = employeeInstanceList.size()
+				[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin,siteId:siteId,site:site]
+			}else {
 				def sites = Site.findAll("from Site")
 				employeeInstanceList = []
-				sites.each{siteTmp -> 
-					employeeInstanceList.addAll(Employee.findAllBySite(siteTmp,['sort':'lastName','offset':offset]))			
+				sites.each{siteTmp ->
+					employeeInstanceList.addAll(Employee.findAllBySite(siteTmp,['sort':'lastName','offset':offset]))
 				}
-	
+
 				employeeInstanceTotal = employeeInstanceList.size()
-				[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin]		
+				[employeeInstanceList: employeeInstanceList, employeeInstanceTotal: employeeInstanceList.size(),username:username,isAdmin:isAdmin]
 			}
 		}else{
 			if (site != null){
@@ -473,12 +473,12 @@ class EmployeeController {
 				def sites = Site.findAll("from Site")
 				employeeInstanceList = []
 				for (Site siteTmp : sites){
-					employeeInstanceList.addAll(Employee.findAllBySite(siteTmp,[offset: 0]))				
+					employeeInstanceList.addAll(Employee.findAllBySite(siteTmp,[offset: 0]))
 				}
 				employeeInstanceTotal = employeeInstanceList.size()
 			}
-		}	
-		
+		}
+
 		log.debug('employee list returned')
 		def newList = employeeInstanceList.take(20 + offset)
 		def newList2 = newList.drop(offset)
@@ -486,9 +486,9 @@ class EmployeeController {
 			render template: "/employee/template/listEmployeeTemplate", model:[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
 			return
 		}
-		[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]	
+		[employeeInstanceList: newList2, employeeInstanceTotal: employeeInstanceTotal,username:username,isAdmin:isAdmin,siteId:siteId,site:site]
     }
-	
+
 	@Secured(['ROLE_ADMIN'])
     def create() {
 		def service = params["employee.service.id"]
@@ -503,7 +503,7 @@ class EmployeeController {
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
 		def service = params["employee.service.id"]
 		def site = params["employee.site.id"]
-		def function = params["employee.function.id"]	
+		def function = params["employee.function.id"]
 		Status status
 		def employeeInstance =new Employee(params)
 		employeeInstance.service=Service.get(service)
@@ -512,9 +512,9 @@ class EmployeeController {
 
 		if ( params["updatedSelection"] == null || (params["updatedSelection"] != null && params["updatedSelection"].size() == 0)){
 			status = new Status(null, employeeInstance,StatusType.ACTIF)
-			employeeInstance.status = status		
+			employeeInstance.status = status
 		}
-			
+
         if (!employeeInstance.save(flush: true)) {
             render(view: "create", model: [employeeInstance: employeeInstance])
             return
@@ -550,7 +550,7 @@ class EmployeeController {
 	}
 
 	@Secured(['ROLE_ADMIN'])
-    def show(Long id) {		
+    def show(Long id) {
 		def siteId=params["siteId"]
 		def isAdmin = (params["isAdmin"] != null && params["isAdmin"].equals("true")) ? true : false
         def employeeInstance = Employee.get(id)
@@ -561,7 +561,7 @@ class EmployeeController {
         }
         [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]
     }
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def employeeExcelExport(){
 		def folder = grailsApplication.config.pdf.directory
@@ -577,26 +577,26 @@ class EmployeeController {
 						message(code: 'employee.firstName.label'),
 						message(code: 'employee.lastName.label'),
 						message(code: 'employee.birthName.label'),
-						message(code: 'employee.username.label'),						
-						message(code: 'employee.matricule.label'),							
-						message(code: 'employee.function.label'),						
-						message(code: 'laboratory.label'),						
-						message(code: 'service.label'),							
-						message(code: 'employee.weekly.hour.label'),						
+						message(code: 'employee.username.label'),
+						message(code: 'employee.matricule.label'),
+						message(code: 'employee.function.label'),
+						message(code: 'laboratory.label'),
+						message(code: 'service.label'),
+						message(code: 'employee.weekly.hour.label'),
 						message(code: 'employee.arrivalDate.short.label')]
 		int i = 1
-		def employeeValue = []	
-		def employeeList = (site != null) ? Employee.findAllBySite(site) : Employee.list()	
+		def employeeValue = []
+		def employeeList = (site != null) ? Employee.findAllBySite(site) : Employee.list()
 		def criteria = EmployeeDataListMap.createCriteria()
 		def employeeDataListMap = EmployeeDataListMap.find("from EmployeeDataListMap")
 		def dataListRank = EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
-		
+
 		def fieldMap = (dataListRank != null) ? dataListRank : [:]
 		dataListRank.each{rank->
 			headers.add(rank.fieldName)
 		}
 
-		def categoryList = Category.findAll()		
+		def categoryList = Category.findAll()
 		for (Category category : categoryList){
 			headers.add(message(code: 'default.authorization.label')+': \n'+category.name)
 			headers.add(message(code: 'authorization.startDate.label'))
@@ -608,54 +608,54 @@ class EmployeeController {
 				headers.add(message(code: 'authorization.endDate.label'))
 			}
 		}
-		
+
 		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/employee_list_template.xlsx').with {
-			setResponseHeaders(response)		
+			setResponseHeaders(response)
 			fillHeader(headers)
-			for(employee in employeeList) {			
+			for(employee in employeeList) {
 				employeeValue = []
 				employeeValue.add(employee.title != null ? employee.title :'-')
 				employeeValue.add(employee.lastName != null ? employee.lastName :'-')
 				employeeValue.add(employee.firstName != null ? employee.firstName :'-')
-				employeeValue.add((employee.birthName != null && !employee.birthName.equals('') ) ? employee.birthName :'-')				
+				employeeValue.add((employee.birthName != null && !employee.birthName.equals('') ) ? employee.birthName :'-')
 				employeeValue.add(employee.userName != null ? employee.userName :'-')
 				employeeValue.add(employee.matricule != null ? employee.matricule :'-')
 				employeeValue.add(employee.function != null ? employee.function.name :'-')
 				employeeValue.add(employee.site != null ? employee.site.name :'-')
-				employeeValue.add(employee.service != null ? employee.service.name :'-')				
+				employeeValue.add(employee.service != null ? employee.service.name :'-')
 				employeeValue.add(employee.weeklyContractTime != null ? employee.weeklyContractTime :'-')
 				employeeValue.add(employee.arrivalDate != null ? employee.arrivalDate.format('dd/MM/yyyy') :'-')
-				
+
 				fieldMap.each{rank->
-					value = employee.extraData.get(rank.fieldName)	
+					value = employee.extraData.get(rank.fieldName)
 					if (value == null || value.equals('')){
 						value = '-'
-					}			
+					}
 					if ((employeeDataListMap.fieldMap.get(rank.fieldName)).equals('DATE')){
 						if (value != null && !value.equals('-')){
 							value = (new Date().parse("yyyyMd", value)).format('dd/MM/yyyy')
 						}
-					}				
+					}
 					employeeValue.add(value)
-				}			
-				
+				}
+
 				authorizations = Authorization.findByEmployee(employee)
-				
+
 				for (Category category : categoryList){
-					
-					
+
+
 					authorization = Authorization.findByCategoryAndEmployee(category,employee)
 					if (authorization != null){
 						employeeValue.add(authorization.isAuthorized)
 						employeeValue.add(authorization.startDate != null ? authorization.startDate.format('dd/MM/yyyy') :'-')
 						employeeValue.add(authorization.endDate != null ? authorization.endDate.format('dd/MM/yyyy') :'-')
-						
+
 					}else{
 						employeeValue.add('-')
 						employeeValue.add('-')
 						employeeValue.add('-')
 					}
-					
+
 					def subCategoryList = category.subCategories
 					for (SubCategory subCategory:subCategoryList){
 						authorization = Authorization.findBySubCategoryAndEmployee(subCategory,employee)
@@ -663,7 +663,7 @@ class EmployeeController {
 							employeeValue.add(authorization.isAuthorized)
 							employeeValue.add(authorization.startDate != null ? authorization.startDate.format('dd/MM/yyyy') :'-')
 							employeeValue.add(authorization.endDate != null ? authorization.endDate.format('dd/MM/yyyy') :'-')
-							
+
 						}else{
 							employeeValue.add('-')
 							employeeValue.add('-')
@@ -671,35 +671,35 @@ class EmployeeController {
 						}
 					}
 				}
-				
-				
+
+
 
 				fillRow(employeeValue,i)
 				i+=1
 
-			}		
+			}
 			save(response.outputStream)
-		}	
+		}
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def vacationExcelExport(){
 		params.each{i-> log.debug('param: '+i)}
 		log.error('entering vacationExcelExport with params: site: '+params['site'])
-		def folder = grailsApplication.config.pdf.directory	
+		def folder = grailsApplication.config.pdf.directory
 		def siteId = params['siteId']
-		def calendar = Calendar.instance	
+		def calendar = Calendar.instance
 		def result
 		def site = Site.get(params.int("siteId"))
 		if (params['myDate_month'] != null && params['myDate_year'] != null){
 			calendar.set(Calendar.MONTH,params.int("myDate_month") - 1)
 			calendar.set(Calendar.YEAR,params.int("myDate_year"))
 		}
-		
+
 		if (site != null){
 			result = employeeService.getMonthlyPresence(site,calendar.time)
 		}
-		
+
 		def lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 		calendar.set(Calendar.DAY_OF_MONTH,1)
 		def headers = [message(code: 'laboratory.label'), message(code: 'employee.label')]
@@ -707,7 +707,7 @@ class EmployeeController {
 			headers.add(calendar.time.format('E dd MMM'))
 			calendar.roll(Calendar.DAY_OF_MONTH,1)
 		}
-		
+
 		headers.add(AbsenceType.VACANCE)
 		headers.add(AbsenceType.RTT)
 		headers.add(AbsenceType.AUTRE)
@@ -715,8 +715,8 @@ class EmployeeController {
 		headers.add(AbsenceType.PATERNITE)
 		headers.add(AbsenceType.CSS)
 		headers.add(AbsenceType.DIF)
-		headers.add(AbsenceType.GROSSESSE)		
-		headers.add(AbsenceType.MALADIE)				
+		headers.add(AbsenceType.GROSSESSE)
+		headers.add(AbsenceType.MALADIE)
 		def employeeDailyMap = result.get('employeeDailyMap')
 		def employeeAbsenceMap = result.get('employeeAbsenceMap')
 		def employeeList = result.get('employeeList')
@@ -725,14 +725,14 @@ class EmployeeController {
 		def absenceList = []
 		def absenceMap
 		int i = 1
-			
+
 		new WebXlsxExporter(folder+'/vacation_template.xlsx').with {
 			setResponseHeaders(response)
-			fillHeader(headers)			
+			fillHeader(headers)
 			for(employee in employeeList) {
 				dailyList = [employee.site,employee.lastName]
 				dailyMap = employeeDailyMap.get(employee)
-				dailyMap.each{ k, v -> 
+				dailyMap.each{ k, v ->
 					dailyList.add(v)
 				}
 				absenceMap = employeeAbsenceMap.get(employee)
@@ -741,12 +741,12 @@ class EmployeeController {
 				}else{
 					dailyList.add(0)
 				}
-				
+
 				if (absenceMap.get(AbsenceType.RTT) != null){
 					dailyList.add(absenceMap.get(AbsenceType.RTT))
 				}else{
 					dailyList.add(0)
-				}				
+				}
 				if (absenceMap.get(AbsenceType.AUTRE) != null){
 					dailyList.add(absenceMap.get(AbsenceType.AUTRE))
 				}else{
@@ -793,10 +793,10 @@ class EmployeeController {
 			save(response.outputStream)
 		}
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def monthlyVacationFollowup(){
-		log.error('entering monthlyVacationFollowup')		
+		log.error('entering monthlyVacationFollowup')
 		def calendar = Calendar.instance
 		def thisMonthCalendar = Calendar.instance
 		def site
@@ -806,10 +806,10 @@ class EmployeeController {
 		def employeeList
 		def boolean isCurrentMonth = false
 		def criteria
-		
+
 		if (params["site.id"] != null && !params["site.id"].equals("")){
 			def coco = params["site.id"]
-			
+
 			if (params["site.id"] instanceof String[]){
 				if (params.("site.id")[0] != ""){
 					site = Site.get(params.("site.id")[0])
@@ -819,7 +819,7 @@ class EmployeeController {
 			}
 		}
 		if (site == null && params["siteId"] != null && !params["siteId"].equals("")){
-			site = Site.get(params.int("siteId"))			
+			site = Site.get(params.int("siteId"))
 		}
 
 		if (site == null){
@@ -827,40 +827,40 @@ class EmployeeController {
 			redirect(action: "vacationFollowup")
 			return
 		}
-		
+
 		if (params['myDate_month'] != null && params['myDate_year'] != null){
 			calendar.set(Calendar.MONTH,params.int("myDate_month") - 1)
 			calendar.set(Calendar.YEAR,params.int("myDate_year"))
 		}
-		
+
 		//special case: requested month is not over: need to stop at current day
 		if (thisMonthCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) && thisMonthCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) ){
 			isCurrentMonth = true
 		}
-		
+
 		Period period = (calendar.get(Calendar.MONTH) < 5) ? Period.findByYear(calendar.get(Calendar.YEAR) - 1) : Period.findByYear(calendar.get(Calendar.YEAR))
 		def lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 		def tmpDay = lastDay
-		
+
 		if (site != null){
 			result = employeeService.getMonthlyPresence(site,calendar.time)
 		}
 		return [
 			lastDay:tmpDay,
 			employeeDailyMap:result.get('employeeDailyMap'),
-			employeeAbsenceMap:result.get('employeeAbsenceMap'),			
+			employeeAbsenceMap:result.get('employeeAbsenceMap'),
 			siteId:site.id,
 			site:site,
 			myDate:calendar.time
 		]
-		
+
 	}
 
 	@Secured(['ROLE_ADMIN'])
 	def vacationFollowup(){
 		def year = params["year"]
 		def max = params["max"] != null ? params.int("max") : 20
-		def offset = params["offset"] != null ? params.int("offset") : 0	
+		def offset = params["offset"] != null ? params.int("offset") : 0
 		def site
 		def siteId
 		def employeeInstanceList
@@ -875,7 +875,7 @@ class EmployeeController {
 		def takenSicknessMap = [:]
 		def takenCSSMap = [:]
 		def takenAutreMap = [:]
-		def takenExceptionnelMap = [:]		
+		def takenExceptionnelMap = [:]
 		def takenPaterniteMap = [:]
 		def takenDifMap = [:]
 		def formationMap = [:]
@@ -886,13 +886,13 @@ class EmployeeController {
 		def takenAutre
 		def takenExceptionnel
 		def takenPaternite
-		def takenDIF	
+		def takenDIF
 		def formation
 		def employeeInstanceTotal
-		
+
 		if (params["siteId"]!=null && !params["siteId"].equals("")){
 			site = Site.get(params["siteId"])
-			siteId=site.id	
+			siteId=site.id
 		}else{
 			if (params["site.id"]!=null && !params["site.id"].equals("")){
 				def tmpSite = params["site.id"]
@@ -903,25 +903,25 @@ class EmployeeController {
 				}else {
 					tmpSite=tmpSite.toInteger()
 				}
-				site = Site.get(tmpSite)						
-				siteId=site.id			
+				site = Site.get(tmpSite)
+				siteId=site.id
 			}
 		}
-		
-		if (year!=null && !year.equals("")){		
+
+		if (year!=null && !year.equals("")){
 			if (year instanceof String[]){
-				year= (year[0] != "") ? year[0].toInteger():year[1].toInteger()					
+				year= (year[0] != "") ? year[0].toInteger():year[1].toInteger()
 			}else {
-				year=year.toInteger()	
+				year=year.toInteger()
 			}
 		}
-		
+
 		def startCalendar = Calendar.instance
 		def currentMonth = startCalendar.get(Calendar.MONTH)
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
 		startCalendar.clearTime()
-		
+
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
 		endCalendar.set(Calendar.DAY_OF_MONTH,31)
@@ -929,24 +929,24 @@ class EmployeeController {
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
-		
+
 		if (year != null){
 			period = Period.get(year)
 		}else{
 			period = (currentMonth < 5) ? Period.findByYear(startCalendar.get(Calendar.YEAR) - 1) : Period.findByYear(startCalendar.get(Calendar.YEAR))
 		}
-			
+
 		if (site != null){
 			employeeInstanceList = Employee.findAllBySite(site)
-			employeeInstanceTotal = employeeInstanceList.size()		
+			employeeInstanceTotal = employeeInstanceList.size()
 			employeeInstanceList = Employee.findAllBySite(site,[max:max,offset:offset])
-			
+
 		}else{
 			employeeInstanceList = Employee.findAll("from Employee")
 			employeeInstanceTotal = employeeInstanceList.size()
-			employeeInstanceList = Employee.findAll("from Employee",[max:max,offset:offset])	
+			employeeInstanceList = Employee.findAll("from Employee",[max:max,offset:offset])
 		}
-				
+
 		// for each employee, retrieve absences
 		for (Employee employee: employeeInstanceList){
 			// step 1: fill initial values
@@ -963,7 +963,7 @@ class EmployeeController {
 			if (initialCA != null){
 				initialCAMap.put(employee, initialCA.counter)
 			}else{
-				initialCAMap.put(employee, 0)		
+				initialCAMap.put(employee, 0)
 			}
 			//RTT
 			criteria = Vacation.createCriteria()
@@ -979,7 +979,7 @@ class EmployeeController {
 			}else{
 				initialRTTMap.put(employee, 0)
 			}
-			
+
 			// step 2: fill actual counters
 			startCalendar.set(Calendar.YEAR,period.year)
 			endCalendar.set(Calendar.YEAR,period.year+1)
@@ -999,7 +999,7 @@ class EmployeeController {
 			}else{
 				remainingCAMap.put(employee, initialCAMap.get(employee))
 				takenCAMap.put(employee, 0)
-				
+
 			}
 			//RTT
 			criteria = Absence.createCriteria()
@@ -1014,12 +1014,12 @@ class EmployeeController {
 			if (takenRTT!=null){
 				remainingRTTMap.put(employee, initialRTTMap.get(employee)-takenRTT.size())
 				takenRTTMap.put(employee, takenRTT.size())
-				
+
 			}else{
 				remainingRTTMap.put(employee, initialRTTMap.get(employee))
 				takenRTTMap.put(employee, 0)
 			}
-			
+
 			// SICKNESS
 			criteria = Absence.createCriteria()
 			takenSickness = criteria.list {
@@ -1029,13 +1029,13 @@ class EmployeeController {
 					lt('date',endCalendar.time)
 					eq('type',AbsenceType.MALADIE)
 				}
-			}			
+			}
 			if (takenSickness!=null){
 				takenSicknessMap.put(employee, takenSickness.size())
 			}else{
 				takenSicknessMap.put(employee, 0)
-			}	
-							
+			}
+
 			//CSS
 			criteria = Absence.createCriteria()
 			takenCSS = criteria.list {
@@ -1045,7 +1045,7 @@ class EmployeeController {
 					lt('date',endCalendar.time)
 					eq('type',AbsenceType.CSS)
 				}
-			}			
+			}
 			if (takenCSS!=null){
 				takenCSSMap.put(employee, takenCSS.size())
 			}else{
@@ -1067,7 +1067,7 @@ class EmployeeController {
 			}else{
 				takenAutreMap.put(employee, 0)
 			}
-			
+
 			//FORMATION
 			criteria = Absence.createCriteria()
 			formation = criteria.list {
@@ -1083,7 +1083,7 @@ class EmployeeController {
 			}else{
 				formationMap.put(employee, 0)
 			}
-			
+
 			//EXCEPTIONNEL
 			criteria = Absence.createCriteria()
 			takenExceptionnel = criteria.list {
@@ -1099,7 +1099,7 @@ class EmployeeController {
 			}else{
 				takenExceptionnelMap.put(employee, 0)
 			}
-			
+
 			//PATERNITE
 			criteria = Absence.createCriteria()
 			takenExceptionnel = criteria.list {
@@ -1115,7 +1115,7 @@ class EmployeeController {
 			}else{
 				takenPaterniteMap.put(employee, 0)
 			}
-			
+
 			//DIF
 			criteria = Absence.createCriteria()
 			takenDIF = criteria.list {
@@ -1153,14 +1153,14 @@ class EmployeeController {
 			remainingRTTMap:remainingRTTMap,
 			remainingCAMap:remainingCAMap,
 			formationMap:formationMap
-		]	
+		]
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
-	def vacationDisplay(Long id){		
+	def vacationDisplay(Long id){
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
 		def siteId=params["siteId"]
-		def employeeInstance = Employee.get(id)		
+		def employeeInstance = Employee.get(id)
 		def criteria
 		def takenCA=[]
 		def takenRTT=[]
@@ -1184,7 +1184,7 @@ class EmployeeController {
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
 		startCalendar.clearTime()
-		
+
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
 		endCalendar.set(Calendar.DAY_OF_MONTH,31)
@@ -1208,7 +1208,7 @@ class EmployeeController {
 				initialCAMap.put(period.year, initialCA.counter)
 			}else{
 				initialCAMap.put(period.year, 0)
-			
+
 			}
 			//RTT
 			criteria = Vacation.createCriteria()
@@ -1224,7 +1224,7 @@ class EmployeeController {
 			}else{
 				initialRTTMap.put(period.year, 0)
 			}
-			
+
 			// step 2: fill actual counters
 			startCalendar.set(Calendar.YEAR,period.year)
 			endCalendar.set(Calendar.YEAR,period.year+1)
@@ -1244,7 +1244,7 @@ class EmployeeController {
 			}else{
 				remainingCAMap.put(period.year, initialCAMap.get(period.year))
 				takenCAMap.put(period.year, 0)
-				
+
 			}
 			//RTT
 			criteria = Absence.createCriteria()
@@ -1259,12 +1259,12 @@ class EmployeeController {
 			if (takenRTT!=null){
 				remainingRTTMap.put(period.year, initialRTTMap.get(period.year)-takenRTT.size())
 				takenRTTMap.put(period.year, takenRTT.size())
-				
+
 			}else{
 				remainingRTTMap.put(period.year, initialRTTMap.get(period.year))
-				takenRTTMap.put(period.year, 0)			
+				takenRTTMap.put(period.year, 0)
 			}
-			
+
 			criteria = Absence.createCriteria()
 			takenSickness = criteria.list {
 				and {
@@ -1274,13 +1274,13 @@ class EmployeeController {
 					eq('type',AbsenceType.MALADIE)
 				}
 			}
-			
+
 			if (takenSickness!=null){
-				takenSicknessMap.put(period.year, takenSickness.size())				
+				takenSicknessMap.put(period.year, takenSickness.size())
 			}else{
 				takenSicknessMap.put(period.year, 0)
-			}		
-			
+			}
+
 			criteria = Absence.createCriteria()
 			takenCSS = criteria.list {
 				and {
@@ -1290,11 +1290,11 @@ class EmployeeController {
 					eq('type',AbsenceType.CSS)
 				}
 			}
-			
+
 			if (takenCSS!=null){
-				takenCSSMap.put(period.year, takenCSS.size())				
+				takenCSSMap.put(period.year, takenCSS.size())
 			}else{
-				takenCSSMap.put(period.year, 0)		
+				takenCSSMap.put(period.year, 0)
 			}
 
 			criteria = Absence.createCriteria()
@@ -1306,14 +1306,14 @@ class EmployeeController {
 					eq('type',AbsenceType.AUTRE)
 				}
 			}
-			
+
 			if (takenAutre!=null){
 				takenAutreMap.put(period.year, takenAutre.size())
 			}else{
 				takenAutreMap.put(period.year, 0)
-			}	
-			
-			
+			}
+
+
 			criteria = Absence.createCriteria()
 			formation = criteria.list {
 				and {
@@ -1323,13 +1323,13 @@ class EmployeeController {
 					eq('type',AbsenceType.FORMATION)
 				}
 			}
-			
+
 			if (formation!=null){
 				formationMap.put(period.year, formation.size())
 			}else{
 				formationMap.put(period.year, 0)
 			}
-						
+
 		}
 	[
 		takenCSSMap:takenCSSMap,
@@ -1345,22 +1345,22 @@ class EmployeeController {
 		remainingRTTMap:remainingRTTMap,
 		formationMap:formationMap,
 		remainingCAMap:remainingCAMap
-		]	
+		]
 
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
     def edit(Long id) {
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
 		def fromSite = (params["fromSite"] != null  && params["fromSite"].equals("true")) ? true : false
-		def back = (params["back"] != null  && params["back"].equals("true")) ? true : false		
+		def back = (params["back"] != null  && params["back"].equals("true")) ? true : false
         def employeeInstance = Employee.get(id)
-		def myDate = params["myDate"] 
+		def myDate = params["myDate"]
 		def siteId=params["siteId"]
 		def orderedVacationList=[]
 		def previousContracts
 		// starting calendar: 1 of June of the period
-		def startCalendar = Calendar.instance		
+		def startCalendar = Calendar.instance
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
 		startCalendar.clearTime()
@@ -1371,27 +1371,27 @@ class EmployeeController {
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
-		
+
 		def periodList= Period.findAll("from Period as p order by year asc")
-		
+
 		for (Period period:periodList){
 			def vacations = Vacation.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
 			for (Vacation vacation:vacations){
 				orderedVacationList.add(vacation)
-			}			
-		}				
+			}
+		}
 		previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'startDate',order:'desc'])
         if (!employeeInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'employee.label', default: 'Employee'), id])
             redirect(action: "list")
             return
         }
-		def arrivalDate = employeeInstance.arrivalDate		
+		def arrivalDate = employeeInstance.arrivalDate
 		def criteria = EmployeeDataListMap.createCriteria()
 		def employeeDataListMap= EmployeeDataListMap.find("from EmployeeDataListMap")
 		def dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
 		def authorizationInstanceList = Authorization.findAllByEmployee(employeeInstance)
-		
+
 		def retour = [
 			authorizationInstanceList:authorizationInstanceList,
 			fromEditEmployee:true,
@@ -1405,33 +1405,33 @@ class EmployeeController {
 			isAdmin:isAdmin,siteId:siteId,
 			employeeDataListMapInstance:employeeDataListMap,
 			dataListRank:dataListRank
-		]		
+		]
 		return retour
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def getAjaxSupplementaryTime(Long id) {
 		def year = params.int('year')
  		def month = params.int('month')
-		 
+
 		log.error("getAjaxSupplementaryTime triggered with params: month="+month+" and year="+year)
-		def employee = Employee.get(id)		
+		def employee = Employee.get(id)
 		def model
 		def currentContract
 		def calendar = Calendar.instance
 		calendar.set(Calendar.YEAR,year)
 		calendar.set(Calendar.MONTH,month)
-	
+
 		if (employee){
 			model = timeManagerService.getYearSupTime(employee,year,month,false)
 		}
-		
+
 		log.error("getAjaxSupplementaryTime has terminated")
 		model << [id:id,month:month,year:year]
 		render template: "/employee/template/yearSupplementaryTime", model: model
-		return 
+		return
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def getAjaxOffHoursTime(Long id){
 		log.error('getOffHoursTime called')
@@ -1443,30 +1443,30 @@ class EmployeeController {
 		def model = timeManagerService.getOffHoursTime(employee,year)
 		log.error("getOffHoursTime has terminated")
 		render template: "/employee/template/offHoursTime", model: model
-		return 
+		return
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def getSupplementaryTime(Long id) {
 		def employeeInstance = Employee.get(id)
 		def data
-		def period = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)	
-		data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)	
+		def period = ((new Date()).getAt(Calendar.MONTH) >= 5) ? Period.findByYear(new Date().getAt(Calendar.YEAR)) : Period.findByYear(new Date().getAt(Calendar.YEAR) - 1)
+		data = supplementaryTimeService.getAllSupAndCompTime(employeeInstance,period)
 		def model = [employeeInstance:employeeInstance]
-		model << data 		
+		model << data
 		return model
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def cartouche(long userId,int year,int month){
 		def employeeInstance = Employee.get(userId)
 		return timeManagerService.getCartoucheData(employeeInstance,year,month)
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def modifyAllAbsence(){
 		log.error('entering modifyAllAbsence')
-		
+
 		def employee = Employee.get(params.int('employeeId'))
 		def updatedSelection = params["updatedSelection"].toString()
 		if (updatedSelection.equals('G'))
@@ -1479,28 +1479,28 @@ class EmployeeController {
 			updatedSelection = AbsenceType.FORMATION
 		if (updatedSelection.equals('CE'))
 			updatedSelection = AbsenceType.EXCEPTIONNEL
-		
+
 			if (updatedSelection.equals('RTT'))
 			updatedSelection = AbsenceType.RTT
-			
+
 			if (updatedSelection.equals('V'))
 			updatedSelection = AbsenceType.VACANCE
-			
+
 			if (updatedSelection.equals('R'))
 			updatedSelection = AbsenceType.AUTRE
-			
+
 			if (updatedSelection.equals('CSS'))
 			updatedSelection = AbsenceType.CSS
-			
+
 			if (updatedSelection.equals('F'))
 			updatedSelection = AbsenceType.FERIE
-			
+
 			if (updatedSelection.equals('CP'))
 			updatedSelection = AbsenceType.PATERNITE
-			
+
 			if (updatedSelection.equals('DIF'))
 			updatedSelection = AbsenceType.DIF
-			
+
 			if (updatedSelection.equals('AI'))
 			updatedSelection = AbsenceType.INJUSTIFIE
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
@@ -1510,7 +1510,7 @@ class EmployeeController {
 		calendarLoop.time=date
 		calendarLoop.set(Calendar.DAY_OF_MONTH,1)
 		log.error(calendarLoop.time)
-		// check if an absence was already logged:			
+		// check if an absence was already logged:
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendarLoop.getActualMaximum(Calendar.DAY_OF_MONTH)){
 			if (!updatedSelection.equals('')){
 				criteria = Absence.createCriteria()
@@ -1523,7 +1523,7 @@ class EmployeeController {
 						eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
 					}
 				}
-		
+
 				if (absence != null){
 					if (updatedSelection.equals(AbsenceType.ANNULATION.key)){
 						// annulation nécessaire: il faut effacer le tupple
@@ -1560,7 +1560,7 @@ class EmployeeController {
 			if (calendarLoop.get(Calendar.DAY_OF_MONTH) == calendarLoop.getActualMaximum(Calendar.DAY_OF_MONTH)){
 				break
 			}
-			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)	
+			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
 		}
 
 		def cartoucheTable = timeManagerService.getReportData(null, employee,  null, calendarLoop.get(Calendar.MONTH) + 1, calendarLoop.get(Calendar.YEAR),true)
@@ -1592,7 +1592,7 @@ class EmployeeController {
 		render template: "/employee/template/cartoucheTemplate", model:model
 		return
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def modifyAbsence(){
 		def employee = Employee.get(params.int('employeeId'))
@@ -1614,7 +1614,7 @@ class EmployeeController {
 		cal.time=date
 		if (!updatedSelection.equals('')){
 			// check if an absence was already logged:
-			criteria = Absence.createCriteria()			
+			criteria = Absence.createCriteria()
 			// get cumul holidays
 			def absence = criteria.get {
 				and {
@@ -1624,18 +1624,18 @@ class EmployeeController {
 					eq('day',cal.get(Calendar.DAY_OF_MONTH))
 				}
 			}
-	
+
 			if (absence != null){
 				if (updatedSelection.equals(AbsenceType.ANNULATION.key)){
 					// annulation nécessaire: il faut effacer le tupple
 					absence.delete(flush: true)
 				}else{
-					absence.type=updatedSelection					
+					absence.type=updatedSelection
 					if (absence.month < 6){
 						absence.period=Period.findByYear(absence.year - 1)
 					}else{
 						absence.period=Period.findByYear(absence.year)
-					}				
+					}
 					absence.save(flush: true)
 				}
 			}else {
@@ -1646,18 +1646,18 @@ class EmployeeController {
 					absence.day=cal.get(Calendar.DAY_OF_MONTH)
 					absence.month=cal.get(Calendar.MONTH)+1
 					absence.year=cal.get(Calendar.YEAR)
-					absence.type=updatedSelection					
+					absence.type=updatedSelection
 					if (absence.month < 6){
 						absence.period=Period.findByYear(absence.year - 1)
 					}else{
 						absence.period=Period.findByYear(absence.year)
-					}			
+					}
 					absence.save(flush: true)
 				}
 			}
 		}else{
 			flash.message=message(code: 'absence.impossible.update')
-		}	
+		}
 		def cartoucheTable = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),true)
 		def openedDays = timeManagerService.computeMonthlyHours(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH) + 1)
 		def yearInf
@@ -1686,7 +1686,7 @@ class EmployeeController {
 		render template: "/employee/template/cartoucheTemplate", model:model
 		return
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def modifySite(){
 		log.error('modifySite called')
@@ -1699,11 +1699,11 @@ class EmployeeController {
 		def criteria
 		def dailyTotal
 		def site
-		cal.time = date	
+		cal.time = date
 		if (siteName != null && siteName.size() > 0 && !siteName.equals('')){
 			site  = Site.findByName(siteName)
 			if (site != null){
-				criteria = DailyTotal.createCriteria()			
+				criteria = DailyTotal.createCriteria()
 				// get cumul holidays
 				dailyTotal = criteria.get {
 					and {
@@ -1722,27 +1722,27 @@ class EmployeeController {
 			}
 		}
 		def report = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),true)
-		log.error('modifySite ended')		
-		render template: "/employee/template/reportTableTemplate", model: report	
+		log.error('modifySite ended')
+		render template: "/employee/template/reportTableTemplate", model: report
 		return
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def addingEventToEmployee(){
 		params.each{i->log.error(i)}
-		def cal = Calendar.instance	
-		
-		def type = params["type"].equals("Entrer") ? "E" : "S" 
+		def cal = Calendar.instance
+
+		def type = params["type"].equals("Entrer") ? "E" : "S"
 		def isOutSideSite = params["isOutSideSite"].equals("true") ? true : false
-		Employee employeeInstance = Employee.get(params['userId'])		
+		Employee employeeInstance = Employee.get(params['userId'])
 		def currentDate = cal.time
 		def criteria
 		def entranceStatus = params.boolean("entranceStatus")//false
 		type = entranceStatus ? "E" : "S"
-		def timeDiff		
+		def timeDiff
 		def flashMessage=true
 		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).time
-				
+
 		log.error('trying to add event to employee '+employeeInstance.firstName+' '+employeeInstance.lastName+' with type: '+type)
 		// liste les entrees de la journée et vérifie que cette valeur n'est pas supérieure à une valeur statique
 		def inAndOutcriteria = InAndOut.createCriteria()
@@ -1772,7 +1772,7 @@ class EmployeeController {
 			}
 			maxResults(1)
 		}
-		
+
 		if (lastIn != null){
 			def LIT = lastIn.time
 			use (TimeCategory){timeDiff=currentDate-LIT}
@@ -1782,14 +1782,14 @@ class EmployeeController {
 				flashMessage=false
 			}
 		}
-		
+
 		// initialisation
 		if (flashMessage){
 			def inOrOut = timeManagerService.initializeTotals(employeeInstance,currentDate,type,null,isOutSideSite)
-			timeManagerService.getDailyTotalWithMonth(inOrOut.dailyTotal)	
+			timeManagerService.getDailyTotalWithMonth(inOrOut.dailyTotal)
 			log.error('entry created with params: '+inOrOut)
 		}
-		
+
 		criteria = InAndOut.createCriteria()
 		def inAndOuts = criteria.list {
 			and {
@@ -1800,7 +1800,7 @@ class EmployeeController {
 				order('time','asc')
 			}
 		}
-			
+
 		if (lastIn!=null){
 			if (flashMessage){
 				entranceStatus = lastIn.type.equals("S") ? true : false
@@ -1814,15 +1814,15 @@ class EmployeeController {
 			if (flashMessage)
 				flash.message = message(code: 'inAndOut.create.label', args: [message(code: 'inAndOut.entry.label', default: 'exit'), cal.time])
 		}else{
-			if (flashMessage)		
+			if (flashMessage)
 				flash.message = message(code: 'inAndOut.create.label', args: [message(code: 'inAndOut.exit.label', default: 'exit'), cal.time])
 		}
-		
+
 		def model = timeManagerService.getPointageData(employeeInstance)
 		model << [userId: employeeInstance.id,employee: employeeInstance]
 		render template: "/employee/template/last5DaysTemplate", model:model
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
     def update(Long id, Long version) {
 		def siteId=params["siteId"]
@@ -1841,10 +1841,10 @@ class EmployeeController {
                 render(view: "edit", model: [employeeInstance: employeeInstance])
                 return
             }
-        }		
-		log.debug('employee status: '+employeeInstance.status)	
+        }
+		log.debug('employee status: '+employeeInstance.status)
         employeeInstance.properties = params
-		
+
 		if (params["weeklyContractTime"] != null){
 			employeeInstance.weeklyContractTime = params.float("weeklyContractTime")
 		}
@@ -1854,25 +1854,25 @@ class EmployeeController {
 			service = Service.get(service)
 			employeeInstance.service=service
 		}
-		
+
 		def site = params["employee.site.id"]
 		if (site!=null && !site.equals('')){
 			site = Site.get(site)
 			employeeInstance.site=site
 		}
-		
+
 		def function = params["employee.function.id"]
 		if (function!=null && !function.equals('')){
 			function = Function.get(function)
 			employeeInstance.function=function
 		}
 
-		/* dealing with employee extra data*/ 
+		/* dealing with employee extra data*/
 		def criteria = EmployeeDataListMap.createCriteria()
 		def employeeDataListMapInstance = EmployeeDataListMap.find("from EmployeeDataListMap")
 
 		employeeDataListMapInstance.fieldMap.each{k,v->
-			
+
 			log.error('key: '+k)
 			log.error('value: '+v)
 			log.error('params[k]: '+params[k])
@@ -1880,7 +1880,7 @@ class EmployeeController {
 				employeeInstance.extraData = [:]
 			}
 			if (params[k] != null){
-				if (v.equals('DATE')){			
+				if (v.equals('DATE')){
 					employeeInstance.extraData.put(k,params[k+'_year']+params[k+'_month']+params[k+'_day'])
 				}else{
 					employeeInstance.extraData.put(k,params[k])
@@ -1888,10 +1888,10 @@ class EmployeeController {
 				if (params[k] == ''){
 					employeeInstance.extraData.remove(k)
 				}
-			}		
+			}
 		}
 		//employeeInstance.extraData
-		//employeeInstance.status = employeeStatus		
+		//employeeInstance.status = employeeStatus
         if (!employeeInstance.save(flush: true)) {
             render(view: "edit", model: [employeeInstance: employeeInstance])
             return
@@ -1899,14 +1899,14 @@ class EmployeeController {
         flash.message = message(code: 'default.updated.message', args: [message(code: 'employee.label', default: 'Employee'), employeeInstance.userName])
         redirect(action: "edit", id: employeeInstance.id,params: [isAdmin: isAdmin,siteId:siteId])
     }
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def changeContractParams(){
 		def employee = Employee.get(params["userId"])
 		def contract = Contract.get(params["contractId"])
 		def newDate
-		def newValue		
-		if (params["newDate"] != null) {			
+		def newValue
+		if (params["newDate"] != null) {
 			if (params["newDate"] == ''){
 				if (params["type"].contains('startDate')){
 					// throw error: start date cannot be null
@@ -1915,24 +1915,24 @@ class EmployeeController {
 					contract.endDate = null
 				}
 			}else{
-				newDate = new Date().parse("d/M/yyyy",params["newDate"])		
+				newDate = new Date().parse("d/M/yyyy",params["newDate"])
 				if (params["type"].contains('startDate')){
-					contract.startDate = newDate					
+					contract.startDate = newDate
 				}else {
-					contract.endDate = newDate				
+					contract.endDate = newDate
 				}
-			}	
+			}
 		}
 		if (params["newValue"] != null){
 			newValue = params["newValue"].toFloat()
 			contract.weeklyLength = newValue
-		}		
+		}
 		def contracts = Contract.findAllByEmployee(employee,[sort:'startDate',order:'desc'])
-		def model = [previousContracts:contracts,employeeInstance: employee]	
+		def model = [previousContracts:contracts,employeeInstance: employee]
 		render template: "/employee/template/contractTable", model: model
 		return
 	}
-		
+
 	@Secured(['ROLE_ADMIN'])
 	def trashContract(){
 		def contractId=params["contractId"]
@@ -1941,13 +1941,13 @@ class EmployeeController {
 		log.error('removing contract '+contract)
 		contract.delete(flush:true)
 		def contracts = Contract.findAllByEmployee(employee,[sort:'startDate',order:'desc'])
-		def model = [previousContracts:contracts,employeeInstance: employee]	
+		def model = [previousContracts:contracts,employeeInstance: employee]
 		render template: "/employee/template/contractTable", model: model
 		return
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
-    def delete(Long id) {		
+    def delete(Long id) {
         def employeeInstance = Employee.get(id)
 		def employeeName = employeeInstance.firstName + ' ' +employeeInstance.lastName
         if (!employeeInstance) {
@@ -1961,26 +1961,26 @@ class EmployeeController {
 			def file = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'.sql'
 			def file1 = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'1.sql'
 			def file2 = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'2.sql'
-			
+
 			def threads = []
 			def dump1_thread = new Thread({
 				log.error('creating thread for mysqldump 1 ')
 				(mysqldump_folder+'/mysqldump -u root --no-create-info --where=id='+employeeInstance.id+' -C pointeuse employee --result-file='+file1).execute()
 			})
 			threads << dump1_thread
-			
+
 			def dump2_thread = new Thread({
 				log.error('creating thread for mysqldump 2 ')
 				(mysqldump_folder+'/mysqldump -u root --no-create-info --where=employee_id='+employeeInstance.id+' --ignore-table=pointeuse.absence_type_config --ignore-table=pointeuse.authorization_nature --ignore-table=pointeuse.authorization_type --ignore-table=pointeuse.bank_holiday --ignore-table=pointeuse.card_terminal --ignore-table=pointeuse.employee_data_list_map --ignore-table=pointeuse.employee_data_list_map_field_map --ignore-table=pointeuse.employee_data_list_map_hidden_field_map --ignore-table=pointeuse.employee_extra_data --ignore-table=pointeuse.event_log --ignore-table=pointeuse.exception_logger --ignore-table=pointeuse.function --ignore-table=pointeuse.period --ignore-table=pointeuse.reason --ignore-table=pointeuse.role --ignore-table=pointeuse.service --ignore-table=pointeuse.site --ignore-table=pointeuse.site_user --ignore-table=pointeuse.status --ignore-table=pointeuse.user --ignore-table=pointeuse.user_role --ignore-table=pointeuse.year --ignore-table=pointeuse.employee --ignore-table=pointeuse.dummy --ignore-table=pointeuse.monthly_total_weekly_total -C pointeuse --result-file='+file2).execute()
 			})
-			threads << dump2_thread		
+			threads << dump2_thread
 			threads.each { it.start() }
 			threads.each { it.join() }
 			def delete_thread = new Thread({
-					new File(file).withWriter { w ->				
-					[file1,file2].each{ f ->	
+					new File(file).withWriter { w ->
+					[file1,file2].each{ f ->
 						// Get a reader for the input file
-						new File(f).withReader { r ->					
+						new File(f).withReader { r ->
 						  // And write data from the input into the output
 						 w << r << '\n'
 						}
@@ -1991,7 +1991,7 @@ class EmployeeController {
 			})
 			delete_thread.sleep((long)(2000))
 			delete_thread.start()
-				
+
 			employeeInstance.delete()//(flush: true)
             flash.message = message(code: 'default.deleted.message', args: [message(code: 'employee.label', default: 'Employee'), employeeName])
             redirect(action: "list")
@@ -2002,7 +2002,7 @@ class EmployeeController {
             redirect(action: "show", id: id)
         }
     }
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def validate(){
 		def eventId=params["inOrOutId"]
@@ -2011,7 +2011,7 @@ class EmployeeController {
 		inOrOut.regularizationType=InAndOut.MODIFIEE_ADMIN
 		inOrOut.save(flush:true)
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def trash(){
 		def eventId = params["inOrOutId"]
@@ -2021,11 +2021,11 @@ class EmployeeController {
 		def employee = inOrOut.employee
 		log.error('removing entry '+inOrOut)
 		inOrOut.delete(flush:true)
-		def report = timeManagerService.getReportData(null, employee,  null, month, year,true)			
+		def report = timeManagerService.getReportData(null, employee,  null, month, year,true)
 		render template: "/employee/template/reportTableTemplate", model: report
 		return
 	}
-		
+
 	@Secured(['ROLE_ADMIN'])
 	def modifyTime(){
 		def idList=params["inOrOutId"]
@@ -2041,16 +2041,16 @@ class EmployeeController {
 
 		try{
 			def month=monthList[0]
-			def year=yearList[0]		
+			def year=yearList[0]
 			if (idList==null){
 				log.error("list is null")
 				def retour = report(employee.id as long,month as int,year as int)
 				render(view: "report", model: retour)
 			}
 			timeManagerService.timeModification( idList, dayList, monthList, yearList, employee, newTimeList, fromRegularize)
-			
-			
-				// now, find if employee still has errors:			
+
+
+				// now, find if employee still has errors:
 			if (fromRegularize){
 				redirect(action: "pointage", id: employee.id)
 			}else{
@@ -2063,14 +2063,14 @@ class EmployeeController {
 			if (fromRegularize){
 				//render(view: "index")
 				redirect(uri:'/')
-				
+
 				return
 			}else{
 				def retour = report(employee.id as long,month as int,year as int)
 				render(view: "report", model: retour)
 				return
 			}
-			
+
 		}catch(NullPointerException e2){
 			flash.message = message(code: "appliquer.inutile.message")
 			log.error(e2.message)
@@ -2079,25 +2079,25 @@ class EmployeeController {
 				return
 			}else{
 				def currentMonth=params.int('myDate_month')
-				def currentYear=params.int('myDate_year')	
+				def currentYear=params.int('myDate_year')
 				def retour = report(employee.id as long,currentMonth as int,currentYear as int)
 				render(view: "report", model: retour)
 				return
 			}
 		}
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def annualReport(Long userId){
 		def year
 		def month
-		def calendar = Calendar.instance		
+		def calendar = Calendar.instance
 		boolean isAjax = params["isAjax"].equals("true") ? true : false
 		if (userId == null){
 			userId = params.long('userId')
 		}
 		Employee employee = Employee.get(userId)
-		
+
 		if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
 			year = params.int('myDate_year')
 		}else{
@@ -2111,21 +2111,21 @@ class EmployeeController {
 		if (month < 6){
 			year = year - 1
 		}
-		
+
 		def  period = Period.get(params.int('periodId'))
 		if (period != null){
 			year = period.year
 		} else{
 			period = Period.findByYear(year)
 		}
-		
-		
+
+
 		if (userId==null){
 			log.error('userId is null. exiting')
 			return
 		}
 		log.error('annualReport called with param: employee='+employee+' and period='+period)
-		
+
 		def model = timeManagerService.getAnnualReportData(year, employee)
 		model << [period:period,siteId:employee.site.id,periodId:period.id]
 		if (isAjax){
@@ -2136,7 +2136,7 @@ class EmployeeController {
 			model
 		}
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def annualReportLight(Long userId){
 		def year
@@ -2144,7 +2144,7 @@ class EmployeeController {
 		def calendar = Calendar.instance
 		boolean isAjax = params["isAjax"].equals("true") ? true : false
 		Employee employee = Employee.get(userId)
-		
+
 		if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
 			year = params.int('myDate_year')
 		}else{
@@ -2158,14 +2158,14 @@ class EmployeeController {
 		if (month < 6){
 			year = year - 1
 		}
-		
+
 		if (userId==null){
 			log.error('userId is null. exiting')
 			return
 		}
-		[employee:employee,userId:employee.id]				
+		[employee:employee,userId:employee.id]
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def reportLight(Long userId,int monthPeriod,int yearPeriod){
 		def yearInf
@@ -2193,23 +2193,23 @@ class EmployeeController {
 		def dailySeconds = 0
 		def weeklySupTime
 		def currentWeek
-		
+
 		if (myDate != null && myDate instanceof String){
 			SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
-			myDate = dateFormat.parse(myDate)			
+			myDate = dateFormat.parse(myDate)
 		}
-			
+
 		if (userId==null){
 			if (params["userId"] instanceof String)
 				userId = params["userId"]
 		}
 		employee = Employee.get(userId)
-	
+
 		//get last day of the month
 		if (myDate==null){
 			if (yearPeriod!=0){
 				calendar.set(Calendar.MONTH,monthPeriod-1)
-				calendar.set(Calendar.YEAR,yearPeriod)			
+				calendar.set(Calendar.YEAR,yearPeriod)
 			}
 			calendar.set(Calendar.MONTH,calendar.get(Calendar.MONTH))
 			calendar.set(Calendar.DATE,calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
@@ -2220,27 +2220,27 @@ class EmployeeController {
 		calendar.set(Calendar.MINUTE,59)
 		calendar.set(Calendar.SECOND,59)
 		calendar.set(Calendar.DATE,1)
-			
+
 		def calendarLoop = calendar
 		int month = calendar.get(Calendar.MONTH)+1 // starts at 0
 		int year = calendar.get(Calendar.YEAR)
 		calendarLoop.getTime().clearTime()
 		def lastWeekParam = utilService.getLastWeekOfMonth(month, year)
 		def isSunday=lastWeekParam.get(1)
-		
+
 		currentWeek=0//calendar.get(Calendar.WEEK_OF_YEAR)
-		
+
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 			// elimine les dimanches du rapport
 			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
-				mapByDay = [:]					
+				mapByDay = [:]
 			}
 			//print calendarLoop.time
 			criteria = DailyTotal.createCriteria()
 			def dailyTotal = criteria.get {
 				and {
 					eq('employee',employee)
-					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH)) 
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
 					eq('month',month)
 					eq('year',year)
 				}
@@ -2255,7 +2255,7 @@ class EmployeeController {
 				}else{
 					weeklyTotalTime.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), dailySeconds)
 				}
-				
+
 				if (!isSunday && calendarLoop.get(Calendar.WEEK_OF_YEAR)==lastWeekParam.get(0) ){
 					weeklySupTime = 0
 				}else{
@@ -2269,8 +2269,8 @@ class EmployeeController {
 				weeklySupTotalTimeByEmployee.put(employee,weeklySuppTotalTime)
 				weeklyTotalTimeByEmployee.put(employee,weeklyTotalTime)
 				dailyTotalId=dailyTotal.id
-			} 
-						
+			}
+
 			criteria = InAndOut.createCriteria()
 			def entriesByDay = criteria{
 				and {
@@ -2290,14 +2290,14 @@ class EmployeeController {
 				}else {
 					dailyTotalMap.put(tmpDate, 0)
 					dailySupTotalMap.put(tmpDate, 0)
-				}		
+				}
 				mapByDay.put(tmpDate, entriesByDay)
-			}	
+			}
 			else{
 				dailyTotalMap.put(tmpDate, 0)
 				mapByDay.put(tmpDate, null)
-			}		
-			
+			}
+
 			// find out if day is a bank holiday:
 			criteria = BankHoliday.createCriteria()
 			def bankHoliday = criteria.get{
@@ -2311,25 +2311,25 @@ class EmployeeController {
 				dailyBankHolidayMap.put(tmpDate, true)
 			}else{
 				dailyBankHolidayMap.put(tmpDate, false)
-			
+
 			}
-			
-			def absenceCriteria = Absence.createCriteria()			
+
+			def absenceCriteria = Absence.createCriteria()
 			def dailyAbsence = absenceCriteria.get {
 				and {
 					eq('employee',employee)
 					eq('year',calendarLoop.get(Calendar.YEAR))
 					eq('month',calendarLoop.get(Calendar.MONTH)+1)
-					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))				
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
 				}
 			}
 			holidayMap.put(tmpDate, dailyAbsence)
-			weeklyAggregate.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), mapByDay)	
+			weeklyAggregate.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), mapByDay)
 			if (calendarLoop.get(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 				break
 			}
 			calendarLoop.roll(Calendar.DAY_OF_MONTH, 1)
-		}	
+		}
 		try {
 			if (userId != null){
 				def cartoucheTable = timeManagerService.getCartoucheData(employee,year,month)
@@ -2340,16 +2340,16 @@ class EmployeeController {
 				def payableSupTime = timeManagerService.computeHumanTime(Math.round(monthlySupTime as long))
 				def payableCompTime = timeManagerService.computeHumanTime(0)
 				def currentContract = cartoucheTable.get('currentContract')
-							
+
 				if (currentContract.weeklyLength!=35){
 					if (monthlyTotalTime > monthTheoritical){
 						payableCompTime = timeManagerService.computeHumanTime(Math.max(monthlyTotalTime-monthTheoritical-monthlySupTime,0) as long)
 					}
 				}
-			
+
 				monthlyTotalTimeByEmployee.put(employee, timeManagerService.computeHumanTime(monthlyTotalTime as long))
-				monthTheoritical = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical') as long),true)		
-	
+				monthTheoritical = timeManagerService.getTimeAsText(timeManagerService.computeHumanTime(cartoucheTable.get('monthTheoritical') as long),true)
+
 				if (month>5){
 					yearInf=year
 					yearSup=year+1
@@ -2357,11 +2357,11 @@ class EmployeeController {
 					yearInf=year-1
 					yearSup=year
 				}
-	
+
 				def model=[
 					isAdmin:false,
 					siteId:siteId,
-					currentContract:currentContract,				
+					currentContract:currentContract,
 					yearInf:yearInf,
 					yearSup:yearSup,
 					userId:userId,
@@ -2388,10 +2388,10 @@ class EmployeeController {
 			}
 		}catch (NullPointerException e){
 			log.error('error with application: '+e.toString())
-		}	
+		}
 	}
-	
-	
+
+
 	@Secured(['ROLE_ADMIN'])
 	def report(Long userId,int monthPeriod,int yearPeriod){
 		def siteId=params["siteId"]
@@ -2405,51 +2405,51 @@ class EmployeeController {
 
 		if (myDate != null && myDate instanceof String){
 			dateFormat = new SimpleDateFormat('dd/MM/yyyy');
-			myDate = dateFormat.parse(myDate)			
+			myDate = dateFormat.parse(myDate)
 		}
 		if (myDateFromEdit != null && myDateFromEdit instanceof String){
 			dateFormat = new SimpleDateFormat('MM/yyyy');
 			myDate = dateFormat.parse(myDateFromEdit)
-		}	
-		
-		
+		}
+
+
 		if (userId==null && params["userId"] != null ){
 			employee = Employee.get(params["userId"])
 		}else{
 			employee = Employee.get(userId)
 		}
 		//get last day of the month
-		if (employee){			
+		if (employee){
 			report = timeManagerService.getReportData(siteId, employee,  myDate, monthPeriod, yearPeriod,false)
 			currentContract = report.getAt('currentContract')
 			if (currentContract == null){
 				def lastContract = Contract.findByEmployee(employee,[max: 1, sort: "endDate", order: "desc"])
 				if (lastContract != null){
-					flash.message = message(code: 'employee.is.gone.error')	
-					report = timeManagerService.getReportData(siteId, employee,  null, lastContract.endDate.getAt(Calendar.MONTH)+1, lastContract.endDate.getAt(Calendar.YEAR),false)	
+					flash.message = message(code: 'employee.is.gone.error')
+					report = timeManagerService.getReportData(siteId, employee,  null, lastContract.endDate.getAt(Calendar.MONTH)+1, lastContract.endDate.getAt(Calendar.YEAR),false)
 					calendar.set(Calendar.MONTH,lastContract.endDate.getAt(Calendar.MONTH))
-					calendar.set(Calendar.YEAR,lastContract.endDate.getAt(Calendar.YEAR))				
+					calendar.set(Calendar.YEAR,lastContract.endDate.getAt(Calendar.YEAR))
 				}else{
-					flash.message = message(code: 'employee.not.arrived.error')	
+					flash.message = message(code: 'employee.not.arrived.error')
 					report = timeManagerService.getReportData(siteId, employee,  null, employee.arrivalDate.getAt(Calendar.MONTH)+1, employee.arrivalDate.getAt(Calendar.YEAR),false)
 					calendar.set(Calendar.MONTH,employee.arrivalDate.getAt(Calendar.MONTH))
-					calendar.set(Calendar.YEAR,employee.arrivalDate.getAt(Calendar.YEAR))				
-				}					
+					calendar.set(Calendar.YEAR,employee.arrivalDate.getAt(Calendar.YEAR))
+				}
 			}
 		}
-		
+
 		if (myDate != null){
 			calendar.time = myDate
 		}
 		report << [period:calendar.time]
-		return report			
+		return report
 	}
 
 
 	//@Secured(['ROLE_ANONYMOUS'])
-	def pointage(Long id){	
+	def pointage(Long id){
 		log.error('pointage called')
-		try {	
+		try {
 			def username = params["username"]
 			def employee
 			def entranceStatus
@@ -2458,19 +2458,19 @@ class EmployeeController {
 			def dailyCriteria
 			def elapsedSeconds=0
 			if (id!=null){
-				employee = Employee.get(id)		
+				employee = Employee.get(id)
 			}
 			if (username!=null && !username.equals("")){
-				employee = Employee.findByUserName(username)	
+				employee = Employee.findByUserName(username)
 			}
-			
+
 			if (employee==null){
 				throw new NullPointerException("unknown employee("+username+")")
 			}else{
 				log.error('employee successfully authenticated='+employee)
 			}
-			
-			def calendar = Calendar.instance	
+
+			def calendar = Calendar.instance
 			def inAndOutsCriteria = InAndOut.createCriteria()
 			def systemGeneratedEvents = inAndOutsCriteria.list {
 				and {
@@ -2480,25 +2480,25 @@ class EmployeeController {
 					order('time','asc')
 				}
 			}
-			
+
 			if (systemGeneratedEvents!=null && systemGeneratedEvents.size()>0){
 				log.error('redirecting user to regularization page')
 				render(view: "regularize", model: [systemGeneratedEvents: systemGeneratedEvents,employee:employee])
 				return
 			}
-				
+
 			def model = timeManagerService.getPointageData(employee)
 			model << [userId: employee.id,employee: employee]
 			return model
-			
+
 		}
 		catch (Exception e){
-			log.error('error with application: '+e.toString())		
+			log.error('error with application: '+e.toString())
 			flash.message = message(code: 'employee.not.found.label',args:[params["username"]])
 			redirect(uri:'/')
-			
+
 		}
-	}	
+	}
 
 	@Secured(['ROLE_ADMIN'])
 	def ecartPDF(){
@@ -2510,8 +2510,8 @@ class EmployeeController {
 		def site
 		def period
 		def monthList=[]
-		
-		
+
+
 		if (params["site.id"]!=null && !params["site.id"].equals('')){
 			site = Site.get(params["site.id"].toInteger())
 		}else{
@@ -2519,8 +2519,8 @@ class EmployeeController {
 			redirect(action: "ecartFollowup")
 			return
 		}
-		
-		
+
+
 		if (year!=null && !year.equals("")){
 			if (year instanceof String[]){
 				year=(year[0]!="")?year[0].toInteger():year[1].toInteger()
@@ -2531,10 +2531,10 @@ class EmployeeController {
 		}else{
 			period = Period.findByYear(calendar.get(Calendar.YEAR))
 		}
-			 
+
 		 refCalendar.set(Calendar.MONTH,5)
 		 refCalendar.set(Calendar.YEAR,period.year)
-		 
+
 		 if (refCalendar.get(Calendar.YEAR)==calendar.get(Calendar.YEAR)){
 			 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
 				 log.debug('refCalendar: '+refCalendar.time)
@@ -2562,9 +2562,9 @@ class EmployeeController {
 				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
 					 break
 				 }
-			 }	 
-	 	} 
-				 
+			 }
+	 	}
+
 		if (params["site.id"]!=null && !params["site.id"].equals("")){
 			def tmpSite = params["site.id"]
 			if (tmpSite instanceof String[]){
@@ -2580,7 +2580,7 @@ class EmployeeController {
 		response.setHeader("Content-disposition", "filename=${retour[1]}")
 		response.outputStream << retour[0]
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def siteMonthlyPDF(){
 		def myDate = params["myDate"]
@@ -2589,16 +2589,16 @@ class EmployeeController {
 		def timeDifference
 		Calendar calendar = Calendar.instance
 		calendar.roll(Calendar.MONTH,-1)
-		
+
 		def startTime = calendar.time
 		def folder = grailsApplication.config.pdf.directory
-		
+
 		if (myDate==null || myDate.equals("")){
 			myDate=calendar.time
 		}else {
 			calendar.time=myDate
 		}
-	
+
 
 		if (params["site.id"]!=null && !params["site.id"].equals('')){
 			siteId = params["site.id"].toInteger()
@@ -2609,7 +2609,7 @@ class EmployeeController {
         	redirect(action: "list")
 			return
 		}
-			
+
 		def retour = PDFService.generateSiteMonthlyTimeSheet(myDate,site,folder)
 		calendar = Calendar.instance
 		def endTime = calendar.time
@@ -2617,29 +2617,29 @@ class EmployeeController {
 		log.error("le rapport a pris: "+timeDifference)
 
 		def file = new File(folder+'/'+retour[1])
-		render(file: file, fileName: retour[1],contentType: "application/octet-stream")		
+		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def allSiteMonthlyPDF(){
 		def myDate = params["myDate"]
 
 		Calendar calendar = Calendar.instance
 		def folder = grailsApplication.config.pdf.directory
-			
+
 		def retour = PDFService.generateAllSitesMonthlyTimeSheet(calendar.time=myDate,folder)
 		response.setContentType("application/octet-stream")
 		response.setHeader("Content-disposition", "filename=${retour[1]}")
 		response.outputStream << retour[0]
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def dailyTotalPDF(){
 		def site
 		def siteId
 		Calendar calendar = Calendar.instance
 		def folder = grailsApplication.config.pdf.directory
-		
+
 		def date_picker =params["date_picker"]
 		if (date_picker != null && date_picker.size()>0){
 			calendar.time = new Date().parse("dd/MM/yyyy", date_picker)
@@ -2653,21 +2653,21 @@ class EmployeeController {
 			redirect(action: "list")
 			return
 		}
-			
+
 		def retour = PDFService.generateDailySheet(site,folder,calendar.time)
 		response.setContentType("application/octet-stream")
 		response.setHeader("Content-disposition", "filename=${retour[1]}")
 		response.outputStream << retour[0]
-		
+
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def dailyTotalWithStylePDF(){
 		def site
 		def siteId
 		Calendar calendar = Calendar.instance
 		def folder = grailsApplication.config.pdf.directory
-		
+
 		def date_picker =params["date_picker"]
 		if (date_picker != null && date_picker.size()>0){
 			calendar.time = new Date().parse("dd/MM/yyyy", date_picker)
@@ -2681,14 +2681,14 @@ class EmployeeController {
 			redirect(action: "list")
 			return
 		}
-			
+
 		def retour = PDFService.generateDailySheetWithStyle(site,folder,calendar.time)
 		response.setContentType("application/octet-stream")
 		response.setHeader("Content-disposition", "filename=${retour[1]}")
 		response.outputStream << retour[0]
-		
+
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def downloadPdf() {
 		String pathToPhantomJS = "/usr/local/bin/phantomjs" //path to your phantom js
@@ -2696,23 +2696,23 @@ class EmployeeController {
 		String paperSize = "A4"
 		String url = "http://localhost:8080/pointeuse/employee/dailyReport?isAdmin=false&max=20&fromIndex=true" //url of your web page to which you want to convert into pdf
 		File outputFile = File.createTempFile("sample", ".pdf") //file in which you want to save your pdf
-		 
+
 		//TODO: also do exception handling stuff . i am not doing this for simplicity
-		 
+
 		Process process = Runtime.getRuntime().exec(pathToPhantomJS + " " + pathToRasterizeJS + " " + url + " " + outputFile.absolutePath + " " + paperSize);
 		int exitStatus = process.waitFor(); //do a wait here to prevent it running for ever
 		if (exitStatus != 0) {
 		log.error("EXIT-STATUS - " + process.toString());
 		}
 		response.setContentType("application/octet-stream")
-		
+
 		//response.contentType = "application/pdf"
 		response.setHeader("Content-Disposition", "filename=sample.pdf");
 		response.outputStream << outputFile.bytes
 		response.outputStream.flush()
 		response.outputStream.close()
 		}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def userPDF(){
 		def myDate = params["myDate"]
@@ -2720,7 +2720,7 @@ class EmployeeController {
 		Employee employee = Employee.get(userId)
 		Calendar calendar = Calendar.instance
 		def folder = grailsApplication.config.pdf.directory
-		
+
 		if (myDate==null || myDate.equals("")){
 			myDate=calendar.time
 		}else {
@@ -2730,15 +2730,15 @@ class EmployeeController {
 		def file = new File(folder+'/'+retour[1])
 		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
-	def annualTotalPDF(Long userId){	
+	def annualTotalPDF(Long userId){
 		def year
 		def month
 		def calendar = Calendar.instance
 		Employee employee = Employee.get(userId)
 		def folder = grailsApplication.config.pdf.directory
-		
+
 		if (params["myDate_year"] != null && !params["myDate_year"].equals('')){
 			year = params.int('myDate_year')
 		}else{
@@ -2752,12 +2752,12 @@ class EmployeeController {
 		if (month < 6){
 			year = year - 1
 		}
-		
+
 		Period period = Period.get(params.int("year"))
 		if (period != null){
 			year = period.year
 		}
-		
+
 		if (userId==null){
 			log.error('userId is null. exiting')
 			return
@@ -2767,12 +2767,12 @@ class EmployeeController {
 		response.setHeader("Content-disposition", "filename=${retour[1]}")
 		response.outputStream << retour[0]
 	}
-	
-	 
+
+
 	@Secured(['ROLE_ADMIN'])
 	 def ecartFollowup(){
 		 def fromIndex=params.boolean('fromIndex')
-		 
+
 		 def siteId=params["site.id"]
 		 if (!fromIndex && (siteId == null || siteId.size() == 0)){
 			 flash.message = message(code: 'ecart.site.selection.error')
@@ -2780,15 +2780,15 @@ class EmployeeController {
 			 redirect(action: "ecartFollowup",params:params)
 			 return
 		 }
-		 def year = params["year"]		 
+		 def year = params["year"]
 		 def employeeInstanceList
 		 def employeeInstanceTotal
 		 def calendar = Calendar.instance
-		 def refCalendar = Calendar.instance 
+		 def refCalendar = Calendar.instance
 		 def site
 		 def period
 		 def monthList=[]
-		 
+
 		 if (year!=null && !year.equals("")){
 			 if (year instanceof String[]){
 				 year=(year[0]!="")?year[0].toInteger():year[1].toInteger()
@@ -2799,10 +2799,10 @@ class EmployeeController {
 		 }else{
 		 	period = Period.findByYear(calendar.get(Calendar.YEAR))
 		 }
-		 	 
+
 		 refCalendar.set(Calendar.MONTH,5)
 		 refCalendar.set(Calendar.YEAR,period.year)
-		 
+
 		 if (refCalendar.get(Calendar.YEAR)==calendar.get(Calendar.YEAR)){
 			 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
 				 log.debug('refCalendar: '+refCalendar.time)
@@ -2830,9 +2830,9 @@ class EmployeeController {
 				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
 					 break
 				 }
-			 }	 
-	 	} 
-		 		 
+			 }
+	 	}
+
 		if (params["site.id"]!=null && !params["site.id"].equals("")){
 			 def tmpSite = params["site.id"]
 			 if (tmpSite instanceof String[]){
@@ -2843,17 +2843,17 @@ class EmployeeController {
 			 site = Site.get(tmpSite)
 			 siteId=site.id
 			 employeeInstanceList = Employee.findAllBySite(site)
-			 employeeInstanceTotal = employeeInstanceList.size()	 
+			 employeeInstanceTotal = employeeInstanceList.size()
 		 }else{
 			 employeeInstanceList=Employee.list(params)
 			 employeeInstanceTotal = employeeInstanceList.size()
-		 }	 
-		 
-		
+		 }
+
+
 		 if (fromIndex){
 			 return [site:site,fromIndex:fromIndex,period:period]
 		 }
-		 
+
 		def ecartData = timeManagerService.getEcartData(site, monthList, period)
 		def retour = [
 			site:site,
@@ -2864,40 +2864,40 @@ class EmployeeController {
 			employeeInstanceList:employeeInstanceList
 		]
 	 	retour << ecartData
-		 
+
 		render template: "/employee/template/ecartTemplate", model: retour
 
 		return retour
 	}
-	 
+
 
 	@Secured(['ROLE_ADMIN'])
 	def addNewContract (){
 		log.error('addNewContract called')
 		Contract contract = new Contract()
 		Employee employee = Employee.get(params.id)
-		
+
 		def dateFormat = new SimpleDateFormat('d/M/yyyy');
 		if (params['newStartDate'] != null)
 			contract.startDate = dateFormat.parse(params['newStartDate'])
 		if (params['newEndDate'] != null && params['newEndDate'].size() > 0)
 			contract.endDate = dateFormat.parse(params['newEndDate'])
-		
+
 		if (utilService.detectCollidingContract(contract.startDate,contract.endDate,employee)){
 			log.error('contract dates are incomplatible, exiting')
 			flash.message = message(code: 'contract.incompatible.values')
 			redirect(action: "edit", params: [id:params.id,isAdmin:false])
 			return
-		}			
+		}
 		contract.year=contract.startDate.getAt(Calendar.YEAR)
 		contract.month=(contract.startDate.getAt(Calendar.MONTH))+1
 		contract.weeklyLength = params.float('newContractValue')
 		contract.employee = Employee.get(params.id)
 		contract.loggingTime = new Date()
 		contract.save()
-		redirect(action: "edit", params: [id:params.id,isAdmin:false])		
+		redirect(action: "edit", params: [id:params.id,isAdmin:false])
 	  }
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def payHS(){
 		log.error('payHS called')
@@ -2910,7 +2910,7 @@ class EmployeeController {
 		def employee = Employee.get(userId)
 		def period = Period.findByYear(year)
 		log.error('employeeId: '+employee.id)
-		
+
 		def criteria
 		criteria = SupplementaryTime.createCriteria()
 		def supplementaryOccurence = criteria.get{
@@ -2920,7 +2920,7 @@ class EmployeeController {
 				eq('type',type)
 			}
 		}
-		
+
 		if (supplementaryOccurence != null){
 			supplementaryOccurence.value=value
 			supplementaryOccurence.save()
@@ -2931,7 +2931,7 @@ class EmployeeController {
 			ST.loggingTime = new Date()
 			ST.value = value
 			ST.type = type
-			ST.period = period			
+			ST.period = period
 			ST.user =  springSecurityService.currentUser
 			ST.save()
 
@@ -2940,9 +2940,9 @@ class EmployeeController {
 		def model = [employeeInstance: employee] << data
 		render template: "/employee/template/paidHSEditTemplate", model: tasks model
 		return
-		
+
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def changeContractStatus (){
 		def employeeId = params['employeeId']
@@ -2950,8 +2950,8 @@ class EmployeeController {
 		def employee = Employee.get(employeeId)
 		def status = employee.status
 		SimpleDateFormat dateFormat = new SimpleDateFormat('d/MM/yyyy');
-		
-		 
+
+
 		if (params["newDate"] != null && params["newDate"].size() > 0){
 			status.date = dateFormat.parse(params["newDate"])
 		}else{
@@ -2966,18 +2966,18 @@ class EmployeeController {
 						status.date = null
 					}else {
 						log.error('setting the date to new Date()')
-						status.date = new Date()	
+						status.date = new Date()
 					}
 				}
-			}		
+			}
 		}
 		status.save(flush:true)
 		render template: '/employee/template/contractStatus', model:[employeeInstance:employee]
 		return
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
-	def sendMail (){	
+	def sendMail (){
 		def myDate = params["myDate"]
 		def site
 		def siteId = params["siteId"]
@@ -3001,7 +3001,7 @@ class EmployeeController {
 		def sites = Site.findAll(){
 			log.error("site: "+siteOccurence)
 		}
-		
+
 		filename = calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf'
 		def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
 		if (!file.exists()){
@@ -3011,18 +3011,18 @@ class EmployeeController {
 		}else{
 		//	render(file: file, fileName: file.name,contentType: "application/octet-stream")
 		log.error('file found')
-		
+
 			mailService.sendMail {
 				multipart true
 				to "henri.martin@gmail.com"
 				subject "Rapport Mensuel du site de "+site.name+" pour le mois de " + calendar.time.format("MMM yyyy")
 				body "Veuillez trouver ci-joint le rapport mensuel du site"
-				attachBytes filename,'application/pdf', file.readBytes()	
-			}	
+				attachBytes filename,'application/pdf', file.readBytes()
+			}
 		}
 		log.error('mail sent')
 	  }
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def removeCSS(){
 		def criteria
@@ -3031,7 +3031,7 @@ class EmployeeController {
 		for (Employee employee: employeeList){
 		//	log.error('employee: '+employee)
 			entryDate = employee.arrivalDate
-			criteria = Absence.createCriteria()			
+			criteria = Absence.createCriteria()
 			log.error('employee entry date: '+entryDate)
 			def sansSoldeList = criteria.list {
 				and {
@@ -3051,7 +3051,7 @@ class EmployeeController {
 			}
 		}
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def getUser(){
 		def cal = Calendar.instance
@@ -3075,7 +3075,7 @@ class EmployeeController {
 			}
 			maxResults(1)
 		}
-		
+
 		if (lastIn != null){
 			def LIT = lastIn.time
 			use (TimeCategory){timeDiff=currentDate-LIT}
@@ -3096,7 +3096,7 @@ class EmployeeController {
 		render jsonEmployee as JSON
 		//return 'OK'
 	}
-	
+
 
 	@Secured(['ROLE_ANOMYMOUS'])
 	def logEmployee(){
@@ -3108,13 +3108,13 @@ class EmployeeController {
 		def employee = Employee.findByUserName(userName)
 		def timeDiff
 		def type = "E"
-		
+
 		if (employee == null){
 			flash.message = message(code: 'employee.not.found.label', args:[userName])
 			render template: "/employee/template/entryValidation", model: [employee: null,inOrOut:null,flash:flash]
 			return
 		}
-		
+
 		def criteria = InAndOut.createCriteria()
 		def lastIn = criteria.get {
 			and {
@@ -3127,7 +3127,7 @@ class EmployeeController {
 			}
 			maxResults(1)
 		}
-		
+
 		if (lastIn != null){
 			def LIT = lastIn.time
 			use (TimeCategory){timeDiff=currentDate-LIT}
@@ -3144,7 +3144,7 @@ class EmployeeController {
 		render template: "/employee/template/entryValidation", model: [employee: employee,inOrOut:inOrOut,flash:null]
 		return
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def getAllEmployees() {
 		params.sort='site'
@@ -3156,7 +3156,7 @@ class EmployeeController {
 		byte[] hash
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		def hashAsString
-		def user		
+		def user
 		if (username == null){
 			log.error('authentication failed!')
 			response.status = 401;
@@ -3165,7 +3165,7 @@ class EmployeeController {
 		else{
 			user = User.findByUsername(username)
 		}
-		
+
 		if (password == null){
 			log.error('authentication failed!')
 			response.status = 401;
@@ -3175,13 +3175,13 @@ class EmployeeController {
 			hash = digest.digest(password.getBytes("UTF-8"));
 			hashAsString = hash.encodeHex()
 		}
-		
+
 		if (user != null && !user.password.equals(hashAsString.toString())){
 			log.error('authentication failed!')
 			response.status = 401;
 			return
 		}
-		
+
 		if (params["site"]!=null && !params["site"].equals('') && !params["site"].equals('[id:]')){
 			site = Site.get(params.int('site'))
 			if (site != null)
@@ -3198,16 +3198,16 @@ class EmployeeController {
 		}else{
 			employeeInstanceList=Employee.list(params)
 		}
-		
+
 		def employeeJSONList = []
 		for (Employee employee : employeeInstanceList){
 			employeeJSONList.add(new JSONEmployee(employee))
 		}
-		
+
 		response.contentType = "application/json"
 		render employeeJSONList as JSON
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def searchAllEmployees() {
 		params.sort='site'
@@ -3221,8 +3221,8 @@ class EmployeeController {
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		def hashAsString
 		def user
-		
-		
+
+
 		if (username == null){
 			log.error('authentication failed!')
 			response.status = 401;
@@ -3231,7 +3231,7 @@ class EmployeeController {
 		else{
 			user = User.findByUsername(username)
 		}
-		
+
 		if (password == null){
 			log.error('authentication failed!')
 			response.status = 401;
@@ -3241,13 +3241,13 @@ class EmployeeController {
 			hash = digest.digest(password.getBytes("UTF-8"));
 			hashAsString = hash.encodeHex()
 		}
-		
+
 		if (user != null && !user.password.equals(hashAsString.toString())){
 			log.error('authentication failed!')
 			response.status = 401;
 			return
 		}
-		
+
 		if (params["site"]!=null && !params["site"].equals('') && !params["site"].equals('[id:]')){
 			site = Site.get(params.int('site'))
 			if (site != null)
@@ -3265,16 +3265,16 @@ class EmployeeController {
 				like('lastName','%'+name+'%')
 				}
 
-		}		
+		}
 		def employeeJSONList = []
 		for (Employee employee : employeeInstanceList){
 			employeeJSONList.add(new JSONEmployee(employee))
 		}
-		
+
 		response.contentType = "application/json"
 		render employeeJSONList as JSON
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def getEmployee(Long id) {
 		def username=params["username"]
@@ -3285,7 +3285,7 @@ class EmployeeController {
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		def hashAsString
 		def user
-		
+
 		if (username == null){
 			log.error('authentication failed!')
 			response.status = 401;
@@ -3294,7 +3294,7 @@ class EmployeeController {
 		else{
 			user = User.findByUsername(username)
 		}
-		
+
 		if (password == null){
 			log.error('authentication failed!')
 			response.status = 401;
@@ -3304,7 +3304,7 @@ class EmployeeController {
 			hash = digest.digest(password.getBytes("UTF-8"));
 			hashAsString = hash.encodeHex()
 		}
-		
+
 		if (user != null && !user.password.equals(hashAsString.toString())){
 			log.error('authentication failed!')
 			response.status = 401;
@@ -3316,7 +3316,7 @@ class EmployeeController {
 		}
 		render employee// as JSON
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def getJSONEmployee() {
 		def employee
@@ -3325,7 +3325,7 @@ class EmployeeController {
 		if (employeeUsername != null){
 			employee = Employee.findByUserName(employeeUsername)
 		}
-		
+
 		render(contentType: 'text/json') {[
 			'firstName': employee.firstName,
 			'lastName': employee.lastName,
@@ -3334,7 +3334,7 @@ class EmployeeController {
 		]}
 		return
 	}
-		
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def searchJSONEmployee() {
 		def firstName=params["firstName"].replaceAll("\\W","")
@@ -3347,7 +3347,7 @@ class EmployeeController {
 				employee = Employee.findByFirstName(firstName)
 			}
 		}
-		
+
 		if (employee != null){
 			render(contentType: 'text/json') {[
 
@@ -3363,7 +3363,7 @@ class EmployeeController {
 		]}
 		return
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def computeYearSupTime(boolean isLastMonth){
 		log.error('computeYearSupTime called')
@@ -3372,7 +3372,7 @@ class EmployeeController {
 		def calendar = Calendar.instance
 		if (isLastMonth){
 			month = calendar.get(Calendar.MONTH)
-			year = calendar.get(Calendar.YEAR)		
+			year = calendar.get(Calendar.YEAR)
 			if (month == 0){
 				month = 1
 				year = year - 1
@@ -3381,13 +3381,13 @@ class EmployeeController {
 			month = calendar.get(Calendar.MONTH)+1
 			year = calendar.get(Calendar.YEAR)
 		}
-		
+
 		def employees = Employee.findAll()
 		log.error('there are '+employees.size()+' employees found')
 		def counter = 1
 		for (Employee employee: employees){
-			Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)	
-			def data = timeManagerService.getYearSupTime(employee,year,month,false)		
+			Period period = (month>5)?Period.findByYear(year):Period.findByYear(year - 1)
+			def data = timeManagerService.getYearSupTime(employee,year,month,false)
 			def criteria = SupplementaryTime.createCriteria()
 			def supTime = criteria.get {
 				and {
@@ -3402,15 +3402,15 @@ class EmployeeController {
 			}else{
 				supTime.value = data.get('ajaxYearlySupTimeDecimal')
 			}
-			supTime.save(flush: true)		
+			supTime.save(flush: true)
 		}
 		log.error('computeYearSupTime ended')
 		log.error('recreating job')
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def initializeSupTime(Long id,Long siteId,Long initialMonth,Long initialYear){
-		log.error('initializeSupTime called')	
+		log.error('initializeSupTime called')
 		def calendar = Calendar.instance
 		def currentYear = calendar.get(Calendar.YEAR)
 		def currentMonth = calendar.get(Calendar.MONTH)+1
@@ -3427,18 +3427,18 @@ class EmployeeController {
 			log.error('finding all employees of a given site')
 			def site = Site.get(siteId)
 			employees = Employee.findAllBySite(site,[offset:offset])
-			
+
 		}else{
 			if (id != null){
 				employees.add(Employee.get(id))
 			}else{
 				employees = Employee.findAll()
-				
+
 			}
 		}
 		counter = employees.size()
-		
-		
+
+
 		// it all starts on June 1st, 2013
 		if (initialMonth == null){
 			initialMonth = 6
@@ -3459,17 +3459,17 @@ class EmployeeController {
 				while (year <= currentYear){
 					if (loopMonth == 12){
 						loopMonth = 1
-						year += 1			
+						year += 1
 					}else{
-						loopMonth += 1	
+						loopMonth += 1
 					}
-					
+
 					Period period = (loopMonth>5)?Period.findByYear(year):Period.findByYear(year - 1)
 					log.error('will compute yearSupTime for month:  '+loopMonth+' and year: '+year)
 					def data = timeManagerService.getYearSupTime(employee,year as int,loopMonth as int,true)
 					SupplementaryTime supTime = new SupplementaryTime( employee, period,  loopMonth as int, data.get('ajaxYearlySupTimeDecimal'))
 					log.error('supTime computed')
-					
+
 					supTime.save(flush: true)
 					if (loopMonth == currentMonth && year == currentYear){
 						break;
@@ -3482,23 +3482,23 @@ class EmployeeController {
 		}
 		calendar = Calendar.instance
 		def endTime = calendar.time
-		use (TimeCategory){timeDiff=endTime-startTime}	
+		use (TimeCategory){timeDiff=endTime-startTime}
 		log.error('computeYearSupTime executed in '+timeDiff)
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
-	def updateUsername(Long id, Long version) {		
+	def updateUsername(Long id, Long version) {
 		def employeeInstance = Employee.get(id)
 		if (!employeeInstance) {
 			return
 		}
-		def employeeStatus = employeeInstance.status	
-		log.error('employee status: '+employeeInstance.status)	
+		def employeeStatus = employeeInstance.status
+		log.error('employee status: '+employeeInstance.status)
 		employeeInstance.userName = params['username']
-		employeeInstance.save(flush: true)		
+		employeeInstance.save(flush: true)
 		render employeeInstance
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def displayArchive(){
 		def folder = grailsApplication.config.pdf.directory
@@ -3506,13 +3506,13 @@ class EmployeeController {
 		def archiveList = []
 		basedir.eachFileMatch (~/.*.pdf/) { file ->
 		  archiveList << file
-		
+
 		}
 		log.error('archiveList: '+archiveList)
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
-	def getSitePDF(Long id){	
+	def getSitePDF(Long id){
 		def myDate = params["myDate"]
 		def site
 		def siteId
@@ -3520,7 +3520,7 @@ class EmployeeController {
 		Calendar calendar = Calendar.instance
 		def startTime = calendar.time
 		def folder = grailsApplication.config.pdf.directory
-		
+
 		if (myDate==null || myDate.equals("")){
 			myDate=calendar.time
 		}else {
@@ -3534,7 +3534,7 @@ class EmployeeController {
 			redirect(action: "list")
 			return
 		}
-		def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')		
+		def file = new File(folder+'/'+calendar.get(Calendar.YEAR).toString()+'-'+(calendar.get(Calendar.MONTH)+1).toString() +'-'+site.name+'.pdf')
 		if (!file.exists()){
 			flash.message = message(code: 'pdf.site.report.not.available')
 			redirect(action: "list")
@@ -3543,7 +3543,7 @@ class EmployeeController {
 			render(file: file, fileName: file.name,contentType: "application/octet-stream")
 		}
 	}
-	
+
 	@Secured(['ROLE_ADMIN'])
 	def getSiteInfoPDF(Long id){
 		def myDate = params["myDate"]
@@ -3553,7 +3553,7 @@ class EmployeeController {
 		Calendar calendar = Calendar.instance
 		def startTime = calendar.time
 		def folder = grailsApplication.config.pdf.directory
-		
+
 		if (myDate==null || myDate.equals("")){
 			myDate=calendar.time
 		}else {
@@ -3567,12 +3567,12 @@ class EmployeeController {
 			redirect(action: "list")
 			return
 		}
-	
+
 		def retour = PDFService.generateSiteInfo(myDate,site,folder)
 		def file = new File(folder+'/'+retour[1])
 		render(file: file, fileName: retour[1],contentType: "application/octet-stream")
-		
-		
+
+
 		if (!file.exists()){
 			flash.message = message(code: 'pdf.site.report.not.available')
 			redirect(action: "list")
@@ -3581,7 +3581,7 @@ class EmployeeController {
 			render(file: file, fileName: file.name,contentType: "application/octet-stream")
 		}
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def createAllSitesPDF() {
 		def timeDifference
@@ -3601,12 +3601,12 @@ class EmployeeController {
 			log.error('the new date is:  '+calendar.time)
 			currentDate = calendar.time
 		}
-		
+
 		def sites = Site.findAll()
-		def threads = []	
+		def threads = []
 	    def thr = sites.each{ site ->
 			if (site.id != 16){
-		        def th = new Thread({	            				
+		        def th = new Thread({
 					log.error('generating PDF for site: '+site.name)
 					retour = PDFService.generateSiteMonthlyTimeSheet(currentDate,site,folder)
 					siteNames.add(retour[1])
@@ -3614,10 +3614,10 @@ class EmployeeController {
 		        println "putting thread in list"
 		        threads << th
 			}
-	    }	
+	    }
 	    threads.each { it.start() }
-	    threads.each { it.join() }	
-		def thTime = Thread.start{			
+	    threads.each { it.join() }
+		def thTime = Thread.start{
 			def endDate = new Date()
 			log.error('end time= '+endDate)
 			use (TimeCategory){timeDifference = endDate - startDate}
@@ -3651,7 +3651,7 @@ class EmployeeController {
 								attachBytes filename,'application/pdf', file.readBytes()
 								inline 'biolab33', 'image/png', new File('/images/biolab3.png')
 							}
-							
+
 							mailService.sendMail {
 								multipart true
 								to 'henri.martin@gmail.com'
@@ -3662,22 +3662,22 @@ class EmployeeController {
 							}
 						}
 					}
-					
+
 				}
-				
+
 			}
 		}
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def sendMailToAll(){
 		log.error('sendMailToAll called: sending email to all admins')
 		def sites = Site.findAll()
 		def folder = grailsApplication.config.pdf.directory
-		
+
 		Calendar calendar = Calendar.instance
 		calendar.roll(Calendar.MONTH,-1)
-		
+
 		sites = Site.findAll()
 		sites.each{site ->
 			def userList = site.users
@@ -3709,13 +3709,13 @@ class EmployeeController {
 							*/
 						}
 					}
-					
+
 				}
-				
+
 			}
 		}
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def computeMonthlyTotals() {
 		def timeDifference
@@ -3725,17 +3725,17 @@ class EmployeeController {
 		log.error("computeMonthlyTotals called at: "+calendar.time)
 		def currentDate = calendar.time
 		def sites = Site.findAll()
-		def refCalendar = Calendar.instance	
+		def refCalendar = Calendar.instance
 		def year = refCalendar.get(Calendar.YEAR)
 		def period = Period.findByYear(year)
-		
+
 		if (refCalendar.get(Calendar.MONTH)<5){
 			refCalendar.roll(Calendar.YEAR,- 1)
 			year -= 1
 			log.debug('changing refCalendar YEAR: '+refCalendar.time)
 		}
-		def monthList = []			 
-		refCalendar.set(Calendar.MONTH,5)		
+		def monthList = []
+		refCalendar.set(Calendar.MONTH,5)
 		if (refCalendar.get(Calendar.YEAR)==calendar.get(Calendar.YEAR)){
 			while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
 				log.debug('refCalendar: '+refCalendar.time)
@@ -3763,14 +3763,14 @@ class EmployeeController {
 				monthList.add(refCalendar.get(Calendar.MONTH)+1)
 				refCalendar.roll(Calendar.MONTH, 1)
 				if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
-					monthList.add(refCalendar.get(Calendar.MONTH)+1)				
+					monthList.add(refCalendar.get(Calendar.MONTH)+1)
 					break
 				}
 			}
 		}
 		def threads = []
-		def thr = sites.each{ site ->		
-				def th = new Thread({								
+		def thr = sites.each{ site ->
+				def th = new Thread({
 					log.debug('generating computeWeeklyTotals for site: '+site.name)
 					def employeeList = Employee.findAllBySite(site)
 					for (Employee employee: employeeList){
@@ -3779,17 +3779,17 @@ class EmployeeController {
 						for (month in monthList){
 							try{
 								if (month>=6){
-									timeManagerService.computeWeeklyTotals( employee,  month,  year,true)									
+									timeManagerService.computeWeeklyTotals( employee,  month,  year,true)
 								}else{
-									timeManagerService.computeWeeklyTotals( employee,  month,  year + 1,true)						
+									timeManagerService.computeWeeklyTotals( employee,  month,  year + 1,true)
 								}
 							}catch (Exception e){
 								log.error('Exception: '+e.message)
-							}	
+							}
 						}
 					}
 				})
-				threads << th			
+				threads << th
 		}
 		threads.each { it.start() }
 		threads.each { it.join() }
@@ -3801,7 +3801,7 @@ class EmployeeController {
 		}
 		thTime.join()
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def recreateEmployeeData(Long id){
 		params.each{i->log.error(i)}
@@ -3822,21 +3822,21 @@ class EmployeeController {
 		iteratorCal.set(Calendar.DAY_OF_MONTH,first_in_and_out.day)
 		iteratorCal.set(Calendar.MONTH,first_in_and_out.month - 1)
 		iteratorCal.set(Calendar.YEAR,first_in_and_out.year)
-		log.error('calendar starts at: '+calendar.time)		
-		
+		log.error('calendar starts at: '+calendar.time)
+
 		def inAndOuts=InAndOut.findAllByEmployee(employee)
 		for (InAndOut inAndOut : inAndOuts){
 			iteratorCal.set(Calendar.DAY_OF_MONTH,inAndOut.day)
 			iteratorCal.set(Calendar.MONTH,inAndOut.month - 1)
-			iteratorCal.set(Calendar.YEAR,inAndOut.year)		
+			iteratorCal.set(Calendar.YEAR,inAndOut.year)
 			timeManagerService.initializeTotals(employee, iteratorCal.time)
 			timeManagerService. recomputeDailyTotals(employee.id as int,inAndOut.day as int,inAndOut.month as int,inAndOut.year as int)
 		}
 		def endDate = new Date()
-		use (TimeCategory){executionTime=endDate-calendar.time}	
+		use (TimeCategory){executionTime=endDate-calendar.time}
 		log.error('recreateEmployeeData executed in '+executionTime+' for employee: '+employee.lastName)
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def executeDump(Long id){
 		def employeeInstance = Employee.get(id)
@@ -3844,34 +3844,34 @@ class EmployeeController {
 		def file = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'.sql'
 		def file1 = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'1.sql'
 		def file2 = folder+'/'+employeeInstance.lastName+'_'+(new Date().format('yyyy-MM-dd'))+'2.sql'
-		
+
 		log.error('file: '+file)
 		log.error('file1: '+file1)
-		
+
 		def threads = []
 		def dump1_thread = new Thread({
 			log.error('creating thread for mysqldump 1 ')
 			('/usr/local/mysql/bin/mysqldump -u root --no-create-info --where=id='+employeeInstance.id+' -C pointeuse employee --result-file='+file1).execute()
 		})
 		threads << dump1_thread
-		
+
 		def dump2_thread = new Thread({
 			log.error('creating thread for mysqldump 2 ')
 			('/usr/local/mysql/bin/mysqldump -u root --no-create-info --where=employee_id='+employeeInstance.id+' --ignore-table=pointeuse.absence_type_config --ignore-table=pointeuse.authorization_nature --ignore-table=pointeuse.authorization_type --ignore-table=pointeuse.bank_holiday --ignore-table=pointeuse.card_terminal --ignore-table=pointeuse.employee_data_list_map --ignore-table=pointeuse.employee_data_list_map_field_map --ignore-table=pointeuse.employee_data_list_map_hidden_field_map --ignore-table=pointeuse.employee_extra_data --ignore-table=pointeuse.event_log --ignore-table=pointeuse.exception_logger --ignore-table=pointeuse.function --ignore-table=pointeuse.period --ignore-table=pointeuse.reason --ignore-table=pointeuse.role --ignore-table=pointeuse.service --ignore-table=pointeuse.site --ignore-table=pointeuse.site_user --ignore-table=pointeuse.status --ignore-table=pointeuse.user --ignore-table=pointeuse.user_role --ignore-table=pointeuse.year --ignore-table=pointeuse.employee --ignore-table=pointeuse.dummy --ignore-table=pointeuse.monthly_total_weekly_total -C pointeuse --result-file='+file2).execute()
 		})
 		threads << dump2_thread
-		
+
 
 		threads.each { it.start() }
 		threads.each { it.join() }
 		def delete_thread = new Thread({
 				new File(file).withWriter { w ->
-				
+
 				[file1,file2].each{ f ->
-	
+
 					// Get a reader for the input file
 					new File(f).withReader { r ->
-				
+
 					  // And write data from the input into the output
 					 w << r << '\n'
 					}
@@ -3883,15 +3883,15 @@ class EmployeeController {
 		delete_thread.sleep((long)(10000))
 		delete_thread.start()
 		//delete_thread.join()
-		
+
 		/*
 			new File( file ).withWriter { w ->
-			
+
 			[file1,file2].each{ f ->
 
 				// Get a reader for the input file
 				new File( f ).withReader { r ->
-			
+
 				  // And write data from the input into the output
 				 w << r << '\n'
 				}
@@ -3901,11 +3901,11 @@ class EmployeeController {
 		boolean file2SuccessfullyDeleted =  new File(file2).delete()
 */
 	}
-	
+
 	@Secured(['ROLE_ANONYMOUS'])
 	def modifyTitle(){
 		log.error('modifyTitle called')
-		def base 		
+		def base
 		for (Employee employee:Employee.findAll()){
 			base = "https://api.genderize.io/?name="+employee.firstName
 			def url = new URL(base)
@@ -3921,7 +3921,7 @@ class EmployeeController {
 				}
 				employee.save(flush:true)
 			}
-		
+
 		}
 			log.error('modifyTime done')
 	}

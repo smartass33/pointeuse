@@ -16,4 +16,44 @@ class PointeuseTagLib {
 	def authorizationCategoryTable ={attrs,body->
 		out<<render(template:"/authorization/template/authorizationCategoryTable",model:[showEmployee:attrs.showEmployee])
 	}
+	
+	def itineraryActionTable ={attrs,body->
+		out<<render(template:"/itinerary/template/theoriticalActionTable")
+	}
+	def loggedActionTable ={attrs,body->
+		out<<render(template:"/itinerary/template/loggedActionTable")
+	}
+	def theoriticalActionTable ={attrs,body->
+		out<<render(template:"/itinerary/template/theoriticalActionTable")
+	}
+	def theoriticalActionForm ={attrs,body->
+		out<<render(template:"/itinerary/template/theoriticalActionForm")
+	}
+	def itineraryReportTemplate ={attrs,body->
+		out<<render(template:"/itinerary/template/itineraryReportTemplate")
+	}
+	def mergedActionTable ={attrs,body->
+		out<<render(template:"/itinerary/template/mergedActionTable")
+	}
+	def itinerarySiteReportTemplate ={attrs,body->
+		out<<render(template:"/itinerary/template/itinerarySiteReportTemplate")
+	}
+	def itineraryTheoriticalTemplate ={attrs,body->
+		out<<render(template:"/itinerary/template/itineraryTheoriticalTemplate")
+	}
+	def itineraryTheoriticalSiteView ={attrs,body->
+		out<<render(template:"/itinerary/template/itineraryTheoriticalSiteView")
+	}
+	def itineraryTheoriticalItineraryView ={attrs,body->
+		out<<render(template:"/itinerary/template/itineraryTheoriticalItineraryView")
+	}
+	def itinerarySiteDailyView ={attrs,body->
+		out<<render(template:"/itinerary/template/itinerarySiteDailyView")
+	}
+	def itinerarySiteMonthlyView ={attrs,body->
+		out<<render(template:"/itinerary/template/itinerarySiteMonthlyView")
+	}
+	def weekScheduleView ={attrs,body->
+		out<<render(template:"/employee/template/weekScheduleTemplate")
+	}
 }
