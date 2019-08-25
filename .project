@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>toto</name>
+	<name>pointeuse</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -26,7 +26,7 @@
 		<link>
 			<name>.link_to_grails_plugins</name>
 			<type>2</type>
-			<location>C:/Users/dbzm1855/Documents/workspace/pointeuse/target/work/plugins</location>
+			<location>/Users/hnrimar/pointeuse/target/work/plugins</location>
 		</link>
 	</linkedResources>
 </projectDescription>
