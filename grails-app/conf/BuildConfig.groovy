@@ -58,9 +58,6 @@ grails.project.dependency.resolution = {
 		runtime 'mysql:mysql-connector-java:5.1.21'
 		compile 'com.itextpdf:itextpdf:5.4.1'
 		build 'org.codehaus.gpars:gpars:1.2.1'
-		//compile 'com.jameskleeh:excel-builder:0.4.3'
-		//runtime 'net.sourceforge.jexcelapi:jxl:2.6.12'
-
     }
 
     plugins {

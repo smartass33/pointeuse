@@ -95,11 +95,11 @@
 												<td class="eventTD" width="120px"><font size="2"><i>${entries.key.format('E dd MMM yyyy')}</i></font></td>								
 												<td class="eventTD" ><font size="2"><my:humanTimeTD id="dailyTotal" name="dailyTotal" value="${dailyTotalMap.get(entries.key)}"/></font></td>
 												<td class="eventTD" >		
-													<g:if test="${holidayMap.get(entries.key) != null}"><font size="2">${holidayMap.get(entries.key).type}</font></g:if>
+													<g:if test="${holidayMap != null && holidayMap.get(entries.key) != null}"><font size="2">${holidayMap.get(entries.key).type}</font></g:if>
 													<g:else><font size="2">-</font></g:else>
 												</td>
 												<td class="eventTD" >		
-													<g:if test="${mileageMap.get(entries.key) != null}"><font size="2">${mileageMap.get(entries.key).value}</font></g:if>
+													<g:if test="${mileageMap != null && mileageMap.get(entries.key) != null}"><font size="2">${mileageMap.get(entries.key).value}</font></g:if>
 													<g:else><font size="2">0</font></g:else>
 												</td>										
 												

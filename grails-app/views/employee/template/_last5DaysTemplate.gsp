@@ -2,8 +2,21 @@
 <%@ page import="pointeuse.Site" %>
 <%@ page import="pointeuse.Itinerary" %>
 
+<g:set var="isAble" value="${true}" />
+
+<g:hiddenField name="siteSelect2" value="0" />
+<header>
+	<script>
+		function updateSiteId (newSite){
+			document.getElementById('siteSelect2').value = newSite
+			alert(document.getElementById('siteSelect2').value);
+			}
+	</script>
+</header>
+
+
 <div id="last5days" >
-	<h1><g:message code="daily.last.3.events" default="Last Name" /></h1>
+	<h1><g:message code="daily.last.3.events" default="Last Name"/></h1>
 		<table border="1" style="padding:15px;">
 			<thead>
 				<th class="eventTD" style="width:150px;"><g:message code="employee.date" default="Last Name" /></th>
@@ -107,78 +120,42 @@
 		<g:hiddenField name="type" value="E" />
 		<%entryName='Entrer'%>
 	</g:else>
-
-	<g:hiddenField name="userId" value="${employee?.id}" />
-	<g:if test="${entranceStatus}">
-			<g:hiddenField name="type" value="S" />
-			<%entryName='Sortir'%>
-	</g:if>
-	<g:else>
-		<g:hiddenField name="type" value="E" />
-		<%entryName='Entrer'%>
-	</g:else>
-
-	
 	<BR>
 	<div class="standardNav">
 		<ul>
-<<<<<<< .merge_file_34enGn
-			<li>
-				<g:select name="site.id"
-					from="${Site.list([sort:'name'])}"
-					noSelection="['':'-Ajouter un site-']" optionKey="id"
-					optionValue="name" 
-					onchange="${remoteFunction(action: 'addingEventToEmployee',
-                       update: 'last5days',
-						params:"\'siteId=\'+ this.value + \'&userId=\' + \'${employee.id} + \' + \'&entranceStatus=\' + \'${entranceStatus} +          \'"								
-					   )}"
-					/>
+			<g:if test="${employee != null && !employee.lastName.equals('cort')}">
+			
+				<li>
+				  <g:select name="site.id"
+				    from="${Site.list([sort:'name'])}"
+				    noSelection="['':'-Ajouter un site-']" optionKey="id"
+				    optionValue="name" 
+				    onchange="${remoteFunction(action: 'addingEventToEmployee',
+				                 update: 'last5days',
+				      params:"\'siteId=\'+ this.value + \'&userId=\' + \'${employee.id} + \' + \'&entranceStatus=\' + \'${entranceStatus} +          \'"								
+				       )}"
+				    />
+				</li>
+				<li>									
+						<g:if test="${entranceStatus}">					
+							<g:remoteLink action="addingEventToEmployee" update="last5days"
+								onLoading="document.getElementById('spinner').style.display = 'inline';"
+			                    onComplete="document.getElementById('spinner').style.display = 'none';"	
+								class="exitbutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>			
+						</g:if> 
+						<g:else>
+							<g:remoteLink action="addingEventToEmployee" update="last5days"
+								onLoading="document.getElementById('spinner').style.display = 'inline';"
+			                    onComplete="document.getElementById('spinner').style.display = 'none';"	
+								class="entrybutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>				
+						</g:else>
+				</li>
 
-			</li>
-			<li>				
-				<g:if test="${entranceStatus}">					
-					<g:remoteLink action="addingEventToEmployee" update="last5days"
-						onLoading="document.getElementById('spinner').style.display = 'inline';"
-	                    onComplete="document.getElementById('spinner').style.display = 'none';"	
-						class="exitbutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>			
-				</g:if> 
-				<g:else>
-					<g:remoteLink action="addingEventToEmployee" update="last5days"
-						onLoading="document.getElementById('spinner').style.display = 'inline';"
-	                    onComplete="document.getElementById('spinner').style.display = 'none';"	
-						class="entrybutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>				
-				</g:else>
-			</li>
-
+			</g:if>
 			<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
 			<li >
 				<g:link class="displayButton" controller="employee" action="reportLight" params="[userId:employee.id]">${message(code: 'employee.monthly.report.label', default: 'Report')}</g:link>
 			</li>
-			<li >
-				<a href="#join_form" id="join_pop" class="addElementButton"><g:message code="inAndOut.element.add"/></a>
-				<a href="#x" class="overlay" id="join_form" style="background: transparent;"></a>
-				<div id="popup" class="popup">
-					<h2><g:message code="inAndOut.element.add"/></h2>
-					<p><g:message code="inAndOut.element.add.info"/></p>
-			<g:if test="${employee != null && !employee.lastName.equals('cort')}">
-				<li>				
-					<g:if test="${entranceStatus}">
-						<g:remoteLink action="addingEventToEmployee" update="last5days"
-							onLoading="document.getElementById('spinner').style.display = 'inline';"
-		                    onComplete="document.getElementById('spinner').style.display = 'none';"	
-							class="exitbutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
-					</g:if> 
-					<g:else>
-						<g:remoteLink action="addingEventToEmployee" update="last5days"
-							onLoading="document.getElementById('spinner').style.display = 'inline';"
-		                    onComplete="document.getElementById('spinner').style.display = 'none';"	
-							class="entrybutton" params="[userId:employee?.id,type:entryName]">${entryName}</g:remoteLink>
-					</g:else>
-				</li>
-				<li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
-				<li>	
-					<g:link class="displayButton" controller="employee" action="reportLight" params="[userId:employee.id]">${message(code: 'employee.monthly.light.report.label', default: 'Report')}</g:link>
-				</li>
 				<li>
 					<a href="#join_form" id="join_pop" class="addElementButton">${message(code: 'inAndOut.create.add.label.short', default: 'Report')}</a>
 					<a href="#x" class="overlay" id="join_form" style="background: transparent;"></a>
@@ -228,6 +205,7 @@
 						<a class="close" id="closeId" href="#close"></a>
 					</div>
 			</li>
+
 			<li >
 				<a href="#mileage_form" id="mileage_pop" class="addMileageButton">${message(code: 'mileage.create.add.label.short', default: 'Report')}</a>
 				<a href="#x" class="overlay" id="mileage_form" style="background: transparent;"></a>
@@ -269,7 +247,6 @@
 					<a class="close" id="closeId" href="#close"></a>
 				</div>
 			</li>
-			</g:if>
 			<li >
 				<a href="#itinerary_action_form" id="itinerary_action_pop" class="addElementButton">${message(code: 'action.create.add.label', default: 'Report')}</a>
 				<a href="#x" class="overlay" id="itinerary_action_form" style="background: transparent;"></a>

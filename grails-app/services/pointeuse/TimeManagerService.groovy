@@ -3371,9 +3371,10 @@ class TimeManagerService {
 		def calendar = Calendar.instance
 		def inAndOutsCriteria = InAndOut.createCriteria()
 		def tmpCalendar = Calendar.instance
+		def inAndOuts
 		tmpCalendar.set(Calendar.DAY_OF_YEAR,tmpCalendar.get(Calendar.DAY_OF_YEAR)-4)
 		
-		def inAndOuts = inAndOutsCriteria.list {
+		inAndOuts = inAndOutsCriteria.list {
 			and {
 				eq('employee',employee)
 				eq('year',calendar.get(Calendar.YEAR))
@@ -3420,8 +3421,8 @@ class TimeManagerService {
 		}
 		if (inAndOuts!=null){
 			def max = inAndOuts.size()
-			if (max>0){
-			def  lastEvent = inAndOuts.get(max-1)
+			if (max > 0){
+			def  lastEvent = inAndOuts.get(max - 1)
 			entranceStatus = lastEvent.type.equals("S") ? false : true
 			}else{
 				entranceStatus=false	

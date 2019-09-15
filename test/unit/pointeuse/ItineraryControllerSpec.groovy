@@ -2,7 +2,6 @@ package pointeuse
 
 
 
-import grails.test.mixin.*
 import spock.lang.*
 
 @TestFor(ItineraryController)

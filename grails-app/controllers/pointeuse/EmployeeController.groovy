@@ -1721,7 +1721,7 @@ class EmployeeController {
 				}
 			}
 		}
-		def report = timeManagerService.getReportData(null, employee,  null, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),true)
+		def report = timeManagerService.getReportData(null, employee,  cal.time, cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),true)
 		log.error('modifySite ended')
 		render template: "/employee/template/reportTableTemplate", model: report
 		return
@@ -1731,22 +1731,27 @@ class EmployeeController {
 	def addingEventToEmployee(){
 		params.each{i->log.error(i)}
 		def cal = Calendar.instance
-
+		def entranceStatus = params.boolean("entranceStatus")//false
+		def site = Site.get(params["siteId"])
 		def type = params["type"].equals("Entrer") ? "E" : "S"
-		def isOutSideSite = params["isOutSideSite"].equals("true") ? true : false
+		if (params["type"] == null){type = entranceStatus ? "S" : "E"}
+		//def isOutSideSite = params["isOutSideSite"].equals("true") ? true : false
+		def isOutSideSite = site != null ? true : false
+		
 		Employee employeeInstance = Employee.get(params['userId'])
 		def currentDate = cal.time
 		def criteria
-		def entranceStatus = params.boolean("entranceStatus")//false
-		type = entranceStatus ? "E" : "S"
 		def timeDiff
-		def flashMessage=true
+		def flashMessage = true
 		def today = new GregorianCalendar(cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)).time
-
+		def inAndOutcriteria
+		def todayEmployeeEntries
+		def dailyTotal
+		
 		log.error('trying to add event to employee '+employeeInstance.firstName+' '+employeeInstance.lastName+' with type: '+type)
 		// liste les entrees de la journée et vérifie que cette valeur n'est pas supérieure à une valeur statique
-		def inAndOutcriteria = InAndOut.createCriteria()
-		def todayEmployeeEntries = inAndOutcriteria.list {
+		inAndOutcriteria = InAndOut.createCriteria()
+		todayEmployeeEntries = inAndOutcriteria.list {
 			and {
 				eq('employee',employeeInstance)
 				eq('type','E')
@@ -1775,11 +1780,11 @@ class EmployeeController {
 
 		if (lastIn != null){
 			def LIT = lastIn.time
-			use (TimeCategory){timeDiff=currentDate-LIT}
+			use (TimeCategory){timeDiff = currentDate - LIT}
 			//empecher de represser le bouton pendant 30 seconds
 			if ((timeDiff.seconds + timeDiff.minutes*60 + timeDiff.hours*3600) < 30){
 				flash.message = message(code: 'employee.overlogging.error')
-				flashMessage=false
+				flashMessage = false
 			}
 		}
 
@@ -1787,6 +1792,12 @@ class EmployeeController {
 		if (flashMessage){
 			def inOrOut = timeManagerService.initializeTotals(employeeInstance,currentDate,type,null,isOutSideSite)
 			timeManagerService.getDailyTotalWithMonth(inOrOut.dailyTotal)
+			if (site != null){
+				dailyTotal = inOrOut.dailyTotal
+				dailyTotal.site = site
+				dailyTotal.save(flush:true)
+				
+			}
 			log.error('entry created with params: '+inOrOut)
 		}
 
@@ -1808,7 +1819,7 @@ class EmployeeController {
 				entranceStatus = lastIn.type.equals("S") ? false : true
 			}
 		}else{
-			entranceStatus=true
+			entranceStatus = true
 		}
 		if (type.equals("E")){
 			if (flashMessage)
@@ -2457,6 +2468,9 @@ class EmployeeController {
 			def totalByDay=[:]
 			def dailyCriteria
 			def elapsedSeconds=0
+			def calendar = Calendar.instance
+			def inAndOutsCriteria = InAndOut.createCriteria()
+			
 			if (id!=null){
 				employee = Employee.get(id)
 			}
@@ -2469,9 +2483,6 @@ class EmployeeController {
 			}else{
 				log.error('employee successfully authenticated='+employee)
 			}
-
-			def calendar = Calendar.instance
-			def inAndOutsCriteria = InAndOut.createCriteria()
 			def systemGeneratedEvents = inAndOutsCriteria.list {
 				and {
 					eq('employee',employee)
