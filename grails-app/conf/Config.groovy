@@ -87,7 +87,7 @@ environments {
 		context="/pointeuse"
 		log4j = {
 			appenders {
-				rollingFile name:'rollingFileAppender',file:"C:/Users/dbzm1855/Documents/workspace/pointeuse/logs/pointeuse.log", maxFileSize:1024,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+				rollingFile name:'rollingFileAppender',file:"/var/log/pointeuse.log", maxFileSize:1024,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 			}
 			warn 'org.codehaus.groovy.grails.orm.hibernate','org.hibernate','org.springframework', 'net.sf.ehcache.hibernate'
 			warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
