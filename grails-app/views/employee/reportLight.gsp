@@ -99,7 +99,7 @@
 													<g:else><font size="2">-</font></g:else>
 												</td>
 												<td class="eventTD" >		
-													<g:if test="${mileageMap != null && mileageMap.get(entries.key) != null}"><font size="2">${mileageMap.get(entries.key).value}</font></g:if>
+													<g:if test="${mileageMapByDay != null && mileageMapByDay.get(entries.key) != null}"><font size="2">${mileageMapByDay.get(entries.key).value}</font></g:if>
 													<g:else><font size="2">0</font></g:else>
 												</td>										
 												

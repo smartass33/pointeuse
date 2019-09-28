@@ -78,7 +78,7 @@ environments {
 		ip.authorization.on=false
 		laboratory.logo='LABM.png'
 		laboratory.name='LABM'
-		pdf.directory='/Users/henri/pointeuse'
+		pdf.directory='/Users/hnrimar/pointeuse'
 		mysqldump.directory='/usr/local/bin/'
 		grails.app.context=pointeuse
         grails.logging.jul.usebridge = true
@@ -87,7 +87,7 @@ environments {
 		context="/pointeuse"
 		log4j = {
 			appenders {
-				rollingFile name:'rollingFileAppender',file:"/var/log/pointeuse.log", maxFileSize:1024,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+				rollingFile name:'rollingFileAppender',file:"/Users/hnrimar/pointeuse/pointeuse.log", maxFileSize:1024,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 			}
 			warn 'org.codehaus.groovy.grails.orm.hibernate','org.hibernate','org.springframework', 'net.sf.ehcache.hibernate'
 			warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts

@@ -217,7 +217,6 @@
 							<tbody>
 								<tr class="prop">
 									<td class="eventTD" valign="top"><g:message code="inAndOut.element.choose.date"/></td>
-									<td class="eventTD" valign="top"><input type="text" name="date_picker" id="date_picker" /> 
 									<td class="eventTD" valign="top">${message(code: 'mileage.create.date.choice', default: 'Report')}:</td>
 									<td class="eventTD" valign="top"><input type="text" name="date_mileage_picker" id="date_mileage_picker" /> 
 										<script type="text/javascript">

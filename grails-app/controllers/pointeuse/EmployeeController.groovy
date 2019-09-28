@@ -857,10 +857,360 @@ class EmployeeController {
 	}
 
 	@Secured(['ROLE_ADMIN'])
-	def vacationFollowup(){
-		def year = params["year"]
+	def absenceFollowup(){
+		log.error('absenceFollowup called')
+		params.each{i->log.error(i)}
+		boolean isMonthlyView = false
+		boolean isYearlyView = false
+		boolean isDailyView = false
+		def folder = grailsApplication.config.pdf.directory
+		def reportSpan = params["id"]
 		def max = params["max"] != null ? params.int("max") : 20
 		def offset = params["offset"] != null ? params.int("offset") : 0
+		def siteId
+		def site
+		def employeeInstanceList = []
+		def criteria
+		def absenceList
+		def employeeInstanceTotal
+		def currentCalendar = Calendar.instance
+		def date_picker = params["date_picker"]
+		def absenceMapByEmployee = [:]
+		def absenceMapByDay = [:]
+		def dayList = []
+		def headers = ['nom']
+		def period = (currentCalendar.get(Calendar.MONTH) >= 5) ? Period.findByYear(currentCalendar.get(Calendar.YEAR)) : Period.findByYear(currentCalendar.get(Calendar.YEAR) - 1)
+		def firstDayOfPeriod = Calendar.instance
+		def initialDayOfPeriod = Calendar.instance
+		def functionList = Function.list([sort: "ranking", order: "asc"])
+	//	def serviceList = Service.list([sort: "name", order: "asc"])
+		def employeeSubList = []
+		def lastDayOfPeriod = Calendar.instance
+		firstDayOfPeriod.set(Calendar.YEAR,period.year)
+		firstDayOfPeriod.set(Calendar.MONTH,5)
+		firstDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		firstDayOfPeriod.clearTime()
+		
+		initialDayOfPeriod.set(Calendar.YEAR,period.year)
+		initialDayOfPeriod.set(Calendar.MONTH,5)
+		initialDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		initialDayOfPeriod.clearTime()
+		
+		lastDayOfPeriod.set(Calendar.YEAR,period.year + 1)
+		lastDayOfPeriod.set(Calendar.MONTH,5)
+		lastDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		lastDayOfPeriod.clearTime()
+		
+		if (date_picker != null && date_picker.size() > 0){
+			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+		}
+		if (params["site.id"]!=null && !params["site.id"].equals("")){
+			site = Site.get(params["site.id"] as long)
+			siteId = site.id
+		}
+		if (site != null){
+			for (Function function:functionList){
+				employeeInstanceList.addAll(Employee.findAllByFunctionAndSite(function,site,[sort: "lastName", order: "asc"]))
+			}
+		}else{
+			for (Function function:functionList){
+				employeeInstanceList.addAll(Employee.findAllByFunction(function,[sort: "lastName", order: "asc"]))
+			}
+		}
+		employeeInstanceTotal = employeeInstanceList.size()
+		
+		/*
+		
+		if (site != null){
+			employeeInstanceList = Employee.findAllBySite(site)
+			employeeInstanceTotal = employeeInstanceList.size()
+			employeeInstanceList = Employee.findAllBySite(site,[max:max,offset:offset])
+			
+		}else{
+			employeeInstanceList = Employee.findAll()
+			employeeInstanceTotal = employeeInstanceList.size()
+		}
+		*/
+		switch (reportSpan) {
+			// case daily
+			case 'dailyView':
+				isDailyView = true
+				criteria = Absence.createCriteria()
+				absenceList = criteria.list {
+					and {
+						'in'("employee",employeeInstanceList)
+						eq('day',currentCalendar.get(Calendar.DAY_OF_MONTH))
+						eq('month',currentCalendar.get(Calendar.MONTH) + 1)
+						eq('year',currentCalendar.get(Calendar.YEAR))
+					}
+				}
+				break
+			// case monthly
+			case 'monthlyView':
+				isMonthlyView = true			
+				for (Employee employee in employeeInstanceList){
+					criteria = Absence.createCriteria()
+					absenceList = criteria.list {
+						and {
+							eq('employee',employee)
+							//'in'("employee",employeeInstanceList)
+							eq('month',currentCalendar.get(Calendar.MONTH) + 1)
+							eq('year',currentCalendar.get(Calendar.YEAR))
+						}
+					}				
+					absenceMapByDay = [:]
+					for (Absence absence in absenceList){
+						absenceMapByDay.put(absence.day as int, absence)
+					
+					}					
+					absenceMapByEmployee.put(employee, absenceMapByDay)
+				}
+				break
+			// case yearly
+			case 'yearlyView':
+				isYearlyView = true
+				while(firstDayOfPeriod.get(Calendar.MONTH) <= 11){
+					log.debug('refCalendar: '+firstDayOfPeriod.time.format('d-M-yyyy'))
+					dayList.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+					if (firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) == firstDayOfPeriod.getActualMaximum(Calendar.DAY_OF_YEAR)){
+						break
+					}
+					firstDayOfPeriod.roll(Calendar.DAY_OF_YEAR, 1)
+				}
+				firstDayOfPeriod.set(Calendar.MONTH,0)
+				firstDayOfPeriod.set(Calendar.YEAR,period.year + 1)
+				while(firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) <= lastDayOfPeriod.get(Calendar.DAY_OF_YEAR)){
+					log.debug('firstDayOfPeriod: '+firstDayOfPeriod.time.format('d-M-yyyy'))
+					dayList.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+					firstDayOfPeriod.roll(Calendar.DAY_OF_YEAR, 1)
+					if (firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) == lastDayOfPeriod.get(Calendar.DAY_OF_YEAR)){
+						break
+					}
+				}
+				for (Employee employee in employeeInstanceList){
+					absenceMapByDay = [:]
+					criteria = Absence.createCriteria()
+					absenceList = criteria.list {
+						and {
+							eq('employee',employee)
+							//'in'("employee",employeeInstanceList)
+							ge('date',initialDayOfPeriod.time)
+							lt('date',lastDayOfPeriod.time)
+						}
+					}
+					
+					for (Absence absence in absenceList){
+						absenceMapByDay.put(absence.day+'-'+absence.month+'-'+absence.year, absence)
+					}			
+					for (int k = 0;k < dayList.size();k++){
+						if (absenceMapByDay.get(dayList[k]) == null){
+							absenceMapByDay.put(dayList[k],'-')
+							headers.add(dayList[k])
+						}
+					}
+					absenceMapByEmployee.put(employee, absenceMapByDay)
+				}
+				break
+
+			default:
+				break
+		}
+			
+		if (isYearlyView){
+			WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/employee_list_template.xlsx').with {
+				def data = []
+				int i = 1
+				setResponseHeaders(response)
+				fillHeader(headers)
+				absenceMapByEmployee.each{employeeInstance,absenceMapByDayInstance->
+					data.add(employeeInstance)
+					absenceMapByDayInstance.each{k,v->
+						if (!v.equals('-')){
+							data.add(v.type)
+						}else{
+							data.add('-')
+						}
+					}
+					fillRow(data,i)
+					i++
+				}
+				save(response.outputStream)
+				response.setContentType("application/octet-stream")
+			}
+			return
+		}
+		
+		def model =
+			[
+				period:period,
+				employeeInstanceList:employeeInstanceList,
+				isYearlyView:isYearlyView,
+				isMonthlyView:isMonthlyView,
+				isDailyView:isDailyView,
+				dayList:dayList,
+				currentDate:currentCalendar.time,
+				absenceMapByEmployee:absenceMapByEmployee,
+				absenceList:absenceList
+			]
+		if (isDailyView || isMonthlyView || isYearlyView){
+			render template: "/employee/template/listAbsenceEmployeeTemplate", model: model
+			return
+		}
+		model	
+	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def vacationFollowAnnualExcel(){
+		params.each{i->log.error(i)}
+		def folder = grailsApplication.config.pdf.directory
+		def max = params["max"] != null ? params.int("max") : 20
+		def offset = params["offset"] != null ? params.int("offset") : 0
+		def siteId
+		def site
+		def employeeInstanceList = []
+		def criteria
+		def absenceList
+		def employeeInstanceTotal
+		def functionList = Function.list([sort: "ranking", order: "asc"])
+		def currentCalendar = Calendar.instance
+		def absenceMapByEmployee = [:]
+		def absenceMapByDay = [:]
+		def dayList = []
+		def data = []
+		def date_picker = params["date_picker"]
+		def headers = [message(code: 'employee.lastName.label'),message(code: 'employee.site.label'),message(code: 'employee.function.label')]
+		def period = (currentCalendar.get(Calendar.MONTH) >= 5) ? Period.findByYear(currentCalendar.get(Calendar.YEAR)) : Period.findByYear(currentCalendar.get(Calendar.YEAR) - 1)
+		def firstDayOfPeriod = Calendar.instance
+		def initialDayOfPeriod = Calendar.instance
+		
+		def lastDayOfPeriod = Calendar.instance
+		firstDayOfPeriod.set(Calendar.YEAR,period.year)
+		firstDayOfPeriod.set(Calendar.MONTH,5)
+		firstDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		firstDayOfPeriod.clearTime()
+		
+		initialDayOfPeriod.set(Calendar.YEAR,period.year)
+		initialDayOfPeriod.set(Calendar.MONTH,5)
+		initialDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		initialDayOfPeriod.clearTime()
+		
+		lastDayOfPeriod.set(Calendar.YEAR,period.year + 1)
+		lastDayOfPeriod.set(Calendar.MONTH,5)
+		lastDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
+		lastDayOfPeriod.clearTime()
+
+		if (date_picker != null && date_picker.size() > 0){
+			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+		}
+		
+		if (params["site.id"]!=null && !params["site.id"].equals("")){
+			site = Site.get(params["site.id"] as long)
+			siteId = site.id
+		}
+		
+		if (site != null){
+			for (Function function:functionList){
+				employeeInstanceList.addAll(Employee.findAllByFunctionAndSite(function,site,[sort: "lastName", order: "asc"]))
+			}
+		}else{
+			for (Function function:functionList){
+				employeeInstanceList.addAll(Employee.findAllByFunction(function,[sort: "lastName", order: "asc"]))
+			}
+		}
+		employeeInstanceTotal = employeeInstanceList.size()
+		
+		/*
+		
+		if (site != null){
+			employeeInstanceList = Employee.findAllBySite(site)
+			employeeInstanceTotal = employeeInstanceList.size()
+			employeeInstanceList = Employee.findAllBySite(site,[max:max,offset:offset])
+			
+		}else{
+			employeeInstanceList = Employee.findAll()
+			employeeInstanceTotal = employeeInstanceList.size()
+		}
+		*/
+		
+		while(firstDayOfPeriod.get(Calendar.MONTH) <= 11){
+			log.error('refCalendar: '+firstDayOfPeriod.time.format('d-M-yyyy'))
+			dayList.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+			headers.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+			if (firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) == firstDayOfPeriod.getActualMaximum(Calendar.DAY_OF_YEAR)){
+				break
+			}
+			firstDayOfPeriod.roll(Calendar.DAY_OF_YEAR, 1)
+		}
+		firstDayOfPeriod.set(Calendar.MONTH,0)
+		firstDayOfPeriod.set(Calendar.YEAR,period.year + 1)
+		while(firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) <= lastDayOfPeriod.get(Calendar.DAY_OF_YEAR)){
+			log.error('firstDayOfPeriod: '+firstDayOfPeriod.time.format('d-M-yyyy'))
+			dayList.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+			headers.add(firstDayOfPeriod.time.format('d-M-yyyy'))
+			firstDayOfPeriod.roll(Calendar.DAY_OF_YEAR, 1)
+			if (firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) == lastDayOfPeriod.get(Calendar.DAY_OF_YEAR)){
+				break
+			}
+		}
+		
+		for (Employee employee in employeeInstanceList){
+			absenceMapByDay = [:]
+			criteria = Absence.createCriteria()
+			absenceList = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',initialDayOfPeriod.time)
+					lt('date',lastDayOfPeriod.time)
+				}
+			}
+			
+			for (Absence absence in absenceList){
+				absenceMapByDay.put(absence.day+'-'+absence.month+'-'+absence.year, absence)
+			}
+			
+			for (int k = 0;k < dayList.size();k++){
+				if (absenceMapByDay.get(dayList[k]) == null){
+					absenceMapByDay.put(dayList[k],'-')
+				}
+			}
+			absenceMapByEmployee.put(employee, absenceMapByDay)
+		}
+		
+		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/employee_list_template.xlsx').with {
+			int i = 1
+			setResponseHeaders(response)
+			fillHeader(headers)
+			absenceMapByEmployee.each{employeeInstance,absenceMapByDayInstance->
+				data = []
+				data.add(employeeInstance.lastName+' '+employeeInstance.firstName)
+				data.add(employeeInstance.site.name)
+				data.add(employeeInstance.function.name)
+				
+				for (int l = 0;l < dayList.size();l++){
+					if (!(absenceMapByDayInstance.get(dayList[l])).equals('-')){
+						data.add(absenceMapByDayInstance.get(dayList[l]).type)
+					}else{
+						data.add('-')
+					}
+				}
+
+				fillRow(data,i)
+				i++
+			}
+			save(response.outputStream)
+			response.setContentType("application/octet-stream")
+		}
+	}
+	
+	
+	@Secured(['ROLE_ADMIN'])
+	def vacationFollowup(){
+		log.error('vacationFollowup called')
+		params.each{i->log.error(i)}
+		
+		def year = params["year"]
+		def max = params["max"] != null ? params.int("max") : 20
+		def offset = params["offset"] != null ? params.int("offset") : 0	
 		def site
 		def siteId
 		def employeeInstanceList
@@ -873,11 +1223,14 @@ class EmployeeController {
 		def remainingRTTMap = [:]
 		def takenRTTMap = [:]
 		def takenSicknessMap = [:]
+		def takenMaterniteMap = [:]
 		def takenCSSMap = [:]
 		def takenAutreMap = [:]
-		def takenExceptionnelMap = [:]
+		def takenExceptionnelMap = [:]		
 		def takenPaterniteMap = [:]
+		def takenParentalMap = [:]
 		def takenDifMap = [:]
+		def takenDonMap = [:]
 		def formationMap = [:]
 		def takenSickness
 		def takenRTT
@@ -886,42 +1239,32 @@ class EmployeeController {
 		def takenAutre
 		def takenExceptionnel
 		def takenPaternite
-		def takenDIF
+		def takenParental
+		def takenMaternite
+		def takenDIF	
+		def takenDON
 		def formation
 		def employeeInstanceTotal
-
-		if (params["siteId"]!=null && !params["siteId"].equals("")){
-			site = Site.get(params["siteId"])
-			siteId=site.id
-		}else{
-			if (params["site.id"]!=null && !params["site.id"].equals("")){
-				def tmpSite = params["site.id"]
-				if (tmpSite instanceof String[]){
-					if (tmpSite[0]!=""){
-						tmpSite=tmpSite[0]!=""?tmpSite[0].toInteger():tmpSite[1].toInteger()
-					}
-				}else {
-					tmpSite=tmpSite.toInteger()
-				}
-				site = Site.get(tmpSite)
-				siteId=site.id
-			}
+		
+		if (params["site.id"]!=null && !params["site.id"].equals("")){
+			site = Site.get(params["site.id"] as long)
+			siteId=site.id	
 		}
-
-		if (year!=null && !year.equals("")){
+		
+		if (year!=null && !year.equals("")){		
 			if (year instanceof String[]){
-				year= (year[0] != "") ? year[0].toInteger():year[1].toInteger()
+				year= (year[0] != "") ? year[0].toInteger():year[1].toInteger()					
 			}else {
-				year=year.toInteger()
+				year=year.toInteger()	
 			}
 		}
-
+		
 		def startCalendar = Calendar.instance
 		def currentMonth = startCalendar.get(Calendar.MONTH)
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
 		startCalendar.clearTime()
-
+		
 		// ending calendar: 31 of May of the period
 		def endCalendar   = Calendar.instance
 		endCalendar.set(Calendar.DAY_OF_MONTH,31)
@@ -929,24 +1272,28 @@ class EmployeeController {
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
-
+		
 		if (year != null){
 			period = Period.get(year)
 		}else{
 			period = (currentMonth < 5) ? Period.findByYear(startCalendar.get(Calendar.YEAR) - 1) : Period.findByYear(startCalendar.get(Calendar.YEAR))
 		}
-
+			
 		if (site != null){
 			employeeInstanceList = Employee.findAllBySite(site)
-			employeeInstanceTotal = employeeInstanceList.size()
+			employeeInstanceTotal = employeeInstanceList.size()		
 			employeeInstanceList = Employee.findAllBySite(site,[max:max,offset:offset])
-
+			
 		}else{
-			employeeInstanceList = Employee.findAll("from Employee")
+			employeeInstanceList = []
+				def statusList = Status.findAllByType(StatusType.ACTIF)
+			for (Status status in statusList){
+				employeeInstanceList.add(status.employee)
+			}
 			employeeInstanceTotal = employeeInstanceList.size()
-			employeeInstanceList = Employee.findAll("from Employee",[max:max,offset:offset])
+			//employeeInstanceList = Employee.findAllByStatus(StatusType.ACTIF,[max:max,offset:offset])	
 		}
-
+				
 		// for each employee, retrieve absences
 		for (Employee employee: employeeInstanceList){
 			// step 1: fill initial values
@@ -963,7 +1310,7 @@ class EmployeeController {
 			if (initialCA != null){
 				initialCAMap.put(employee, initialCA.counter)
 			}else{
-				initialCAMap.put(employee, 0)
+				initialCAMap.put(employee, 0)		
 			}
 			//RTT
 			criteria = Vacation.createCriteria()
@@ -979,7 +1326,7 @@ class EmployeeController {
 			}else{
 				initialRTTMap.put(employee, 0)
 			}
-
+			
 			// step 2: fill actual counters
 			startCalendar.set(Calendar.YEAR,period.year)
 			endCalendar.set(Calendar.YEAR,period.year+1)
@@ -999,7 +1346,7 @@ class EmployeeController {
 			}else{
 				remainingCAMap.put(employee, initialCAMap.get(employee))
 				takenCAMap.put(employee, 0)
-
+				
 			}
 			//RTT
 			criteria = Absence.createCriteria()
@@ -1014,12 +1361,12 @@ class EmployeeController {
 			if (takenRTT!=null){
 				remainingRTTMap.put(employee, initialRTTMap.get(employee)-takenRTT.size())
 				takenRTTMap.put(employee, takenRTT.size())
-
+				
 			}else{
 				remainingRTTMap.put(employee, initialRTTMap.get(employee))
 				takenRTTMap.put(employee, 0)
 			}
-
+			
 			// SICKNESS
 			criteria = Absence.createCriteria()
 			takenSickness = criteria.list {
@@ -1029,13 +1376,29 @@ class EmployeeController {
 					lt('date',endCalendar.time)
 					eq('type',AbsenceType.MALADIE)
 				}
-			}
+			}			
 			if (takenSickness!=null){
 				takenSicknessMap.put(employee, takenSickness.size())
 			}else{
 				takenSicknessMap.put(employee, 0)
+			}	
+				
+			// MATERNITE
+			criteria = Absence.createCriteria()
+			takenMaternite = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.MATERNITE)
+				}
 			}
-
+			if (takenMaternite!=null){
+				takenMaterniteMap.put(employee, takenMaternite.size())
+			}else{
+				takenMaterniteMap.put(employee, 0)
+			}
+						
 			//CSS
 			criteria = Absence.createCriteria()
 			takenCSS = criteria.list {
@@ -1045,7 +1408,7 @@ class EmployeeController {
 					lt('date',endCalendar.time)
 					eq('type',AbsenceType.CSS)
 				}
-			}
+			}			
 			if (takenCSS!=null){
 				takenCSSMap.put(employee, takenCSS.size())
 			}else{
@@ -1067,7 +1430,7 @@ class EmployeeController {
 			}else{
 				takenAutreMap.put(employee, 0)
 			}
-
+			
 			//FORMATION
 			criteria = Absence.createCriteria()
 			formation = criteria.list {
@@ -1083,7 +1446,7 @@ class EmployeeController {
 			}else{
 				formationMap.put(employee, 0)
 			}
-
+			
 			//EXCEPTIONNEL
 			criteria = Absence.createCriteria()
 			takenExceptionnel = criteria.list {
@@ -1099,10 +1462,10 @@ class EmployeeController {
 			}else{
 				takenExceptionnelMap.put(employee, 0)
 			}
-
+			
 			//PATERNITE
 			criteria = Absence.createCriteria()
-			takenExceptionnel = criteria.list {
+			takenPaternite = criteria.list {
 				and {
 					eq('employee',employee)
 					ge('date',startCalendar.time)
@@ -1116,6 +1479,22 @@ class EmployeeController {
 				takenPaterniteMap.put(employee, 0)
 			}
 
+			//PARENTAL
+			criteria = Absence.createCriteria()
+			takenParental = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.PARENTAL)
+				}
+			}
+			if (takenParental != null){
+				takenParentalMap.put(employee, takenParental.size())
+			}else{
+				takenParentalMap.put(employee, 0)
+			}
+						
 			//DIF
 			criteria = Absence.createCriteria()
 			takenDIF = criteria.list {
@@ -1130,6 +1509,22 @@ class EmployeeController {
 				takenDifMap.put(employee, takenDIF.size())
 			}else{
 				takenDifMap.put(employee, 0)
+			}
+			
+			//DON
+			criteria = Absence.createCriteria()
+			takenDON = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.DON)
+				}
+			}
+			if (takenDON!=null){
+				takenDonMap.put(employee, takenDON.size())
+			}else{
+				takenDonMap.put(employee, 0)
 			}
 		}
 		log.debug("done")
@@ -1146,6 +1541,7 @@ class EmployeeController {
 			takenRTTMap:takenRTTMap,
 			takenExceptionnelMap:takenExceptionnelMap,
 			takenPaterniteMap:takenPaterniteMap,
+			takenParentalMap:takenParentalMap,
 			takenDifMap:takenDifMap,
 			takenCAMap:takenCAMap,
 			initialCAMap:initialCAMap,
@@ -1153,9 +1549,9 @@ class EmployeeController {
 			remainingRTTMap:remainingRTTMap,
 			remainingCAMap:remainingCAMap,
 			formationMap:formationMap
-		]
+		]	
 	}
-
+	
 	@Secured(['ROLE_ADMIN'])
 	def vacationDisplay(Long id){
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
@@ -1353,14 +1749,19 @@ class EmployeeController {
     def edit(Long id) {
 		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
 		def fromSite = (params["fromSite"] != null  && params["fromSite"].equals("true")) ? true : false
-		def back = (params["back"] != null  && params["back"].equals("true")) ? true : false
+		def back = (params["back"] != null  && params["back"].equals("true")) ? true : false		
         def employeeInstance = Employee.get(id)
-		def myDate = params["myDate"]
+		def myDate = params["myDate"] 
 		def siteId=params["siteId"]
 		def orderedVacationList=[]
+		def orderedCAMap = [:]
+		def orderedRTTMap = [:]
+		
 		def previousContracts
+		def previousSickness
+		def criteria = Vacation.createCriteria()
 		// starting calendar: 1 of June of the period
-		def startCalendar = Calendar.instance
+		def startCalendar = Calendar.instance		
 		startCalendar.set(Calendar.DAY_OF_MONTH,1)
 		startCalendar.set(Calendar.MONTH,5)
 		startCalendar.clearTime()
@@ -1371,27 +1772,48 @@ class EmployeeController {
 		endCalendar.set(Calendar.HOUR_OF_DAY,23)
 		endCalendar.set(Calendar.MINUTE,59)
 		endCalendar.set(Calendar.SECOND,59)
-
-		def periodList= Period.findAll("from Period as p order by year asc")
-
+		
+		def periodList = Period.findAll("from Period as p order by year asc")
+		
 		for (Period period:periodList){
-			def vacations = Vacation.findAllByEmployeeAndPeriod(employeeInstance,period,[sort:'type',order:'asc'])
-			for (Vacation vacation:vacations){
-				orderedVacationList.add(vacation)
+			//get RTT
+			criteria = Vacation.createCriteria()
+			
+			def rtt = criteria.get {
+				and {
+					eq('employee',employeeInstance)
+					eq('period',period)
+					eq('type',VacationType.RTT)
+				}
 			}
-		}
+			orderedRTTMap.put(period, rtt)
+			
+			//get CA
+			criteria = Vacation.createCriteria()
+			def ca = criteria.get {
+				and {
+					eq('employee',employeeInstance)
+					eq('period',period)
+					eq('type',VacationType.CA)
+				}
+			}
+			orderedCAMap.put(period, ca)
+			
+		}				
+		
+
+		
 		previousContracts = Contract.findAllByEmployee(employeeInstance,[sort:'startDate',order:'desc'])
         if (!employeeInstance) {
             flash.message = message(code: 'default.not.found.message', args: [message(code: 'employee.label', default: 'Employee'), id])
             redirect(action: "list")
             return
         }
-		def arrivalDate = employeeInstance.arrivalDate
-		def criteria = EmployeeDataListMap.createCriteria()
+		def arrivalDate = employeeInstance.arrivalDate		
 		def employeeDataListMap= EmployeeDataListMap.find("from EmployeeDataListMap")
 		def dataListRank= EmployeeDataListRank.findAll("from EmployeeDataListRank as e order by rank asc")
 		def authorizationInstanceList = Authorization.findAllByEmployee(employeeInstance)
-
+	
 		def retour = [
 			authorizationInstanceList:authorizationInstanceList,
 			fromEditEmployee:true,
@@ -1399,15 +1821,105 @@ class EmployeeController {
 			myDateFromEdit:myDate,
 			previousContracts:previousContracts,
 			arrivalDate:arrivalDate,
-			orderedVacationList:orderedVacationList,
-			orderedVacationListfromSite:fromSite,
+			orderedCAMap:orderedCAMap,
+			orderedRTTMap:orderedRTTMap,
+			periodList:periodList,
 			employeeInstance: employeeInstance,
 			isAdmin:isAdmin,siteId:siteId,
 			employeeDataListMapInstance:employeeDataListMap,
 			dataListRank:dataListRank
-		]
+		]		
 		return retour
 	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def sickLeaveReport(){
+		params.each{i-> log.error('param: '+i) }
+		
+		log.error('sickLeaveReport called')
+		def isAdmin = (params["isAdmin"] != null  && params["isAdmin"].equals("true")) ? true : false
+		def fromSite = (params["fromSite"] != null  && params["fromSite"].equals("true")) ? true : false
+		def back = (params["back"] != null  && params["back"].equals("true")) ? true : false
+		def employee = Employee.get(params["employeeId"])
+		def myDate = params["myDate"]
+		def siteId=params["siteId"]
+
+		def criteria
+		def previousSickness
+		
+		// list sick leave period
+		criteria = Absence.createCriteria()
+		def sickLeaveList = criteria.list {
+			and {
+				eq('type',AbsenceType.MALADIE)
+				eq('employee',employee)
+				order('date','asc')
+			}
+		}
+		
+		
+		//def periodList = Period.findAll()
+		def sickLeaveMap = [:]
+		def leaveCouple = [null,null]
+		def leaveList = []
+		def period
+		def sickness
+		
+		def sicknessCalendar = Calendar.instance
+		def previousSicknessCalendar = Calendar.instance
+		
+		if (sickLeaveList != null && sickLeaveList.size() > 0){
+			
+			// initialization
+			leaveCouple[0] = sickLeaveList.get(0)
+			previousSickness = sickLeaveList.get(0)
+			
+			// now that we have all sick leave, we are going to group them by 2 based on date continuity
+
+			for (int i = 1;i < sickLeaveList.size();i++){
+				sickness = sickLeaveList.get(i)
+				sicknessCalendar.time = sickness.date
+				previousSicknessCalendar.time = previousSickness.date
+			
+				log.error('sickness: '+sickness)
+				log.error('sicknessCalendar.time: '+sicknessCalendar.time)
+				log.error('previousSicknessCalendar.time: '+previousSicknessCalendar.time)
+				if (
+					(sicknessCalendar.get(Calendar.DAY_OF_YEAR) == previousSicknessCalendar.get(Calendar.DAY_OF_YEAR) + 1)
+					||
+					(sicknessCalendar.get(Calendar.DAY_OF_YEAR) == sicknessCalendar.getActualMinimum(Calendar.DAY_OF_YEAR) && previousSicknessCalendar.get(Calendar.DAY_OF_YEAR)  == previousSicknessCalendar.getActualMaximum(Calendar.DAY_OF_YEAR))
+					){
+					leaveCouple[1] = sickness
+					log.error("dates are consecutive")
+					if (i == sickLeaveList.size() - 1){
+						leaveList.add(leaveCouple)
+					}
+				}else{
+						log.error("dates not are consecutive")
+						leaveCouple[1] = previousSickness
+						leaveList.add(leaveCouple)
+					//	period = ((leaveCouple[0]).date.getAt(Calendar.MONTH) >= 5) ? Period.findByYear((leaveCouple[0]).date.getAt(Calendar.YEAR)) : Period.findByYear((leaveCouple[0]).date.getAt(Calendar.YEAR) - 1)
+					//	sickLeaveMap.put(period, leaveList)
+						
+						leaveCouple = [sickness,null]
+				}
+				previousSickness = sickness
+			}
+		}
+			
+		 log.error("finalizing list")
+		 return [
+			 leaveList:leaveList,
+			 fromEditEmployee:true,
+			 back:back,
+			 myDateFromEdit:myDate,
+			 employeeInstance: employee,
+			 employeeId:employee.id,
+			 isAdmin:isAdmin,
+			 siteId:employee.site.id
+			 ]
+	}
+	
 
 	@Secured(['ROLE_ADMIN'])
 	def getAjaxSupplementaryTime(Long id) {
@@ -2196,6 +2708,7 @@ class EmployeeController {
 		def holidayMap = [:]
 		def employee
 		def mapByDay = [:]
+		def mileageMapByDay = [:]
 		def dailyTotalId=0
 		def myDate = params["myDate"]
 		def monthlySupTime = 0
@@ -2239,8 +2752,14 @@ class EmployeeController {
 		def lastWeekParam = utilService.getLastWeekOfMonth(month, year)
 		def isSunday=lastWeekParam.get(1)
 
-		currentWeek=0//calendar.get(Calendar.WEEK_OF_YEAR)
+		currentWeek=0
 
+		
+	
+			
+
+		
+		
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 			// elimine les dimanches du rapport
 			if (calendarLoop.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY){
@@ -2335,6 +2854,19 @@ class EmployeeController {
 				}
 			}
 			holidayMap.put(tmpDate, dailyAbsence)
+			
+			criteria = Mileage.createCriteria()
+			def dailyMileage = criteria.get {
+				and {
+					eq('employee',employee)
+					eq('day',calendarLoop.get(Calendar.DAY_OF_MONTH))
+					eq('month',calendarLoop.get(Calendar.MONTH)+1)
+					eq('year',calendarLoop.get(Calendar.YEAR))
+				}
+			}
+			mileageMapByDay.put(tmpDate, dailyMileage)
+			
+			
 			weeklyAggregate.put(weekName+calendarLoop.get(Calendar.WEEK_OF_YEAR), mapByDay)
 			if (calendarLoop.get(Calendar.DAY_OF_MONTH)==calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
 				break
@@ -2392,7 +2924,8 @@ class EmployeeController {
 					weeklyAggregate:weeklyAggregate,
 					employee:employee,
 					payableSupTime:payableSupTime,
-					payableCompTime:payableCompTime
+					payableCompTime:payableCompTime,
+					mileageMapByDay:mileageMapByDay
 				]
 				model << cartoucheTable
 				return model

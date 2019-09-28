@@ -24,8 +24,8 @@ class MileageController {
 
 	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS'])
 	def addMileage(){
-		log.debug('calling addMileage')
-		params.each{i->log.debug('parameter of list: '+i)}
+		log.error('calling addMileage')
+		params.each{i->log.error('parameter of list: '+i)}
 		//def period = Period.get(params['periodId'])
 		def employee = Employee.get(params['employeeId'])
 		def value = params.long('mileageValue')
