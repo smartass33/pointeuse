@@ -18,6 +18,47 @@ class UtilService  {
 		
 	}
 	
+	def getSaturdayOfMonth(Date currentDate){
+		// retrieve all saturdays of a given month
+		def saturdayList = []
+		def calendar = Calendar.instance
+		calendar.time = currentDate
+		calendar.set(Calendar.DAY_OF_MONTH,1)
+		
+		while(calendar.get(Calendar.DAY_OF_MONTH) <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
+				saturdayList.add(calendar.time)
+			}
+			if (calendar.get(Calendar.DAY_OF_MONTH) == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+				break
+			}
+			calendar.roll(Calendar.DAY_OF_MONTH,1)
+		}
+		return saturdayList
+	}
+
+	def getSaturdayBetweenDates(Date fromDate,Date toDate){
+		// retrieve all saturdays between dates
+		def saturdayList = []
+		def calendar     = Calendar.instance
+		def toCalendar   = Calendar.instance
+		calendar.time    = fromDate
+		toCalendar.time  = toDate
+		
+		while(calendar.time <= toCalendar.time){
+			log.error(calendar.time.format('dd/mm/yyyy'))
+			if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
+				saturdayList.add(calendar.time)
+			}
+			if (calendar.time >= toCalendar.time){
+				break
+			}
+			calendar.roll(Calendar.DAY_OF_YEAR,1)
+		}
+		return saturdayList
+	}
+
+	
 	def getWeeksfMonth(int month, int year){
 		def weekList = []		
 		Calendar calendar = Calendar.instance

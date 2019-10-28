@@ -23,6 +23,11 @@ class EmployeeTagLib {
 		
 	}
 	
+	def listSaturdayTime ={attrs,body->
+		out<<render(template:"/employee/template/listSaturdayTemplate")
+		
+	}
+	
 	def listDailySickLeave ={attrs,body->
 		out<<render(template:"/employee/template/listSickLeaveDailyTemplate")
 		

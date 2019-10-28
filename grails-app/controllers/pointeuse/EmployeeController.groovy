@@ -416,6 +416,173 @@ class EmployeeController {
 		}
 		[currentDate:calendar.time]
 	}
+	
+	
+	@Secured(['ROLE_ADMIN'])
+	def saturdayReport(){
+		log.error('entering saturdayReport')
+		params.each{i->log.error('parameter of list: '+i)}
+		def saturdayEmployeeMap = [:]
+		def siteId = params["site.id"]
+		def fromIndex = params.boolean('fromIndex')
+		def inAndOutList
+		def criteria
+		def site = Site.get(siteId)
+		def from_date_picker = params["from_date_picker"]
+		def to_date_picker = params["to_date_picker"]
+		def from_currentDate
+		def to_currentDate
+		def employeeList = []
+		def monthlyMap = [:]
+		def saturdayList
+		def calendar = Calendar.instance
+
+		if (!fromIndex && (siteId == null || siteId.size() == 0)){
+			flash.message = message(code: 'ecart.site.selection.error')
+			params["fromIndex"]=true
+			redirect(action: "dailyReport",params:params)
+			return
+		}
+		if (from_date_picker != null && from_date_picker.size()>0){
+			from_currentDate =  new Date().parse("dd/MM/yyyy", from_date_picker)
+		}
+		if (to_date_picker != null && to_date_picker.size()>0){
+			to_currentDate =  new Date().parse("dd/MM/yyyy", to_date_picker)
+		}
+		
+		site = Site.get(siteId)
+		if (site != null && from_currentDate != null && to_currentDate != null){
+			log.debug("site, from_currentDate and to_currentDate are not null")
+			employeeList = Employee.findAllBySite(site)
+			saturdayList = utilService.getSaturdayBetweenDates(from_currentDate,to_currentDate)
+	
+			//get all dailyTotals for a given saturday
+			for (Date saturday:saturdayList){	
+				calendar.time = saturday
+				log.debug("time is: "+calendar.time)
+				criteria = InAndOut.createCriteria()
+				
+				for (Employee employee:employeeList){
+					criteria = InAndOut.createCriteria()
+					inAndOutList = criteria.list{
+						and {
+							eq('employee',employee)
+							eq('month',calendar.get(Calendar.MONTH)+1)
+							eq('year',calendar.get(Calendar.YEAR))
+							eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+						}
+					}
+					if (inAndOutList != null && inAndOutList.size() > 0){
+						saturdayEmployeeMap.put(employee, true)
+					}else{
+						saturdayEmployeeMap.put(employee, false)
+					}
+				}		
+				// putting in a map all employees that have a dailytotal, meaning they are present on that day
+	
+				monthlyMap.put(saturday, saturdayEmployeeMap)
+				saturdayEmployeeMap = [:]
+			}
+			render template: "/employee/template/listSaturdayTemplate", model:[
+				employeeList: employeeList,
+				site:site,
+				monthlyMap:monthlyMap,
+				saturdayList:saturdayList
+				]
+			return
+		}
+	}
+	
+	
+	@Secured(['ROLE_ADMIN'])
+	def saturdayExcelExport(){
+		params.each{i-> log.debug('param: '+i)}
+		log.error('entering saturdayExcelExport with params: site: '+params['site'])
+		def folder = grailsApplication.config.pdf.directory
+		def date_picker =params["date_picker"]
+		def siteId = params['site.id']
+		def calendar = Calendar.instance
+		def result
+		def saturdayList
+		def employeeList
+		def criteria
+		def inAndOutList
+		def saturdayEmployeeMap = [:]
+		def monthlyMap = [:]
+		def presenceList = []
+		int i = 1
+		def from_date_picker = params["from_date_picker"]
+		def to_date_picker = params["to_date_picker"]
+		def from_currentDate
+		def to_currentDate
+		def site = Site.get(siteId)
+
+		if (from_date_picker != null && from_date_picker.size()>0){
+			from_currentDate =  new Date().parse("dd/MM/yyyy", from_date_picker)
+		}
+		if (to_date_picker != null && to_date_picker.size()>0){
+			to_currentDate =  new Date().parse("dd/MM/yyyy", to_date_picker)
+		}
+		employeeList = Employee.findAllBySite(site)
+		saturdayList = utilService.getSaturdayBetweenDates(from_currentDate,to_currentDate)
+		
+		def headers = [message(code: 'employee.label')]
+		for (Date saturday:saturdayList){
+			headers.add(saturday.format('E dd MMM'))
+		}
+
+		for (Date saturday:saturdayList){
+			calendar.time = saturday
+			log.debug("time is: "+calendar.time)
+			criteria = InAndOut.createCriteria()
+			
+			for (Employee employee:employeeList){
+				
+				criteria = InAndOut.createCriteria()
+				inAndOutList = criteria.list{
+					and {
+						eq('employee',employee)
+						eq('month',calendar.get(Calendar.MONTH)+1)
+						eq('year',calendar.get(Calendar.YEAR))
+						eq('day',calendar.get(Calendar.DAY_OF_MONTH))
+					}
+				}
+				if (inAndOutList != null && inAndOutList.size() > 0){
+					saturdayEmployeeMap.put(employee, true)
+				}else{
+					saturdayEmployeeMap.put(employee, false)
+				}
+			}
+			// putting in a map all employees that have a dailytotal, meaning they are present on that day
+
+			monthlyMap.put(saturday, saturdayEmployeeMap)
+			saturdayEmployeeMap = [:]
+			
+		}
+
+		
+		new WebXlsxExporter(folder+'/weekly_report_template.xlsx').with {
+			setResponseHeaders(response)
+			fillHeader(headers)
+			for(Employee employee in employeeList) {
+				presenceList = [employee.lastName]
+				
+				for (Date saturdayIter:saturdayList){
+					if (monthlyMap.get(saturdayIter).get(employee)){
+						presenceList.add('P')
+					}else{
+						presenceList.add('-')
+					}
+					log.error(presenceList)
+				}
+				log.error(presenceList)
+				fillRow(presenceList,i)
+				i+=1
+			}
+			save(response.outputStream)
+		}
+		
+	}
 
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {

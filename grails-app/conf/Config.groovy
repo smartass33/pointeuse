@@ -173,6 +173,42 @@ environments {
 			}
 		}
 	}
+	
+	aws_isengard {
+		ip.authorized = ['90.80.193.12','90.120.222.39','0:0:0:0:0:0:0:1']
+		ip.authorization.on=true
+		pdf.directory='/opt/tomcat/pdf'
+		mysqldump.directory='/usr/bin'
+		laboratory.logo='biolab3.png'
+		laboratory.name='biolab'
+		grails.app.context=''
+		grails.logging.jul.usebridge = true
+		grails.resources.processing.enabled=false
+		//serverURL = "http://ec2-34-255-11-191.eu-west-1.compute.amazonaws.com"
+		serverURL = "http://pointeuse.biolab33.com"
+
+		context=''
+		log4j = {
+				'null' name:'stacktrace'
+				appenders {
+					rollingFile name:'myAppender',file:"/tmp/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+				}
+				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
+				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
+					   'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+					   'org.codehaus.groovy.grails.web.mapping',        // URL mapping
+					   'org.codehaus.groovy.grails.commons',            // core / classloading
+					   'org.codehaus.groovy.grails.plugins',            // plugins
+					   'org.codehaus.groovy.grails.orm.hibernate',      // hibernate integration
+					   'org.springframework',
+					   'org.hibernate',
+					   'net.sf.ehcache.hibernate'
+				warn 'org.springframework.security'
+				root {
+					warn 'myAppender'//,'rollingFile'
+			}
+		}
+	}
 
 }
 

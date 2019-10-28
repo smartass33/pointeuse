@@ -40,8 +40,8 @@ environments {
 			dbCreate = "update"
 			url = "jdbc:mariadb://localhost:3306/pointeuse"
 			driverClassName = "org.mariadb.jdbc.Driver"
-			username = "root"
-			password = "root"
+			username = "pointeuse"
+			password = "pointeuse"
 
 			properties {
 				maxActive = 50
@@ -88,10 +88,10 @@ environments {
 		dataSource {
 			pooled = true
 			dbCreate = "update"
-			url = "jdbc:mariadb://pointeuse-db.cluster-cn3odsuhpmsj.eu-west-2.rds.amazonaws.com:3306/pointeuse"
+			url = "jdbc:mariadb://aat8a3gefhwkah.cr6vxicqs2rk.us-east-1.rds.amazonaws.com:3306/pointeuse"
 			driverClassName = "org.mariadb.jdbc.Driver"
 			username = "root"
-			password = "smartass"
+			password = "rootroot"
 			properties {
 				maxActive = 50
 				maxIdle = 25
