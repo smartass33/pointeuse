@@ -146,7 +146,7 @@
 						/>	
 					</li>	
 					<li>
-						<g:actionSubmit class='excelButton' value="export excel"  action="saturdayExcelExport"/>	
+						<g:actionSubmit class='excelButton' value="export"  action="saturdayExcelExport"/>	
 					</li>								
 					<g:hiddenField name="isAdmin" value="${isAdmin}" />
 					<g:hiddenField name="siteId" value="${siteId}" />

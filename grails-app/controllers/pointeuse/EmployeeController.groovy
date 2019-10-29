@@ -436,13 +436,9 @@ class EmployeeController {
 		def monthlyMap = [:]
 		def saturdayList
 		def calendar = Calendar.instance
+		def employeeMap = [:]
 
-		if (!fromIndex && (siteId == null || siteId.size() == 0)){
-			flash.message = message(code: 'ecart.site.selection.error')
-			params["fromIndex"]=true
-			redirect(action: "dailyReport",params:params)
-			return
-		}
+
 		if (from_date_picker != null && from_date_picker.size()>0){
 			from_currentDate =  new Date().parse("dd/MM/yyyy", from_date_picker)
 		}
@@ -450,10 +446,15 @@ class EmployeeController {
 			to_currentDate =  new Date().parse("dd/MM/yyyy", to_date_picker)
 		}
 		
-		site = Site.get(siteId)
-		if (site != null && from_currentDate != null && to_currentDate != null){
-			log.debug("site, from_currentDate and to_currentDate are not null")
+		if (siteId != null && siteId.size()>0){
+			site = Site.get(siteId)
 			employeeList = Employee.findAllBySite(site)
+		}else{
+			employeeList = Employee.list([sort: "site"])
+		}
+		
+		if (from_currentDate != null && to_currentDate != null){
+			log.debug("site, from_currentDate and to_currentDate are not null")
 			saturdayList = utilService.getSaturdayBetweenDates(from_currentDate,to_currentDate)
 	
 			//get all dailyTotals for a given saturday
@@ -474,6 +475,11 @@ class EmployeeController {
 					}
 					if (inAndOutList != null && inAndOutList.size() > 0){
 						saturdayEmployeeMap.put(employee, true)
+						if (employeeMap.get(employee) != null){
+							employeeMap.put(employee,employeeMap.get(employee)+1)
+						}else{
+							employeeMap.put(employee,1)
+						}
 					}else{
 						saturdayEmployeeMap.put(employee, false)
 					}
@@ -487,6 +493,7 @@ class EmployeeController {
 				employeeList: employeeList,
 				site:site,
 				monthlyMap:monthlyMap,
+				employeeMap:employeeMap,
 				saturdayList:saturdayList
 				]
 			return
@@ -516,6 +523,7 @@ class EmployeeController {
 		def from_currentDate
 		def to_currentDate
 		def site = Site.get(siteId)
+		def employeeMap = [:]
 
 		if (from_date_picker != null && from_date_picker.size()>0){
 			from_currentDate =  new Date().parse("dd/MM/yyyy", from_date_picker)
@@ -523,10 +531,15 @@ class EmployeeController {
 		if (to_date_picker != null && to_date_picker.size()>0){
 			to_currentDate =  new Date().parse("dd/MM/yyyy", to_date_picker)
 		}
-		employeeList = Employee.findAllBySite(site)
+		if (siteId != null && siteId.size()>0){
+			site = Site.get(siteId)
+			employeeList = Employee.findAllBySite(site)
+		}else{
+			employeeList = Employee.list([sort: "site"])
+		}		
 		saturdayList = utilService.getSaturdayBetweenDates(from_currentDate,to_currentDate)
 		
-		def headers = [message(code: 'employee.label')]
+		def headers = [message(code: 'employee.site.label'),message(code: 'employee.label'),message(code: 'employee.daily.time.short')]
 		for (Date saturday:saturdayList){
 			headers.add(saturday.format('E dd MMM'))
 		}
@@ -549,23 +562,30 @@ class EmployeeController {
 				}
 				if (inAndOutList != null && inAndOutList.size() > 0){
 					saturdayEmployeeMap.put(employee, true)
+					if (employeeMap.get(employee) != null){
+						employeeMap.put(employee,employeeMap.get(employee)+1)
+					}else{
+						employeeMap.put(employee,1)
+					}
 				}else{
 					saturdayEmployeeMap.put(employee, false)
 				}
 			}
-			// putting in a map all employees that have a dailytotal, meaning they are present on that day
-
 			monthlyMap.put(saturday, saturdayEmployeeMap)
 			saturdayEmployeeMap = [:]
-			
 		}
 
-		
 		new WebXlsxExporter(folder+'/weekly_report_template.xlsx').with {
 			setResponseHeaders(response)
 			fillHeader(headers)
 			for(Employee employee in employeeList) {
-				presenceList = [employee.lastName]
+				presenceList = [employee.site.name,employee.lastName]
+				
+				if (employeeMap.get(employee) != null){
+					presenceList.add(employeeMap.get(employee))
+				}else{
+					presenceList.add(0)
+				}
 				
 				for (Date saturdayIter:saturdayList){
 					if (monthlyMap.get(saturdayIter).get(employee)){
@@ -573,15 +593,12 @@ class EmployeeController {
 					}else{
 						presenceList.add('-')
 					}
-					log.error(presenceList)
 				}
-				log.error(presenceList)
 				fillRow(presenceList,i)
 				i+=1
 			}
 			save(response.outputStream)
 		}
-		
 	}
 
 	@Secured(['ROLE_ADMIN'])

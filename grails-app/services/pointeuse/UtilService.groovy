@@ -46,7 +46,6 @@ class UtilService  {
 		toCalendar.time  = toDate
 		
 		while(calendar.time <= toCalendar.time){
-			log.error(calendar.time.format('dd/mm/yyyy'))
 			if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
 				saturdayList.add(calendar.time)
 			}
