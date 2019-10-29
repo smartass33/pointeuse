@@ -437,6 +437,8 @@ class EmployeeController {
 		def saturdayList
 		def calendar = Calendar.instance
 		def employeeMap = [:]
+		def functionList = Function.findAll()
+		
 
 
 		if (from_date_picker != null && from_date_picker.size()>0){
@@ -448,9 +450,11 @@ class EmployeeController {
 		
 		if (siteId != null && siteId.size()>0){
 			site = Site.get(siteId)
-			employeeList = Employee.findAllBySite(site)
+			employeeList = Employee.findAllBySite(site,[sort: "site"])
 		}else{
-			employeeList = Employee.list([sort: "site"])
+			for (Site siteIter:Site.findAll()){
+				employeeList.addAll(Employee.findAllBySite(siteIter,[sort:'function']))
+			}
 		}
 		
 		if (from_currentDate != null && to_currentDate != null){
@@ -511,7 +515,7 @@ class EmployeeController {
 		def calendar = Calendar.instance
 		def result
 		def saturdayList
-		def employeeList
+		def employeeList = []
 		def criteria
 		def inAndOutList
 		def saturdayEmployeeMap = [:]
@@ -533,13 +537,15 @@ class EmployeeController {
 		}
 		if (siteId != null && siteId.size()>0){
 			site = Site.get(siteId)
-			employeeList = Employee.findAllBySite(site)
+			employeeList = Employee.findAllBySite(site,[sort: 'site'])
 		}else{
-			employeeList = Employee.list([sort: "site"])
+			for (Site siteIter:Site.findAll()){
+				employeeList.addAll(Employee.findAllBySite(siteIter,[sort:'function']))
+			}
 		}		
 		saturdayList = utilService.getSaturdayBetweenDates(from_currentDate,to_currentDate)
 		
-		def headers = [message(code: 'employee.site.label'),message(code: 'employee.label'),message(code: 'employee.daily.time.short')]
+		def headers = [message(code: 'employee.site.label'),message(code: 'employee.label'),message(code: 'function.label'),message(code: 'employee.daily.time.short')]
 		for (Date saturday:saturdayList){
 			headers.add(saturday.format('E dd MMM'))
 		}
@@ -579,7 +585,7 @@ class EmployeeController {
 			setResponseHeaders(response)
 			fillHeader(headers)
 			for(Employee employee in employeeList) {
-				presenceList = [employee.site.name,employee.lastName]
+				presenceList = [employee.site.name,employee.lastName,employee.function.name]
 				
 				if (employeeMap.get(employee) != null){
 					presenceList.add(employeeMap.get(employee))
