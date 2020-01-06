@@ -46,20 +46,20 @@
 					<li><g:message code="laboratory.label" default="Search" style="vertical-align: middle;" /></li>
 					<li>
 						<g:if test="${siteId != null && !siteId.equals('')}">
-							<g:select name="site.id" from="${Site.list([sort:'name'])}"
+							<g:select name="siteId" from="${Site.list([sort:'name'])}"
 								noSelection="${['':site.name]}" optionKey="id" optionValue="name"
 								style="vertical-align: middle;" />
 						</g:if>
 						<g:else>
-							<g:select name="site.id" from="${Site.list([sort:'name'])}"
-								noSelection="${['':(site?site.name:'-')]}" optionKey="id" optionValue="name"
+							<g:select name="siteId" from="${Site.list([sort:'name'])}"
+								noSelection="${['':(site ? site.name:'-')]}" optionKey="id" optionValue="name"
 								style="vertical-align: middle;" />						
 						</g:else>				
 					</li>
 					<li class="datePicker">
 						<g:select name="year" from="${Period.list([sort:'year'])}"
 							value="${period}"
-							noSelection="${['':(period?period:'-')]}" optionKey="id" 
+							noSelection="${['':(period ? period:'-')]}" optionKey="id" 
 							style="vertical-align: middle;" />					
 					</li>
 					<li><g:actionSubmit class='displayButton' value="${message(code: 'default.search.label', default: 'List')}"  action="vacationFollowup"/></li>		

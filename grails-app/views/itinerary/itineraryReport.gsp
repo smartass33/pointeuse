@@ -188,6 +188,8 @@
 						<li>
 							<g:actionSubmit value="PDF" action="itineraryPDF" class="pdfButton" />
 							<g:hiddenField name="id" value="monthlyView"/>
+							<g:hiddenField name="itineraryIdFromIndex" value="${itineraryIdFromIndex}"/>
+							
 						</li>
 					</g:form>
 				</ul>

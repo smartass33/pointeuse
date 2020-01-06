@@ -188,7 +188,11 @@ class ItineraryController {
 	}
 	
 	def itineraryReport(){
-		
+		params.each{i->log.error('parameter of list: '+i)}
+		def itineraryInstance = Itinerary.get(params.int('itineraryId'))
+		if (itineraryInstance != null){
+			[itineraryIdFromIndex:itineraryInstance.id,itinerary:itineraryInstance]
+		}
 	}
 	
 	def itinerarySiteView(){
@@ -197,7 +201,7 @@ class ItineraryController {
 
 	def showAnomalies(){
 		log.error('showAnomalies called')
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		
 		def itinerary
 		def site
@@ -235,6 +239,8 @@ class ItineraryController {
 	
 	def showItineraryActions(){
 		log.error('showItineraryActions called')
+		params.each{i->log.error('parameter of list: '+i)}
+		
 		def itinerary
 		def currentCalendar = Calendar.instance
 		def criteria 
@@ -258,6 +264,8 @@ class ItineraryController {
 		def actionThOrderList
 		
 		params.each { name, value ->
+			if (name.contains('itineraryIdFromIndex'))
+				itinerary = Itinerary.get(params.int(name))
 			if (name.contains('itineraryId'))
 				itinerary = Itinerary.get(params.int(name))
 			if (name.contains('id')){

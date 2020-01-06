@@ -78,7 +78,8 @@ environments {
 		ip.authorization.on=false
 		laboratory.logo='LABM.png'
 		laboratory.name='LABM'
-		pdf.directory='/Users/hnrimar/pointeuse'
+		def log4jFile=userHome.toString()+'/pointeuse.log'
+		pdf.directory='/Users/henri/pointeuse'
 		mysqldump.directory='/usr/local/bin/'
 		grails.app.context=pointeuse
         grails.logging.jul.usebridge = true
@@ -87,7 +88,7 @@ environments {
 		context="/pointeuse"
 		log4j = {
 			appenders {
-				rollingFile name:'rollingFileAppender',file:"/Users/hnrimar/pointeuse/pointeuse.log", maxFileSize:1024,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+				rollingFile name:'rollingFileAppender',file:log4jFile, maxFileSize:1024,maxBackupIndex:10,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 			}
 			warn 'org.codehaus.groovy.grails.orm.hibernate','org.hibernate','org.springframework', 'net.sf.ehcache.hibernate'
 			warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts
@@ -155,7 +156,7 @@ environments {
 		log4j = {
 				'null' name:'stacktrace'
 				appenders {
-					rollingFile name:'myAppender',file:"/tmp/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
+					rollingFile name:'myAppender',file:"/var/log/tomcat7/pointeuse.log", maxFileSize:1024000,maxBackupIndex:31,layout:pattern(conversionPattern: '%d %c{2} %m%n')
 				}
 				warn  myAppender:['pointeuse','pointeuse.ErrorsController','pointeuse.EmployeeController']     // controllers
 				warn   'org.codehaus.groovy.grails.web.sitemesh',       // layouts

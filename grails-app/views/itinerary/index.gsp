@@ -55,9 +55,9 @@
 					<tr>
 						<g:sortableColumn property="name" title="${message(code: 'itinerary.name.label', default: 'Name')}" />
 						<g:sortableColumn property="description" title="${message(code: 'itinerary.description.label', default: 'Name')}" />
-						<th><g:message code="itinerary.creationUser.label" default="Creation User" /></th>
-						<th><g:message code="itinerary.deliveryBoy.label" default="Delivery Boy" /></th>
-						<th>action<th>
+						<th><g:message code="itinerary.creationUser.label"/></th>
+						<th><g:message code="itinerary.deliveryBoy.label"/></th>
+						<th><g:message code="action.name"/><th>
 					</tr>
 				</thead>
 				<tbody>
@@ -67,7 +67,12 @@
 						<td><g:link action="show" id="${itineraryInstance.id}">${fieldValue(bean: itineraryInstance, field: "description")}</g:link></td>
 						<td>${itineraryInstance.creationUser.lastName} ${itineraryInstance.creationUser.firstName}</td>				
 						<td>${itineraryInstance.deliveryBoy.lastName} ${itineraryInstance.deliveryBoy.firstName}</td>	
-						<td><g:link class="create" action="itineraryReport">Obtenir le rapport</g:link></td>						
+						<g:if test="${itineraryInstance != null}">
+							<td><g:link class="create" action="itineraryReport" params="[itineraryId: itineraryInstance.id]"><g:message code="itinerary.report.get"/></g:link></td>			
+						</g:if>		
+						<g:else>
+							<td><g:link class="create" action="itineraryReport"><g:message code="itinerary.report.get"/></g:link></td>									
+						</g:else>	
 					</tr>
 				</g:each>
 				</tbody>

@@ -503,12 +503,14 @@ class ActionController {
 	@Secured(['ROLE_ADMIN','ROLE_ANONYMOUS','ROLE_TOURNEE'])
 	def addAction(){
 		log.error('addAction called')
-		params.each{i->log.debug('parameter of list: '+i)}
+		params.each{i->log.error('parameter of list: '+i)}
 		def site
 		def itinerary
 		def actionType
 		def employee
 		def currentDate
+		def isNotDone = false
+		def isRelay = false
 		
 		params.each { name, value ->
 			if (name.contains('employeeId')){
@@ -520,13 +522,26 @@ class ActionController {
 			if (name.contains('siteId')){
 				site = Site.get(params.int(name))
 			}
-			if (name.contains('time_picker'))
+			if (name.contains('time_picker')){
 				currentDate =  new Date().parse("dd/MM/yyyy HH:mm", params[name])
-			if (name.contains('action.type'))
+			}
+			if (name.contains('action.type')){
 				actionType = (params[name]).equals('ARR') ? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
+			}
+			if (name.contains('chkBoxNE')){
+				if (params[name] != null && params[name].size() > 0 )
+					isNotDone = true
+			}
+			if (name.contains('chkBoxRELAY')){
+				if (params[name] != null && params[name].size() > 0 )
+					isRelay = true
+			}
+			
 		}
 		
 		def action = new Action(itinerary, currentDate, site, employee, actionType) 	
+		action.isNotDone = isNotDone
+		action.isRelay = isRelay
 		action.save flush:true
 	}
 	

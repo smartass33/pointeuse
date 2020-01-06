@@ -19,6 +19,8 @@ class Action {
 	String fnc
 	String other
 	static belongsTo = [itinerary:Itinerary]
+	boolean isNotDone 
+	boolean isRelay
 	
 	public Action(){
 	}
@@ -39,11 +41,9 @@ class Action {
 		this.site = site
 		this.employeeLogger = employeeLogger
 		this.isTheoritical = false
+		this.isNotDone = false
+		this.isRelay = false
  		this.nature = nature
 	}
 	
-	String toString(){
-		//return 'employee: lastname:'+ this.employee.lastName+' firstname:'+this.employee.firstName + ' type:'+ this.type + ' day:'+this.day + ' month:'+this.month + ' year:'+this.year
-	//	return 'site: '+this.site.name + ' ,nature: ' + nature + ' ,date: '+date.format('dd/mm/yyyy')
-	}
 }

@@ -1436,12 +1436,12 @@ class EmployeeController {
 		def formation
 		def employeeInstanceTotal
 		
-		if (params["site.id"]!=null && !params["site.id"].equals("")){
-			site = Site.get(params["site.id"] as long)
+		if (params["siteId"] != null && !params["siteId"].equals("")){
+			site = Site.get(params["siteId"] as long)
 			siteId=site.id	
 		}
 		
-		if (year!=null && !year.equals("")){		
+		if (year != null && !year.equals("")){		
 			if (year instanceof String[]){
 				year= (year[0] != "") ? year[0].toInteger():year[1].toInteger()					
 			}else {

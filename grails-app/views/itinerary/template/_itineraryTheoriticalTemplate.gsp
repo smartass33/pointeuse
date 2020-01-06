@@ -5,15 +5,12 @@
 <g:set var="theoriticalCal" value="${Calendar.instance}"/>
 
 <g:if test="${!siteTemplate}">
-	
-
-	
-	
 	<g:if test="${theoriticalActionsList != null}">
 	<h1><g:message code="itinerary.theoritical.label"/></h1>
 		<table style="table-layout:fixed;">
 			<tbody>
 				<tr>
+					<td class="itineraryReportTD">${message(code: 'itinerary.date')}</td>
 					<g:each in="${theoriticalActionsList}" var='actionItem' status="j">
 						<td class="itineraryReportTD">
 							${actionItem.site.name}
@@ -34,6 +31,7 @@
 		<table style="table-layout:fixed;">
 			<tbody>
 				<tr>
+					<td class="itineraryReportTD">${message(code: 'itinerary.date')}</td>
 					<g:each in="${theoriticalSaturdayActionsList}" var='actionItem' status="j">
 						<td class="itineraryReportTD">
 							${actionItem.site.name}
@@ -57,7 +55,8 @@
 	</g:if>
 		<table style="table-layout:fixed;">
 		<tbody>
-			<tr><td class="itineraryReportTD">${message(code: 'itinerary.weekday', default: 'Report')}</td>
+			<tr>
+				<td class="itineraryReportTD">${message(code: 'itinerary.weekday')}</td>
 				<g:each in="${theoriticalActionsList}" var='actionItem' status="j">
 					<td class="itineraryReportTD">
 						${actionItem.itinerary.name}<br>
