@@ -251,7 +251,8 @@ class ItineraryController {
 		def viewType
 		def timeDiff
 		def timeDiffMap = [:]
-		def actionListMap = [:]
+		def actionListMapUpdated = [:]
+		def actionListNotOrderedMap = [:]
 		def calendar = Calendar.instance
 		def i = 0
 		def hasDiscrepancy = false
@@ -262,11 +263,14 @@ class ItineraryController {
 		def theoriticalActionsMap = [:]
 		def theoriticalSaturdayActionsMap = [:]
 		def actionThOrderList
+		def actionIterList
+		def orderedActionList = []
+		def theoriticalListRef = []
 		
 		params.each { name, value ->
 			if (name.contains('itineraryIdFromIndex'))
 				itinerary = Itinerary.get(params.int(name))
-			if (name.contains('itineraryId'))
+			if (name.contains('itineraryId') && value.size() > 0)
 				itinerary = Itinerary.get(params.int(name))
 			if (name.contains('id')){
 				viewType = params[name]
@@ -296,12 +300,11 @@ class ItineraryController {
 		}
 		
 		currentCalendar.set(Calendar.DAY_OF_MONTH,1)
-		def actionIterList 
-		def orderedActionList = []
-		def theoriticalListRef = []
-		
+
 		for (int j = 1;j < currentCalendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
 			log.debug("date: "+currentCalendar.time)
+			def notOrderedActionList = serviceResponse.get('actionListMap').get(currentCalendar.time).collect()
+			actionListNotOrderedMap.put(currentCalendar.time, notOrderedActionList)
 			theoriticalListRef = (currentCalendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
 			actionIterList = serviceResponse.get('actionListMap').get(currentCalendar.time)
 			
@@ -311,7 +314,7 @@ class ItineraryController {
 			}else{
 				orderedActionList = actionIterList
 			}
-			actionListMap.put(currentCalendar.time,orderedActionList)
+			actionListMapUpdated.put(currentCalendar.time,orderedActionList)
 			orderedActionList = []
 			currentCalendar.roll(Calendar.DAY_OF_MONTH,1)
 		}
@@ -321,7 +324,8 @@ class ItineraryController {
 				model: [
 				itineraryInstance:itinerary,
 				actionsList:serviceResponse.get('actionsList'),
-				actionListMap:actionListMap,
+				actionListMap:actionListMapUpdated,
+				actionListNotOrderedMap:actionListNotOrderedMap,
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
@@ -340,7 +344,8 @@ class ItineraryController {
 				model: [
 				itineraryInstance:itinerary,
 				actionsList:serviceResponse.get('actionsList'),
-				actionListMap:actionListMap,
+				actionListMap:actionListMapUpdated,
+				actionListNotOrderedMap:actionListNotOrderedMap,
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,

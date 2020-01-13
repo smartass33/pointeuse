@@ -259,6 +259,13 @@
 				<g:each in="${actionListMap}" var='actionListItem' status="m">
 					<tr>
 						<td class="itineraryReportDateTD">${(actionListItem.key).format('dd/MM/yyyy')}</td>
+						
+						<g:each in="${(actionListNotOrderedMap.get(actionListItem.key))}" var="noOrderItem">
+							<td class="itineraryReportDateTD">${noOrderItem.site.name}<BR>${noOrderItem.date.format('kk:mm')}</td>
+						</g:each>
+					</tr>
+					<tr>
+						<td class="itineraryReportDateTD">${(actionListItem.key).format('dd/MM/yyyy')}</td>
 						<g:each in="${actionListItem.value}" var='actionItem' status="n">
 							<% actionItemColor = (actionItem.nature.equals(ItineraryNature.ARRIVEE)) ? 'red' : 'green' %>
 							<g:if test="${actionItem.date.getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY}">

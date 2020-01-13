@@ -188,8 +188,10 @@
 						<li>
 							<g:actionSubmit value="PDF" action="itineraryPDF" class="pdfButton" />
 							<g:hiddenField name="id" value="monthlyView"/>
-							<g:hiddenField name="itineraryIdFromIndex" value="${itineraryIdFromIndex}"/>
+							<g:if test = "${itineraryId != null}">
+								<g:hiddenField name="itineraryIdFromIndex" value="${itineraryId}"/>
 							
+							</g:if>
 						</li>
 					</g:form>
 				</ul>

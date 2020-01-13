@@ -321,6 +321,14 @@ class ItineraryService {
 		]
 	}
 	
+	def printList(def actualList){
+		def newActualList = []
+		for (Action action : actualList){
+			newActualList.add(action)
+		}
+		return newActualList
+	}
+	
 	def orderList(def theoriticalList, def actualList, def orderedList){
 		try {
 			for (Action theoriticalAction : theoriticalList){
