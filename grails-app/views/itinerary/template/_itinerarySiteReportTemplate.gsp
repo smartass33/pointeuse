@@ -88,7 +88,7 @@
 	<div id="anomalyViewBySite">
 		<g:if test="${actionListMap == null || actionListMap.size() == 0}">${message(code: 'action.list.empty', default: 'Report')}</g:if>
 		<g:else>
-			<g:each in="${actionListMap}" var='actionListItem' status="m">
+			<g:each in="${actionListMap}" var='actionListItem' status="m">				
 					<g:each in="${actionListItem.value}" var='actionItem' status="n">
 						<g:if test="${actionItem.date.getAt(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY}">
 							<g:if test="${theoriticalActionsList.size() >= n && theoriticalActionsList[n] != null}">										
@@ -233,7 +233,17 @@
 						</g:each>
 					</tr>
 					
+
+					
 					<g:each in="${actionListMap}" var='actionListItem' status="m">
+					
+					<tr>
+						<td class="itineraryReportDateTD">${(actionListItem.key).format('dd/MM/yyyy')}<BR>ordre reel</td>
+						<g:each in="${(actionListNotOrderedMap.get(actionListItem.key))}" var="noOrderItem">
+							<td class="itineraryReportDateTD">${noOrderItem.date.format('kk:mm')}</td>
+						</g:each>
+					</tr>
+					
 						<tr>
 							<td class="itineraryReportDateTD">${(actionListItem.key).format('EEE dd')}</td>
 							<g:each in="${actionListItem.value}" var='actionItem' status="n">

@@ -92,7 +92,7 @@
 		</script>
 		
 		
-			<style type="text/css">
+		<style type="text/css">
          div#tooltip a span {
          	display: none;
          }

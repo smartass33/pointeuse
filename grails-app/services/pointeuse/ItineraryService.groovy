@@ -347,7 +347,6 @@ class ItineraryService {
 						orderList(theoriticalList, actualList, orderedList)
 						break
 					}
-	
 				}
 				if (theoriticalList.size() == 1){
 					orderedList.add(actualList[0])

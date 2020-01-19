@@ -150,7 +150,8 @@
 											timePickerLaunch ("date_action_picker_${j}","date");						
 										</script>	
 											<BR>												
-										${message(code: 'inAndOut.create.event', default: 'Report')}:	<g:select
+										${message(code: 'inAndOut.create.event', default: 'Report')}:	
+										<g:select
 											name="actionType" from="${['DEP','ARR']}"
 											valueMessagePrefix="itinerary.name"
 											noSelection="['':'-Choisissez votre élément-']" />
@@ -258,8 +259,7 @@
 			<tbody>
 				<g:each in="${actionListMap}" var='actionListItem' status="m">
 					<tr>
-						<td class="itineraryReportDateTD">${(actionListItem.key).format('dd/MM/yyyy')}</td>
-						
+						<td class="itineraryReportDateTD">${(actionListItem.key).format('dd/MM/yyyy')}<BR>ordre reel</td>
 						<g:each in="${(actionListNotOrderedMap.get(actionListItem.key))}" var="noOrderItem">
 							<td class="itineraryReportDateTD">${noOrderItem.site.name}<BR>${noOrderItem.date.format('kk:mm')}</td>
 						</g:each>

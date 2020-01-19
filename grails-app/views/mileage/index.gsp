@@ -10,7 +10,6 @@
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'mileage.label', default: 'Milage')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>
-		<ui:resources includeJQuery="true"/>
 		
 	</head>
 	<body>
@@ -33,7 +32,7 @@
 					<ul>
 					<li><g:message code="laboratory.label" default="Search" style="vertical-align: middle;" /></li>
 					<li>	
-						 <ui:multiSelect 
+						 <g:select 
 						 	name="sites"
 		                     multiple="yes"
 		                     from="${Site.list()}" 
