@@ -45,6 +45,10 @@ class UtilService  {
 		calendar.time    = fromDate
 		toCalendar.time  = toDate
 		
+		
+		
+		
+		// if calendar and toCalendar are in the same year
 		while(calendar.time <= toCalendar.time){
 			if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
 				saturdayList.add(calendar.time)
@@ -52,7 +56,13 @@ class UtilService  {
 			if (calendar.time >= toCalendar.time){
 				break
 			}
-			calendar.roll(Calendar.DAY_OF_YEAR,1)
+			if (calendar.get(Calendar.DAY_OF_YEAR) == calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
+				calendar.roll(Calendar.YEAR, 1)
+				calendar.set(Calendar.DAY_OF_YEAR,calendar.getActualMinimum(Calendar.DAY_OF_YEAR))
+				
+			}else{
+				calendar.roll(Calendar.DAY_OF_YEAR,1)
+			}
 		}
 		return saturdayList
 	}

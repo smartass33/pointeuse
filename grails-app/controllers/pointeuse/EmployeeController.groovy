@@ -421,7 +421,7 @@ class EmployeeController {
 	@Secured(['ROLE_ADMIN'])
 	def saturdayReport(){
 		log.error('entering saturdayReport')
-		params.each{i->log.error('parameter of list: '+i)}
+		params.each{i->log.debug('parameter of list: '+i)}
 		def saturdayEmployeeMap = [:]
 		def siteId = params["site.id"]
 		def fromIndex = params.boolean('fromIndex')
@@ -456,6 +456,9 @@ class EmployeeController {
 				employeeList.addAll(Employee.findAllBySite(siteIter,[sort:'function']))
 			}
 		}
+		
+		//log.error('from_currentDate: '+from_currentDate.format("dd/MM/yyyy"))
+		//log.error('to_currentDate: '+to_currentDate.format("dd/MM/yyyy"))
 		
 		if (from_currentDate != null && to_currentDate != null){
 			log.debug("site, from_currentDate and to_currentDate are not null")
