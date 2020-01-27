@@ -57,6 +57,18 @@
 									noSelection="['':'-Choisissez votre élément-']" />																	
 							</td>	
 						</tr>
+						<tr class="prop">
+							<td class="eventTD" valign="top">${message(code: 'action.ne.label')}:</td>
+							<td>
+								<g:checkBox name="chkBoxNE" />																
+							</td>	
+							</tr>	
+						<tr class="prop">
+							<td class="eventTD" valign="top">${message(code: 'action.relais.label')}:</td>
+							<td>
+								<g:checkBox name="chkBoxRELAY"/>																
+							</td>	
+						</tr>				
 						<tr>
 							<td class="eventTD" valign="top">${message(code: 'action.time', default: 'Report')}:</td>
 							<td><input type="text" name="date_action_picker_daily" id="date_action_picker_daily" value="${null}"/> </td>
@@ -150,11 +162,18 @@
 											timePickerLaunch ("date_action_picker_${j}","date");						
 										</script>	
 											<BR>												
-										${message(code: 'inAndOut.create.event', default: 'Report')}:	
-										<g:select
-											name="actionType" from="${['DEP','ARR']}"
-											valueMessagePrefix="itinerary.name"
-											noSelection="['':'-Choisissez votre élément-']" />
+											${message(code: 'inAndOut.create.event', default: 'Report')}:	
+											<g:select
+												name="actionType" from="${['DEP','ARR']}"
+												valueMessagePrefix="itinerary.name"
+												noSelection="['':'-Choisissez votre élément-']" />
+											<BR>
+											${message(code: 'action.relais.label')}:
+											<g:checkBox name="chkBoxNE" />			
+											<BR>
+											${message(code: 'action.ne.label')}:
+											<g:checkBox name="chkBoxRELAY" />															
+
 										<BR>
 										${message(code: 'itinerary.label', default: 'Report')}:	<g:select
 											name="itinerary.name" from="${Itinerary.list([sort:'name'])}"
@@ -230,6 +249,18 @@
 									noSelection="['':'-Choisissez votre élément-']" />																	
 							</td>	
 						</tr>
+						<tr class="prop">
+							<td class="eventTD" valign="top">${message(code: 'action.ne.label')}:</td>
+							<td>
+								<g:checkBox name="chkBoxNE" />																
+							</td>	
+						</tr>	
+						<tr class="prop">
+							<td class="eventTD" valign="top">${message(code: 'action.relais.label')}:</td>
+							<td>
+								<g:checkBox name="chkBoxRELAY"/>																
+							</td>	
+						</tr>	
 						<tr>
 							<td class="eventTD" valign="top">${message(code: 'action.time', default: 'Report')}:</td>
 							<td><input type="text" name="date_action_picker_monthly" id="date_action_picker_monthly" value="${null}"/> </td>

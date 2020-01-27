@@ -191,6 +191,18 @@
 									noSelection="['':'-Choisissez votre élément-']" />																	
 							</td>	
 						</tr>
+						<tr class="prop">
+							<td class="eventTD" valign="top">${message(code: 'action.ne.label')}:</td>
+							<td>
+								<g:checkBox name="chkBoxNE" />																
+							</td>	
+							</tr>	
+						<tr class="prop">
+							<td class="eventTD" valign="top">${message(code: 'action.relais.label')}:</td>
+							<td>
+								<g:checkBox name="chkBoxRELAY"/>																
+							</td>	
+						</tr>
 						<tr>
 							<td class="eventTD" valign="top">${message(code: 'action.time', default: 'Report')}:</td>
 							<td><input type="text" name="date_action_picker_monthly" id="date_action_picker_monthly" value="${null}"/> </td>
@@ -352,6 +364,19 @@
 										noSelection="['':'-Choisissez votre élément-']" />																	
 								</td>	
 							</tr>
+							
+							<tr class="prop">
+							<td class="eventTD" valign="top">${message(code: 'action.ne.label')}:</td>
+							<td>
+								<g:checkBox name="chkBoxNE" />																
+							</td>	
+							</tr>	
+						<tr class="prop">
+							<td class="eventTD" valign="top">${message(code: 'action.relais.label')}:</td>
+							<td>
+								<g:checkBox name="chkBoxRELAY"/>																
+							</td>	
+						</tr>
 							<tr>
 								<td><input type="text" name="date_action_picker_daily" id="date_action_picker_daily" value="${null}"/> </td>
 								<script type="text/javascript">

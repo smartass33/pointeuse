@@ -238,6 +238,12 @@ class ActionController {
 		def actionType
 		def serviceResponse
 		def siteTemplate
+		def actionListMapUpdated = [:]
+		def actionListNotOrderedMap = [:]
+		def actionIterList
+		def orderedActionList = []
+		def theoriticalListRef = []
+		
 		
 		params.each { name, value ->
 			if (name.contains('action_picker')){
@@ -251,6 +257,12 @@ class ActionController {
 			}
 			if (name.contains('employeeId')){
 				employee = Employee.get(params.int(name))
+			}
+			if (name.contains('chkBoxRELAY')){
+				employee = Employee.get(params.boolean(name))
+			}
+			if (name.contains('chkBoxNE')){
+				employee = Employee.get(params.boolean(name))
 			}
 			if (name.contains('action.type') && value.size() > 0){
 				actionType = (value.equals('ARR') )? ItineraryNature.ARRIVEE : ItineraryNature.DEPART
@@ -281,10 +293,8 @@ class ActionController {
 		}
 		
 		calendar.set(Calendar.DAY_OF_MONTH,1)
-		def actionIterList 
-		def orderedActionList = []
-		def theoriticalListRef = []
-		
+
+		/*
 		for (int j = 1;j < calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
 			
 			theoriticalListRef = (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
@@ -300,12 +310,35 @@ class ActionController {
 			orderedActionList = []
 			calendar.roll(Calendar.DAY_OF_MONTH,1)
 		}
+		*/
+		
+		
+		
+		for (int j = 1;j < calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;j++){
+			log.debug("date: "+calendar.time)
+			def notOrderedActionList = serviceResponse.get('actionListMap').get(calendar.time).collect()
+			actionListNotOrderedMap.put(calendar.time, notOrderedActionList)
+			theoriticalListRef = (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) ? theoriticalActionsList.collect() : theoriticalSaturdayActionsList.collect()
+			actionIterList = serviceResponse.get('actionListMap').get(calendar.time)
+			
+			// compare to theoriticalActionsList
+			if (theoriticalListRef != null && actionIterList != null && theoriticalListRef.size() == actionIterList.size()){
+				orderedActionList = itineraryService.orderList(theoriticalListRef, actionIterList, [])
+			}else{
+				orderedActionList = actionIterList
+			}
+			actionListMapUpdated.put(calendar.time,orderedActionList)
+			orderedActionList = []
+			calendar.roll(Calendar.DAY_OF_MONTH,1)
+		}
 	
 		if (siteTemplate){
-			render template: "/itinerary/template/itinerarySiteReportTemplate", model: [
+			render template: "/itinerary/template/itinerarySiteReportTemplate", 
+				model: [
 				itineraryInstance:itinerary,
 				actionsList:serviceResponse.get('actionsList'),
-				actionListMap:actionListMap,
+				actionListMap:actionListMapUpdated,
+				actionListNotOrderedMap:actionListNotOrderedMap,
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,
@@ -320,10 +353,12 @@ class ActionController {
 				]
 			return
 		}else{
-			render template: "/itinerary/template/itineraryReportTemplate", model: [
+			render template: "/itinerary/template/itineraryReportTemplate", 
+				model: [
 				itineraryInstance:itinerary,
 				actionsList:serviceResponse.get('actionsList'),
-				actionListMap:serviceResponse.get('actionListMap'),
+				actionListMap:actionListMapUpdated,
+				actionListNotOrderedMap:actionListNotOrderedMap,
 				dailyActionMap:serviceResponse.get('dailyActionMap'),
 				theoriticalActionsList:theoriticalActionsList,
 				theoriticalSaturdayActionsList:theoriticalSaturdayActionsList,

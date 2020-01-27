@@ -49,10 +49,18 @@
 
 					</td>
 				</tr>
-				
-				
-														
-				
+				<tr class="prop">
+					<td class="eventTD" valign="top">${message(code: 'action.ne.label')}:</td>
+					<td>
+						<g:checkBox name="chkBoxNE" />																
+					</td>	
+					</tr>	
+				<tr class="prop">
+					<td class="eventTD" valign="top">${message(code: 'action.relais.label')}:</td>
+					<td>
+						<g:checkBox name="chkBoxRELAY"/>																
+					</td>	
+				</tr>	
 				<tr class="prop">
 					<td>${message(code: 'itinerary.comment', default: 'Report')}:</td>
 					<td>
