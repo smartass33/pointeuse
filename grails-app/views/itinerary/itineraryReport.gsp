@@ -152,12 +152,12 @@
 						<li>
 							<g:if test="${itineraryId != null && !itineraryId.equals('')}">
 								<g:select name="itineraryId" from="${Itinerary.list([sort:'name'])}"
-									noSelection="${['':itinerary.name]}" optionKey="id" optionValue="name"
+									noSelection="${['':'-']}" optionKey="id" optionValue="${{it.description != null ? it.name+' '+it.description : it.name}}"
 									style="vertical-align: middle;" />
 							</g:if>
 							<g:else>
 								<g:select name="itineraryId" from="${Itinerary.list([sort:'name'])}"
-									noSelection="${['':(itinerary?itinerary.name:'-')]}" optionKey="id" optionValue="${{it.description != null ? it.name+' '+it.description : it.name}}"
+									noSelection="${['':'-']}" optionKey="id" optionValue="${{it.description != null ? it.name+' '+it.description : it.name}}"
 									style="vertical-align: middle;" />						
 							</g:else>				
 						</li>

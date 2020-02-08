@@ -189,9 +189,18 @@ class ItineraryController {
 	
 	def itineraryReport(){
 		params.each{i->log.error('parameter of list: '+i)}
-		def itineraryInstance = Itinerary.get(params.int('itineraryId'))
-		if (itineraryInstance != null){
-			[itineraryIdFromIndex:itineraryInstance.id,itinerary:itineraryInstance]
+		def itinerary
+		def itineraryId
+		params.each { name, value ->
+			if (name.contains('itineraryId')){
+				itinerary = Itinerary.get(params.int(name))
+				itineraryId = params.int(name)
+			}
+		}
+		if (itinerary != null){
+			[itineraryIdFromIndex:itinerary.id,itinerary:itinerary,itineraryId:itineraryId]
+		}else{
+			[itineraryId:itineraryId]
 		}
 	}
 	
@@ -268,9 +277,7 @@ class ItineraryController {
 		def theoriticalListRef = []
 		
 		params.each { name, value ->
-			if (name.contains('itineraryIdFromIndex'))
-				itinerary = Itinerary.get(params.int(name))
-			if (name.contains('itineraryId') && value.size() > 0)
+			if (name.contains('itineraryIdFromIndex') && value.size() > 0)
 				itinerary = Itinerary.get(params.int(name))
 			if (name.contains('id')){
 				viewType = params[name]
@@ -286,7 +293,9 @@ class ItineraryController {
 				}
 			}
 		}
-				
+		if (params['itineraryId'] != null){
+			itinerary = Itinerary.get(params.int('itineraryId'))
+		}
 		serviceResponse = itineraryService.getActionMap(viewType, itinerary, currentCalendar, site)
 		
 		if (siteTemplate){
