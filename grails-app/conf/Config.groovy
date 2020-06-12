@@ -78,7 +78,7 @@ environments {
 		ip.authorization.on=false
 		laboratory.logo='LABM.png'
 		laboratory.name='LABM'
-		def log4jFile=userHome.toString()+'/pointeuse.log'
+		def log4jFile=userHome.toString()+'/pointeuse/pointeuse.log'
 		pdf.directory='/Users/henri/pointeuse'
 		mysqldump.directory='/usr/local/bin/'
 		grails.app.context=pointeuse

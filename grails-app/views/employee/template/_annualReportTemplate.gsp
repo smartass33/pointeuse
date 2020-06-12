@@ -18,6 +18,8 @@
 		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.holidays.label"/></font></span></div></th>
 		<th class='rotate-45'  style="width:55px"><div><span><font size="1"><g:message code="annual.report.remaining.holidays.label"/></font></span></div></th>	
 		<th class='rotate-45'  style="width:43px"><div><span><font size="1"><g:message code="annual.report.RTT.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:43px"><div><span><font size="1"><g:message code="annual.report.GARDE_ENFANT.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:43px"><div><span><font size="1"><g:message code="annual.report.CHOMAGE.label"/></font></span></div></th>
 		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.CSS.label"/></font></span></div></th>
 		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.DIF.label"/></font></span></div></th>
 		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.DON.label"/></font></span></div></th>		
@@ -59,6 +61,8 @@
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('holidays')}</td>
 				<td style="vertical-align: middle;text-align:center;">${monthlyTakenHolidays.get(cartouche.key)}</td>				
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('rtt')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('garde_enfant')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('chomage')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sansSolde')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('dif')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('don')}</td>		
@@ -94,6 +98,8 @@
 		<td style="vertical-align: middle;text-align:center;">${annualHoliday}</td>
 		<td style="vertical-align: middle;text-align:center;">${remainingCA}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualRTT}</td>
+		<td style="vertical-align: middle;text-align:center;">${annualGarde_enfant}</td>	
+		<td style="vertical-align: middle;text-align:center;">${annualChomage}</td>	
 		<td style="vertical-align: middle;text-align:center;">${annualCSS}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualDIF}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualDON}</td>

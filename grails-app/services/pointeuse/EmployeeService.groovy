@@ -128,10 +128,19 @@ class EmployeeService {
 		def lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 		def employeeDailyMap = [:]
 		def employeeAbsenceMap = [:]
+		def period = (calendar.get(Calendar.MONTH) >= 5) ? Period.findByYear(calendar.get(Calendar.YEAR)) : Period.findByYear(calendar.get(Calendar.YEAR) - 1)
+		
 		
 		employeeList = Employee.findAllBySite(site)
 		if (employeeList != null){
 			for (Employee employee: employeeList){
+				
+				def conges = getYearToDateVacation(period, employee)
+				conges.get('takenCA')
+				conges.get('remainingCA')
+				conges.get('takenRTT')
+				conges.get('remainingRTT')
+				
 				dayMap = [:]
 				absenceMap = [:]
 				for (int i=1;i<lastDay+1;i++){
@@ -181,11 +190,81 @@ class EmployeeService {
 						}
 					}
 				}
-				
 				employeeDailyMap.put(employee,dayMap)
 				employeeAbsenceMap.put(employee,absenceMap)
 			}
 		}
-		return [employeeDailyMap:employeeDailyMap,employeeAbsenceMap:employeeAbsenceMap,employeeList:employeeList]
+		return [
+			employeeDailyMap:employeeDailyMap,
+			employeeAbsenceMap:employeeAbsenceMap,
+			employeeList:employeeList
+		]
 	}	
+	
+	
+	def getYearToDateVacation(Period period, Employee employee){
+		def criteria
+	
+		def startCalendar = Calendar.instance
+		def endCalendar = Calendar.instance
+		def takenCA
+		def initialCA
+		def takenRTT
+		def initialRTT
+		
+		startCalendar.set(Calendar.YEAR,period.year)
+		startCalendar.set(Calendar.MONTH,5)
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.clearTime()
+			
+		
+	
+			criteria = Vacation.createCriteria()
+			initialCA = criteria.get{
+				and {
+					eq('employee',employee)
+					eq('period',period)
+					eq('type',VacationType.CA)
+				}
+			}
+	
+			criteria = Absence.createCriteria()
+			takenCA = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.VACANCE)
+				}
+			}
+		
+
+			criteria = Vacation.createCriteria()
+			initialRTT = criteria.get{
+				and {
+					eq('employee',employee)
+					eq('period',period)
+					eq('type',VacationType.RTT)
+				}
+			}
+	
+			criteria = Absence.createCriteria()
+			takenRTT = criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.RTT)
+				}
+			}
+			
+		
+
+		return [
+			takenCA:takenCA,
+			remainingCA: initialCA.counter - takenCA.size(),
+			takenRTT:takenRTT,
+			remainingRTT: initialRTT.counter - takenRTT.size()
+		]
+	}
 }

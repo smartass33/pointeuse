@@ -38,6 +38,8 @@
 				<th  style="width:80px;"><div><span><g:message code="annual.report.holidays.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.remaining.holidays.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.RTT.label"/></span></div></th>
+				<th  style="width:80px;"><div><span><g:message code="annual.report.GARDE_ENFANT.label"/></span></div></th>
+				<th  style="width:80px;"><div><span><g:message code="annual.report.CHOMAGE.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.CSS.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.INJUSTIFIE.label"/></span></div></th>
 				<th  style="width:80px;"><div><span><g:message code="annual.report.DIF.label"/></span></div></th>	
@@ -70,6 +72,8 @@
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualHoliday')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('remainingCA')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualRTT')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualGarde_enfant')}</td>
+								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualChomage')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualCSS')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualINJUSTIFIE')}</td>
 								<td style="width:45px;text-align:center;">${(annualReportMap.get(employee)).get('annualDIF')}</td>
@@ -96,6 +100,7 @@
 								<td style="width:50px;text-align:center;">${siteAnnualHoliday}</td>
 								<td style="width:50px;text-align:center;">${siteRemainingCA}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualRTT}</td>
+								<td style="width:50px;text-align:center;">${siteAnnualChomage}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualCSS}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualINJUSTIFIE}</td>
 								<td style="width:50px;text-align:center;">${siteAnnualDIF}</td>

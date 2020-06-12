@@ -80,6 +80,7 @@
 		     			<td class="cartoucheRightFiguresTD">${yearlyHoliday as java.lang.Float}</td>
 		     			<td class="cartoucheRightFiguresTD">${(initialCA - yearlyHoliday)  as Float}</td>
 					</tr>
+
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.rtt.count', default: 'report')} :</td>
 						<td class="cartoucheRightFiguresTD">${rtt as java.lang.Float}</td>
@@ -92,7 +93,16 @@
 		     			<td class="cartoucheRightFiguresTD">${yearlySickness as java.lang.Float}</td>   
 		     			<td class="cartoucheRightFiguresTD"/>						
 					</tr>
-
+					<tr>		
+						<td class="cartoucheRightTitleTD" >${message(code: 'employee.garde_enfant.count', default: 'report')} :</td>	
+						<td class="cartoucheRightFiguresTD">${garde_enfant as java.lang.Float}</td>        					
+		     			<td class="cartoucheRightFiguresTD">${yearlyGarde_enfant as java.lang.Float}</td>
+					</tr>
+					<tr>		
+						<td class="cartoucheRightTitleTD" >${message(code: 'employee.chomage.count', default: 'report')} :</td>	
+						<td class="cartoucheRightFiguresTD">${chomage as java.lang.Float}</td>        					
+		     			<td class="cartoucheRightFiguresTD">${yearlyChomage as java.lang.Float}</td>
+					</tr>
 					<tr>
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.sanssolde.count', default: 'report')} :</td>
 						<td class="cartoucheRightFiguresTD">${sansSolde as java.lang.Float}</td>

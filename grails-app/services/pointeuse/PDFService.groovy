@@ -444,6 +444,8 @@ class PDFService {
 		def siteAnnualHoliday = 0
 		def siteRemainingCA = 0
 		def siteAnnualRTT = 0
+		def siteAnnualChomage = 0
+		def siteAnnualGarde_enfant = 0
 		def siteAnnualCSS = 0
 		def siteAnnualINJUSTIFIE = 0
 		def siteAnnualSickness = 0
@@ -472,6 +474,8 @@ class PDFService {
 						 siteAnnualTheoritical += data.get('annualTheoritical')
 						 siteAnnualTotal += data.get('annualTotal')
 						 siteAnnualHoliday += data.get('annualHoliday')
+						 siteAnnualGarde_enfant += data.get('annualGarde_enfant')	
+						 siteAnnualChomage += data.get('annualChomage')		 
 						 siteRemainingCA += data.get('remainingCA')
 						 siteAnnualRTT += data.get('annualRTT')
 						 siteAnnualCSS += data.get('annualCSS')
@@ -506,6 +510,8 @@ class PDFService {
 			siteAnnualTheoritical:siteAnnualTheoritical,
 			siteAnnualTotal:siteAnnualTotal,
 			siteAnnualHoliday:siteAnnualHoliday,
+			siteAnnualGarde_enfant:siteAnnualGarde_enfant,
+			siteAnnualChomage:siteAnnualChomage,
 			siteRemainingCA:siteRemainingCA,
 			siteAnnualRTT:siteAnnualRTT,
 			siteAnnualCSS:siteAnnualCSS,

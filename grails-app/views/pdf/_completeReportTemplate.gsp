@@ -127,7 +127,6 @@
 	 									<tr><td>${holiday as float}</td></tr>
 	        						</table>
 	        					</td>
-	        					
 	        					<td>
 	        						<table border="1" class="cartoucheValues">
 	        							<thead></thead>	        							
@@ -162,6 +161,36 @@
 	        						</table>
 	        					</td>	        					
 							</tr>
+							<tr>
+								<td style="text-align:left;">${message(code: 'employee.garde_enfant.count', default: 'report')} :</td>
+	 							<td>
+	 								<table  border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${garde_enfant as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td>${yearlyGarde_enfant as float}</td></tr>
+	        						</table>
+	        					</td>	        					        					
+							</tr>
+							<tr>
+								<td style="text-align:left;">${message(code: 'employee.chomage.count', default: 'report')} :</td>
+	 							<td>
+	 								<table  border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${chomage as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td>${yearlyChomage as float}</td></tr>
+	        						</table>
+	        					</td>	        					        					
+							</tr>							
 							<tr>
 								<td style="text-align:left;">${message(code: 'employee.sickness.count', default: 'report')} :</td>
 	 							<td>

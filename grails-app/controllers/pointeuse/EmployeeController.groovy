@@ -253,148 +253,229 @@ class EmployeeController {
 		[dailyMap: dailyMap,site:site,dailySupMap:dailySupMap,dailyInAndOutMap:dailyInAndOutMap,currentDate:calendar.time,maxSize:maxSize]
 	}
 
-
+	
+	
 	@Secured(['ROLE_ADMIN'])
 	def weeklyReport(){
 		log.error('weeklyReport called')
-		def weeklyMap = [:]
-		def criteria
-		def elapsedSeconds = 0
-		def employeeInstanceList
+		params.each{i->log.error('param: '+i)}
+		def siteValue = params.boolean('siteValue')
+		def fromWeeklyReport = params.boolean('fromWeeklyReport')
+		def siteFunction = params['siteFunction']
 		def currentDate
 		def calendar = Calendar.instance
 		def fromIndex=params.boolean('fromIndex')
-		def weeklyTotalByEmployee = [:]
-		def weeklyTotalByWeek = [:]
-		def lastWeekOfYearByEmployee = [:]
-		def weekList = []
-		def employeeSubList
-		def year
-		def weeklyTotals
-		def lastWeekOfYearWeeklyTotals
+		def site = Site.get(params.int('siteId'))
+		def funtionCheckBoxesMap = [:]
+		def period = Period.get(params.int('periodId'))
+		def model = [:]
+		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
+		if (period == null && year != null){
+			period = Period.findByYear(year)
+		}
+		if (params['simpleFuntionCheckBoxesMap']  == null){
+			def jsonSlurper = new JsonSlurper()
+			funtionCheckBoxesMap = params['funtionCheckBoxesMap'] != null ? jsonSlurper.parseText(params['funtionCheckBoxesMap']) : [:]
+		}else{
+			def words = []
+			words = (params['simpleFuntionCheckBoxesMap']).split("-")
+			for (int j = 0 ;j < words.size() ; j++){
+				if (j % 2 == 0){
+					funtionCheckBoxesMap.put(words[j],(words[j + 1]).toBoolean())
+				}
+			}
+		}
+	
+		if (siteFunction != null){
+			funtionCheckBoxesMap.put(siteFunction,siteValue)
+		}
+		if (fromWeeklyReport)
+			model = timeManagerService.getWeeklyReportData(year, site, funtionCheckBoxesMap)
+
+		if (!fromIndex && site == null){
+			flash.message = message(code: 'weeklyTime.site.selection.error')
+			params["fromIndex"] = true
+			redirect(action: "weeklyReport",params:params)
+			return
+		}
+		model << [
+			fromIndex:false,
+			site:site,
+			period:period,
+			firstYear:period.year,
+			lastYear:period.year+1,
+			funtionCheckBoxesMap:funtionCheckBoxesMap
+			]
+
+		if (site != null){
+			render template: "/employee/template/listWeeklyTimeTemplate", model:model
+			return
+		}
+		[currentDate:calendar.time]
+	}
+	
+	@Secured(['ROLE_ADMIN'])
+	def annualSitesReportExcelExport(){
+		log.error('entering annualSitesReportExcelExport')
+		def folder = grailsApplication.config.pdf.directory
+		def siteValue = params.boolean('siteValue')
+		def siteFunction = params['siteFunction']
+		def currentDate
+		def calendar = Calendar.instance
+		def fromIndex=params.boolean('fromIndex')
+		def funtionCheckBoxesMap = [:]
+		def period = Period.get(params.int('periodId'))
+		def sites = Site.findAll("from Site")
+		def functions = Function.list([sort: "ranking", order: "asc"])
+		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
+		def annualSiteReportMap = [:]
+		if (period == null && year != null){
+			period = Period.findByYear(year)
+		}
+	
+		if (params['simpleFuntionCheckBoxesMap']  == null){
+			def jsonSlurper = new JsonSlurper()
+			funtionCheckBoxesMap = params['funtionCheckBoxesMap'] != null ? jsonSlurper.parseText(params['funtionCheckBoxesMap']) : [:]
+		}else{
+			def words = []
+			words = (params['simpleFuntionCheckBoxesMap']).split("-")
+			for (int j = 0 ;j < words.size() ; j++){
+				if (j % 2 == 0){
+					funtionCheckBoxesMap.put(words[j],(words[j + 1]).toBoolean())
+				}
+			}
+		}
+		if (siteFunction != null){
+			funtionCheckBoxesMap.put(siteFunction,siteValue)
+		}
+		sites.each{siteIter ->
+			log.debug('computing site: '+siteIter.name)
+			annualSiteReportMap.put(siteIter,timeManagerService.getWeeklyReportData(year, siteIter, funtionCheckBoxesMap))
+		}
+		log.error('annualSitesReportExcelExport - sites retrieved')
+				
+		def headers = [message(code: 'laboratory.label')]
+		functions.each{function ->
+			headers.add(function.name)
+		}
+
+		headers.add(message(code: 'weekly.particularism.1.noBR'))
+		headers.add(message(code: 'weekly.particularism.2.noBR'))
+		headers.add(message(code: 'sub.total'))
+		headers.add(message(code: 'sub.total.minutes'))
+		headers.add(message(code: 'weekly.case.noBR'))
+		headers.add(message(code: 'weekly.home.assistance'))
+		headers.add(message(code: 'ratio.employees.cases'))
+
+		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/annual_report_template.xlsx').with {exporter ->
+			
+			def toto = exporter.getCellAt(0, 0)
+			setResponseHeaders(response)
+			fillHeader(headers)
+			int i = 1
+			annualSiteReportMap.each{site,mileageByEmployeeYear->
+				log.debug('siteReport: '+mileageByEmployeeYear)
+				def data = []
+				data.add(site.name)
+				mileageByEmployeeYear.each{employee,employeeMileageYearMap ->
+					employeeMileageYearMap.each{iterYear,employeeYearlyMileage ->
+						data.add(employee.lastName)
+						data.add(employeeYearlyMileage)
+					}
+				}
+			
+				fillRow(data,i)
+				i += 1
+			}
+			save(response.outputStream)
+		}
+		response.setContentType("application/octet-stream")
+	}
+	
+	
+	@Secured(['ROLE_ADMIN'])
+	def annualSitesReport(){
+		params.each{i->log.debug('parameter of list: '+i)}
+		def siteValue = params.boolean('siteValue')
+		def siteFunction = params['siteFunction']
+		def period = Period.get(params.int('periodId'))
+		def fromWeeklyReport = params.boolean('fromWeeklyReport')
+		def calendar = Calendar.instance
+		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
+		def funtionCheckBoxesMap = [:]
+		def annualSiteReportMap = [:]
+		def model =[:]
+		def sites = Site.findAll("from Site")
+		def functions = Function.list([sort: "ranking", order: "asc"])
+		
+		if (!fromWeeklyReport){
+			if (params['simpleFuntionCheckBoxesMap']  == null){
+				def jsonSlurper = new JsonSlurper()
+				funtionCheckBoxesMap = params['funtionCheckBoxesMap'] != null ? jsonSlurper.parseText(params['funtionCheckBoxesMap']) : [:]
+			}else{
+				def words = []
+				words = (params['simpleFuntionCheckBoxesMap']).split("-")
+				for (int j = 0 ;j < words.size() ; j++){
+					if (j % 2 == 0){
+						funtionCheckBoxesMap.put(words[j],(words[j + 1]).toBoolean())
+					}
+				}
+			}
+			
+			if (siteFunction != null){
+				funtionCheckBoxesMap.put(siteFunction,siteValue)
+			}
+			
+			sites.each{siteIter ->
+				log.debug('computing site: '+siteIter.name)
+				annualSiteReportMap.put(siteIter,timeManagerService.getWeeklyReportData(year, siteIter, funtionCheckBoxesMap))
+			}
+			log.error('annualSitesReport - sites retrieved')
+			
+			model << [
+				annualSiteReportMap:annualSiteReportMap,
+				funtionCheckBoxesMap:funtionCheckBoxesMap,
+				siteFunctionList:functions,
+				siteList:sites,
+				period:period
+			]
+			render template: "/employee/template/listAnnualSiteTimeTemplate", model:model
+			return
+		}else{
+			[currentDate:calendar.time]
+			return
+		}
+	}
+	
+	
+/*
+	@Secured(['ROLE_ADMIN'])
+	def weeklyReport(){
+		log.error('weeklyReport called')
+		def fromIndex=params.boolean('fromIndex')
 		def period = Period.get(params.int('periodId'))
 		def site = Site.get(params.int('siteId'))
+		def criteria
+		def elapsedSeconds = 0
+		def currentDate
+		def calendar = Calendar.instance
+		def year
+		def currentYear
+		def result
+		if (year == null){year = calendar.get(Calendar.YEAR)}
 		if (period != null){
 			year = period.year
 		 } else{
 			period = Period.findByYear(year)
 		 }
-		 if (year == null){
-		 	year = calendar.get(Calendar.YEAR)
-		 }
-
-		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
-		def currentYear = year
-		def currentWeek = 0
-		def functionList = Function.list([sort: "ranking", order: "asc"])
-		def serviceList = Service.list([sort: "name", order: "asc"])
-
-		if (site != null){
-			employeeInstanceList = []
-			for (Function function:functionList){
-				for (Service service:serviceList){
-					 criteria = Employee.createCriteria()
-					 employeeSubList = criteria.list{
-						 and {
-							 eq('function',function)
-							 eq('service',service)
-							 eq('site',site)
-						 }
-						 order('lastName','asc')
-					 }
-					 employeeInstanceList.addAll(employeeSubList)
-				 }
-			 }
-		}else{
-			employeeInstanceList = []
-			for (Service service:serviceList){
-				for (Function function:functionList){
-					employeeInstanceList.addAll(Employee.findAllByFunctionAndService(function,service,[sort: "lastName", order: "asc"]))
-				}
-			}
-		}
-		def rollingCal = Calendar.instance
-		rollingCal.set(Calendar.MONTH,5)
-		rollingCal.set(Calendar.DAY_OF_MONTH,1)
-		rollingCal.set(Calendar.YEAR,currentYear)
-		rollingCal.clearTime()
-
-		def lastWeekOfYear = rollingCal.getActualMaximum(Calendar.WEEK_OF_YEAR)
-		def firstWeek = rollingCal.get(Calendar.WEEK_OF_YEAR)
-		def weekNumber = []
-		for (int i = firstWeek; i <= lastWeekOfYear;i++){
-			weekNumber.add(i)
-		}
-		def endOfPeriodCal =  Calendar.instance
-		endOfPeriodCal.set(Calendar.MONTH,4)
-		endOfPeriodCal.set(Calendar.DAY_OF_MONTH,endOfPeriodCal.getActualMaximum(Calendar.DAY_OF_MONTH))
-		endOfPeriodCal.set(Calendar.YEAR,currentYear + 1)
-		endOfPeriodCal.clearTime()
-
-		for (int j = 1; j <= endOfPeriodCal.get(Calendar.WEEK_OF_YEAR);j++){
-			weekNumber.add(j)
-		}
-
-		def iteratorYear = currentYear
-		for (week in weekNumber){
-			if (week < firstWeek){
-				iteratorYear = currentYear + 1
-			}
-			criteria = WeeklyTotal.createCriteria()
-			weeklyTotals = criteria.list {
-					and {
-						eq('year',iteratorYear)
-						eq('week',week)
-
-						'in'('employee',employeeInstanceList)
-					}
-				order('employee', 'asc')
-			}
-
-			weeklyTotalByWeek.put(week,weeklyTotals)
-			weekList.add(week)
-
-			if (iteratorYear == currentYear && week == lastWeekOfYear){
-				log.error('we got the rest of the last week of year that is in the year + 1')
-				criteria = WeeklyTotal.createCriteria()
-				lastWeekOfYearWeeklyTotals = criteria.list {
-						and {
-							eq('year',currentYear + 1)
-							eq('week',week)
-
-							'in'('employee',employeeInstanceList)
-						}
-					order('employee', 'asc')
-				}
-			}
-		}
-
-		for (WeeklyTotal weeklyTotal in lastWeekOfYearWeeklyTotals){
-			lastWeekOfYearByEmployee.put(weeklyTotal.employee,weeklyTotal)
-		}
-
-
-		def weeklyTotalsByWeek = [:]
-		for (int weekIter in weekList){
-			def weeklyTotalsByEmployee = [:]
-			for (Employee currentEmployee in employeeInstanceList){
-				for (WeeklyTotal weeklyTotal in weeklyTotalByWeek.get(weekIter)){
-					if (weeklyTotal.employee == currentEmployee){
-						if (weeklyTotalsByEmployee.get(currentEmployee) == null){
-							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotal.elapsedSeconds as long)
-						}else{
-							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + weeklyTotal.elapsedSeconds as long)
-						}
-						if (weekIter == lastWeekOfYear && lastWeekOfYearWeeklyTotals!= null && lastWeekOfYearByEmployee.get(currentEmployee) != null){
-							weeklyTotalsByEmployee.put(currentEmployee,weeklyTotalsByEmployee.get(currentEmployee) + lastWeekOfYearByEmployee.get(currentEmployee).elapsedSeconds as long)
-						}
-						weeklyTotalsByWeek.put(weekIter,weeklyTotalsByEmployee)
-					}
-				}
-
-			}
-		}
-
+		currentYear = year
+		result = timeManagerService.getAnnualSiteDataGroupByWeek(currentYear, site)
+		result << [	
+				site:site,
+				period:period,
+				firstYear:period.year,
+				lastYear:period.year+1]
+		
 		if (!fromIndex && site == null){
 			flash.message = message(code: 'weeklyTime.site.selection.error')
 			params["fromIndex"]=true
@@ -402,21 +483,12 @@ class EmployeeController {
 			return
 		}
 		if (site!=null){
-			render template: "/employee/template/listWeeklyTimeTemplate",
-			model:[
-				site:site,
-				period:period,
-				weeklyTotalsByWeek:weeklyTotalsByWeek,
-				weekList:weekList,
-				employeeInstanceList:employeeInstanceList,
-				firstYear:period.year,
-				lastYear:period.year+1,
-				]
+			render template: "/employee/template/listWeeklyTimeTemplate",model:result
 			return
 		}
 		[currentDate:calendar.time]
 	}
-	
+	*/
 	
 	@Secured(['ROLE_ADMIN'])
 	def saturdayReport(){
@@ -875,6 +947,318 @@ class EmployeeController {
 		}
 	}
 
+	
+	
+	@Secured(['ROLE_ADMIN'])
+	def weeklyReportExcelExport(){
+		params.each{i->log.debug('parameter of list: '+i)}
+		def folder = grailsApplication.config.pdf.directory
+		log.error('entering weeklyReportExcelExport')
+		def siteValue = params.boolean('siteValue')
+		def siteFunction = params['siteFunction']
+		def currentDate
+		def calendar = Calendar.instance
+		def fromIndex=params.boolean('fromIndex')
+		def siteId = params['siteId']
+		def site = Site.get(siteId)
+		def funtionCheckBoxesMap = [:]
+		def period = Period.get(params['periodId'])
+		def year = (period != null) ? period.year : calendar.get(Calendar.YEAR)
+		if (period == null && year != null){
+			period = Period.findByYear(year)
+		}
+		def calendarMonday = Calendar.instance
+		def calendarSaturday = Calendar.instance
+		calendarMonday.set(Calendar.YEAR,year)
+		calendarSaturday.set(Calendar.YEAR,year)
+		
+		if (params['simpleFuntionCheckBoxesMap']  == null){
+			def jsonSlurper = new JsonSlurper()
+			funtionCheckBoxesMap = params['funtionCheckBoxesMap'] != null ? jsonSlurper.parseText(params['funtionCheckBoxesMap']) : [:]
+		}else{
+			def words = []
+			words = (params['simpleFuntionCheckBoxesMap']).split("-")
+			for (int j = 0 ;j < words.size() ; j++){
+				if (j % 2 == 0){
+					funtionCheckBoxesMap.put(words[j],(words[j + 1]).toBoolean())
+				}
+			}
+		}
+		if (siteFunction != null){
+			funtionCheckBoxesMap.put(siteFunction,siteValue)
+		}
+		def model = timeManagerService.getWeeklyReportData(year, site, funtionCheckBoxesMap)
+		def headers = [message(code: 'default.week')]
+		for (Employee employee: model.get('employeeInstanceList')){
+			headers.add(employee.lastName)
+		}
+		
+		model.get('siteFunctionMap').each{key,value ->
+			headers.add(key)
+		}
+		headers.add(message(code: 'weekly.particularism.1.noBR'))
+		headers.add(message(code: 'weekly.particularism.2.noBR'))
+		headers.add(message(code: 'sub.total'))
+		headers.add(message(code: 'sub.total.minutes'))
+		headers.add(message(code: 'weekly.case.noBR'))
+		headers.add(message(code: 'weekly.home.assistance'))
+		headers.add(message(code: 'ratio.employees.cases'))
+
+		WebXlsxExporter webXlsxExporter = new WebXlsxExporter(folder+'/weekly_report_template.xlsx').with {
+			setResponseHeaders(response)
+			def weekList = model.get('weekList')
+			def employeeInstanceList = model.get('employeeInstanceList')
+			def weeklyFunctionTotalMap = model.get('weeklyFunctionTotalMap')
+			def siteFunctionMap = model.get('siteFunctionMap')
+			def weeklySubTotalsByWeek = model.get('weeklySubTotalsByWeek')
+			def weeklyCasesMap = model.get('weeklyCasesMap')
+			def yearlyTotalsByFunction = model.get('yearlyTotalsByFunction')
+			def yearlyTotalsByEmployee = model.get('yearlyTotalsByEmployee')
+			setResponseHeaders(response)
+			fillHeader(headers)
+			
+			int i = 1
+			
+			for (weekNumber in weekList){
+				def data = []
+				log.debug('weekNumber: '+weekNumber)
+				calendarMonday.set(Calendar.WEEK_OF_YEAR,weekNumber as int)
+				calendarMonday.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY)
+				calendarSaturday.set(Calendar.WEEK_OF_YEAR,weekNumber as int)
+				calendarSaturday.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY)
+						
+				if (weekNumber == 1){
+					calendarMonday.set(Calendar.YEAR,year + 1)
+					calendarSaturday.set(Calendar.YEAR,year + 1)
+				}
+				
+				data.add(calendarMonday.time.format('EE dd/MM/yyyy') + '-' + calendarSaturday.time.format('EE dd/MM/yy'))
+				for (Employee currentEmployee in employeeInstanceList){
+					log.debug('currentEmployee: '+currentEmployee)
+					def weeklyTotalsByWeek = model.get('weeklyTotalsByWeek')
+					if (weeklyTotalsByWeek != null && weeklyTotalsByWeek.get(weekNumber) != null && weeklyTotalsByWeek.get(weekNumber).get(currentEmployee) != null ){
+						data.add(timeManagerService.writeHumanTime(model.get('weeklyTotalsByWeek').get(weekNumber).get(currentEmployee) as long))
+					}else{
+						data.add(timeManagerService.writeHumanTime(0))
+					}
+				}
+				siteFunctionMap.each{key,value ->
+					log.debug("siteFunctionMap key: "+key)
+					if (weeklyFunctionTotalMap != null && weeklyFunctionTotalMap.get(weekNumber)!= null && weeklyFunctionTotalMap.get(weekNumber).get(value) != null){
+						data.add(timeManagerService.writeHumanTime(weeklyFunctionTotalMap.get(weekNumber).get(value) as long))
+					}else{
+						data.add(timeManagerService.writeHumanTime(0))
+					}
+				}
+				
+
+				//particularity
+				if (weeklyCasesMap != null && weeklyCasesMap.get(weekNumber) != null  && (weeklyCasesMap.get(weekNumber)).particularity1 != null){
+					data.add(timeManagerService.writeHumanTime(weeklyCasesMap.get(weekNumber).particularity1 as long))
+				}else{
+					data.add(timeManagerService.writeHumanTime(0))
+				}
+				if (weeklyCasesMap != null && weeklyCasesMap.get(weekNumber) != null  && (weeklyCasesMap.get(weekNumber)).particularity2 != null){
+					data.add(timeManagerService.writeHumanTime(weeklyCasesMap.get(weekNumber).particularity2 as long))
+				}else{
+					data.add(timeManagerService.writeHumanTime(0))
+				}
+				
+								
+				
+				if (weeklySubTotalsByWeek != null && weeklySubTotalsByWeek.get(weekNumber)!= null){
+					// sous total hebdo
+					data.add(timeManagerService.writeHumanTime(weeklySubTotalsByWeek.get(weekNumber) as long))
+					// sous total hebdo en minute
+					data.add(Math.round((weeklySubTotalsByWeek.get(weekNumber) as long) / 60))
+				}else{
+					data.add(timeManagerService.writeHumanTime(0))
+					data.add(0)
+				}
+				
+				if (weeklyCasesMap != null && weeklyCasesMap.get(weekNumber)!= null){
+					data.add(weeklyCasesMap.get(weekNumber).cases)
+					data.add(weeklyCasesMap.get(weekNumber).home_assistance)
+				}else{
+					data.add(0)
+					data.add(0)
+				}
+				def dataSize = data.size()
+				// get subtotal minutes
+				if (dataSize > 3){
+					def subTotal = data[dataSize - 3]
+				// get last item : cases
+					def caseNubmers = data.last()
+					def home_assistances = data[dataSize - 2]
+				//apply ratio (minutes/cases)
+					if (caseNubmers > 0 || home_assistances > 0){
+						data.add((subTotal / (caseNubmers + home_assistances)).toDouble().round(2))
+					}else{
+						data.add(0)
+					}
+				}else{
+					data.add(0)
+				}
+				fillRow(data,i)
+				i += 1
+			}
+			// TOTALS:
+			def totalLine = []
+			totalLine.add(message(code: 'weekly.report.totals'))
+			for (Employee employeeIter in employeeInstanceList){
+				if (yearlyTotalsByEmployee != null && yearlyTotalsByEmployee.get(employeeIter) != null){
+					totalLine.add(timeManagerService.writeHumanTime(yearlyTotalsByEmployee.get(employeeIter)))
+				}else{
+					totalLine.add(timeManagerService.writeHumanTime(0))
+				}
+			}
+			siteFunctionMap.each{key,value ->
+				if (yearlyTotalsByFunction != null && yearlyTotalsByFunction.get(value) != null){
+					totalLine.add(timeManagerService.writeHumanTime(yearlyTotalsByFunction.get(value)))
+				}else{
+					totalLine.add(timeManagerService.writeHumanTime(0))
+				}
+			}
+			
+			totalLine.add(timeManagerService.writeHumanTime(model.get('yearlyParticularity1')))
+			totalLine.add(timeManagerService.writeHumanTime(model.get('yearlyParticularity2')))
+			totalLine.add(timeManagerService.writeHumanTime(model.get('yearlySubTotals')))
+			totalLine.add(Math.round((model.get('yearlySubTotals') as long) / 60))
+			totalLine.add(model.get('yearlyCases'))
+			totalLine.add(model.get('yearlyHomeAssistance'))
+
+			log.error("(model.get('yearlyCases') + model.get('yearlyHomeAssistance'))": +(model.get('yearlyCases') + model.get('yearlyHomeAssistance')))
+			
+			if (model.get('yearlyCases') + model.get('yearlyHomeAssistance') != 0 ){
+				totalLine.add(((Math.round((model.get('yearlySubTotals') as long) / 60)) / (model.get('yearlyCases') + model.get('yearlyHomeAssistance'))).toDouble().round(2))
+			}else{
+				totalLine.add((0).toDouble().round(2))
+			}
+			
+			fillRow(totalLine,i)
+			save(response.outputStream)
+		}
+		response.setContentType("application/octet-stream")
+	}
+	
+	
+	
+	/*
+	@Secured(['ROLE_ADMIN'])
+	def weeklyReportExcelExport(){
+		log.error('entering weeklyReportExcelExport')
+		params.each{i-> log.error('param: '+i)}
+		def folder = grailsApplication.config.pdf.directory
+		def fromIndex=params.boolean('fromIndex')
+		def period = Period.get(params.int('periodId'))
+		def site = Site.get(params.int('siteId'))
+		def criteria
+		int i = 1
+		def elapsedSeconds = 0
+		def currentDate
+		def calendar = Calendar.instance
+		def calendarMonday = Calendar.instance
+		def calendarSaturday = Calendar.instance
+		def year
+		def currentYear
+		def result
+		def headers
+		def employeeInstanceList
+		def weekData
+		def weeklyTotalsByWeek
+		def weeklyFunctionTotalMap
+		def weeklySubTotalsByWeek
+		def siteFunctionMap
+		def weeklyCasesMap
+		
+		if (year == null){year = calendar.get(Calendar.YEAR)}
+		if (period != null){
+			year = period.year
+		 } else{
+			period = Period.findByYear(year)
+		 }
+		currentYear = year
+		calendarMonday.set(Calendar.YEAR,period.year)
+		calendarSaturday.set(Calendar.YEAR,period.year)
+
+		
+		result = timeManagerService.getWeeklyReportData(currentYear,site, [:])
+		employeeInstanceList = result.get('employeeInstanceList')
+		weeklyTotalsByWeek = result.get('weeklyTotalsByWeek')
+		weeklySubTotalsByWeek = result.get('weeklySubTotalsByWeek')
+		siteFunctionMap = result.get('siteFunctionMap')
+		weeklyFunctionTotalMap = result.get('weeklyFunctionTotalMap')
+		weeklyCasesMap = result.get('weeklyCasesMap')
+		
+		headers = [message(code: 'default.week')]
+		for (def employee in employeeInstanceList){
+			headers.add(employee.lastName.take(4))
+		}
+		
+		
+		headers.add([message(code: 'weekly.particularism.1'), message(code: 'weekly.particularism.2'), message(code: 'sub.total')])
+		
+		
+		new WebXlsxExporter(folder+'/vacation_template.xlsx').with {
+			setResponseHeaders(response)
+			fillHeader(headers)
+			
+			//LOOP OVER map 
+			for (def weekNumber in result.get('weekList')){
+				weekData = [] 
+				calendarMonday.set(Calendar.WEEK_OF_YEAR,weekNumber as int)
+				calendarMonday.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY)
+				calendarSaturday.set(Calendar.WEEK_OF_YEAR,weekNumber as int)
+				calendarSaturday.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY)
+	
+				if (weekNumber == 1){
+					calendarMonday.roll(Calendar.YEAR,1)
+					calendarSaturday.roll(Calendar.YEAR,1)
+				}
+				if (weekNumber == 2 && (calendarMonday.get(Calendar.YEAR) != calendarSaturday.get(Calendar.YEAR)) ){
+					calendarMonday.set(Calendar.YEAR,calendarSaturday.get(Calendar.YEAR))
+				}
+				weekData.add(calendarMonday.time.format('EE dd/MM/yy')+'-'+calendarSaturday.time.format('EE dd/MM/yy'))
+				
+				
+				for (def currentEmployee in employeeInstanceList){
+					weeklyTotalsByWeek.get(weekNumber)
+					if (weeklyTotalsByWeek.get(weekNumber)!= null && weeklyTotalsByWeek.get(weekNumber).get(currentEmployee) != null){
+						weekData.add(timeManagerService.computeHumanTime(weekData.add(weeklyTotalsByWeek.get(weekNumber).get(currentEmployee))))
+					}else{
+						weekData.add(timeManagerService.computeHumanTime(0))
+					}
+				}
+				
+				for (def siteFunction in siteFunctionMap){
+					if (weeklyFunctionTotalMap != null && weeklyFunctionTotalMap.get(weekNumber)!= null && weeklyFunctionTotalMap.get(weekNumber).get(siteFunction.value) != null){
+						weekData.add(timeManagerService.computeHumanTime(weeklyFunctionTotalMap.get(weekNumber).get(siteFunction.value)))
+					}else{
+						weekData.add(timeManagerService.computeHumanTime(0))
+					}
+				}
+				if (weeklySubTotalsByWeek != null && weeklySubTotalsByWeek.get(weekNumber) != null){
+					weekData.add(timeManagerService.computeHumanTime(weeklySubTotalsByWeek.get(weekNumber)))
+				}else{
+					weekData.add(timeManagerService.computeHumanTime(0))
+				}
+
+				
+				
+
+				
+				
+				fillRow(weekData,i)
+				i+=1
+			}
+		
+			save(response.outputStream)
+		}
+
+	}
+	
+	*/
+	
 	@Secured(['ROLE_ADMIN'])
 	def vacationExcelExport(){
 		params.each{i-> log.debug('param: '+i)}
@@ -902,6 +1286,7 @@ class EmployeeController {
 		}
 
 		headers.add(AbsenceType.VACANCE)
+		headers.add(AbsenceType.GARDE_ENFANT)
 		headers.add(AbsenceType.RTT)
 		headers.add(AbsenceType.AUTRE)
 		headers.add(AbsenceType.EXCEPTIONNEL)
@@ -910,6 +1295,8 @@ class EmployeeController {
 		headers.add(AbsenceType.DIF)
 		headers.add(AbsenceType.GROSSESSE)
 		headers.add(AbsenceType.MALADIE)
+		headers.add(AbsenceType.CHOMAGE)
+		
 		def employeeDailyMap = result.get('employeeDailyMap')
 		def employeeAbsenceMap = result.get('employeeAbsenceMap')
 		def employeeList = result.get('employeeList')
@@ -931,6 +1318,16 @@ class EmployeeController {
 				absenceMap = employeeAbsenceMap.get(employee)
 				if (absenceMap.get(AbsenceType.VACANCE) != null){
 					dailyList.add(absenceMap.get(AbsenceType.VACANCE))
+				}else{
+					dailyList.add(0)
+				}
+				if (absenceMap.get(AbsenceType.GARDE_ENFANT) != null){
+					dailyList.add(absenceMap.get(AbsenceType.GARDE_ENFANT))
+				}else{
+					dailyList.add(0)
+				}
+				if (absenceMap.get(AbsenceType.CHOMAGE) != null){
+					dailyList.add(absenceMap.get(AbsenceType.CHOMAGE))
 				}else{
 					dailyList.add(0)
 				}
@@ -1425,6 +1822,10 @@ class EmployeeController {
 		def takenDifMap = [:]
 		def takenDonMap = [:]
 		def formationMap = [:]
+		def takenGarde_enfantMap = [:]
+		def takenGarde_enfant
+		def takenChomageMap = [:]
+		def takenChomage
 		def takenSickness
 		def takenRTT
 		def takenCA
@@ -1539,7 +1940,6 @@ class EmployeeController {
 			}else{
 				remainingCAMap.put(employee, initialCAMap.get(employee))
 				takenCAMap.put(employee, 0)
-				
 			}
 			//RTT
 			criteria = Absence.createCriteria()
@@ -1575,6 +1975,38 @@ class EmployeeController {
 			}else{
 				takenSicknessMap.put(employee, 0)
 			}	
+			
+			// GARDE ENFANT
+			criteria = Absence.createCriteria()
+			takenGarde_enfant= criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.GARDE_ENFANT)
+				}
+			}
+			if (takenGarde_enfant!=null){
+				takenGarde_enfantMap.put(employee, takenGarde_enfant.size())
+			}else{
+				takenGarde_enfantMap.put(employee, 0)
+			}
+			
+			// CHOMAGE
+			criteria = Absence.createCriteria()
+			takenChomage= criteria.list {
+				and {
+					eq('employee',employee)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.CHOMAGE)
+				}
+			}
+			if (takenChomage != null){
+				takenChomageMap.put(employee, takenChomage.size())
+			}else{
+				takenChomageMap.put(employee, 0)
+			}
 				
 			// MATERNITE
 			criteria = Absence.createCriteria()
@@ -1720,11 +2152,9 @@ class EmployeeController {
 				takenDonMap.put(employee, 0)
 			}
 		}
-		log.debug("done")
 		[
 			employeeInstanceTotal:employeeInstanceTotal,
 			period:period,
-			employeeInstanceTotal:employeeInstanceTotal,
 			site:site,
 			siteId:siteId,
 			employeeInstanceList:employeeInstanceList,
@@ -1754,10 +2184,14 @@ class EmployeeController {
 		def takenCA=[]
 		def takenRTT=[]
 		def takenCSS=[]
+		def takenChomage=[]
 		def takenAutre=[]
 		def formation=[]
+		def takenGarden_enfant = []
 		def takenSickness = []
 		def takenRTTMap=[:]
+		def takenChomageMap=[:]
+		def takenGarden_enfantMap = [:]
 		def takenCAMap=[:]
 		def yearMap=[:]
 		def initialCAMap=[:]
@@ -1833,7 +2267,6 @@ class EmployeeController {
 			}else{
 				remainingCAMap.put(period.year, initialCAMap.get(period.year))
 				takenCAMap.put(period.year, 0)
-
 			}
 			//RTT
 			criteria = Absence.createCriteria()
@@ -1868,6 +2301,36 @@ class EmployeeController {
 				takenSicknessMap.put(period.year, takenSickness.size())
 			}else{
 				takenSicknessMap.put(period.year, 0)
+			}
+
+			criteria = Absence.createCriteria()
+			takenGarden_enfant = criteria.list {
+				and {
+					eq('employee',employeeInstance)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.GARDE_ENFANT)
+				}
+			}			
+			if (takenGarden_enfant!=null){
+				takenGarden_enfantMap.put(period.year, takenGarden_enfant.size())
+			}else{
+				takenGarden_enfantMap.put(period.year, 0)
+			}
+			
+			criteria = Absence.createCriteria()
+			takenChomage = criteria.list {
+				and {
+					eq('employee',employeeInstance)
+					ge('date',startCalendar.time)
+					lt('date',endCalendar.time)
+					eq('type',AbsenceType.CHOMAGE)
+				}
+			}
+			if (takenChomage !=null){
+				takenChomageMap.put(period.year, takenChomage.size())
+			}else{
+				takenChomageMap.put(period.year, 0)
 			}
 
 			criteria = Absence.createCriteria()
@@ -2180,6 +2643,7 @@ class EmployeeController {
 			updatedSelection = AbsenceType.ANNULATION
 		if (updatedSelection.equals('M'))
 			updatedSelection = AbsenceType.MALADIE
+
 		if (updatedSelection.equals('FO'))
 			updatedSelection = AbsenceType.FORMATION
 		if (updatedSelection.equals('CE'))
@@ -2190,6 +2654,12 @@ class EmployeeController {
 
 			if (updatedSelection.equals('V'))
 			updatedSelection = AbsenceType.VACANCE
+			
+			if (updatedSelection.equals('GE'))
+				updatedSelection = AbsenceType.GARDE_ENFANT
+
+			if (updatedSelection.equals('CH'))
+				updatedSelection = AbsenceType.CHOMAGE
 
 			if (updatedSelection.equals('R'))
 			updatedSelection = AbsenceType.AUTRE
@@ -2310,8 +2780,29 @@ class EmployeeController {
 			updatedSelection = AbsenceType.ANNULATION
 		if (updatedSelection.equals('M'))
 			updatedSelection = AbsenceType.MALADIE
+		if (updatedSelection.equals('GE'))
+			updatedSelection = AbsenceType.GARDE_ENFANT
+		if (updatedSelection.equals('CH'))
+			updatedSelection = AbsenceType.CHOMAGE
 		if (updatedSelection.equals('FO'))
 			updatedSelection = AbsenceType.FORMATION
+		if (updatedSelection.equals('CE'))
+			updatedSelection = AbsenceType.EXCEPTIONNEL
+		if (updatedSelection.equals('RTT'))
+			updatedSelection = AbsenceType.RTT
+		if (updatedSelection.equals('V'))
+			updatedSelection = AbsenceType.VACANCE
+		if (updatedSelection.equals('R'))
+			updatedSelection = AbsenceType.AUTRE
+		if (updatedSelection.equals('CSS'))
+			updatedSelection = AbsenceType.CSS
+		if (updatedSelection.equals('F'))
+			updatedSelection = AbsenceType.FERIE
+		if (updatedSelection.equals('CP'))
+			updatedSelection = AbsenceType.PATERNITE
+		if (updatedSelection.equals('DIF'))
+			updatedSelection = AbsenceType.DIF
+			
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 		Date date = dateFormat.parse(day)
 		def cal= Calendar.instance

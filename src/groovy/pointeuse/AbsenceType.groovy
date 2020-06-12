@@ -3,6 +3,8 @@ package pointeuse
 public enum AbsenceType {
 
 	VACANCE('V'),
+	CHOMAGE('CH'),
+	GARDE_ENFANT('GE'),
 	MALADIE('M'),
 	GROSSESSE('G'),
 	MATERNITE('CM'),

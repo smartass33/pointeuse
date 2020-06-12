@@ -93,6 +93,8 @@
   					</g:each>
   					<th class="rotate-45"><div><span>${AbsenceType.VACANCE}</span></div></th>
   					<th class="rotate-45"><div><span>${AbsenceType.RTT}</span></div></th>
+  					<th class="rotate-45"><div><span>${AbsenceType.GARDE_ENFANT}</span></div></th>	
+  					<th class="rotate-45"><div><span>${AbsenceType.CHOMAGE}</span></div></th>	
  					<th class="rotate-45"><div><span>${AbsenceType.AUTRE}</span></div></th>
 					<th class="rotate-45"><div><span>${AbsenceType.EXCEPTIONNEL}</span></div></th>
 					<th class="rotate-45"><div><span>${AbsenceType.PATERNITE}</span></div></th>
@@ -134,11 +136,20 @@
   							<g:if test="${employeeAbsenceMap.get(employee.key).get(AbsenceType.VACANCE) == null }">0</g:if> 							
   							<g:else>${employeeAbsenceMap.get(employee.key).get(AbsenceType.VACANCE)}</g:else>  							
   						</td>
+  						
+
   						<td class="vacationTD">
   							<g:if test="${employeeAbsenceMap.get(employee.key).get(AbsenceType.RTT) == null }">0</g:if> 							
   							<g:else>${employeeAbsenceMap.get(employee.key).get(AbsenceType.RTT)}</g:else>  							
   						</td>
-  						
+   						<td class="vacationTD">
+  							<g:if test="${employeeAbsenceMap.get(employee.key).get(AbsenceType.GARDE_ENFANT) == null }">0</g:if> 							
+  							<g:else>${employeeAbsenceMap.get(employee.key).get(AbsenceType.GARDE_ENFANT)}</g:else>  							
+  						</td> 						
+   						<td class="vacationTD">
+  							<g:if test="${employeeAbsenceMap.get(employee.key).get(AbsenceType.CHOMAGE) == null }">0</g:if> 							
+  							<g:else>${employeeAbsenceMap.get(employee.key).get(AbsenceType.CHOMAGE)}</g:else>  							
+  						</td>  
    						<td class="vacationTD">
   							<g:if test="${employeeAbsenceMap.get(employee.key).get(AbsenceType.AUTRE) == null }">0</g:if> 							
   							<g:else>${employeeAbsenceMap.get(employee.key).get(AbsenceType.AUTRE)}</g:else>  							

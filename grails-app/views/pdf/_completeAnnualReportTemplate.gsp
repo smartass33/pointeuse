@@ -65,6 +65,8 @@
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.elapsed.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.holidays.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.RTT.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.GARDE_ENFANT.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.CHOMAGE.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.CSS.label"/></th>
 			<th class='rotate-45'  style="width:45px"><div><span><g:message code="annual.report.DIF.label"/></span></div></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.INJUSTIFIE.label"/></th>
@@ -100,6 +102,8 @@
 					</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('holidays')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('rtt')}</td>
+					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('garde_enfant')}</td>	
+					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('chomage')}</td>	
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('sansSolde')}</td>
 					<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('dif')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('injustifie')}</td>
@@ -127,6 +131,8 @@
 				</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualHoliday}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualRTT}</td>
+				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualGarde_enfant}</td>
+				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualChomage}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualCSS}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualDIF}</td>	
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualINJUSTIFIE}</td>

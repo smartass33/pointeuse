@@ -63,8 +63,8 @@
 				<g:form>
 					<g:actionSubmit class='excelButton' value="export"  action="weeklyReportExcelExport"/>	
 					<g:hiddenField name="funtionCheckBoxesMap" id="funtionCheckBoxesMap" value="${funtionCheckBoxesMap as JSON} " />
-					<g:if test="${site != null}"><g:hiddenField name="siteId" id="siteId" value="${site.id} " /></g:if>
-					<g:if test="${period != null}"><g:hiddenField name="periodId" id="periodId" value="${period.id} " /></g:if>			
+					<g:if test="${site != null}"><g:hiddenField name="siteId" id="siteId" value="${site.id}"/></g:if>
+					<g:if test="${period != null}"><g:hiddenField name="periodId" id="periodId" value="${period.id}"/></g:if>			
 				</g:form >				
 			</th>
 			<th style="vertical-align: middle;text-align:center;width:60px;" class="domicile">${message(code: 'weekly.case')}</th>	
@@ -83,6 +83,9 @@
 					if (weekNumber == 1){
 						calendarMonday.roll(Calendar.YEAR,1)
 						calendarSaturday.roll(Calendar.YEAR,1)
+					}
+					if (weekNumber == 2 && (calendarMonday.get(Calendar.YEAR) != calendarSaturday.get(Calendar.YEAR)) ){
+						calendarMonday.set(Calendar.YEAR,calendarSaturday.get(Calendar.YEAR))
 					}
 				%>	
 				<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
