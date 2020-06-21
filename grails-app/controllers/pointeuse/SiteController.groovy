@@ -213,6 +213,7 @@ class SiteController {
 		def siteAnnualRTT = 0
 		def siteAnnualCSS = 0
 		def siteAnnualINJUSTIFIE = 0
+		def siteAnnualMISE_A_PIED = 0
 		def siteAnnualSickness = 0
 		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
@@ -291,6 +292,7 @@ class SiteController {
 					employeeModel << ['annualRTT':(annualEmployeeData.valueMap.get('annualRTT') != null ? annualEmployeeData.valueMap.get('annualRTT').toLong() : 0)]
 					employeeModel << ['annualCSS':(annualEmployeeData.valueMap.get('annualCSS') != null ? annualEmployeeData.valueMap.get('annualCSS').toLong() : 0)]
 					employeeModel << ['annualINJUSTIFIE':(annualEmployeeData.valueMap.get('annualINJUSTIFIE') != null && annualEmployeeData.valueMap.get('annualINJUSTIFIE') != 'null' ? annualEmployeeData.valueMap.get('annualINJUSTIFIE').toLong() : 0)]
+					employeeModel << ['annualMISE_A_PIED':(annualEmployeeData.valueMap.get('annualMISE_A_PIED') != null && annualEmployeeData.valueMap.get('annualMISE_A_PIED') != 'null' ? annualEmployeeData.valueMap.get('annualMISE_A_PIED').toLong() : 0)]
 					employeeModel << ['annualDIF':(annualEmployeeData.valueMap.get('annualDIF') != null ? annualEmployeeData.valueMap.get('annualDIF').toLong() : 0 )  ]
 					employeeModel << ['annualSickness':(annualEmployeeData.valueMap.get('annualSickness') != null ? annualEmployeeData.valueMap.get('annualSickness').toLong() : 0)]	
 					employeeModel << ['annualMaternite':(annualEmployeeData.valueMap.get('annualMaternite') != null ? annualEmployeeData.valueMap.get('annualMaternite').toLong() : 0)]
@@ -311,6 +313,7 @@ class SiteController {
 					siteAnnualRTT += (annualEmployeeData.valueMap.get('annualRTT') != null ? annualEmployeeData.valueMap.get('annualRTT').toLong() : 0)
 					siteAnnualCSS += (annualEmployeeData.valueMap.get('annualCSS') != null ? annualEmployeeData.valueMap.get('annualCSS').toLong() : 0)
 					siteAnnualINJUSTIFIE += (annualEmployeeData.valueMap.get('annualINJUSTIFIE') != null && annualEmployeeData.valueMap.get('annualINJUSTIFIE') != 'null' ? annualEmployeeData.valueMap.get('annualINJUSTIFIE').toLong() : 0)
+					siteAnnualMISE_A_PIED += (annualEmployeeData.valueMap.get('annualMISE_A_PIED') != null && annualEmployeeData.valueMap.get('annualMISE_A_PIED') != 'null' ? annualEmployeeData.valueMap.get('annualMISE_A_PIED').toLong() : 0)
 					siteAnnualSickness += (annualEmployeeData.valueMap.get('annualSickness') != null ? annualEmployeeData.valueMap.get('annualSickness').toLong() : 0)
 					siteAnnualMaternite += (annualEmployeeData.valueMap.get('annualMaternite') != null ? annualEmployeeData.valueMap.get('annualMaternite').toLong() : 0)				
 					siteAnnualDIF += (annualEmployeeData.valueMap.get('annualDIF') != null ? annualEmployeeData.valueMap.get('annualDIF').toLong() : 0)
@@ -334,6 +337,7 @@ class SiteController {
 				siteAnnualRTT:siteAnnualRTT,
 				siteAnnualCSS:siteAnnualCSS,
 				siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
+				siteAnnualMISE_A_PIED:siteAnnualMISE_A_PIED,
 				siteAnnualSickness:siteAnnualSickness,
 				siteAnnualMaternite:siteAnnualMaternite,
 				siteAnnualDIF:siteAnnualDIF,
@@ -414,6 +418,7 @@ class SiteController {
 					valueMap << ['annualRTT':String.valueOf(annualReportMap.get(employee).get('annualRTT'))]
 					valueMap << ['annualCSS':String.valueOf(annualReportMap.get(employee).get('annualCSS'))]
 					valueMap << ['annualINJUSTIFIE':String.valueOf(annualReportMap.get(employee).get('annualINJUSTIFIE'))]
+					valueMap << ['annualMISE_A_PIED':String.valueOf(annualReportMap.get(employee).get('annualMISE_A_PIED'))]
 					valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
 					valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
 					valueMap << ['annualMaternite':String.valueOf(annualReportMap.get(employee).get('annualMaternite'))]
@@ -461,6 +466,7 @@ class SiteController {
 		def siteAnnualRTT = 0
 		def siteAnnualCSS = 0
 		def siteAnnualINJUSTIFIE = 0
+		def siteAnnualMISE_A_PIED = 0
 		def siteAnnualSickness = 0
 		def siteAnnualMaternite = 0
 		def siteAnnualExceptionnel = 0
@@ -491,6 +497,7 @@ class SiteController {
 				siteAnnualRTT += data.get('annualRTT')
 				siteAnnualCSS += data.get('annualCSS')
 				siteAnnualINJUSTIFIE += data.get('annualINJUSTIFIE')
+				siteAnnualMISE_A_PIED += data.get('annualMIS_A_PIED')
 				siteAnnualSickness += data.get('annualSickness')
 				siteAnnualMaternite += data.get('annualMaternite')			
 				siteAnnualDIF += data.get('annualDIF')
@@ -524,7 +531,8 @@ class SiteController {
 			siteAnnualHoliday:siteAnnualHoliday,
 			siteRemainingCA:siteRemainingCA,
 			siteAnnualRTT:siteAnnualRTT,
-			siteAnnualCSS:siteAnnualCSS,
+			siteAnnualCSS:siteAnnualCSS,			
+			siteAnnualMISE_A_PIED:siteAnnualMISE_A_PIED,
 			siteAnnualINJUSTIFIE:siteAnnualINJUSTIFIE,
 			siteAnnualSickness:siteAnnualSickness,
 			siteAnnualMaternite:siteAnnualMaternite,		
@@ -565,6 +573,7 @@ class SiteController {
 				valueMap << ['annualRTT':String.valueOf(annualReportMap.get(employee).get('annualRTT'))]
 				valueMap << ['annualCSS':String.valueOf(annualReportMap.get(employee).get('annualCSS'))]
 				valueMap << ['annualINJUSTIFIE':String.valueOf(annualReportMap.get(employee).get('annualINJUSITIFIE'))]
+				valueMap << ['annualMISE_A_PIED':String.valueOf(annualReportMap.get(employee).get('annualMISE_A_PIED'))]
 				valueMap << ['annualDIF':String.valueOf(annualReportMap.get(employee).get('annualDIF'))]
 				valueMap << ['annualSickness':String.valueOf(annualReportMap.get(employee).get('annualSickness'))]
 				valueMap << ['annualMaternite':String.valueOf(annualReportMap.get(employee).get('annualMaternite'))]

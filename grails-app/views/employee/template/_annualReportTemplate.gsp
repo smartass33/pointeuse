@@ -24,6 +24,7 @@
 		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.DIF.label"/></font></span></div></th>
 		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.DON.label"/></font></span></div></th>		
 		<th class='rotate-45'  style="width:50px"><div><span><font size="1"><g:message code="annual.report.INJUSTIFIE.label"/></font></span></div></th>
+		<th class='rotate-45'  style="width:50px"><div><span><font size="1"><g:message code="annual.report.MISE_A_PIED.label"/></font></span></div></th>
 		<th class='rotate-45'  style="width:50px"><div><span><font size="1"><g:message code="annual.report.sickness.label"/></font></span></div></th>
 		<th class='rotate-45'  style="width:45px"><div><span><font size="1"><g:message code="annual.report.maternite.abreviation.label"/></font></span></div></th>
 		<th class='rotate-45'  style="width:50px"><div><span><font size="1"><g:message code="annual.report.exceptionnel.abreviation.label"/></font></span></div></th>
@@ -67,6 +68,7 @@
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('dif')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('don')}</td>		
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('injustifie')}</td>
+				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('MISE_A_PIED')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('sickness')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('maternite')}</td>
 				<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('exceptionnel')}</td>
@@ -104,6 +106,7 @@
 		<td style="vertical-align: middle;text-align:center;">${annualDIF}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualDON}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualINJUSTIFIE}</td>
+		<td style="vertical-align: middle;text-align:center;">${annualMISE_A_PIED}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualSickness}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualMaternite}</td>
 		<td style="vertical-align: middle;text-align:center;">${annualExceptionnel}</td>

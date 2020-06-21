@@ -115,6 +115,12 @@
 		    			<td class="cartoucheRightFiguresTD">${yearlyInjustifie as java.lang.Float}</td>
 		    			<td class="cartoucheRightFiguresTD">
 					</tr>
+										<tr>
+						<td class="cartoucheRightTitleTD" >${message(code: 'employee.MISE_A_PIED.count', default: 'report')} :</td>
+						<td class="cartoucheRightFiguresTD">${MISE_A_PIED as java.lang.Float}</td>
+		    			<td class="cartoucheRightFiguresTD">${yearlyMISE_A_PIED as java.lang.Float}</td>
+		    			<td class="cartoucheRightFiguresTD">
+					</tr>
 					<tr>		
 						<td class="cartoucheRightTitleTD" >${message(code: 'employee.exceptionnel.count', default: 'report')} :</td>	
 						<td class="cartoucheRightFiguresTD">${exceptionnel as java.lang.Float}</td>        					

@@ -70,6 +70,7 @@
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.CSS.label"/></th>
 			<th class='rotate-45'  style="width:45px"><div><span><g:message code="annual.report.DIF.label"/></span></div></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.INJUSTIFIE.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.MISE_A_PIED.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.sickness.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.maternite.abreviation.label"/></th>
 			<th style="vertical-align: middle;text-align:center;width:"><g:message code="annual.report.exceptionnel.abreviation.label"/></th>
@@ -107,6 +108,7 @@
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('sansSolde')}</td>
 					<td style="vertical-align: middle;text-align:center;">${cartouche.value.getAt('dif')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('injustifie')}</td>
+					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('MISE_A_PIED')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('sickness')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('maternite')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('exceptionnel')}</td>
@@ -136,6 +138,7 @@
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualCSS}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualDIF}</td>	
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualINJUSTIFIE}</td>
+				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualMISE_A_PIED}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualSickness}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualMaternite}</td>
 				<td style="vertical-align: middle;text-align:right;font-weight:bold;">${annualExceptionnel}</td>

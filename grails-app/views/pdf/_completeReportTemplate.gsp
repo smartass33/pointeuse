@@ -9,10 +9,10 @@
 		<style  type="text/css">
 			@page {
 			   size: 210mm 297mm;
-			   margin: 5px 5px 5px 5px;
+			   margin: 3px 3px 3px 3px;
 			 }
 			table {
-			  font: normal 11px verdana, arial, helvetica, sans-serif;
+			  font: normal 10px verdana, arial, helvetica, sans-serif;
 			  color: #363636;
 			  background: #f6f6f6;
 			  background-color: white;
@@ -20,7 +20,7 @@
 			  }
 			caption {
 			  text-align: center;
-			  font: bold 16px arial, helvetica, sans-serif;
+			  font: bold 14px arial, helvetica, sans-serif;
 			  background: transparent;
 			  padding:6px 4px 8px 0px;
 			  color: #CC00FF;
@@ -48,7 +48,7 @@
 			 	text-align:center;
 			 	height:5px;
 			 	width:90px;
-			 	font-size:80%;
+			 	font-size:70%;
 			}			
 			tbody th{
 			 	text-align:center;
@@ -69,7 +69,7 @@
 		</style>
 	</head>
 	<body>
-	<h1 style="text-align:center;font-size:130%">${message(code: 'employee.monthly.report.label')} <g:formatDate format="MMMM yyyy" date="${period}"/></h1>
+	<h2 style="text-align:center;font-size:100%">${message(code: 'employee.monthly.report.label')} <g:formatDate format="MMMM yyyy" date="${period}"/></h2>
 	<table>
 		<tbody>  
 			<tr>
@@ -236,6 +236,36 @@
 	        						</table>
 	        					</td>
 							</tr>	
+							<tr>
+								<td style="text-align:left;">${message(code: 'employee.MISE_A_PIED.count', default: 'report')} :</td>
+	 							<td>
+	 								<table border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${MISE_A_PIED as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td>${yearlyMISE_A_PIED as float}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>
+							<tr>
+								<td style="text-align:left;">${message(code: 'employee.injustifie.count', default: 'report')} :</td>
+	 							<td>
+	 								<table border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${injustifie as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td>${yearlyInjustifie as float}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>
 							
 							<tr>
 								<td width="35%" style="text-align:left;" >${message(code: 'employee.exceptionnel.count', default: 'report')} :</td>	
@@ -298,6 +328,22 @@
 	        						<table border="1" class="cartoucheValues">
 	        							<thead></thead>	        							
 	        							<tr><td>${yearlyDif as float}</td></tr>
+	        						</table>
+	        					</td>
+							</tr>								
+							<tr>
+								<td width="35%" style="text-align:left;" >${message(code: 'employee.don.count', default: 'report')} :</td>	
+	 							<td>
+	 								<table border="1" class="cartoucheValues" >
+	 									<thead></thead>
+	 									<tr><td>${don as float}</td></tr>
+	        						</table>
+	        					</td>
+	        					
+	        					<td>
+	        						<table border="1" class="cartoucheValues">
+	        							<thead></thead>	        							
+	        							<tr><td>${yearlyDon as float}</td></tr>
 	        						</table>
 	        					</td>
 							</tr>											

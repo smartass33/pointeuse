@@ -2678,6 +2678,10 @@ class EmployeeController {
 
 			if (updatedSelection.equals('AI'))
 			updatedSelection = AbsenceType.INJUSTIFIE
+			
+			if (updatedSelection.equals('MAP'))
+			updatedSelection = AbsenceType.MISE_A_PIED
+			
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 		Date date = dateFormat.parse(params["period"])
 		def calendarLoop= Calendar.instance

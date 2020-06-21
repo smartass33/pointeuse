@@ -19,7 +19,8 @@ public enum AbsenceType {
 	DIF('DIF'),
 	DON('DON'),
 	FORMATION('FO'),
-	INJUSTIFIE('AI')
+	INJUSTIFIE('AI'),
+	MISE_A_PIED('MAP')
 	
 	final String value
     AbsenceType(String value){ this.value = value }
