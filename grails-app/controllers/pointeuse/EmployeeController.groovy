@@ -1449,7 +1449,7 @@ class EmployeeController {
 	@Secured(['ROLE_ADMIN'])
 	def absenceFollowup(){
 		log.error('absenceFollowup called')
-		params.each{i->log.error(i)}
+		params.each{i->log.debug(i)}
 		boolean isMonthlyView = false
 		boolean isYearlyView = false
 		boolean isDailyView = false
@@ -1469,11 +1469,14 @@ class EmployeeController {
 		def absenceMapByDay = [:]
 		def dayList = []
 		def headers = ['nom']
+		if (date_picker != null && date_picker.size() > 0){
+			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+		}
 		def period = (currentCalendar.get(Calendar.MONTH) >= 5) ? Period.findByYear(currentCalendar.get(Calendar.YEAR)) : Period.findByYear(currentCalendar.get(Calendar.YEAR) - 1)
+		
 		def firstDayOfPeriod = Calendar.instance
 		def initialDayOfPeriod = Calendar.instance
 		def functionList = Function.list([sort: "ranking", order: "asc"])
-	//	def serviceList = Service.list([sort: "name", order: "asc"])
 		def employeeSubList = []
 		def lastDayOfPeriod = Calendar.instance
 		firstDayOfPeriod.set(Calendar.YEAR,period.year)
@@ -1651,7 +1654,7 @@ class EmployeeController {
 	
 	@Secured(['ROLE_ADMIN'])
 	def vacationFollowAnnualExcel(){
-		params.each{i->log.error(i)}
+		params.each{i->log.debug(i)}
 		def folder = grailsApplication.config.pdf.directory
 		def max = params["max"] != null ? params.int("max") : 20
 		def offset = params["offset"] != null ? params.int("offset") : 0
@@ -1669,7 +1672,12 @@ class EmployeeController {
 		def data = []
 		def date_picker = params["date_picker"]
 		def headers = [message(code: 'employee.lastName.label'),message(code: 'employee.site.label'),message(code: 'employee.function.label')]
+		
+		if (date_picker != null && date_picker.size() > 0){
+			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
+		}
 		def period = (currentCalendar.get(Calendar.MONTH) >= 5) ? Period.findByYear(currentCalendar.get(Calendar.YEAR)) : Period.findByYear(currentCalendar.get(Calendar.YEAR) - 1)
+		
 		def firstDayOfPeriod = Calendar.instance
 		def initialDayOfPeriod = Calendar.instance
 		
@@ -1689,9 +1697,7 @@ class EmployeeController {
 		lastDayOfPeriod.set(Calendar.DAY_OF_MONTH,1)
 		lastDayOfPeriod.clearTime()
 
-		if (date_picker != null && date_picker.size() > 0){
-			currentCalendar.time = new Date().parse("dd/MM/yyyy", date_picker)
-		}
+
 		
 		if (params["site.id"]!=null && !params["site.id"].equals("")){
 			site = Site.get(params["site.id"] as long)
@@ -1723,7 +1729,7 @@ class EmployeeController {
 		*/
 		
 		while(firstDayOfPeriod.get(Calendar.MONTH) <= 11){
-			log.error('refCalendar: '+firstDayOfPeriod.time.format('d-M-yyyy'))
+			log.debug('refCalendar: '+firstDayOfPeriod.time.format('d-M-yyyy'))
 			dayList.add(firstDayOfPeriod.time.format('d-M-yyyy'))
 			headers.add(firstDayOfPeriod.time.format('d-M-yyyy'))
 			if (firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) == firstDayOfPeriod.getActualMaximum(Calendar.DAY_OF_YEAR)){
@@ -1734,7 +1740,7 @@ class EmployeeController {
 		firstDayOfPeriod.set(Calendar.MONTH,0)
 		firstDayOfPeriod.set(Calendar.YEAR,period.year + 1)
 		while(firstDayOfPeriod.get(Calendar.DAY_OF_YEAR) <= lastDayOfPeriod.get(Calendar.DAY_OF_YEAR)){
-			log.error('firstDayOfPeriod: '+firstDayOfPeriod.time.format('d-M-yyyy'))
+			log.debug('firstDayOfPeriod: '+firstDayOfPeriod.time.format('d-M-yyyy'))
 			dayList.add(firstDayOfPeriod.time.format('d-M-yyyy'))
 			headers.add(firstDayOfPeriod.time.format('d-M-yyyy'))
 			firstDayOfPeriod.roll(Calendar.DAY_OF_YEAR, 1)

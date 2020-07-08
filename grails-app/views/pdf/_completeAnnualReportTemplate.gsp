@@ -9,11 +9,11 @@
 	
 		<style  type="text/css">
 			@page {
-			   size: 210mm 297mm;
-			   margin: 0px 0px 13px 0px;
+			   size: 297mm 210mm;
+			   margin: 0px 0px 0px 0px;
 			 }
 			table {
-			  font: normal 11px verdana, arial, helvetica, sans-serif;
+			  font: normal 9px verdana, arial, helvetica, sans-serif;
 			  color: #363636;
 			  background: #f6f6f6;
 			  text-align:left;
@@ -47,10 +47,9 @@
 			}
 			h1{
 				font: bold 16px arial, helvetica, sans-serif;
-				padding:15px;				
+				padding:2px;				
 			}	
 		</style>
-	
 	</head>
 		
 	<h1 style="text-align:center;font-size:150%">
@@ -68,12 +67,12 @@
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.GARDE_ENFANT.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.CHOMAGE.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.CSS.label"/></th>
-			<th class='rotate-45'  style="width:45px"><div><span><g:message code="annual.report.DIF.label"/></span></div></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.DIF.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.INJUSTIFIE.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.MISE_A_PIED.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.sickness.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.maternite.abreviation.label"/></th>
-			<th style="vertical-align: middle;text-align:center;width:"><g:message code="annual.report.exceptionnel.abreviation.label"/></th>
+			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.exceptionnel.abreviation.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.paternite.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.parental.label"/></th>
 			<th style="vertical-align: middle;text-align:center;"><g:message code="annual.report.supplementary.abreviation.label"/></th>
@@ -114,8 +113,6 @@
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('exceptionnel')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('paternite')}</td>
 					<td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('parental')}</td>
-					<!--  td style="vertical-align: middle;text-align:right;">${cartouche.value.getAt('formation')}</td-->
-
 					<td style="vertical-align: middle;text-align:right;">
 						<g:if test="${yearMonthlySupTime.get(cartouche.key) !=null}"><my:humanTimeTD id="yearMonthlySupTime"  name="yearMonthlySupTime" value="${yearMonthlySupTime.get(cartouche.key)} "/></g:if>
 					</td>					
