@@ -73,6 +73,12 @@
 	</label>
 	<g:textField name="matricule" value="${employeeInstance?.matricule}"/>
 </div>
+<div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'hasNightJob', 'error')} ">
+	<label for="matricule">
+		<g:message code="employee.hasNightJob.label" default="Night Job" />
+	</label>
+	<g:select id="hasNightJob" name="hasNightJob" from="${[true,false]}" value="${employeeInstance?.hasNightJob}" valueMessagePrefix="boolean.hasNightJob.select" />
+</div>
 <div class="fieldcontain ${hasErrors(bean: employeeInstance, field: 'arrivalDate', 'error')} ">
 	<label for="arrivalDate">
 		<g:message code="employee.arrivalDate.label" default="arrivalDate" />

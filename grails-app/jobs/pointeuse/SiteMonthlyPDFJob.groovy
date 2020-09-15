@@ -18,9 +18,6 @@ import grails.util.Holders
 
 class SiteMonthlyPDFJob {
 	private static final log = LogFactory.getLog(this)
-	
-	//def employeeService
-	//def PDFService
 	def timeManagerService
 	
 	static triggers = {
@@ -29,108 +26,26 @@ class SiteMonthlyPDFJob {
 
 	}
 	def group = "MyGroup"
-
-/*
-	def execute(context) {
-		log.error "SiteMonthlyPDFJob is running!"	
-		def registryCalendar = Calendar.instance
-		def timeDifference	
-		def folder = context.mergedJobDataMap.get('folder')//grailsApplication.config.pdf.directory
-		def retour
-		Date startDate = new Date()
-		Calendar calendar= Calendar.instance
-		log.error("createAllSitesPDF called at: "+calendar.time)
-		calendar.roll(Calendar.MONTH,-1)
-		def currentDate = calendar.time
-		def sites = Site.findAll()
-		def threads = []	
-		def thr = sites.each{ site ->		
-			if (site.id != 16){
-				def th = new Thread({								
-					log.error('generating PDF for site: '+site.name)
-					retour = PDFService.generateSiteMonthlyTimeSheet(currentDate,site,folder as String)
-				})
-				println "putting thread in list"
-				threads << th
-			}
-		}	
-		threads.each { it.start() }
-		threads.each { it.join() }
-			
-		def thTime = Thread.start{
-			
-			def endDate = new Date()
-			log.error('end time= '+endDate)
-			use (TimeCategory){timeDifference = endDate - startDate}
-			log.error("le rapport a pris: "+timeDifference)
-		}
-		thTime.join()
-			
-		if (registryCalendar.get(Calendar.DAY_OF_YEAR) == registryCalendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
-			registryCalendar.roll(Calendar.YEAR,1)
-			registryCalendar.set(Calendar.DAY_OF_YEAR,1)
-		}else{
-			registryCalendar.roll(Calendar.DAY_OF_YEAR,1)
-		}
-		registryCalendar.set(Calendar.HOUR_OF_DAY,3)
-		registryCalendar.set(Calendar.MINUTE,0)
-		log.error 'registring SiteMonthlyPDFJob at '+registryCalendar.time
-
-		this.schedule(registryCalendar.time,[folder:folder])
-		
-	}
-	*/
-	
-	/*
-	def execute(context){
-		def registryCalendar = Calendar.instance
-		
-		//employeeService.createAllSitesPDF()
-		pdfService.killThemAll()
-		if (registryCalendar.get(Calendar.DAY_OF_YEAR) == registryCalendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
-			registryCalendar.roll(Calendar.YEAR,1)
-			registryCalendar.set(Calendar.DAY_OF_YEAR,1)
-		}else{
-			registryCalendar.roll(Calendar.DAY_OF_YEAR,1)
-		}
-		registryCalendar.set(Calendar.HOUR_OF_DAY,3)
-		registryCalendar.set(Calendar.MINUTE,0)
-		log.error 'registring SiteMonthlyPDFJob at '+registryCalendar.time
-
-		this.schedule(registryCalendar.time)
-	}
-	
-	*/
-	
-	
 	
 	def execute(context){
 		Calendar calendar= Calendar.instance
-		
 		log.error("createAllSitesPDF called at: "+calendar.time)
-		
 		def timeDifference
 		def folder = context.mergedJobDataMap.get('folder')
 		def retour
 		Date startDate = new Date()
 		calendar.roll(Calendar.MONTH,-1)
 		def currentDate = calendar.time
-		
-		//log.error('start time= '+myDate)
 		def sites = Site.findAll()
-
-		
 		def threads = []
-	
 		def thr = sites.each{ site ->
 			
 			if (site.id != 16){
 				def th = new Thread({
-									
+							
 					log.error('generating PDF for site: '+site.name)
 					retour = generateSiteMonthlyTimeSheet(currentDate,site,folder)
 				})
-				println "putting thread in list"
 				threads << th
 			}
 		}

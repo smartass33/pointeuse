@@ -15,6 +15,7 @@ class Employee{
 	Service service
 	float weeklyContractTime //35H par défaut. 
 	boolean hasError
+	boolean hasNightJob
 	Date arrivalDate
 	Status status
 	Map extraData 

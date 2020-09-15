@@ -10,7 +10,6 @@ class SupTimeComputationJob {
 	static triggers = {
 		// fire trigger every day of the month at 2AM
 		cron name: 'myTrigger', cronExpression: "0 30 23 * * ?"
-
 	}
 	def group = "MyGroup"
 

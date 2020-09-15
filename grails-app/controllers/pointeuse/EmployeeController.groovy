@@ -258,7 +258,7 @@ class EmployeeController {
 	@Secured(['ROLE_ADMIN'])
 	def weeklyReport(){
 		log.error('weeklyReport called')
-		params.each{i->log.error('param: '+i)}
+		params.each{i->log.debug('param: '+i)}
 		def siteValue = params.boolean('siteValue')
 		def fromWeeklyReport = params.boolean('fromWeeklyReport')
 		def siteFunction = params['siteFunction']
@@ -826,6 +826,126 @@ class EmployeeController {
         }
         [employeeInstance: employeeInstance,isAdmin:isAdmin,siteId:siteId]
     }
+	
+	@Secured(['ROLE_ADMIN'])
+	def covidExcelExport(){
+		params.each{i-> log.debug('param: '+i)}
+		log.error('entering vacationExcelExport with params: site: '+params['site'])
+		def folder = grailsApplication.config.pdf.directory
+		def calendar = Calendar.instance
+		def startCalendar = Calendar.instance
+		def endCalendar   = Calendar.instance
+		/*
+		startCalendar.set(Calendar.MONTH,8)
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.set(Calendar.YEAR,2019)
+		*/
+		
+		startCalendar.set(Calendar.MONTH,0)
+		startCalendar.set(Calendar.DAY_OF_MONTH,1)
+		startCalendar.set(Calendar.YEAR,2020)
+		
+		
+		
+		
+		endCalendar.set(Calendar.MONTH,8)
+		endCalendar.set(Calendar.DAY_OF_MONTH,1)
+		endCalendar.set(Calendar.YEAR,2020)
+		
+		/*
+		endCalendar.set(Calendar.MONTH,11)
+		endCalendar.set(Calendar.DAY_OF_MONTH,31)
+		endCalendar.set(Calendar.YEAR,2019)
+		*/
+		
+		log.error(startCalendar.time)
+		log.error(endCalendar.time)
+		
+		def result = employeeService.getMonthlyPresenceBetweenDates(startCalendar.time,endCalendar.time)
+		
+		log.error('getMonthlyPresenceBetweenDates done')
+		def headers = [message(code: 'laboratory.label'), message(code: 'employee.label'),'prenom']	
+		while( startCalendar.get(Calendar.DAY_OF_YEAR) <= endCalendar.get(Calendar.DAY_OF_YEAR) ){
+			
+			headers.add(startCalendar.time.format('E dd MMM'))
+			if ( startCalendar.get(Calendar.DAY_OF_YEAR) == endCalendar.get(Calendar.DAY_OF_YEAR) )
+				break
+			startCalendar.roll(Calendar.DAY_OF_YEAR, 1)
+		}
+		def employeeDailyMap = result.get('employeeDailyMap')
+		def employeeList = result.get('employeeList')
+		def dailyMap
+		def dailyList = []
+		def absenceList = []
+		def absenceMap
+		int i = 1
+
+		new WebXlsxExporter(folder+'/vacation_template.xlsx').with {
+			setResponseHeaders(response)
+			fillHeader(headers)
+			for(employee in employeeList) {
+				dailyList = [employee.site,employee.lastName,employee.firstName]
+				dailyList.addAll(employeeDailyMap.get(employee))
+				/*dailyMap = employeeDailyMap.get(employee)
+				dailyMap.each{ k, v ->
+					dailyList.add(v)
+				}
+				*/
+				fillRow(dailyList,i)
+				i+=1
+			}
+			save(response.outputStream)
+		}
+	}
+
+	
+	
+	
+	@Secured(['ROLE_ADMIN'])
+	def covid() {
+		def folder = grailsApplication.config.pdf.directory
+		
+		def startCalendar = Calendar.instance
+		def endCalendar   = Calendar.instance
+		startCalendar.set(Calendar.MONTH,2)
+		startCalendar.set(Calendar.DAY_OF_MONTH,16)
+		startCalendar.set(Calendar.YEAR,2020)
+		
+		endCalendar.set(Calendar.MONTH,7)
+		endCalendar.set(Calendar.DAY_OF_MONTH,30)
+		endCalendar.set(Calendar.YEAR,2020)
+		def retour = employeeService.getMonthlyPresenceBetweenDates(startCalendar.time,endCalendar.time)
+		
+		def employeeDailyMap = retour.get('employeeDailyMap')
+		//log.error(employeeDailyMap)
+		
+		def headers = [
+			'nom','prenom'
+		]
+		
+		while( startCalendar.get(Calendar.DAY_OF_YEAR) <= endCalendar.get(Calendar.DAY_OF_YEAR) ){
+			
+			headers.add(startCalendar.time.format('dd/MM/yyyy'))
+			if ( startCalendar.get(Calendar.DAY_OF_YEAR) == endCalendar.get(Calendar.DAY_OF_YEAR) )
+				break
+		
+			startCalendar.roll(Calendar.DAY_OF_YEAR, 1)
+			
+		}
+		
+		def dailyList = []
+		def dailyMap = []
+		for(employee in retour.get('employeeList')) {
+			dailyList = [employee.site,employee.lastName,employee.firstName]
+			dailyMap = employeeDailyMap.get(employee)
+			dailyMap.each{ k, v ->
+				dailyList.add(v)
+			}
+			log.error(dailyList)
+		}
+
+		[employeeDailyMap: retour.get('employeeDailyMap')]
+	}
 
 	@Secured(['ROLE_ADMIN'])
 	def employeeExcelExport(){
@@ -1443,7 +1563,6 @@ class EmployeeController {
 			site:site,
 			myDate:calendar.time
 		]
-
 	}
 
 	@Secured(['ROLE_ADMIN'])
@@ -1802,7 +1921,7 @@ class EmployeeController {
 	@Secured(['ROLE_ADMIN'])
 	def vacationFollowup(){
 		log.error('vacationFollowup called')
-		params.each{i->log.error(i)}
+		params.each{i->log.debug(i)}
 		
 		def year = params["year"]
 		def max = params["max"] != null ? params.int("max") : 20
@@ -2935,7 +3054,7 @@ class EmployeeController {
 
 	@Secured(['ROLE_ANONYMOUS'])
 	def addingEventToEmployee(){
-		params.each{i->log.error(i)}
+		params.each{i->log.debug(i)}
 		def cal = Calendar.instance
 		def entranceStatus = params.boolean("entranceStatus")//false
 		def site = Site.get(params["siteId"])
@@ -3686,7 +3805,7 @@ class EmployeeController {
 
 	//@Secured(['ROLE_ANONYMOUS'])
 	def pointage(Long id){
-		log.error('pointage called')
+		log.debug('pointage called')
 		try {
 			def username = params["username"]
 			def employee
@@ -3708,7 +3827,7 @@ class EmployeeController {
 			if (employee==null){
 				throw new NullPointerException("unknown employee("+username+")")
 			}else{
-				log.error('employee successfully authenticated='+employee)
+				log.debug('employee successfully authenticated='+employee)
 			}
 			def systemGeneratedEvents = inAndOutsCriteria.list {
 				and {
@@ -4845,11 +4964,10 @@ class EmployeeController {
 	    def thr = sites.each{ site ->
 			if (site.id != 16){
 		        def th = new Thread({
-					log.error('generating PDF for site: '+site.name)
+					log.debug('generating PDF for site: '+site.name)
 					retour = PDFService.generateSiteMonthlyTimeSheet(currentDate,site,folder)
 					siteNames.add(retour[1])
 		        })
-		        println "putting thread in list"
 		        threads << th
 			}
 	    }
@@ -5042,7 +5160,7 @@ class EmployeeController {
 
 	@Secured(['ROLE_ANONYMOUS'])
 	def recreateEmployeeData(Long id){
-		params.each{i->log.error(i)}
+		params.each{i->log.debug(i)}
 		def employee = Employee.get(id)
 		def criteria = InAndOut.createCriteria()
 		def calendar = Calendar.instance

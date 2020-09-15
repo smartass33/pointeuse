@@ -118,6 +118,62 @@ class EmployeeService {
 		return remainingCA=takenCA!=null?(initialCA.counter - takenCA.size()):initialCA.counter
 	}
 	
+	def getMonthlyPresenceBetweenDates(Date startDate,Date endDate){
+		def employeeList
+		def dayMap
+		def criteria
+		def startCalendar = Calendar.instance
+		def endCalendar   = Calendar.instance
+		startCalendar.time = startDate
+		endCalendar.time   = endDate
+		def employeeDailyMap = [:]
+		
+		//def site = Site.get(2)
+		employeeList = Employee.list() //Employee.list()
+		
+		//employeeList = Employee.findAllBySite(site) //Employee.list()
+		log.error('employeeList size: '+employeeList.size())
+		def dayList
+		def i = 1
+			//log.error(startCalendar.time)
+			for (Employee employee: employeeList){	
+				
+				//log.error('doing employee #:'+i+' : '+employee.lastName)
+				startCalendar.time = startDate
+				//log.error(startDate)
+				dayList = []
+				while( startCalendar.get(Calendar.DAY_OF_YEAR) <= endCalendar.get(Calendar.DAY_OF_YEAR) ){
+					//log.error(startCalendar.time)
+					//log.error(startCalendar.time)
+					criteria = DailyTotal.createCriteria()
+					def dailyTotal = criteria.get {
+						and {
+							eq('employee',employee)
+							eq('day',startCalendar.get(Calendar.DAY_OF_MONTH))
+							eq('month',startCalendar.get(Calendar.MONTH) + 1)
+							eq('year',startCalendar.get(Calendar.YEAR) )
+						}
+					}
+					if (dailyTotal != null){
+						dayList.add('OK')
+					}else{
+						dayList.add('0')
+					}
+					if ( startCalendar.get(Calendar.DAY_OF_YEAR) == endCalendar.get(Calendar.DAY_OF_YEAR) )
+						break
+					startCalendar.roll(Calendar.DAY_OF_YEAR, 1)
+				}
+				employeeDailyMap.put(employee,dayList)
+				i++
+				
+			}
+		log.error("DONE")
+		return [
+			employeeDailyMap:employeeDailyMap,
+			employeeList:employeeList
+		]
+	}
+	
 	def getMonthlyPresence(Site site,Date date){
 		def employeeList
 		def dayMap
