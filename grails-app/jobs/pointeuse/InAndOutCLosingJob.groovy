@@ -59,16 +59,15 @@ class InAndOutCLosingJob {
 				if (employee.hasNightJob){
 					log.error "system creating entry for night job: user "+employee.lastName
 					inOrOut = new InAndOut(employee, midnightCalendar.time,"E",false)
-					def totals=initializeTotals(inOrOut.employee,midnightCalendar.time)
+					def totals = timeManagerService.initializeTotals(inOrOut.employee,midnightCalendar.time)
 					def dailyTotal=totals.getAt(0)
-					inOrOut.dailyTotal=dailyTotal					
+					inOrOut.dailyTotal = dailyTotal					
 					inOrOut.systemGenerated = true
 					employee.inAndOuts.add(inOrOut)
 					employee.hasError = false
 					log.error "creating inOrOut: "+inOrOut
 				}
 			}
-			
 			def criteria = InAndOut.createCriteria()
 			def inAndOutList = criteria.list {
 				 or{
@@ -87,8 +86,7 @@ class InAndOutCLosingJob {
 				 employee.hasError=true
 			 }else {
 			 	employee.hasError=false
-			 }
-			
+			 }	
 		}
 		if (calendar.get(Calendar.DAY_OF_YEAR) == calendar.getActualMaximum(Calendar.DAY_OF_YEAR)){
 			calendar.roll(Calendar.YEAR,1)
@@ -98,7 +96,7 @@ class InAndOutCLosingJob {
 		}
 		calendar.set(Calendar.HOUR_OF_DAY,23)
 		calendar.set(Calendar.MINUTE,59)
-		calendar.set(Calendar.SECOND,59)
+		calendar.set(Calendar.SECOND,00)
 		log.error 'registring InAndOutCLosingJob at '+calendar.time
 		this.schedule(calendar.time)
 	}
