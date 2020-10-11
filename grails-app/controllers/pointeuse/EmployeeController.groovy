@@ -3058,7 +3058,6 @@ class EmployeeController {
 		def site = Site.get(params["siteId"])
 		def type = params["type"].equals("Entrer") ? "E" : "S"
 		if (params["type"] == null){type = entranceStatus ? "S" : "E"}
-		//def isOutSideSite = params["isOutSideSite"].equals("true") ? true : false
 		def isOutSideSite = site != null ? true : false
 		
 		Employee employeeInstance = Employee.get(params['userId'])
@@ -3836,7 +3835,7 @@ class EmployeeController {
 				}
 			}
 
-			if (systemGeneratedEvents!=null && systemGeneratedEvents.size()>0){
+			if (systemGeneratedEvents!=null && systemGeneratedEvents.size()>0 && !employee.hasNightJob){
 				log.error('redirecting user to regularization page')
 				render(view: "regularize", model: [systemGeneratedEvents: systemGeneratedEvents,employee:employee])
 				return

@@ -126,6 +126,7 @@
 			<g:if test="${employee != null && !employee.lastName.equals('cort')}">
 			
 				<li>
+					
 				  <g:select name="site.id"
 				    from="${Site.list([sort:'name'])}"
 				    noSelection="['':'-Ajouter un site-']" optionKey="id"
