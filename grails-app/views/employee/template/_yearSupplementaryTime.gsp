@@ -81,12 +81,59 @@
 			</g:else>	  		
 		</td>
 	</tr>
+	
+	
 	<tr>
-		<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeOffHours', default: 'report')} :</td>		
+		<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeBefore5', default: 'report')} :</td>		
+		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
+			<g:if test="${timeBefore5 != null}">
+				<my:humanTimeTD id="timeBefore5"  name="timeBefore5" value="${timeBefore5} "/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeBefore5Decimal"  name="timeBefore5Decimal" value="${timeBefore5} "/>
+  			</g:if>
+			<g:else>
+				${message(code: 'ajax.loading.label', default: 'report')}	
+			</g:else>	  		
+			</td>
+		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
+			<g:if test="${yearTimeBefore5 != null}">
+					<my:humanTimeTD id="yearTimeBefore5"  name="yearTimeBefore5" value="${yearTimeBefore5} "/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeBefore5Decimal"  name="yearTimeBefore5Decimal" value="${yearTimeBefore5} "/>	  			
+			</g:if>
+			<g:else>
+				${message(code: 'ajax.loading.label', default: 'report')}
+			</g:else>	  		
+		</td>				
+	</tr>
+	<tr>
+		<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeAfter22', default: 'report')} :</td>		
 		
 		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
-			<g:if test="${timeOffHours != null}">
-				<my:humanTimeTD id="timeOffHours"  name="timeOffHours" value="${timeOffHours} "/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeOffHours"  name="timeOffHours" value="${timeOffHours} "/>	  			
+			<g:if test="${timeAfter22 != null}">
+				<my:humanTimeTD id="timeAfter22"  name="timeAfter22" value="${timeAfter22} "/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeAfter22Decimal"  name="timeAfter22Decimal" value="${timeAfter22} "/>	  			
+  			</g:if>
+			<g:else>
+				${message(code: 'ajax.loading.label', default: 'report')}
+			</g:else>	  		
+		</td>	
+		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
+			<g:if test="${yearTimeAfter22 != null}">
+				<my:humanTimeTD id="yearTimeAfter22"  name="yearTimeAfter22" value="${yearTimeAfter22} "/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeAfter22"  name="timeAfter22Decimal" value="${yearTimeAfter22} "/>	  			
+  			</g:if>
+			<g:else>
+				${message(code: 'ajax.loading.label', default: 'report')}
+			</g:else>	  		
+		</td>
+	</tr>	
+	
+
+	
+	
+	
+	
+	<tr>
+		<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeOffHours10', default: 'report')} :</td>		
+		
+		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
+			<g:if test="${timeOffHours != null && timeAfter22 != null && timeBefore5 != null}">
+				<my:humanTimeTD id="timeOffHours"  name="timeOffHours" value="${timeOffHours - timeAfter22 - timeBefore5 } "/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeOffHours"  name="timeOffHours" value="${timeOffHours - timeAfter22 - timeBefore5} "/>	  			
   			</g:if>
 			<g:else>
 				${message(code: 'ajax.loading.label', default: 'report')}
@@ -94,12 +141,35 @@
 		</td>	
 			
 		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
-			<g:if test="${yearTimeOffHours != null}">
-				<my:humanTimeTD id="yearTimeOffHours"  name="yearTimeOffHours" value="${yearTimeOffHours} "/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeOffHours"  name="yearTimeOffHours" value="${yearTimeOffHours} "/>	  			
+			<g:if test="${yearTimeOffHours != null && yearTimeAfter22 != null && yearTimeBefore5 != null}">
+				<my:humanTimeTD id="yearTimeOffHours"  name="yearTimeOffHours" value="${yearTimeOffHours - yearTimeAfter22 - yearTimeBefore5 } "/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeOffHours"  name="yearTimeOffHours" value="${yearTimeOffHours - yearTimeAfter22 - yearTimeBefore5} "/>	  			
 	  		</g:if>
 			<g:else>
 				${message(code: 'ajax.loading.label', default: 'report')}
 			</g:else>	  		
 		</td>
 	</tr>	
+	
+		<tr>
+		<td class="cartoucheRightTitleTD" >${message(code: 'employee.monthly.timeOffHours25', default: 'report')} :</td>		
+		
+		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
+			<g:if test="${timeAfter22 != null && timeBefore5 != null}">
+				<my:humanTimeTD id="timeOffHours25"  name="timeOffHours25" value="${timeBefore5+timeAfter22} "/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeOffHours25" value="${timeBefore5+timeAfter22} "/>	  			
+  			</g:if>
+			<g:else>
+				${message(code: 'ajax.loading.label', default: 'report')}
+			</g:else>	  		
+		</td>	
+			
+		 <td style="font-weight:bold; text-align: center;" class="cartoucheRightFiguresTD">  
+			<g:if test="${yearTimeAfter22 != null && yearTimeBefore5 != null}">
+				<my:humanTimeTD id="yearTimeOffHours25"  name="yearTimeOffHours25" value="${yearTimeAfter22+yearTimeBefore5} "/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeOffHours25"  name="yearTimeOffHours25" value="${yearTimeAfter22+yearTimeBefore5} "/>	  			
+	  		</g:if>
+			<g:else>
+				${message(code: 'ajax.loading.label', default: 'report')}
+			</g:else>	  		
+		</td>
+	</tr>
+	
 </table>

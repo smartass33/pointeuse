@@ -769,6 +769,8 @@ class TimeManagerService {
 		def elapsedSeconds = 0
 		def timeBefore7 = 0
 		def timeAfter20 = 0
+		def timeAfter22 = 0
+		def timeBefore5 = 0
 		def timeOffHours = 0
 		def tmpInOrOut
 		def timeDifference
@@ -776,6 +778,9 @@ class TimeManagerService {
 		def previousInOrOut
 		def calendarAtSeven = Calendar.instance
 		def calendarAtNine = Calendar.instance
+		def calendarAt22 = Calendar.instance
+		def calendarAt05 = Calendar.instance
+		
 		calendarAtSeven.set(Calendar.YEAR,dailyTotal.year)
 		calendarAtSeven.set(Calendar.MONTH,dailyTotal.month-1)
 		calendarAtSeven.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
@@ -788,6 +793,20 @@ class TimeManagerService {
 		calendarAtNine.set(Calendar.HOUR_OF_DAY,20)
 		calendarAtNine.set(Calendar.MINUTE,0)
 		calendarAtNine.set(Calendar.SECOND,0)
+		
+		calendarAt22.set(Calendar.YEAR,dailyTotal.year)
+		calendarAt22.set(Calendar.MONTH,dailyTotal.month-1)
+		calendarAt22.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
+		calendarAt22.set(Calendar.HOUR_OF_DAY,22)
+		calendarAt22.set(Calendar.MINUTE,0)
+		calendarAt22.set(Calendar.SECOND,0)
+		
+		calendarAt05.set(Calendar.YEAR,dailyTotal.year)
+		calendarAt05.set(Calendar.MONTH,dailyTotal.month-1)
+		calendarAt05.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
+		calendarAt05.set(Calendar.HOUR_OF_DAY,05)
+		calendarAt05.set(Calendar.MINUTE,0)
+		calendarAt05.set(Calendar.SECOND,0)
 		
 		def inOrOutList = criteria.list {
 			and {
@@ -818,6 +837,15 @@ class TimeManagerService {
 						use (TimeCategory){timeDifference = calendarAtSeven.time - previousInOrOut.time}
 						timeBefore7 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
 					}
+					// managing time before 5
+					if (currentInOrOut.time < calendarAt05.time){
+						use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+						timeBefore5 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+					}
+					if (currentInOrOut.time > calendarAt05.time && previousInOrOut.time < calendarAt05.time){
+						use (TimeCategory){timeDifference = calendarAtSeven.time - previousInOrOut.time}
+						timeBefore5 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+					}
 					
 					// managing time after 21
 					if (previousInOrOut.time > calendarAtNine.time){
@@ -827,6 +855,16 @@ class TimeManagerService {
 					if (currentInOrOut.time > calendarAtNine.time && previousInOrOut.time < calendarAtNine.time){
 						use (TimeCategory){timeDifference = currentInOrOut.time - calendarAtNine.time}
 						timeAfter20 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+					}
+					
+					// managing time after 22
+					if (previousInOrOut.time > calendarAt22.time){
+						use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+						timeAfter22 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+					}
+					if (currentInOrOut.time > calendarAt22.time && previousInOrOut.time < calendarAt22.time){
+						use (TimeCategory){timeDifference = currentInOrOut.time - calendarAt22.time}
+						timeAfter22 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
 					}
 				}
 				previousInOrOut = inOrOut
@@ -845,7 +883,10 @@ class TimeManagerService {
 			elapsedSeconds:elapsedSeconds,
 			timeBefore7:timeBefore7,
 			timeAfter20:timeAfter20,
-			timeOffHours:(timeBefore7 + timeAfter20)
+			timeBefore5:timeBefore5,
+			timeAfter22:timeAfter22,
+			timeOffHours:(timeBefore7 + timeAfter20),
+			timeNight:(timeAfter22 + timeBefore5)
 		]
 	}
 	
@@ -855,6 +896,8 @@ class TimeManagerService {
 		def timeBefore7 = 0
 		def timeAfter20 = 0
 		def timeOffHours = 0
+		def timeAfter22 = 0
+		def timeBefore5 = 0
 		def tmpInOrOut
 		def timeDifference
 		def deltaTime
@@ -862,18 +905,37 @@ class TimeManagerService {
 		def previousInOrOut
 		def calendarAtSeven = Calendar.instance
 		def calendarAtNine = Calendar.instance
+		def calendarAt22 = Calendar.instance
+		def calendarAt05 = Calendar.instance
+		
 		calendarAtSeven.set(Calendar.YEAR,dailyTotal.year)
 		calendarAtSeven.set(Calendar.MONTH,dailyTotal.month-1)
 		calendarAtSeven.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
 		calendarAtSeven.set(Calendar.HOUR_OF_DAY,7)
 		calendarAtSeven.set(Calendar.MINUTE,0)
 		calendarAtSeven.set(Calendar.SECOND,0)
+		
 		calendarAtNine.set(Calendar.YEAR,dailyTotal.year)
 		calendarAtNine.set(Calendar.MONTH,dailyTotal.month-1)
 		calendarAtNine.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
 		calendarAtNine.set(Calendar.HOUR_OF_DAY,20)
 		calendarAtNine.set(Calendar.MINUTE,0)
 		calendarAtNine.set(Calendar.SECOND,0)
+		
+		calendarAt22.set(Calendar.YEAR,dailyTotal.year)
+		calendarAt22.set(Calendar.MONTH,dailyTotal.month-1)
+		calendarAt22.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
+		calendarAt22.set(Calendar.HOUR_OF_DAY,22)
+		calendarAt22.set(Calendar.MINUTE,0)
+		calendarAt22.set(Calendar.SECOND,0)
+		
+		calendarAt05.set(Calendar.YEAR,dailyTotal.year)
+		calendarAt05.set(Calendar.MONTH,dailyTotal.month-1)
+		calendarAt05.set(Calendar.DAY_OF_MONTH,dailyTotal.day)
+		calendarAt05.set(Calendar.HOUR_OF_DAY,05)
+		calendarAt05.set(Calendar.MINUTE,0)
+		calendarAt05.set(Calendar.SECOND,0)
+		
 		def inOrOutList = criteria.list {
 			and {
 				eq('employee',dailyTotal.employee)
@@ -913,7 +975,24 @@ class TimeManagerService {
 					use (TimeCategory){timeDifference = currentInOrOut.time - calendarAtNine.time}
 					timeAfter20 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
 				}
-				
+				// managing time after 22
+				if (previousInOrOut.time > calendarAt22.time){
+					use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+					timeAfter22 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+				}
+				if (currentInOrOut.time > calendarAt22.time && previousInOrOut.time < calendarAt22.time){
+					use (TimeCategory){timeDifference = currentInOrOut.time - calendarAt22.time}
+					timeAfter22 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+				}
+				// managing time before 5
+				if (currentInOrOut.time < calendarAt05.time){
+					use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+					timeBefore5 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+				}
+				if (currentInOrOut.time > calendarAt05.time && previousInOrOut.time < calendarAt05.time){
+					use (TimeCategory){timeDifference = calendarAtSeven.time - previousInOrOut.time}
+					timeBefore5 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+				}	
 				previousInOrOut = inOrOut
 			}
 		}
@@ -924,12 +1003,15 @@ class TimeManagerService {
 		def deltaBefore7 = dailyTotal.weeklyTotal.monthlyTotal.timeBefore7 - timeBefore7
 		def deltaAfter20 = dailyTotal.weeklyTotal.monthlyTotal.timeAfter20 - timeAfter20
 	
+		def deltaBefore5 = dailyTotal.weeklyTotal.monthlyTotal.timeBefore5 - timeBefore5
+		def deltaAfter22 = dailyTotal.weeklyTotal.monthlyTotal.timeAfter22 - timeAfter22
+		
 		
 		dailyTotal.weeklyTotal.elapsedSeconds -= deltaTime
 		dailyTotal.weeklyTotal.monthlyTotal.elapsedSeconds -= deltaTime
 		
-		dailyTotal.weeklyTotal.monthlyTotal.timeBefore7 -= deltaBefore7
-		dailyTotal.weeklyTotal.monthlyTotal.timeAfter20 -= deltaAfter20
+		dailyTotal.weeklyTotal.monthlyTotal.timeBefore5 -= deltaBefore5
+		dailyTotal.weeklyTotal.monthlyTotal.timeAfter22 -= deltaAfter22
 		
 		return elapsedSeconds
 	}
@@ -1791,7 +1873,10 @@ class TimeManagerService {
 			monthlySupTime:data.get('monthlySupTime') as long,
 			timeBefore7:data.get('timeBefore7') as long,	
 			timeAfter20:data.get('timeAfter20') as long,	
+			timeBefore5:data.get('timeBefore5') as long,
+			timeAfter22:data.get('timeAfter22') as long,
 			timeOffHours:data.get('timeOffHours') as long,
+			timeNight:data.get('timeNight') as long,
 			initialCA:initialCA,
 			initialRTT:initialRTT,	
 			isCurrentMonth:isCurrentMonth,
@@ -2727,38 +2812,79 @@ class TimeManagerService {
 		log.error('getOffHoursTime called with param: year= '+year+' and employee: '+employee)
 		def annualBefore7Time = 0
 		def annualAfter20Time = 0
+		def annualBefore5Time = 0
+		def annualAfter22Time = 0
 		def data
 		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
 		for (int currentMonth in monthList){
 			data = computeWeeklyTotals( employee,  currentMonth,  (currentMonth < 6) ? year + 1 : year,true)
 			def timeBefore7 = data.get('timeBefore7')
 			def timeAfter20 = data.get('timeAfter20')
+			def timeBefore5 = data.get('timeBefore5')
+			def timeAfter22 = data.get('timeAfter22')
 			annualBefore7Time += timeBefore7
 			annualAfter20Time += timeAfter20
+			annualBefore5Time += timeBefore5
+			annualAfter22Time += timeAfter22
 		}	
 		def annualOffHoursTime = annualBefore7Time + annualAfter20Time
+		def annualNightTime = annualBefore5Time + annualAfter22Time
+		
 		def annualOffHoursTimeDecimal = computeHumanTime(annualOffHoursTime as long)
-		annualOffHoursTimeDecimal=(annualOffHoursTimeDecimal.get(0)+annualOffHoursTimeDecimal.get(1)/60).setScale(2,2)		
-		return [annualBefore7Time:annualBefore7Time,annualAfter20Time: annualAfter20Time,annualOffHoursTime:annualOffHoursTime,annualOffHoursTimeDecimal:annualOffHoursTimeDecimal]	
+		def annualNightTimeDecimal = computeHumanTime(annualNightTime as long)
+		
+		annualOffHoursTimeDecimal=(annualOffHoursTimeDecimal.get(0)+annualOffHoursTimeDecimal.get(1)/60).setScale(2,2)	
+		annualNightTimeDecimal=(annualNightTimeDecimal.get(0)+annualNightTimeDecimal.get(1)/60).setScale(2,2)
+		
+		return [
+			annualBefore7Time:annualBefore7Time,
+			annualAfter20Time: annualAfter20Time,
+			annualBefore5Time:annualBefore5Time,
+			annualAfter22Time: annualAfter22Time,
+			annualOffHoursTime:annualOffHoursTime,
+			annualOffHoursTimeDecimal:annualOffHoursTimeDecimal,
+			annualNightTime:annualNightTime,
+			annualNightTimeDecimal:annualNightTimeDecimal
+		]	
 	}
 	
 	def getOffHoursTimeNoUpdate(Employee employee, def year){
 		log.error('getOffHoursTimeNoUpdate called with param: year= '+year+' and employee: '+employee)
 		def annualBefore7Time = 0
 		def annualAfter20Time = 0
+		def annualBefore5Time = 0
+		def annualAfter22Time = 0
 		def data
 		def monthList = [6,7,8,9,10,11,12,1,2,3,4,5]
 		for (int currentMonth in monthList){
 			data = computeWeeklyTotals( employee,  currentMonth,  (currentMonth < 6) ? year + 1 : year,false)
 			def timeBefore7 = data.get('timeBefore7')
 			def timeAfter20 = data.get('timeAfter20')
+			def timeBefore5 = data.get('timeBefore5')
+			def timeAfter22 = data.get('timeAfter22')
 			annualBefore7Time += timeBefore7
 			annualAfter20Time += timeAfter20
+			annualBefore5Time += timeBefore5
+			annualAfter22Time += timeAfter22
 		}
 		def annualOffHoursTime = annualBefore7Time + annualAfter20Time
 		def annualOffHoursTimeDecimal = computeHumanTime(annualOffHoursTime as long)
+		def annualNightTime = annualBefore5Time + annualAfter22Time
+		def annualNightTimeDecimal = computeHumanTime(annualNightTime as long)
+		
 		annualOffHoursTimeDecimal=(annualOffHoursTimeDecimal.get(0)+annualOffHoursTimeDecimal.get(1)/60).setScale(2,2)
-		return [annualBefore7Time:annualBefore7Time,annualAfter20Time: annualAfter20Time,annualOffHoursTime:annualOffHoursTime,annualOffHoursTimeDecimal:annualOffHoursTimeDecimal]
+		annualNightTimeDecimal=(annualNightTimeDecimal.get(0)+annualNightTimeDecimal.get(1)/60).setScale(2,2)
+		
+		return [
+			annualBefore5Time:annualBefore5Time,
+			annualAfter22Time: annualAfter22Time,
+			annualBefore7Time:annualBefore7Time,
+			annualAfter20Time: annualAfter20Time,
+			annualOffHoursTime:annualOffHoursTime,
+			annualOffHoursTimeDecimal:annualOffHoursTimeDecimal,
+			annualNightTime:annualNightTime,
+			annualNightTimeDecimal:annualNightTimeDecimal
+			]
 	}
 	
 	def getAbsencesBetweenDates(Employee employee,Date startDate,Date endDate){
@@ -3718,7 +3844,10 @@ class TimeManagerService {
 		def dailySeconds
 		def timeBefore7 = 0
 		def timeAfter20 = 0
+		def timeBefore5 = 0
+		def timeAfter22 = 0
 		def timeOffHours = 0
+		def timeNight = 0
 		def yearlyBefore7 = 0
 		def yearlyAfter21 = 0
 		def yearlyTimeOffHours = 0
@@ -3775,6 +3904,8 @@ class TimeManagerService {
 		if (monthlyTotal != null){
 			monthlyTotal.elapsedSeconds=monthlyTotalTime
 			monthlyTotal.timeBefore7=timeBefore7
+			monthlyTotal.timeAfter22=timeAfter22
+			monthlyTotal.timeBefore5=timeBefore5
 			monthlyTotal.timeAfter20=timeAfter20
 			monthlyTotal.supplementarySeconds=monthlySupTime
 			monthlyTotal.save(flush:true,failOnError:true)
@@ -3804,7 +3935,10 @@ class TimeManagerService {
 		return [
 			timeBefore7:timeBefore7,
 			timeAfter20:timeAfter20,
+			timeBefore5:timeBefore5,
+			timeAfter22:timeAfter22,
 			timeOffHours:timeOffHours,
+			timeNight:timeNight,
 			monthlyTotalTime:monthlyTotalTime,
 			monthlySupTime:monthlySupTime,
 			mapByDay:mapByDay,
@@ -3832,7 +3966,10 @@ class TimeManagerService {
 			def dailySeconds
 			def timeBefore7 = 0
 			def timeAfter20 = 0
-			def timeOffHours = 0
+			def timeBefore5 = 0
+			def timeAfter22 = 0
+			def timeOffHours = 0			
+			def timeNight = 0
 			def yearlyBefore7 = 0
 			def yearlyAfter21 = 0
 			def yearlyTimeOffHours = 0 
@@ -3906,7 +4043,10 @@ class TimeManagerService {
 					dailySeconds = timing.get("elapsedSeconds")
 					timeBefore7 += timing.get("timeBefore7")
 					timeAfter20 +=  timing.get("timeAfter20")
+					timeBefore5 += timing.get("timeBefore5")
+					timeAfter22 +=  timing.get("timeAfter22")
 					timeOffHours = timeOffHours + timing.get("timeBefore7") + timing.get("timeAfter20")
+					timeNight = timeNight + timing.get("timeBefore5") + timing.get("timeAfter22")
 					monthlyTotalTime += dailySeconds
 								
 					if (currentWeek == calendarLoop.get(Calendar.WEEK_OF_YEAR)){
@@ -4051,6 +4191,8 @@ class TimeManagerService {
 				monthlyTotal.elapsedSeconds=monthlyTotalTime
 				monthlyTotal.timeBefore7=timeBefore7
 				monthlyTotal.timeAfter20=timeAfter20
+				monthlyTotal.timeBefore5=timeBefore5
+				monthlyTotal.timeAfter22=timeAfter22
 				monthlyTotal.supplementarySeconds=monthlySupTime
 				try {
 					monthlyTotal.save(flush:true,failOnError:true)
@@ -4099,6 +4241,9 @@ class TimeManagerService {
 				timeBefore7:timeBefore7,
 				timeAfter20:timeAfter20,
 				timeOffHours:timeOffHours,
+				timeBefore5:timeBefore5,
+				timeAfter22:timeAfter22,
+				timeNight:timeNight,
 				monthlyTotalTime:monthlyTotalTime,
 				monthlySupTime:monthlySupTime,
 				mapByDay:mapByDay,
@@ -4124,6 +4269,9 @@ class TimeManagerService {
 		def timeBefore7 = 0
 		def timeAfter20 = 0
 		def timeOffHours = 0
+		def timeBefore5 = 0
+		def timeAfter22 = 0
+		def timeNight = 0
 		def currentWeek = 0
 		def dailyTotalId = 0
 		
@@ -4161,6 +4309,9 @@ class TimeManagerService {
 				timeBefore7 += timing.get("timeBefore7")
 				timeAfter20 +=  timing.get("timeAfter20")
 				timeOffHours = timeOffHours + timing.get("timeBefore7") + timing.get("timeAfter20")
+				timeBefore5 += timing.get("timeBefore5")
+				timeAfter22 +=  timing.get("timeAfter22")
+				timeNight = timeOffHours + timing.get("timeBefore5") + timing.get("timeAfter22")
 							
 				if (currentWeek != calendarLoop.get(Calendar.WEEK_OF_YEAR)){
 					currentWeek = calendarLoop.get(Calendar.WEEK_OF_YEAR)
@@ -4177,8 +4328,10 @@ class TimeManagerService {
 			return [
 			timeBefore7:timeBefore7,
 			timeAfter20:timeAfter20,
-			timeOffHours:timeOffHours
-
+			timeOffHours:timeOffHours,
+			timeBefore5:timeBefore5,
+			timeAfter22:timeAfter22,
+			timeNight:timeNight
 		]
 	}
 	
@@ -4192,11 +4345,17 @@ class TimeManagerService {
 		def yearTimeBefore7 = 0
 		def yearTimeAfter20 = 0
 		def yearTimeOffHours = 0
+		def yearTimeBefore5 = 0
+		def yearTimeAfter22 = 0
+		def yearTimeNight = 0
 		def yearlyCounter = 0
 		def monthlySupTime = 0
 		def timeBefore7 = 0
 		def timeAfter20 = 0
 		def timeOffHours= 0
+		def timeBefore5 = 0
+		def timeAfter22 = 0
+		def timeNight= 0
 		def yearTheoritical = 0
 		def monthTheoritical = 0
 		def calendar = Calendar.instance
@@ -4259,11 +4418,17 @@ class TimeManagerService {
 				yearTimeBefore7 += data.get('timeBefore7')
 				yearTimeAfter20 += data.get('timeAfter20')
 				yearTimeOffHours += data.get('timeOffHours')
+				yearTimeBefore5 += data.get('timeBefore5')
+				yearTimeAfter22 += data.get('timeAfter22')
+				yearTimeNight += data.get('timeNight')
 				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
 					monthlySupTime = data.get('monthlySupTime')
 					timeBefore7 = data.get('timeBefore7') != null ? data.get('timeBefore7') : 0
 					timeAfter20 = data.get('timeAfter20') != null ? data.get('timeAfter20') : 0
 					timeOffHours = data.get('timeOffHours') != null ? data.get('timeOffHours') : 0
+					timeBefore5 = data.get('timeBefore5') != null ? data.get('timeBefore5') : 0
+					timeAfter22 = data.get('timeAfter22') != null ? data.get('timeAfter22') : 0
+					timeNight = data.get('timeNight') != null ? data.get('timeNight') : 0
 					break
 				}
 				calendarIter.roll(Calendar.MONTH, 1)
@@ -4278,10 +4443,16 @@ class TimeManagerService {
 				yearTimeBefore7 += data.get('timeBefore7')
 				yearTimeAfter20 += data.get('timeAfter20')
 				yearTimeOffHours += data.get('timeOffHours')
+				yearTimeBefore5 += data.get('timeBefore5')
+				yearTimeAfter22 += data.get('timeAfter22')
+				yearTimeNight += data.get('timeNight')
 				monthlySupTime = data.get('monthlySupTime')
 				timeBefore7 = data.get('timeBefore7') != null ? data.get('timeBefore7') : 0
 				timeAfter20 = data.get('timeAfter20') != null ? data.get('timeAfter20') : 0
 				timeOffHours = data.get('timeOffHours') != null ? data.get('timeOffHours') : 0
+				timeBefore5 = data.get('timeBefore5') != null ? data.get('timeBefore5') : 0
+				timeAfter22 = data.get('timeAfter22') != null ? data.get('timeAfter22') : 0
+				timeNight = data.get('timeNight') != null ? data.get('timeNight') : 0
 				if (calendarIter.get(Calendar.MONTH) == 11){
 					break
 				}
@@ -4299,10 +4470,16 @@ class TimeManagerService {
 				yearTimeBefore7 += data.get('timeBefore7')
 				yearTimeAfter20 += data.get('timeAfter20')
 				yearTimeOffHours += data.get('timeOffHours')
+				yearTimeBefore5 += data.get('timeBefore5')
+				yearTimeAfter22 += data.get('timeAfter22')
+				yearTimeNight += data.get('timeNight')
 				monthlySupTime = data.get('monthlySupTime')
 				timeBefore7 = data.get('timeBefore7') != null ? data.get('timeBefore7') : 0
 				timeAfter20 = data.get('timeAfter20') != null ? data.get('timeAfter20') : 0
 				timeOffHours = data.get('timeOffHours') != null ? data.get('timeOffHours') : 0
+				timeBefore5 = data.get('timeBefore5') != null ? data.get('timeBefore5') : 0
+				timeAfter22 = data.get('timeAfter22') != null ? data.get('timeAfter22') : 0
+				timeNight = data.get('timeNight') != null ? data.get('timeNight') : 0
 				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
 					break
 				}
@@ -4316,11 +4493,17 @@ class TimeManagerService {
 			monthlySupTime:monthlySupTime as long,
 			timeBefore7:timeBefore7 as long,
 			timeAfter20:timeAfter20 as long,
-			timeOffHours:timeOffHours as long,
+			timeOffHours:timeOffHours as long,			
+			timeBefore5:timeBefore5 as long,
+			timeAfter22:timeAfter22 as long,
+			timeNight:timeNight as long,
 			ajaxYearlySupTime:yearSupTime as long,
 			yearTimeBefore7:yearTimeBefore7 as long,
 			yearTimeAfter20:yearTimeAfter20 as long,
-			yearTimeOffHours:yearTimeOffHours as long
+			yearTimeOffHours:yearTimeOffHours as long,
+			yearTimeBefore5:yearTimeBefore5 as long,
+			yearTimeAfter22:yearTimeAfter22 as long,
+			yearTimeNight:yearTimeNight as long
 		]	
 	}
 
@@ -4329,11 +4512,17 @@ class TimeManagerService {
 		def yearTimeBefore7 = 0
 		def yearTimeAfter20 = 0
 		def yearTimeOffHours = 0
+		def yearTimeBefore5 = 0
+		def yearTimeAfter22 = 0
+		def yearTimeNight = 0
 		def yearlyCounter = 0
 		def data
 		def timeBefore7 = 0
 		def timeAfter20 = 0
 		def timeOffHours= 0
+		def timeBefore5 = 0
+		def timeAfter22 = 0
+		def timeNight= 0
 		def calendar = Calendar.instance
 		calendar.set(Calendar.YEAR,year)
 		def bankHolidayList
@@ -4402,11 +4591,20 @@ class TimeManagerService {
 					yearTimeOffHours += monthlyTotal.timeBefore7
 					yearTimeAfter20 += monthlyTotal.timeAfter20
 					yearTimeOffHours += monthlyTotal.timeAfter20
+					
+					yearTimeBefore5 += monthlyTotal.timeBefore5
+					yearTimeNight += monthlyTotal.timeBefore5
+					yearTimeAfter22 += monthlyTotal.timeAfter22
+					yearTimeNight += monthlyTotal.timeAfter22
 				}
 				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
 					timeBefore7 = monthlyTotal != null ? monthlyTotal.timeBefore7 : 0
 					timeAfter20 = monthlyTotal != null ? monthlyTotal.timeAfter20 : 0
 					timeOffHours = monthlyTotal != null ? (monthlyTotal.timeAfter20 + monthlyTotal.timeBefore7) : 0
+					
+					timeBefore5 = monthlyTotal != null ? monthlyTotal.timeBefore5 : 0
+					timeAfter22 = monthlyTotal != null ? monthlyTotal.timeAfter22 : 0
+					timeNight = monthlyTotal != null ? (monthlyTotal.timeAfter22 + monthlyTotal.timeBefore5) : 0
 					break
 				}
 				calendarIter.roll(Calendar.MONTH, 1)
@@ -4427,11 +4625,20 @@ class TimeManagerService {
 					yearTimeOffHours += monthlyTotal.timeBefore7
 					yearTimeAfter20 += monthlyTotal.timeAfter20
 					yearTimeOffHours += monthlyTotal.timeAfter20
+					
+					yearTimeBefore5 += monthlyTotal.timeBefore5
+					yearTimeNight += monthlyTotal.timeBefore5
+					yearTimeAfter22 += monthlyTotal.timeAfter22
+					yearTimeNight += monthlyTotal.timeAfter22
 				}
 				if (calendarIter.get(Calendar.MONTH) == 11){
 					timeBefore7 = monthlyTotal != null ? monthlyTotal.timeBefore7 : 0
 					timeAfter20 = monthlyTotal != null ? monthlyTotal.timeAfter20 : 0
 					timeOffHours = monthlyTotal != null ? (monthlyTotal.timeAfter20 + monthlyTotal.timeBefore7) : 0
+					
+					timeBefore5 = monthlyTotal != null ? monthlyTotal.timeBefore5 : 0
+					timeAfter22 = monthlyTotal != null ? monthlyTotal.timeAfter22 : 0
+					timeNight = monthlyTotal != null ? (monthlyTotal.timeAfter22 + monthlyTotal.timeBefore5) : 0
 					break
 				}
 				calendarIter.roll(Calendar.MONTH, 1)
@@ -4454,11 +4661,20 @@ class TimeManagerService {
 					yearTimeOffHours += monthlyTotal.timeBefore7
 					yearTimeAfter20 += monthlyTotal.timeAfter20
 					yearTimeOffHours += monthlyTotal.timeAfter20
+					
+					yearTimeBefore5 += monthlyTotal.timeBefore5
+					yearTimeNight += monthlyTotal.timeBefore5
+					yearTimeAfter22 += monthlyTotal.timeAfter22
+					yearTimeNight += monthlyTotal.timeAfter22
 				}
 				if (calendarIter.get(Calendar.MONTH) == maxDate.getAt(Calendar.MONTH)){
 					timeBefore7 = monthlyTotal != null ? monthlyTotal.timeBefore7 : 0
 					timeAfter20 = monthlyTotal != null ? monthlyTotal.timeAfter20 : 0
 					timeOffHours = monthlyTotal != null ? (monthlyTotal.timeAfter20 + monthlyTotal.timeBefore7) : 0
+					
+					timeBefore5 = monthlyTotal != null ? monthlyTotal.timeBefore5 : 0
+					timeAfter22 = monthlyTotal != null ? monthlyTotal.timeAfter22 : 0
+					timeNight = monthlyTotal != null ? (monthlyTotal.timeAfter22 + monthlyTotal.timeBefore5) : 0
 					break
 				}
 				calendarIter.roll(Calendar.MONTH, 1)
@@ -4476,6 +4692,10 @@ class TimeManagerService {
 			timeBefore7 = monthlyTotal.timeBefore7
 			timeAfter20 = monthlyTotal.timeAfter20
 			timeOffHours = timeBefore7 + timeAfter20
+			
+			timeBefore5 = monthlyTotal.timeBefore5
+			timeAfter22 = monthlyTotal.timeAfter22
+			timeNight = timeBefore5 + timeAfter22
 		}
 		
 		def timeBefore7Decimal = computeHumanTime(timeBefore7 as long)
@@ -4495,6 +4715,27 @@ class TimeManagerService {
 		
 		def yearTimeOffHoursDecimal = computeHumanTime(yearTimeOffHours as long)
 		yearTimeOffHoursDecimal=(yearTimeOffHoursDecimal.get(0)+yearTimeOffHoursDecimal.get(1)/60).setScale(2,2)
+		
+
+
+		
+		def timeBefore5Decimal = computeHumanTime(timeBefore5 as long)
+		timeBefore5Decimal=(timeBefore5Decimal.get(0)+timeBefore5Decimal.get(1)/60).setScale(2,2)
+		
+		def timeAfter22Decimal = computeHumanTime(timeAfter22 as long)
+		timeAfter22Decimal=(timeAfter22Decimal.get(0)+timeAfter22Decimal.get(1)/60).setScale(2,2)
+		
+		def timeNightDecimal = computeHumanTime(timeNight as long)
+		timeNightDecimal= (timeNightDecimal.get(0)+timeNightDecimal.get(1)/60).setScale(2,2)
+				
+		def yearTimeBefore5Decimal =computeHumanTime(yearTimeBefore5 as long)
+		yearTimeBefore5Decimal= (yearTimeBefore5Decimal.get(0)+yearTimeBefore5Decimal.get(1)/60).setScale(2,2)
+		
+		def yearTimeAfter22Decimal = computeHumanTime(yearTimeAfter22 as long)
+		yearTimeAfter22Decimal= (yearTimeAfter22Decimal.get(0)+yearTimeAfter22Decimal.get(1)/60).setScale(2,2)
+		
+		def yearTimeNightDecimal = computeHumanTime(yearTimeNight as long)
+		yearTimeNightDecimal=(yearTimeNightDecimal.get(0)+yearTimeNightDecimal.get(1)/60).setScale(2,2)
 			
 		return [
 			timeBefore7:timeBefore7,
@@ -4508,7 +4749,19 @@ class TimeManagerService {
 			timeOffHoursDecimal:timeOffHoursDecimal,
 			yearTimeBefore7Decimal:yearTimeBefore7Decimal,
 			yearTimeAfter20Decimal:yearTimeAfter20Decimal,
-			yearTimeOffHoursDecimal:yearTimeOffHoursDecimal
+			yearTimeOffHoursDecimal:yearTimeOffHoursDecimal,
+			timeBefore5:timeBefore5,
+			timeAfter22:timeAfter22 ,
+			timeNight:timeNight,
+			yearTimeBefore5:yearTimeBefore5,
+			yearTimeAfter22:yearTimeAfter22,
+			yearTimeNight:yearTimeNight,
+			timeBefore5Decimal:timeBefore5Decimal,
+			timeAfter22Decimal:timeAfter22Decimal,
+			timeNightDecimal:timeNightDecimal,
+			yearTimeBefore5Decimal:yearTimeBefore5Decimal,
+			yearTimeAfter22Decimal:yearTimeAfter22Decimal,
+			yearTimeNightDecimal:yearTimeNightDecimal
 		]
 	}
 	
@@ -5222,6 +5475,9 @@ class TimeManagerService {
 		def timeBefore7 = 0
 		def timeAfter20 = 0
 		def timeOffHours = 0
+		def timeBefore5 = 0
+		def timeAfter22 = 0
+		def timeNight = 0
 		def tmpInOrOut
 		def timeDifference
 		def currentInOrOut
@@ -5229,6 +5485,8 @@ class TimeManagerService {
 		def inOrOutList = []
 		def calendarAtSeven = Calendar.instance
 		def calendarAtNine = Calendar.instance
+		def calendarAt5 = Calendar.instance
+		def calendarAt22 = Calendar.instance
 		calendarAtSeven.set(Calendar.YEAR,year)
 		calendarAtSeven.set(Calendar.MONTH,month-1)
 		calendarAtSeven.set(Calendar.DAY_OF_MONTH,day)
@@ -5241,6 +5499,20 @@ class TimeManagerService {
 		calendarAtNine.set(Calendar.HOUR_OF_DAY,20)
 		calendarAtNine.set(Calendar.MINUTE,0)
 		calendarAtNine.set(Calendar.SECOND,0)
+		
+		calendarAt5.set(Calendar.YEAR,year)
+		calendarAt5.set(Calendar.MONTH,month-1)
+		calendarAt5.set(Calendar.DAY_OF_MONTH,day)
+		calendarAt5.set(Calendar.HOUR_OF_DAY,5)
+		calendarAt5.set(Calendar.MINUTE,0)
+		calendarAt5.set(Calendar.SECOND,0)
+		
+		calendarAt22.set(Calendar.YEAR,year)
+		calendarAt22.set(Calendar.MONTH,month-1)
+		calendarAt22.set(Calendar.DAY_OF_MONTH,day)
+		calendarAt22.set(Calendar.HOUR_OF_DAY,22)
+		calendarAt22.set(Calendar.MINUTE,0)
+		calendarAt22.set(Calendar.SECOND,0)
 		
 		InAndOut.withTransaction{
 			inOrOutList = InAndOut.findAll("from InAndOut as a where a.employee = :employee and year = :year and month = :month and day = :day order by time asc",[employee:employee,year:year,month:month,day:day])
@@ -5273,6 +5545,26 @@ class TimeManagerService {
 							use (TimeCategory){timeDifference = currentInOrOut.time - calendarAtNine.time}
 							timeAfter20 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
 						}
+						
+						// managing time before 5
+						if (currentInOrOut.time < calendarAt5.time){
+							use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+							timeBefore5 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						}
+						if (currentInOrOut.time > calendarAt5.time && previousInOrOut.time < calendarAt5.time){
+							use (TimeCategory){timeDifference = calendarAtSeven.time - previousInOrOut.time}
+							timeBefore5 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						}
+						
+						// managing time after 22
+						if (previousInOrOut.time > calendarAt22.time){
+							use (TimeCategory){timeDifference = currentInOrOut.time - previousInOrOut.time}
+							timeAfter22 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						}
+						if (currentInOrOut.time > calendarAt22.time && previousInOrOut.time < calendarAt22.time){
+							use (TimeCategory){timeDifference = currentInOrOut.time - calendarAtNine.time}
+							timeAfter22 += timeDifference.seconds + timeDifference.minutes*60 + timeDifference.hours*3600
+						}
 					}
 					previousInOrOut = inOrOut
 				}
@@ -5280,11 +5572,16 @@ class TimeManagerService {
 		}
 		//dailyTotal.elapsedSeconds=elapsedSeconds
 		timeOffHours = (timeBefore7 as long) + (timeAfter20 as long)
+		timeNight = (timeBefore5 as long) + (timeAfter22 as long)
+		
 		return [
 			elapsedSeconds:elapsedSeconds,
 			timeBefore7:timeBefore7,
 			timeAfter20:timeAfter20,
-			timeOffHours:timeOffHours
+			timeOffHours:timeOffHours,
+			timeBefore5:timeBefore5,
+			timeAfter22:timeAfter22,
+			timeNight:timeNight
 		]
 	}
 	

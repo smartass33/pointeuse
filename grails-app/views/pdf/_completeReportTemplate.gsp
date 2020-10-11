@@ -486,21 +486,74 @@
 	        						</table>
 	        					</td>
 							</tr>	
+														
 							<tr>
-								<td style="width:25%;text-align:left;">${message(code: 'employee.monthly.timeOffHours', default: 'report')} :</td>				
+								<td style="text-align:left;">${message(code: 'employee.monthly.timeBefore5', default: 'report')} :</td>				
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="timeOffHours"  name="timeOffHours" value="${timeOffHours}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeOffHours"  name="timeOffHours" value="${timeOffHours}"/></td></tr>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="timeBefore5" name="timeBefore5" value="${timeBefore5}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeBefore5"  name="timeBefore5" value="${timeBefore5}"/></td></tr>
 	        						</table>
 	        					</td>
 								<td>
 	        						<table border="1" class="cartoucheValues" >
 	        							<thead></thead>
-	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="yearTimeOffHours"  name="yearTimeOffHours" value="${yearTimeOffHours}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeOffHoursDecimal"  name="yearTimeOffHoursDecimal" value="${yearTimeOffHours}"/></td></tr>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="yearTimeBefore5" name="yearTimeBefore5" value="${yearTimeBefore5}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeBefore5Decimal"  name="yearTimeBefore5Decimal" value="${yearTimeBefore5}"/></td></tr>
+	        						</table>
+	        					</td>	        					
+	        					
+							</tr>	
+							<tr>
+								<td style="text-align:left;">${message(code: 'employee.monthly.timeAfter22', default: 'report')} :</td>				
+								<td> 
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="timeAfter22"  name="timeAfter22" value="${timeAfter22}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeAfter22Decimal"  name="timeAfter22Decimal" value="${timeAfter22}"/></td></tr>
 	        						</table>
 	        					</td>
-							</tr>																											
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="yearTimeAfter22"  name="yearTimeAfter22" value="${yearTimeAfter22}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeAfter22Decimal"  name="yearTimeAfter22Decimal" value="${yearTimeAfter22}"/></td></tr>
+	        						</table>
+	        					</td>
+							</tr>
+							
+							
+							
+							<tr>
+								<td style="width:25%;text-align:left;">${message(code: 'employee.monthly.timeOffHours10', default: 'report')} :</td>				
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="timeOffHours10"  name="timeOffHours10" value="${timeOffHours - timeAfter22 - timeBefore5}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeOffHours10"  name="timeOffHours10" value="${timeOffHours - timeAfter22 - timeBefore5}"/></td></tr>
+	        						</table>
+	        					</td>
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="yearTimeOffHours10"  name="yearTimeOffHours10" value="${yearTimeOffHours - yearTimeAfter22 - yearTimeBefore5}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeOffHoursDecimal10"  name="yearTimeOffHoursDecimal10" value="${yearTimeOffHours - yearTimeAfter22 - yearTimeBefore5}"/></td></tr>
+	        						</table>
+	        					</td>
+							</tr>	
+													
+							<tr>
+								<td style="width:25%;text-align:left;">${message(code: 'employee.monthly.timeOffHours25', default: 'report')} :</td>				
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="timeOffHours25" value="${ timeAfter22 + timeBefore5}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="timeOffHours25"  name="timeOffHours25" value="${timeAfter22 + timeBefore5}"/></td></tr>
+	        						</table>
+	        					</td>
+								<td>
+	        						<table border="1" class="cartoucheValues" >
+	        							<thead></thead>
+	        							<tr><td style="font-weight:bold"><my:humanTimeTD id="yearTimeOffHours25"  name="yearTimeOffHours25" value="${  yearTimeAfter22 + yearTimeBefore5}"/> ${message(code: 'common.word.or', default: 'report')} <my:humanTimeDecimalTD id="yearTimeOffHoursDecimal25"  name="yearTimeOffHoursDecimal25" value="${yearTimeAfter22 +  yearTimeBefore5}"/></td></tr>
+	        						</table>
+	        					</td>
+							</tr>	
+							
+																																	
 						</tbody>
 					</table> 
 				</td>

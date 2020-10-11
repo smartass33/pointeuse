@@ -144,7 +144,7 @@ class PDFService {
 	}
 	
 	def generateSiteMonthlyTimeSheet(Date myDate,Site site,String folder){
-		log.error('generateSiteMonthlyTimeSheet called for site: '+site.name+' and date: '+myDate)		
+		log.debug('generateSiteMonthlyTimeSheet called for site: '+site.name+' and date: '+myDate)		
 		def fileNameList=[]
 		def filename
 		PdfCopyFields finalCopy

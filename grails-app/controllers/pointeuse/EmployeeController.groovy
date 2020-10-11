@@ -2706,8 +2706,7 @@ class EmployeeController {
 	def getAjaxSupplementaryTime(Long id) {
 		def year = params.int('year')
  		def month = params.int('month')
-
-		log.error("getAjaxSupplementaryTime triggered with params: month="+month+" and year="+year)
+		log.debug("getAjaxSupplementaryTime triggered with params: month="+month+" and year="+year)
 		def employee = Employee.get(id)
 		def model
 		def currentContract
@@ -2719,7 +2718,7 @@ class EmployeeController {
 			model = timeManagerService.getYearSupTime(employee,year,month,false)
 		}
 
-		log.error("getAjaxSupplementaryTime has terminated")
+		log.debug("getAjaxSupplementaryTime has terminated")
 		model << [id:id,month:month,year:year]
 		render template: "/employee/template/yearSupplementaryTime", model: model
 		return
@@ -2727,14 +2726,14 @@ class EmployeeController {
 
 	@Secured(['ROLE_ADMIN'])
 	def getAjaxOffHoursTime(Long id){
-		log.error('getOffHoursTime called')
+		log.debug('getOffHoursTime called')
 		def year = params.int('year')
 		def employee = Employee.get(id)
 		def data
 		def annualBefore7Time = 0
 		def annualAfter20Time = 0
 		def model = timeManagerService.getOffHoursTime(employee,year)
-		log.error("getOffHoursTime has terminated")
+		log.debug("getOffHoursTime has terminated")
 		render template: "/employee/template/offHoursTime", model: model
 		return
 	}
@@ -2758,7 +2757,7 @@ class EmployeeController {
 
 	@Secured(['ROLE_ADMIN'])
 	def modifyAllAbsence(){
-		log.error('entering modifyAllAbsence')
+		log.debug('entering modifyAllAbsence')
 
 		def employee = Employee.get(params.int('employeeId'))
 		def updatedSelection = params["updatedSelection"].toString()
@@ -2809,11 +2808,10 @@ class EmployeeController {
 			
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 		Date date = dateFormat.parse(params["period"])
-		def calendarLoop= Calendar.instance
+		def calendarLoop = Calendar.instance
 		def criteria
 		calendarLoop.time=date
 		calendarLoop.set(Calendar.DAY_OF_MONTH,1)
-		log.error(calendarLoop.time)
 		// check if an absence was already logged:
 		while(calendarLoop.get(Calendar.DAY_OF_MONTH) <= calendarLoop.getActualMaximum(Calendar.DAY_OF_MONTH)){
 			if (!updatedSelection.equals('')){
@@ -2892,7 +2890,7 @@ class EmployeeController {
 			openedDays:openedDays
 			]
 		model << cartoucheTable
-		log.error('modifyAllAbsence finished')
+		log.debug('modifyAllAbsence finished')
 		render template: "/employee/template/cartoucheTemplate", model:model
 		return
 	}
