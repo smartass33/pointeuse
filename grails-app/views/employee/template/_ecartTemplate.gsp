@@ -17,20 +17,14 @@
 			</g:else>
 		</g:each>		
 	</thead>
-	
-	
-	
 	<tbody id='body_update' style="border:1px;">
 		<tr>
 			<td class="eventTD" />			
-			
-			
 			<g:each in="${[6,7,8,9,10,11,12,1,2,3,4,5]}" var='month_th_2'>		
 				<%= calendar.set(Calendar.MONTH,month_th_2-1) %>
 				<td class="eventTD" style="vertical-align: middle;">${calendar.time.format('MMM') }</td>
 			</g:each>
 		</tr>	
-		
 		<g:if test="${totalPeriodEcartByMonth != null}">
 			<tr>
 				<td class="eventTD" />		
@@ -42,20 +36,16 @@
 		<g:if test="${employeeInstanceList != null}">
 			<th colspan='13' class="eventTD" style="text-align:left;font-weight:bold;text-transform: uppercase;">${message(code: 'ecart.totals', default: 'report')}
 				<g:form method="POST" url="[controller:'employee', action:'ecartEXCEL']" >
-					<g:actionSubmit class='excelButton' value="export excel"  action="ecartEXCEL"/>	
-					<g:if test="${totalMonthlyTheoritical!=null}">	
-						<g:hiddenField name="totalMonthlyTheoritical" value="${totalMonthlyTheoritical.get(lastMonth)}" />		
-					</g:if>
-					<g:if test="${totalMonthlyActual!=null}">	
-						<g:hiddenField name="totalMonthlyActual" value="${totalMonthlyActual.get(lastMonth)}" />		
-					</g:if>			
+					<g:actionSubmit class='excelButton' value="export excel"  action="ecartEXCEL"/>			
 					<g:if test="${employeeInstanceList!=null}">	
-						<g:hiddenField name="employeeInstanceListCount" value="${employeeInstanceList.size()}" />		
+						<g:hiddenField name="employeeInstanceList" value="${employeeInstanceList}" />		
 					</g:if>		
 					<g:if test="${site!=null}">	
 						<g:hiddenField name="siteId" value="${site.id}" />		
 					</g:if>	
-					
+					<g:if test="${period!=null}">	
+						<g:hiddenField name="year" value="${period.year}" />		
+					</g:if>	
 				</g:form>
 			</th>			
 				<tr>

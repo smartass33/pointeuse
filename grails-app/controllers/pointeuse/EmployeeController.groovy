@@ -3853,6 +3853,175 @@ class EmployeeController {
 
 		}
 	}
+	
+	
+	@Secured(['ROLE_ADMIN'])
+	def ecartEXCEL(){
+		log.error('ecartEXCEL called')
+		params.each{i->log.debug(i)}
+		def folder = grailsApplication.config.pdf.directory
+		def year = params["year"]
+		def calendar = Calendar.instance
+		def refCalendar = Calendar.instance
+		def period = Period.findByYear(params["year"])
+		def monthList = []
+		def site = Site.get(params["siteId"])
+		def i = 1
+		def row
+		 
+		refCalendar.set(Calendar.MONTH,5)
+		refCalendar.set(Calendar.YEAR,period.year)
+
+		 if (refCalendar.get(Calendar.YEAR)==calendar.get(Calendar.YEAR)){
+			 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
+				 log.debug('refCalendar: '+refCalendar.time)
+				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
+				 refCalendar.roll(Calendar.MONTH, 1)
+				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+					 break
+				 }
+			 }
+		 }else{
+			 while(refCalendar.get(Calendar.MONTH) <= 11){
+				 log.debug('refCalendar: '+refCalendar.time)
+				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
+				 if (refCalendar.get(Calendar.MONTH)==11){
+					 break
+				 }
+				 refCalendar.roll(Calendar.MONTH, 1)
+			 }
+			 refCalendar.set(Calendar.MONTH,0)
+			 refCalendar.set(Calendar.YEAR,calendar.get(Calendar.YEAR))
+			 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
+				 log.debug('refCalendar: '+refCalendar.time)
+				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
+				 refCalendar.roll(Calendar.MONTH, 1)
+				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+					 break
+				 }
+			 }
+		 }
+		def modelEcart = timeManagerService.getEcartData(site, monthList, period)
+		def headers = [ message(code: 'employee.lastName.label'),message(code: 'ecart.label.name') ]
+		monthList.each{currentmonth ->
+			if ( currentmonth >= 6 ){
+				headers.add(currentmonth+'/'+period.year)
+			}else{
+				headers.add(currentmonth+'/'+period.year + 1)
+			}
+		}
+		
+		new WebXlsxExporter(folder+'/ecart_site.xlsx').with {
+			setResponseHeaders(response)
+			fillHeader(headers)
+			
+			
+			// insert totals
+			row = [site.name,message(code: 'ecart.theoritical.text')]
+			monthList.each{currentmonth ->
+				row.add(timeManagerService.writeHumanTime(modelEcart.get('totalMonthlyTheoritical').get(currentmonth)))
+			}
+			fillRow(row,i)
+			i++
+			
+			row = [site.name,message(code: 'ecart.actuals.text')]
+			monthList.each{currentmonth ->
+				row.add(timeManagerService.writeHumanTime(modelEcart.get('totalMonthlyActual').get(currentmonth)))
+			}
+			fillRow(row,i)
+			i++
+			
+			row = [site.name,message(code: 'ecart.delta.text')]
+			monthList.each{currentmonth ->
+				row.add(timeManagerService.writeHumanTime(modelEcart.get('totalEcart').get(currentmonth)))
+			}
+			fillRow(row,i)
+			i++
+			
+			row = [site.name,message(code: 'ecart.rtt.text')]
+			monthList.each{currentmonth ->
+				row.add(timeManagerService.writeHumanTime(modelEcart.get('totalTakenRTT').get(currentmonth)))
+			}
+			fillRow(row,i)
+			i++
+			
+			row = [site.name,message(code: 'ecart.delta.minus.rtt.text')]
+			monthList.each{currentmonth ->
+				row.add(timeManagerService.writeHumanTime(modelEcart.get('totalEcartMinusRTT').get(currentmonth)))
+			}
+			fillRow(row,i)
+			i++
+			
+			row = [site.name,message(code: 'ecart.suptime.text')]
+			monthList.each{currentmonth ->
+				row.add(timeManagerService.writeHumanTime(modelEcart.get('totalSupTime').get(currentmonth)))
+			}
+			fillRow(row,i)
+			i++
+			row = [site.name,message(code: 'ecart.delta.minus.rtt.suptime.text')]
+			monthList.each{currentmonth ->
+				row.add(timeManagerService.writeHumanTime(modelEcart.get('totalEcartMinusRTTAndHS').get(currentmonth)))
+			}
+			fillRow(row,i)
+			i++
+			
+			
+			
+			
+			modelEcart.get('employeeInstanceList').each{employee->				
+				row = [employee.lastName,message(code: 'ecart.theoritical.text', default: 'report')]
+				monthList.each{currentmonth ->
+					row.add(timeManagerService.writeHumanTime(modelEcart.get('monthlyTheoriticalByEmployee').get(employee).get(currentmonth)))
+				}						
+				fillRow(row,i)
+				i++
+	
+				row = [employee.lastName,message(code: 'ecart.actuals.text', default: 'report')]				
+				monthList.each{currentmonth ->
+					row.add(timeManagerService.writeHumanTime(modelEcart.get('monthlyActualByEmployee').get(employee).get(currentmonth)))
+				}
+				fillRow(row,i)
+				i++
+				
+				row = [employee.lastName,message(code: 'ecart.delta.text', default: 'report')]				
+				monthList.each{currentmonth ->
+					row.add(timeManagerService.writeHumanTime(modelEcart.get('ecartByEmployee').get(employee).get(currentmonth)))
+				}
+				fillRow(row,i)
+				i++
+				row = [employee.lastName,message(code: 'ecart.rtt.text', default: 'report')]				
+				monthList.each{currentmonth ->
+					row.add(modelEcart.get('rttByEmployee').get(employee).get(currentmonth))
+				}
+				fillRow(row,i)
+				i++
+				
+				row = [employee.lastName,message(code: 'ecart.delta.minus.rtt.text', default: 'report')]				
+				monthList.each{currentmonth ->
+					row.add(timeManagerService.writeHumanTime(modelEcart.get('ecartMinusRTTByEmployee').get(employee).get(currentmonth)))
+				}
+				fillRow(row,i)
+				i++
+				
+				row = [employee.lastName,message(code: 'ecart.suptime.text', default: 'report')]				
+				monthList.each{currentmonth ->
+					row.add(timeManagerService.writeHumanTime(modelEcart.get('monthlySupTimeMapByEmployee').get(employee).get(currentmonth)))
+				}
+				fillRow(row,i)
+				i++
+				
+				row = [employee.lastName,message(code: 'ecart.delta.minus.rtt.suptime.text', default: 'report')]				
+				monthList.each{currentmonth ->
+					row.add(timeManagerService.writeHumanTime(modelEcart.get('ecartMinusRTTAndHSByEmployee').get(employee).get(currentmonth)))
+				}
+				fillRow(row,i)
+				i++
+			}
+			save(response.outputStream)
+		}
+		response.setContentType("application/octet-stream")
+		
+	}
 
 	@Secured(['ROLE_ADMIN'])
 	def ecartPDF(){
@@ -4218,9 +4387,7 @@ class EmployeeController {
 			employeeInstanceList:employeeInstanceList
 		]
 	 	retour << ecartData
-
 		render template: "/employee/template/ecartTemplate", model: retour
-
 		return retour
 	}
 
