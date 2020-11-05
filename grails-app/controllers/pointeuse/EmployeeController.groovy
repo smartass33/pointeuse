@@ -3940,7 +3940,7 @@ class EmployeeController {
 			
 			row = [site.name,message(code: 'ecart.rtt.text')]
 			monthList.each{currentmonth ->
-				row.add(timeManagerService.writeHumanTime(modelEcart.get('totalTakenRTT').get(currentmonth)))
+				row.add(modelEcart.get('totalTakenRTT').get(currentmonth))
 			}
 			fillRow(row,i)
 			i++
