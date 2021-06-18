@@ -2806,6 +2806,9 @@ class EmployeeController {
 			if (updatedSelection.equals('MAP'))
 			updatedSelection = AbsenceType.MISE_A_PIED
 			
+			if (updatedSelection.equals('PAR'))
+			updatedSelection = AbsenceType.PARENTAL
+			
 		SimpleDateFormat dateFormat = new SimpleDateFormat('dd/MM/yyyy');
 		Date date = dateFormat.parse(params["period"])
 		def calendarLoop = Calendar.instance
@@ -2891,7 +2894,7 @@ class EmployeeController {
 			]
 		model << cartoucheTable
 		log.debug('modifyAllAbsence finished')
-		render template: "/employee/template/cartoucheTemplate", model:model
+		render template: "/employee/template/cartoucheTemplate", model:model		
 		return
 	}
 
@@ -3892,14 +3895,19 @@ class EmployeeController {
 			 }
 			 refCalendar.set(Calendar.MONTH,0)
 			 refCalendar.set(Calendar.YEAR,calendar.get(Calendar.YEAR))
-			 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
-				 log.debug('refCalendar: '+refCalendar.time)
-				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
-				 refCalendar.roll(Calendar.MONTH, 1)
-				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
-					 break
+			 
+			 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+				 log.error('special case: this is jan!!')
+			 }else{
+				 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
+					 log.debug('refCalendar: '+refCalendar.time)
+					 monthList.add(refCalendar.get(Calendar.MONTH)+1)
+					 refCalendar.roll(Calendar.MONTH, 1)
+					 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+						 break
+					 }
 				 }
-			 }
+			}
 		 }
 		def modelEcart = timeManagerService.getEcartData(site, monthList, period)
 		def headers = [ message(code: 'employee.lastName.label'),message(code: 'ecart.label.name') ]
@@ -4078,12 +4086,17 @@ class EmployeeController {
 			 }
 			 refCalendar.set(Calendar.MONTH,0)
 			 refCalendar.set(Calendar.YEAR,calendar.get(Calendar.YEAR))
-			 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
-				 log.debug('refCalendar: '+refCalendar.time)
-				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
-				 refCalendar.roll(Calendar.MONTH, 1)
-				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
-					 break
+			 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+				 log.error('special case: this is jan!!')
+				 
+			 }else{
+				 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
+					 log.debug('refCalendar: '+refCalendar.time)
+					 monthList.add(refCalendar.get(Calendar.MONTH)+1)
+					 refCalendar.roll(Calendar.MONTH, 1)
+					 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+						 break
+					 }
 				 }
 			 }
 	 	}
@@ -4328,7 +4341,7 @@ class EmployeeController {
 
 		 if (refCalendar.get(Calendar.YEAR)==calendar.get(Calendar.YEAR)){
 			 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
-				 log.debug('refCalendar: '+refCalendar.time)
+				 log.error('refCalendar: '+refCalendar.time)
 				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
 				 refCalendar.roll(Calendar.MONTH, 1)
 				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
@@ -4337,7 +4350,7 @@ class EmployeeController {
 			 }
 	 	}else{
 			 while(refCalendar.get(Calendar.MONTH) <= 11){
-				 log.debug('refCalendar: '+refCalendar.time)
+				 log.error('refCalendar: '+refCalendar.time)
 				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
 				 if (refCalendar.get(Calendar.MONTH)==11){
 					 break
@@ -4346,12 +4359,18 @@ class EmployeeController {
 			 }
 			 refCalendar.set(Calendar.MONTH,0)
 			 refCalendar.set(Calendar.YEAR,calendar.get(Calendar.YEAR))
-			 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
-				 log.debug('refCalendar: '+refCalendar.time)
-				 monthList.add(refCalendar.get(Calendar.MONTH)+1)
-				 refCalendar.roll(Calendar.MONTH, 1)
-				 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
-					 break
+			 //special case: current month is jan
+			 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+				 log.error('special case: this is jan!!')
+				 
+			 }else{
+				 while(refCalendar.get(Calendar.MONTH) <= calendar.get(Calendar.MONTH)){
+					 log.error('refCalendar: '+refCalendar.time)
+					 monthList.add(refCalendar.get(Calendar.MONTH)+1)
+					 refCalendar.roll(Calendar.MONTH, 1)
+					 if (refCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)){
+						 break
+					 }
 				 }
 			 }
 	 	}

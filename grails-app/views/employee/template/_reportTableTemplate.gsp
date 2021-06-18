@@ -17,7 +17,7 @@
 	      <th>
 	      	${message(code: 'report.table.absence.label', default: 'report')}    
              <g:select width="50px"
-                    onchange="${remoteFunction(action:'modifyAllAbsence', update:'report_table_div', 
+                    onchange="${remoteFunction(action:'modifyAllAbsence', update:'cartouche_div', 
 					onLoading: "document.getElementById('spinner').style.display = 'inline';",
 					onComplete: "document.getElementById('spinner').style.display = 'none';",
 	  				params:'\'employeeId=' + employee.id 	

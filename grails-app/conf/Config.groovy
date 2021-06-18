@@ -140,7 +140,7 @@ environments {
 	}
 
 	aws {
-		ip.authorized = ['90.80.193.12','90.120.222.39','0:0:0:0:0:0:0:1']
+		ip.authorized = ['90.80.193.12','23.90.236.198','0:0:0:0:0:0:0:1']
 		ip.authorization.on=true
 		pdf.directory='/opt/tomcat/pdf'
 		mysqldump.directory='/usr/bin'
